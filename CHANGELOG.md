@@ -2,6 +2,13 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.1.2 — 2026-09-08
+
+- **Agregado:** `date-time-picker/` — al elegir fecha u hora, el input oculto ahora también
+  dispara su evento nativo `'change'` (además del `gs-date-picked`/`gs-time-picked` propio). Hueco
+  encontrado al conectar `customer.html`, que ya escuchaba `change` en esos inputs para el
+  autoguardado de borrador y el aviso de "menos de 24 horas".
+
 ## v1.1.1 — 2026-09-08
 
 - **Agregado:** `date-time-picker/` — `syncDate(fieldId)` / `syncTime(fieldId)`, para cuando el

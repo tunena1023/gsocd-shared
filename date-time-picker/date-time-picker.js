@@ -171,6 +171,7 @@
     renderCalGrid(fieldId);
     var pop = el('gs-dtp-calpop-' + fieldId);
     if (pop) pop.classList.remove('open');
+    if (hidden) hidden.dispatchEvent(new Event('change', { bubbles: true }));
     document.dispatchEvent(new CustomEvent('gs-date-picked', { detail: { fieldId: fieldId, value: dateStr } }));
   }
 
@@ -253,6 +254,7 @@
     if (hidden) hidden.value = value;
     var trigger = el('gs-dtp-trigger-' + fieldId);
     if (trigger) trigger.textContent = fmtTimeDisplay(h24, m);
+    if (hidden) hidden.dispatchEvent(new Event('change', { bubbles: true }));
     document.dispatchEvent(new CustomEvent('gs-time-picked', { detail: { fieldId: fieldId, value: value } }));
   }
 

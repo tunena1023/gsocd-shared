@@ -76,9 +76,14 @@ document.addEventListener('gs-time-picked', (e) => {
 - Clic fuera de un popover abierto lo cierra.
 - El reloj primero pide la hora, luego pasa solo a minutos — se puede tocar el número de hora o
   de minuto en el resultado (arriba del reloj) para regresar a ese paso.
+- Al elegir una fecha u hora, el input oculto también dispara su propio evento nativo `'change'`
+  (además del `'gs-date-picked'`/`'gs-time-picked'` de arriba) — así una página que ya escuche
+  `change` en ese input (patrón común) sigue funcionando sin cambios.
 
 ## Historial
 
+- **v1.1.2** — Al elegir fecha/hora, el input oculto también dispara su evento nativo `'change'`
+  (compatible con paginas que ya escuchaban ese patron estandar).
 - **v1.1.1** — Se agrega `syncDate`/`syncTime`, para cuando el valor se pone desde fuera (cargar un
   borrador, editar una orden existente) sin pasar por el calendario/reloj.
 - **v1.0.0** — Primera versión. Extraído de las copias que vivían por separado en `admin.html` y
