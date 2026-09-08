@@ -2,6 +2,22 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.2.0 — 2026-09-08
+
+- **Agregado:** `service-picker/` — `filterMode: 'selected-plus-search'` (para editar algo que ya
+  existe, sin mostrar de entrada el catálogo completo), `crossDivision` (buscar sin límite de
+  división), `getPropertyType()`, y que cambiar de tipo de propiedad también dispare `onChange`.
+
+  Esto salió de revisar TODOS los 6 lugares candidatos (customer.html, templates.html, admin.html
+  ×3 copias internas, developer.html, recurring.html) ANTES de conectar el primero, en vez de
+  conectar uno, encontrar un hueco, parchar, conectar el siguiente, encontrar otro hueco -- que es
+  como se hicieron los 3 parches anteriores (v1.1.0/v1.1.1/v1.1.2) del date-time-picker. Correcion
+  del propio proceso, no solo del componente.
+
+  De paso: `supervisor.html` (tech.gsocd.com), que parecía candidato por usar el mismo estilo de
+  botones L1/L2/L3, se descarta -- es una herramienta distinta (modifica servicios de una orden ya
+  existente, con quitar/deshacer), no un selector desde catálogo.
+
 ## v1.1.2 — 2026-09-08
 
 - **Agregado:** `date-time-picker/` — al elegir fecha u hora, el input oculto ahora también

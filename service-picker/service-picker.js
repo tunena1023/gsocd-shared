@@ -48,18 +48,26 @@
 
   function fireChange(pickerId) {
     var inst = instances[pickerId];
-    if (inst.onChange) inst.onChange(inst.selected, inst.svcLevel);
+    if (inst.onChange) inst.onChange(inst.selected, inst.svcLevel, inst.propertyType);
     document.dispatchEvent(new CustomEvent('gs-services-changed', {
-      detail: { pickerId: pickerId, selected: inst.selected, svcLevel: inst.svcLevel }
+      detail: { pickerId: pickerId, selected: inst.selected, svcLevel: inst.svcLevel, propertyType: inst.propertyType }
     }));
   }
 
   function visibleList(inst) {
     var q = inst.searchEl ? (inst.searchEl.value || '').trim().toLowerCase() : '';
     var list = inst.catalog.filter(function (s) {
-      return s.division.toLowerCase() === inst.division.toLowerCase() && s.propertyType === inst.propertyType;
+      var divMatch = inst.crossDivision || s.division.toLowerCase() === inst.division.toLowerCase();
+      return divMatch && s.propertyType === inst.propertyType;
     });
-    if (q) list = list.filter(function (s) { return s.serviceName.toLowerCase().indexOf(q) !== -1; });
+    if (inst.filterMode === 'selected-plus-search') {
+      var selectedNames = Object.keys(inst.selected[inst.propertyType] || {});
+      list = list.filter(function (s) {
+        return selectedNames.indexOf(s.serviceName) !== -1 || (q && s.serviceName.toLowerCase().indexOf(q) !== -1);
+      });
+    } else if (q) {
+      list = list.filter(function (s) { return s.serviceName.toLowerCase().indexOf(q) !== -1; });
+    }
     list.sort(function (a, b) { return a.serviceName.localeCompare(b.serviceName); });
     return list;
   }
@@ -71,7 +79,10 @@
 
     if (!list.length) {
       grid.className = '';
-      grid.innerHTML = '<p class="gs-sp-empty">No services match.</p>';
+      var emptyMsg = (inst.filterMode === 'selected-plus-search' && !(inst.searchEl && inst.searchEl.value.trim()))
+        ? 'Type to search services\u2026'
+        : 'No services match.';
+      grid.innerHTML = '<p class="gs-sp-empty">' + emptyMsg + '</p>';
       return;
     }
 
@@ -182,6 +193,8 @@
       division: options.division || '',
       propertyType: options.propertyType || 'Commercial',
       mode: options.mode || 'toggle',
+      filterMode: options.filterMode || 'all',
+      crossDivision: !!options.crossDivision,
       showPropertyToggle: options.showPropertyToggle !== false,
       showSelectAll: !!options.showSelectAll,
       selected: options.initialSelected || {},
@@ -231,6 +244,7 @@
       toggleEl.addEventListener('change', function () {
         inst.propertyType = toggleEl.checked ? 'Residential' : 'Commercial';
         renderGrid(pickerId);
+        fireChange(pickerId);
       });
     }
 
@@ -246,6 +260,7 @@
     return {
       getSelected: function () { return inst.selected; },
       getLevels: function () { return inst.svcLevel; },
+      getPropertyType: function () { return inst.propertyType; },
       setSelected: function (selected, levels) {
         inst.selected = selected || {};
         inst.svcLevel = levels || {};
