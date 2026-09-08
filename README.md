@@ -42,9 +42,11 @@ use, uno a la vez — nunca los 3 al mismo tiempo sin haber probado primero.
 | Componente | Carpeta | Qué hace |
 |---|---|---|
 | Lightbox de fotos | [`lightbox/`](./lightbox) | Ver fotos en pantalla completa con flechas, sin descargarlas ni navegar a otra pestaña |
+| Reloj y calendario | [`date-time-picker/`](./date-time-picker) | Elegir fecha y/o hora con el estilo oficial ya usado en toda la app |
+| Selector de servicios | [`service-picker/`](./service-picker) | Buscador + chips o filas con niveles L1/L2/L3, para elegir servicios de un catálogo |
 
-*(Siguen pendientes de mover aquí: reloj/calendario, selector de servicios por chips/niveles —
-ver el `CHANGELOG.md` conforme se vayan agregando.)*
+Los 3 quedan listos para conectar — todavía ningún portal usa el reloj/calendario ni el selector
+de servicios (solo Tech está conectado al lightbox por ahora).
 
 ## Cómo se numeran las versiones
 
