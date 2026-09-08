@@ -1,34 +1,8 @@
-/* ============================================================
-   GS Lightbox -- visor de fotos compartido, para los 3 portales
-   (tech.gsocd.com, Admingsocd.com, ordersgsocd.com).
-
-   Por que existe: antes cada portal tenia su propia copia de este
-   mismo componente, pegada a mano en cada archivo -- cuando aparecio
-   un bug (las fotos se descargaban en vez de verse), hubo que
-   arreglarlo por separado en Tech y en Admin, en 2 momentos
-   distintos. Con esto, se arregla una vez, aqui, y los 3 portales
-   quedan al dia solos.
-
-   USO (una sola linea en el HTML del portal que lo necesite):
-     <script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@v1.0.0/lightbox/lightbox.js"></script>
-
-   El script se inyecta su propio HTML y CSS solo -- no hace falta
-   copiar nada mas. Para abrir una foto:
-     GSLightbox.open(photos, index)
-   donde "photos" es un arreglo de objetos { downloadUrl, name } y
-   "index" es la posicion (0-based) de la foto que se acaba de
-   apretar. GSLightbox.open() reemplaza cualquier onclick="window.open(...)"
-   que navegaba directo al link de descarga (eso era lo que causaba
-   que la foto se bajara en vez de abrirse en movil).
-
-   Version: 1.0.0
-============================================================ */
 (function () {
   'use strict';
 
-  if (window.GSLightbox) return; // ya cargado, no duplicar
+  if (window.GSLightbox) return;
 
-  /* ===== CSS, inyectado una sola vez ===== */
   var style = document.createElement('style');
   style.textContent =
     '.gs-lightbox-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;align-items:center;justify-content:center}' +
@@ -42,7 +16,6 @@
     '.gs-lightbox-counter{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);color:#ddd;font-size:12px;letter-spacing:.04em;font-family:sans-serif}';
   document.head.appendChild(style);
 
-  /* ===== HTML, inyectado una sola vez ===== */
   var overlay = document.createElement('div');
   overlay.className = 'gs-lightbox-overlay';
   overlay.id = 'gs-lightbox-overlay';
