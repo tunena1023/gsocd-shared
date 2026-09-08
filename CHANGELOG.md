@@ -2,6 +2,13 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.1.1 — 2026-09-08
+
+- **Agregado:** `date-time-picker/` — `syncDate(fieldId)` / `syncTime(fieldId)`, para cuando el
+  valor del campo se pone desde fuera (cargar un borrador, editar una orden existente) sin pasar
+  por el calendario/reloj. Hueco encontrado al conectar `customer.html` (ordersgsocd.com), que
+  pone estos valores directo en varios lugares.
+
 ## v1.1.0 — 2026-09-08
 
 - **Agregado:** `date-time-picker/` — selector de fecha y hora (calendario + reloj circular).

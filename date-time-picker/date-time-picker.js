@@ -318,6 +318,30 @@
       '</div></div></div></div>';
   }
 
+  function syncDate(fieldId) {
+    var hidden = el(fieldId);
+    var trigger = el('gs-dtp-trigger-' + fieldId);
+    if (!hidden) return;
+    var parsed = parseISODate(hidden.value);
+    if (!parsed) { if (trigger) trigger.textContent = 'Pick a date'; return; }
+    var st = stateFor(fieldId);
+    st.calSelYear = parsed.year; st.calSelMonth = parsed.month; st.calSelDay = parsed.day;
+    st.calViewYear = parsed.year; st.calViewMonth = parsed.month;
+    if (trigger) trigger.textContent = fmtDateDisplay(parsed.year, parsed.month, parsed.day);
+  }
+
+  function syncTime(fieldId) {
+    var hidden = el(fieldId);
+    var trigger = el('gs-dtp-trigger-' + fieldId);
+    if (!hidden) return;
+    var parsed = parseHHMM(hidden.value);
+    if (!parsed) { if (trigger) trigger.textContent = 'Pick a time'; return; }
+    var st = stateFor(fieldId);
+    st.hour = parsed.hour; st.minute = parsed.minute; st.ampm = parsed.ampm;
+    var h24 = parsed.ampm === 'PM' && parsed.hour !== 12 ? parsed.hour + 12 : (parsed.ampm === 'AM' && parsed.hour === 12 ? 0 : parsed.hour);
+    if (trigger) trigger.textContent = fmtTimeDisplay(h24, parsed.minute);
+  }
+
   function getDate(fieldId) {
     var hidden = el(fieldId);
     return hidden && hidden.value ? hidden.value : null;
@@ -347,6 +371,8 @@
     setAmpm: setAmpm,
     goToStep: goToStep,
     getDate: getDate,
-    getTime: getTime
+    getTime: getTime,
+    syncDate: syncDate,
+    syncTime: syncTime
   };
 })();
