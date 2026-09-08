@@ -325,8 +325,14 @@
     var trigger = el('gs-dtp-trigger-' + fieldId);
     if (!hidden) return;
     var parsed = parseISODate(hidden.value);
-    if (!parsed) { if (trigger) trigger.textContent = 'Pick a date'; return; }
     var st = stateFor(fieldId);
+    if (!parsed) {
+      st.calSelYear = null; st.calSelMonth = null; st.calSelDay = null;
+      var now = new Date();
+      st.calViewYear = now.getFullYear(); st.calViewMonth = now.getMonth();
+      if (trigger) trigger.textContent = 'Pick a date';
+      return;
+    }
     st.calSelYear = parsed.year; st.calSelMonth = parsed.month; st.calSelDay = parsed.day;
     st.calViewYear = parsed.year; st.calViewMonth = parsed.month;
     if (trigger) trigger.textContent = fmtDateDisplay(parsed.year, parsed.month, parsed.day);
@@ -337,8 +343,12 @@
     var trigger = el('gs-dtp-trigger-' + fieldId);
     if (!hidden) return;
     var parsed = parseHHMM(hidden.value);
-    if (!parsed) { if (trigger) trigger.textContent = 'Pick a time'; return; }
     var st = stateFor(fieldId);
+    if (!parsed) {
+      st.hour = 8; st.minute = 0; st.ampm = 'AM'; st.clockStep = 'hour';
+      if (trigger) trigger.textContent = 'Pick a time';
+      return;
+    }
     st.hour = parsed.hour; st.minute = parsed.minute; st.ampm = parsed.ampm;
     var h24 = parsed.ampm === 'PM' && parsed.hour !== 12 ? parsed.hour + 12 : (parsed.ampm === 'AM' && parsed.hour === 12 ? 0 : parsed.hour);
     if (trigger) trigger.textContent = fmtTimeDisplay(h24, parsed.minute);
