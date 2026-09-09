@@ -82,6 +82,11 @@ document.addEventListener('gs-time-picked', (e) => {
 
 ## Historial
 
+- **v1.1.6** — `dateHtml`/`timeHtml` ahora SI limpian el estado interno cuando se llaman sin valor
+  inicial (antes solo lo hacía `syncDate`/`syncTime`, no la generación del HTML). Encontrado al
+  conectar Create Order en `admin.html`: el formulario se regenera con el mismo `fieldId` cada
+  vez que se abre para un cliente distinto — sin este arreglo, el calendario podía seguir
+  mostrando el mes/día que había dejado el cliente anterior, aunque el botón dijera "Pick a date".
 - **v1.1.5** — El popover cambia de `position: absolute` a `position: fixed`, con su propio
   cálculo de posición en JS (relativo al botón que lo abre, recorriéndose si se saldría de
   pantalla por la derecha). Encontrado al conectar Create Order en `admin.html`: ese formulario

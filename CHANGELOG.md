@@ -2,6 +2,14 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.1.6 — 2026-09-08
+
+- **Agregado:** `date-time-picker/` — `dateHtml`/`timeHtml` ahora también limpian el estado
+  interno cuando se llaman sin valor inicial, no solo `syncDate`/`syncTime`. Encontrado al conectar
+  Create Order en `admin.html`, que regenera el formulario con el mismo `fieldId` cada vez que se
+  abre para un cliente distinto -- sin este arreglo, el calendario podía seguir mostrando el
+  mes/día que había dejado el cliente anterior. Confirmado sin regresión (12 pruebas anteriores).
+
 ## v1.1.5 — 2026-09-08
 
 - **Agregado:** `date-time-picker/` — el popover cambia de `position: absolute` a `position: fixed`

@@ -280,6 +280,10 @@
       st.calSelYear = parsed.year; st.calSelMonth = parsed.month; st.calSelDay = parsed.day;
       st.calViewYear = parsed.year; st.calViewMonth = parsed.month;
       triggerText = fmtDateDisplay(parsed.year, parsed.month, parsed.day);
+    } else {
+      var now = new Date();
+      st.calSelYear = null; st.calSelMonth = null; st.calSelDay = null;
+      st.calViewYear = now.getFullYear(); st.calViewMonth = now.getMonth();
     }
     return '' +
       '<div class="gs-dtp-rel">' +
@@ -312,6 +316,8 @@
     if (parsed) {
       st.hour = parsed.hour; st.minute = parsed.minute; st.ampm = parsed.ampm;
       triggerText = fmtTimeDisplay(parsed.ampm === 'PM' && parsed.hour !== 12 ? parsed.hour + 12 : (parsed.ampm === 'AM' && parsed.hour === 12 ? 0 : parsed.hour), parsed.minute);
+    } else {
+      st.hour = 8; st.minute = 0; st.ampm = 'AM'; st.clockStep = 'hour';
     }
     return '' +
       '<div class="gs-dtp-rel">' +
