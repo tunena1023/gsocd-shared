@@ -154,3 +154,10 @@ el primero (probablemente `Admingsocd.com`, para probar el proceso completo con 
   requested' (redaccion ya usada en Admin, mas clara), y se agrego 'Expected Ready Date' ->
   'Ready Date & Time' (tipo real usado por save-expected-ready-date.js en Orders, que no
   se habia contemplado en la v1.0.0).
+
+## v1.5.0 — 2026-09-09
+
+- **order-history**: corregido el ChangeType real de la aprobacion de reactivacion --
+  era 'Reactivation Approved' (inventado), el backend real usa 'Order Reactivated'
+  (ya existia desde antes en admin-approve-order.js y confirm-reactivation.js). Se
+  corrigio tanto en LABELS como en DECISION_TYPES.

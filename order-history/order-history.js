@@ -67,7 +67,7 @@
     'Cancellation Approved':    'Order cancelled',
     'Cancellation Rejected':    'Cancellation not approved',
     'Reactivation Requested':   'Reactivation requested',
-    'Reactivation Approved':    'Order reactivated',
+    'Order Reactivated':        'Order reactivated',
     'Completed':                'Completed',
     'Dates Confirmed':          'Schedule confirmed',
     'Reschedule Requested':     'New dates requested',
@@ -81,7 +81,7 @@
      actor y en la misma tanda, se fusionan en una sola burbuja. --- */
   var DECISION_TYPES = [
     'Change Reassigned', 'Change Rejected', 'Sent to Scheduling',
-    'Cancellation Approved', 'Cancellation Rejected', 'Reactivation Approved'
+    'Cancellation Approved', 'Cancellation Rejected', 'Order Reactivated'
   ];
 
   /* --- Ruido puramente operativo -- nunca aporta nada a "que paso
