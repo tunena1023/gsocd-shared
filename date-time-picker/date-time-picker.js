@@ -14,7 +14,7 @@
       '.gs-dtp-rel{position:relative}' +
       '.gs-dtp-trigger{width:100%;padding:8px 10px;border:1px solid var(--border,#E0D9CC);border-radius:3px;font-size:13px;font-family:inherit;background:var(--white,#fff);text-align:left;cursor:pointer;color:var(--black,#111)}' +
       '.gs-dtp-trigger:hover{border-color:var(--gold,#C9A84C)}' +
-      '.gs-dtp-popover{display:none;position:absolute;margin-top:8px;background:var(--white,#fff);border:1px solid var(--border,#E0D9CC);border-radius:10px;padding:18px;box-shadow:0 6px 24px rgba(0,0,0,.18);z-index:50;width:min(260px,calc(100vw - 40px))}' +
+      '.gs-dtp-popover{display:none;position:fixed;margin-top:8px;background:var(--white,#fff);border:1px solid var(--border,#E0D9CC);border-radius:10px;padding:18px;box-shadow:0 6px 24px rgba(0,0,0,.18);z-index:9999;width:min(260px,calc(100vw - 40px))}' +
       '.gs-dtp-popover.open{display:block}' +
       '.gs-dtp-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gray,#6B6B6B);text-align:center;margin-bottom:14px}' +
       '.gs-dtp-clock-row{display:flex;justify-content:center;margin-bottom:14px}' +
@@ -96,12 +96,24 @@
     });
   }
 
+  function positionPopover(fieldId, pop) {
+    var trigger = el('gs-dtp-trigger-' + fieldId);
+    if (!trigger) return;
+    var r = trigger.getBoundingClientRect();
+    pop.style.top = (r.bottom + 8) + 'px';
+    pop.style.left = r.left + 'px';
+    var popWidth = 260;
+    var overflowRight = (r.left + popWidth) - window.innerWidth + 16;
+    if (overflowRight > 0) pop.style.left = (r.left - overflowRight) + 'px';
+  }
+
   function toggleCal(fieldId) {
     var pop = el('gs-dtp-calpop-' + fieldId);
     if (!pop) return;
     var wasOpen = pop.classList.contains('open');
     closeAllPopovers();
     if (!wasOpen) {
+      positionPopover(fieldId, pop);
       pop.classList.add('open');
       renderCalGrid(fieldId);
     }
@@ -113,6 +125,7 @@
     var wasOpen = pop.classList.contains('open');
     closeAllPopovers();
     if (!wasOpen) {
+      positionPopover(fieldId, pop);
       pop.classList.add('open');
       var st = stateFor(fieldId);
       st.clockStep = 'hour';

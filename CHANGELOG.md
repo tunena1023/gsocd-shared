@@ -2,6 +2,14 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.1.5 — 2026-09-08
+
+- **Agregado:** `date-time-picker/` — el popover cambia de `position: absolute` a `position: fixed`
+  con posicionamiento propio en JS. Encontrado al conectar Create Order en `admin.html`: vive
+  dentro de una tarjeta con `overflow: hidden`, que hubiera recortado el popover con
+  `position: absolute`. Confirmado sin regresión: las 13 pruebas de integración anteriores
+  (customer.html, tracking.html, profile.html, developer.html, admin.html) siguen pasando igual.
+
 ## v1.2.0 — 2026-09-08
 
 - **Agregado:** `service-picker/` — `filterMode: 'selected-plus-search'` (para editar algo que ya

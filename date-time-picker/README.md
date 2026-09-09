@@ -82,6 +82,12 @@ document.addEventListener('gs-time-picked', (e) => {
 
 ## Historial
 
+- **v1.1.5** — El popover cambia de `position: absolute` a `position: fixed`, con su propio
+  cálculo de posición en JS (relativo al botón que lo abre, recorriéndose si se saldría de
+  pantalla por la derecha). Encontrado al conectar Create Order en `admin.html`: ese formulario
+  vive dentro de una tarjeta con `overflow: hidden` — con `position: absolute`, el calendario/reloj
+  se hubiera recortado o desaparecido al abrirse ahí. `position: fixed` no depende de ningún
+  ancestro, funciona igual sin importar qué contenedor envuelva al campo.
 - **v1.1.2** — Al elegir fecha/hora, el input oculto también dispara su evento nativo `'change'`
   (compatible con paginas que ya escuchaban ese patron estandar).
 - **v1.1.1** — Se agrega `syncDate`/`syncTime`, para cuando el valor se pone desde fuera (cargar un
