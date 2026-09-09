@@ -74,7 +74,7 @@ de servicios (solo Tech está conectado al lightbox por ahora).
 Componente compartido para armar el historial de una orden -- una sola pieza para Admingsocd.com (staff), tech.gsocd.com (staff) y ordersgsocd.com (cliente). Agrupa/etiqueta/filtra igual sin importar quien la llama; el filtrado por modo (`staff` vs `client`) es lo único que cambia qué se ve, nunca cómo se llama lo que sí se ve.
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@v1.0.0/order-history/order-history.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@v1.3.0/order-history/order-history.js"></script>
 ```
 
 ```js
