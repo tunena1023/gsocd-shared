@@ -182,3 +182,10 @@ el primero (probablemente `Admingsocd.com`, para probar el proceso completo con 
   Orders ("Occupied unit") y Tech ("Occupied"), y Orders nunca tuvo la nota completa
   de que se necesita de la oficina -- el cliente veia el badge morado pero nunca el
   detalle real.
+
+## v1.8.0 — 2026-09-09
+
+- **order-badges**: nueva funcion `nowOpen(o)` -- badge "Now Open · 8am-5pm" /
+  "Closed · Opens 9am", Opcion 1 confirmada con el usuario (misma linea que los
+  demas badges). Lee `o.NowOpenStatus` (ya calculado del lado del backend, cruzando
+  horario semanal + Holidays), no calcula nada por su cuenta.
