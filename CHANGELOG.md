@@ -130,3 +130,19 @@ Primera versión del repo.
 
 Todavía ningún portal consume este repo — este es el primer componente listo, antes de conectar
 el primero (probablemente `Admingsocd.com`, para probar el proceso completo con el menor riesgo).
+
+## order-history v1.0.0 — 2026-09-09
+
+- Primera version. Consolida en una sola pieza lo que antes eran 3 implementaciones
+  independientes (Admingsocd.com, ordersgsocd.com, tech.gsocd.com), cada una con sus
+  propias reglas de que se agrupa, que se etiqueta, y que se esconde -- por eso el
+  mismo evento se veia distinto (o de plano no se veia) segun donde se mirara.
+- Reglas consolidadas: agrupar renglones consecutivos de 'Dates Confirmed', fusionar
+  esa tanda con el evento de decision que le sigue de cerca, fusionar 'Change
+  Requested' + 'Reschedule Requested' del mismo actor. Etiquetas legibles por
+  ChangeType, iguales en todos los modos. Nunca esconde un evento completo por falta
+  de detalle -- siempre se ve el encabezado como minimo (antes Admin escondia el
+  evento entero si no tenia ni detalle ni nota).
+- Dos modos: 'staff' (todo, sin filtrar mas alla del ruido operativo puro --
+  Document Generated/Failed, Archived) y 'client' (ademas esconde Office Change
+  (Internal), Supervisor, Inspection Date, Delay Reason).

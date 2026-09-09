@@ -68,3 +68,21 @@ de servicios (solo Tech está conectado al lightbox por ahora).
 4. Agregar el componente a la tabla de arriba en este README.
 5. Subir una nueva versión (`git tag vX.X.X`) — nunca se sube sin etiqueta, porque los portales
    siempre piden una versión específica, nunca "lo más nuevo".
+
+## order-history
+
+Componente compartido para armar el historial de una orden -- una sola pieza para Admingsocd.com (staff), tech.gsocd.com (staff) y ordersgsocd.com (cliente). Agrupa/etiqueta/filtra igual sin importar quien la llama; el filtrado por modo (`staff` vs `client`) es lo único que cambia qué se ve, nunca cómo se llama lo que sí se ve.
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@v1.0.0/order-history/order-history.js"></script>
+```
+
+```js
+// modo staff (Admin, Tech) -- todo, sin filtrar
+const html = GSOrderHistory.html(orderId, history, { mode: 'staff' });
+
+// modo client (Orders) -- filtrado a lo que le corresponde ver al cliente
+const html = GSOrderHistory.html(orderId, history, { mode: 'client' });
+```
+
+`history` es el arreglo COMPLETO tal cual viene del backend -- este componente nunca lo trunca por fecha ni por contexto (quien llama nunca debe recortarlo antes de mandarlo).
