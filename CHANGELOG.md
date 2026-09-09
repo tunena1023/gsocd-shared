@@ -2,6 +2,23 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.1.8 — 2026-09-08
+
+- **Arreglado:** `date-time-picker/` — BUG REAL, reportado por el usuario ("el reloj de poner una
+  orden no mantenía la hora, se quedaba en 8"). Elegir solo la hora (sin llegar al minuto) nunca
+  escribía nada en el campo -- solo `pickMinute` guardaba el valor final, así que si el usuario
+  cerraba el reloj justo después de elegir la hora (razonable, ya que el reloj SÍ avanza
+  visualmente a "elegir minuto"), el valor se quedaba pegado en lo que hubiera antes.
+
+  Se extrajo `commitTime(fieldId)`, y ahora se llama tanto al elegir la hora como al cambiar
+  AM/PM, además de al elegir el minuto -- el popover sigue abierto igual que antes (no cambia el
+  flujo visual), solo que ya no depende de llegar hasta el minuto para que algo quede guardado.
+
+  Existía desde antes de este componente -- las 5 copias locales de las que se extrajo tenían el
+  mismo diseño de 2 pasos, con el mismo hueco. Confirmado reproducido primero en aislado, luego
+  arreglado, y sin regresión (18 pruebas anteriores del reloj/calendario, más las 13 de
+  integración de Admin, todas pasan igual).
+
 ## v1.1.7 — 2026-09-08
 
 - **Agregado:** `date-time-picker/` — `dateHtml` acepta un 4to parámetro `options` con

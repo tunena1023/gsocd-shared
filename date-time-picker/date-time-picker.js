@@ -215,6 +215,7 @@
           st.clockStep = 'minute';
           updateClockStepUI(fieldId);
           renderClockMinuteFace(fieldId);
+          commitTime(fieldId);
         };
         face.appendChild(hEl);
       })(h);
@@ -257,6 +258,19 @@
     var group = btn.parentElement;
     Array.prototype.forEach.call(group.querySelectorAll('button'), function (b) { b.classList.remove('active'); });
     btn.classList.add('active');
+    commitTime(fieldId);
+  }
+
+  function commitTime(fieldId) {
+    var st = stateFor(fieldId);
+    var h24 = st.hour % 12; if (st.ampm === 'PM') h24 += 12;
+    var value = String(h24).padStart(2, '0') + ':' + String(st.minute).padStart(2, '0');
+    var hidden = el(fieldId);
+    if (hidden) hidden.value = value;
+    var trigger = el('gs-dtp-trigger-' + fieldId);
+    if (trigger) trigger.textContent = fmtTimeDisplay(h24, st.minute);
+    if (hidden) hidden.dispatchEvent(new Event('change', { bubbles: true }));
+    document.dispatchEvent(new CustomEvent('gs-time-picked', { detail: { fieldId: fieldId, value: value } }));
   }
 
   function pickMinute(fieldId, m) {
@@ -264,14 +278,7 @@
     st.minute = m;
     var pop = el('gs-dtp-clockpop-' + fieldId);
     if (pop) pop.classList.remove('open');
-    var h24 = st.hour % 12; if (st.ampm === 'PM') h24 += 12;
-    var value = String(h24).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-    var hidden = el(fieldId);
-    if (hidden) hidden.value = value;
-    var trigger = el('gs-dtp-trigger-' + fieldId);
-    if (trigger) trigger.textContent = fmtTimeDisplay(h24, m);
-    if (hidden) hidden.dispatchEvent(new Event('change', { bubbles: true }));
-    document.dispatchEvent(new CustomEvent('gs-time-picked', { detail: { fieldId: fieldId, value: value } }));
+    commitTime(fieldId);
   }
 
   function dateHtml(fieldId, initialISO, placeholder, options) {

@@ -85,6 +85,14 @@ document.addEventListener('gs-time-picked', (e) => {
 
 ## Historial
 
+- **v1.1.8** — BUG REAL: elegir solo la hora (sin llegar a elegir el minuto) nunca guardaba nada
+  -- el usuario veía el reloj avanzar a "elegir minuto", pero si cerraba ahí (pensando que ya
+  había terminado), el valor se quedaba en lo que hubiera antes (típicamente 8:00, el default).
+  Ahora, elegir la hora guarda de inmediato "H:00" (o el minuto que ya estuviera elegido antes);
+  el popover sigue abierto para poder afinar el minuto después, pero ya no depende de llegar
+  hasta ahí para que algo quede guardado. Cambiar AM/PM también confirma el valor actual, por la
+  misma razón. Existía desde antes de este componente -- las 5 copias locales originales tenían
+  el mismo diseño de 2 pasos.
 - **v1.1.7** — `dateHtml` acepta un 4to parámetro `options` con `{ min, max }` (fechas límite en
   formato `'YYYY-MM-DD'`). Los días fuera de ese rango se ven apagados y no se pueden elegir.
   Necesario para el panel de "Assign" en `admin.html`, que ya usaba `min`/`max` nativos del
