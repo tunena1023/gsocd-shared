@@ -70,7 +70,8 @@
     'Reactivation Approved':    'Order reactivated',
     'Completed':                'Completed',
     'Dates Confirmed':          'Schedule confirmed',
-    'Reschedule Requested':     'Reschedule requested',
+    'Reschedule Requested':     'New dates requested',
+    'Expected Ready Date':      'Ready Date & Time',
     'Archived':                 'Archived'
   };
   function labelFor(ct) { return LABELS[String(ct || '')] || String(ct || 'Update'); }

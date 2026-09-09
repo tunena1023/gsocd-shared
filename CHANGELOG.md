@@ -146,3 +146,11 @@ el primero (probablemente `Admingsocd.com`, para probar el proceso completo con 
 - Dos modos: 'staff' (todo, sin filtrar mas alla del ruido operativo puro --
   Document Generated/Failed, Archived) y 'client' (ademas esconde Office Change
   (Internal), Supervisor, Inspection Date, Delay Reason).
+
+## v1.4.0 — 2026-09-09
+
+- **order-history**: se agregaron 2 etiquetas que faltaban, encontradas al conectar Admin
+  a la pieza compartida -- 'Reschedule Requested' pasa de 'Reschedule requested' a 'New dates
+  requested' (redaccion ya usada en Admin, mas clara), y se agrego 'Expected Ready Date' ->
+  'Ready Date & Time' (tipo real usado por save-expected-ready-date.js en Orders, que no
+  se habia contemplado en la v1.0.0).
