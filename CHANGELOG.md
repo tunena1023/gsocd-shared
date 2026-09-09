@@ -2,6 +2,22 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.1.10 — 2026-09-08
+
+- **Agregado:** nuevo evento `gs-popover-closed` -- se dispara cada vez que un popover
+  (calendario o reloj) se cierra, sin importar cómo (clic afuera, elegir un día/hora, otro
+  disparador). Necesario para flujos donde algo más depende de "el usuario cerró esto sin elegir
+  nada" (ej. un switch que debe apagarse solo si su reloj se cierra sin confirmar una hora).
+  `closeAllPopovers` también quedó expuesto públicamente.
+
+- **Arreglado:** BUG REAL -- clic afuera del reloj podía cerrarlo de golpe justo después de elegir
+  la HORA (aunque el usuario seguía dentro del reloj, a punto de elegir el minuto). Causa: elegir
+  la hora vuelve a dibujar la cara del reloj (para mostrar los minutos), lo que borra del DOM el
+  número que se acababa de tocar -- para cuando el clic terminaba de "burbujear" hasta el
+  documento, el elemento ya no existía, y la verificación de "¿fue adentro o afuera?" veía un
+  nodo desconectado y lo confundía con "afuera". Arreglado usando `composedPath()`, que congela
+  la ruta real del clic desde el instante en que ocurrió, sin importar qué se borre después.
+
 ## v1.1.9 — 2026-09-08
 
 - **Arreglado:** el popover (calendario o reloj) podía abrirse en el lugar equivocado de la

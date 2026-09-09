@@ -90,9 +90,22 @@
 
   function el(id) { return document.getElementById(id); }
 
+  function fieldIdFromPopId(popId) {
+    if (popId.indexOf('gs-dtp-calpop-') === 0) return popId.slice('gs-dtp-calpop-'.length);
+    if (popId.indexOf('gs-dtp-clockpop-') === 0) return popId.slice('gs-dtp-clockpop-'.length);
+    return null;
+  }
+
+  function closePopover(pop) {
+    if (!pop.classList.contains('open')) return;
+    pop.classList.remove('open');
+    var fieldId = fieldIdFromPopId(pop.id);
+    if (fieldId) document.dispatchEvent(new CustomEvent('gs-popover-closed', { detail: { fieldId: fieldId } }));
+  }
+
   function closeAllPopovers() {
     Array.prototype.forEach.call(document.querySelectorAll('.gs-dtp-popover.open'), function (pop) {
-      pop.classList.remove('open');
+      closePopover(pop);
     });
   }
 
@@ -187,10 +200,10 @@
     var trigger = el('gs-dtp-trigger-' + fieldId);
     if (trigger) trigger.textContent = fmtDateDisplay(year, month, day);
     renderCalGrid(fieldId);
-    var pop = el('gs-dtp-calpop-' + fieldId);
-    if (pop) pop.classList.remove('open');
     if (hidden) hidden.dispatchEvent(new Event('change', { bubbles: true }));
     document.dispatchEvent(new CustomEvent('gs-date-picked', { detail: { fieldId: fieldId, value: dateStr } }));
+    var pop = el('gs-dtp-calpop-' + fieldId);
+    if (pop) closePopover(pop);
   }
 
   function clockPolarPos(idx, count, r) {
@@ -278,9 +291,9 @@
   function pickMinute(fieldId, m) {
     var st = stateFor(fieldId);
     st.minute = m;
-    var pop = el('gs-dtp-clockpop-' + fieldId);
-    if (pop) pop.classList.remove('open');
     commitTime(fieldId);
+    var pop = el('gs-dtp-clockpop-' + fieldId);
+    if (pop) closePopover(pop);
   }
 
   function dateHtml(fieldId, initialISO, placeholder, options) {
@@ -399,9 +412,12 @@
   }
 
   document.addEventListener('click', function (e) {
+    var path = e.composedPath ? e.composedPath() : null;
     Array.prototype.forEach.call(document.querySelectorAll('.gs-dtp-popover.open'), function (pop) {
       var wrap = pop.closest('.gs-dtp-rel');
-      if (wrap && !wrap.contains(e.target)) pop.classList.remove('open');
+      if (!wrap) return;
+      var isInside = path ? (path.indexOf(wrap) !== -1) : wrap.contains(e.target);
+      if (!isInside) closePopover(pop);
     });
   });
 
@@ -419,6 +435,7 @@
     getDate: getDate,
     getTime: getTime,
     syncDate: syncDate,
-    syncTime: syncTime
+    syncTime: syncTime,
+    closeAllPopovers: closeAllPopovers
   };
 })();
