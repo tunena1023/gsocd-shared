@@ -115,6 +115,7 @@
     if (!wasOpen) {
       positionPopover(fieldId, pop);
       pop.classList.add('open');
+      if (window.requestAnimationFrame) window.requestAnimationFrame(function () { positionPopover(fieldId, pop); });
       renderCalGrid(fieldId);
     }
   }
@@ -127,6 +128,7 @@
     if (!wasOpen) {
       positionPopover(fieldId, pop);
       pop.classList.add('open');
+      if (window.requestAnimationFrame) window.requestAnimationFrame(function () { positionPopover(fieldId, pop); });
       var st = stateFor(fieldId);
       st.clockStep = 'hour';
       updateClockStepUI(fieldId);

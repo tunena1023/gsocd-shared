@@ -2,6 +2,25 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.1.9 — 2026-09-08
+
+- **Arreglado:** el popover (calendario o reloj) podía abrirse en el lugar equivocado de la
+  pantalla -- reportado con screenshot: el reloj de "Unit ready" aparecía tapando otras tarjetas,
+  lejos de su botón. Causa: al abrirse, algunos campos (como el de "Unit ready") primero REVELAN
+  un bloque que estaba oculto (`display:none`), y el cálculo de posición corría antes de que el
+  navegador terminara de acomodar ese cambio de layout, agarrando coordenadas viejas.
+
+  Ahora la posición se calcula 2 veces: una de inmediato, y otra un frame después
+  (`requestAnimationFrame`) -- si el primer cálculo ya estaba bien, no cambia nada; si el campo
+  se acababa de revelar, el segundo cálculo corrige la posición una vez que el layout ya se
+  acomodó. Aplica tanto al calendario como al reloj.
+
+  LIMITACIÓN DE LA PRUEBA: el entorno de pruebas automáticas no calcula layout real de pantalla
+  (getBoundingClientRect siempre da 0), así que este arreglo se confirmó sin errores de código y
+  sin romper nada de lo demás, pero NO se pudo confirmar en automático que resuelve el
+  posicionamiento real -- eso lo tiene que confirmar el usuario viéndolo en un navegador de
+  verdad.
+
 ## v1.1.8 — 2026-09-08
 
 - **Arreglado:** `date-time-picker/` — BUG REAL, reportado por el usuario ("el reloj de poner una
