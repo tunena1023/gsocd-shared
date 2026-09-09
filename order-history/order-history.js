@@ -122,7 +122,7 @@
     try {
       var obj = JSON.parse(body);
       if (Array.isArray(obj)) return { services: obj, dirtLevel: '' };
-      if (obj && Array.isArray(obj.services)) return { services: obj.services, dirtLevel: obj.dirtLevel || '' };
+      if (obj && Array.isArray(obj.services)) return obj;
       return null;
     } catch (e) { return null; }
   }
@@ -162,6 +162,11 @@
     var lines = [];
 
     if (h.ChangeType === 'Created') {
+      if (newPay) {
+        if (newPay.entryDate) lines.push('📅 Entry: ' + esc(newPay.entryDate));
+        if (newPay.dueDate) lines.push('📅 Due: ' + esc(newPay.dueDate));
+        if (newPay.serviceWindow) lines.push('🕐 Window: ' + esc(newPay.serviceWindow));
+      }
       (newSvcs || []).forEach(function (s) {
         lines.push('• ' + esc(s.Category || '') + ': ' + esc(s.ServiceName || '') + (svcSubLabel(s) ? ' — ' + esc(svcSubLabel(s)) : ''));
       });

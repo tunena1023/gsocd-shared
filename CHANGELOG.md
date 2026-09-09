@@ -161,3 +161,15 @@ el primero (probablemente `Admingsocd.com`, para probar el proceso completo con 
   era 'Reactivation Approved' (inventado), el backend real usa 'Order Reactivated'
   (ya existia desde antes en admin-approve-order.js y confirm-reactivation.js). Se
   corrigio tanto en LABELS como en DECISION_TYPES.
+
+## v1.6.0 — 2026-09-09
+
+- **order-history**: 2 arreglos reales encontrados al revisar el mini con el usuario.
+  1. `parseServicesPayload` ahora conserva el objeto completo (antes solo extraia
+     `.services`/`.dirtLevel`, descartando cualquier otro campo) -- necesario para que
+     el evento "Created" tambien pueda leer las fechas del pedido original, no solo
+     los servicios.
+  2. El detalle de "Created" ahora muestra Entry/Due/Window ademas de los servicios,
+     cuando el backend los trae (ver commits de Admingsocd.com/ordersgsocd.com -- antes
+     el backend nunca guardaba el pedido original completo, solo la palabra del
+     estatus, asi que este renglon siempre se veia vacio).
