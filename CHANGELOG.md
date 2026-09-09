@@ -173,3 +173,12 @@ el primero (probablemente `Admingsocd.com`, para probar el proceso completo con 
      cuando el backend los trae (ver commits de Admingsocd.com/ordersgsocd.com -- antes
      el backend nunca guardaba el pedido original completo, solo la palabra del
      estatus, asi que este renglon siempre se veia vacio).
+
+## v1.7.0 — 2026-09-09
+
+- Nuevo componente **order-badges**. Consolida en una sola pieza lo que antes eran
+  4 copias independientes (admin.html, tracking.html, employee.html, supervisor.html)
+  del mismo diseno de badge, ya desincronizadas: el texto no coincidia entre Admin/
+  Orders ("Occupied unit") y Tech ("Occupied"), y Orders nunca tuvo la nota completa
+  de que se necesita de la oficina -- el cliente veia el badge morado pero nunca el
+  detalle real.

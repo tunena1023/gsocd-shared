@@ -86,3 +86,17 @@ const html = GSOrderHistory.html(orderId, history, { mode: 'client' });
 ```
 
 `history` es el arreglo COMPLETO tal cual viene del backend -- este componente nunca lo trunca por fecha ni por contexto (quien llama nunca debe recortarlo antes de mandarlo).
+
+## order-badges
+
+Componente compartido para los badges de "unidad ocupada" y "se necesita algo de la oficina" -- una sola pieza para Admingsocd.com, tech.gsocd.com y ordersgsocd.com.
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@v1.7.0/order-badges/order-badges.js"></script>
+```
+
+```js
+GSOrderBadges.occupied(o)       // badge azul, o '' si no aplica
+GSOrderBadges.officeNeed(o)     // badge morado, o '' si no aplica
+GSOrderBadges.officeNeedNote(o) // texto completo, o '' si no aplica
+```
