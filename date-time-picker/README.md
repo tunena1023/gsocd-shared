@@ -14,12 +14,15 @@ razonable, pero se ve mejor si la página ya los define (los 3 portales ya los t
 ### Campo de fecha
 
 ```js
-GSDateTimePicker.dateHtml(fieldId, initialISO, placeholder)
+GSDateTimePicker.dateHtml(fieldId, initialISO, placeholder, options)
 ```
 
 - `fieldId`: id único para este campo (se usa como id del `<input type="hidden">` real).
 - `initialISO`: fecha ya elegida, formato `'YYYY-MM-DD'`, o `null` si no hay ninguna todavía.
 - `placeholder`: texto del botón cuando no hay fecha (opcional, por defecto "Pick a date").
+- `options` (opcional): `{ min, max }`, cada uno `'YYYY-MM-DD'` o `null`. Los días fuera de ese
+  rango se ven apagados y no se pueden elegir — igual que `min`/`max` en un `<input type="date">`
+  nativo, pero respetado por este calendario propio.
 
 Devuelve el HTML completo (input oculto + botón + calendario) — se inserta donde se necesite,
 normalmente dentro de un template string junto al resto del formulario.
@@ -82,6 +85,10 @@ document.addEventListener('gs-time-picked', (e) => {
 
 ## Historial
 
+- **v1.1.7** — `dateHtml` acepta un 4to parámetro `options` con `{ min, max }` (fechas límite en
+  formato `'YYYY-MM-DD'`). Los días fuera de ese rango se ven apagados y no se pueden elegir.
+  Necesario para el panel de "Assign" en `admin.html`, que ya usaba `min`/`max` nativos del
+  navegador (la fecha asignada tiene que caer entre Entry Date y Due Date de la orden).
 - **v1.1.6** — `dateHtml`/`timeHtml` ahora SI limpian el estado interno cuando se llaman sin valor
   inicial (antes solo lo hacía `syncDate`/`syncTime`, no la generación del HTML). Encontrado al
   conectar Create Order en `admin.html`: el formulario se regenera con el mismo `fieldId` cada

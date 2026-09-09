@@ -160,9 +160,11 @@
       (function (day) {
         var dayEl = document.createElement('div');
         var isSel = st.calSelDay === day && st.calSelMonth === st.calViewMonth && st.calSelYear === st.calViewYear;
-        dayEl.className = 'gs-dtp-cal-day' + (isSel ? ' selected' : '');
+        var dayStr = st.calViewYear + '-' + String(st.calViewMonth + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+        var outOfRange = (st.min && dayStr < st.min) || (st.max && dayStr > st.max);
+        dayEl.className = 'gs-dtp-cal-day' + (isSel ? ' selected' : '') + (outOfRange ? ' muted' : '');
         dayEl.textContent = day;
-        dayEl.onclick = function () { pickDay(fieldId, st.calViewYear, st.calViewMonth, day); };
+        if (!outOfRange) dayEl.onclick = function () { pickDay(fieldId, st.calViewYear, st.calViewMonth, day); };
         grid.appendChild(dayEl);
       })(d);
     }
@@ -175,8 +177,9 @@
 
   function pickDay(fieldId, year, month, day) {
     var st = stateFor(fieldId);
-    st.calSelYear = year; st.calSelMonth = month; st.calSelDay = day;
     var dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+    if ((st.min && dateStr < st.min) || (st.max && dateStr > st.max)) return;
+    st.calSelYear = year; st.calSelMonth = month; st.calSelDay = day;
     var hidden = el(fieldId);
     if (hidden) hidden.value = dateStr;
     var trigger = el('gs-dtp-trigger-' + fieldId);
@@ -271,11 +274,13 @@
     document.dispatchEvent(new CustomEvent('gs-time-picked', { detail: { fieldId: fieldId, value: value } }));
   }
 
-  function dateHtml(fieldId, initialISO, placeholder) {
+  function dateHtml(fieldId, initialISO, placeholder, options) {
     styleTag();
     var st = stateFor(fieldId);
     var parsed = parseISODate(initialISO);
     var triggerText = placeholder || 'Pick a date';
+    st.min = (options && options.min) || null;
+    st.max = (options && options.max) || null;
     if (parsed) {
       st.calSelYear = parsed.year; st.calSelMonth = parsed.month; st.calSelDay = parsed.day;
       st.calViewYear = parsed.year; st.calViewMonth = parsed.month;
@@ -284,6 +289,7 @@
       var now = new Date();
       st.calSelYear = null; st.calSelMonth = null; st.calSelDay = null;
       st.calViewYear = now.getFullYear(); st.calViewMonth = now.getMonth();
+      if (st.min) { var minP = parseISODate(st.min); if (minP) { st.calViewYear = minP.year; st.calViewMonth = minP.month; } }
     }
     return '' +
       '<div class="gs-dtp-rel">' +

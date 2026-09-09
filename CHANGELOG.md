@@ -2,6 +2,13 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.1.7 — 2026-09-08
+
+- **Agregado:** `date-time-picker/` — `dateHtml` acepta un 4to parámetro `options` con
+  `{ min, max }`. Necesario para el panel de "Assign" en `admin.html`, el único de los 7 lugares
+  ya conectados que necesitaba límites reales (la fecha asignada tiene que caer entre Entry Date y
+  Due Date de la orden). Confirmado con prueba dedicada y sin regresión (15 pruebas anteriores).
+
 ## v1.1.6 — 2026-09-08
 
 - **Agregado:** `date-time-picker/` — `dateHtml`/`timeHtml` ahora también limpian el estado
