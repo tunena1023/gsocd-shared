@@ -189,3 +189,18 @@ el primero (probablemente `Admingsocd.com`, para probar el proceso completo con 
   "Closed · Opens 9am", Opcion 1 confirmada con el usuario (misma linea que los
   demas badges). Lee `o.NowOpenStatus` (ya calculado del lado del backend, cruzando
   horario semanal + Holidays), no calcula nada por su cuenta.
+
+## v1.9.0 — 2026-09-09 (sin publicar, en revision)
+
+- **service-picker**: nueva opcion `groupByCategory` -- agrupa los servicios en
+  un acordeon por categoria (con contador de elegidos por categoria), en vez
+  de la lista plana de siempre. Sin esta opcion (default false), el
+  comportamiento es EXACTAMENTE igual al de antes -- ningun llamador
+  existente se ve afectado sin pedirlo explicitamente.
+- Bug real encontrado y arreglado ANTES de llegar al componente compartido
+  (via mini con el usuario): elegir un servicio no debe cerrar la categoria
+  abierta -- se corrigio guardando el estado de "abierto/cerrado" por
+  categoria de forma persistente (openCats), en vez de reconstruirlo desde
+  cero en cada render.
+- Buscar abre automaticamente solo las categorias con resultados.
+- Servicios sin categoria asignada caen en "Uncategorized", nunca se pierden.

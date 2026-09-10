@@ -40,7 +40,22 @@
       '.gs-sp-lvl-btn:hover:not(.active){background:var(--off,#F7F6F3)}' +
       '.gs-sp-empty{color:var(--gray,#6B6B6B);font-size:13px}' +
       '@media (max-width:900px){.gs-sp-chip-grid,.gs-sp-row-grid{grid-template-columns:1fr 1fr}}' +
-      '@media (max-width:640px){.gs-sp-chip-grid,.gs-sp-row-grid{grid-template-columns:1fr}}';
+      '@media (max-width:640px){.gs-sp-chip-grid,.gs-sp-row-grid{grid-template-columns:1fr}}' +
+      /* Acordeon por categoria -- confirmado con el usuario: sin
+         categorias no tiene caso, y su catalogo (importado de
+         QuickBooks) no traia ese campo, asi que ahora se mantiene a
+         mano (Developer > Catalog). Servicios sin categoria caen en
+         "Uncategorized", nunca se pierden. */
+      '.gs-sp-cat-group{border:1px solid var(--border,#E0D9CC);margin-bottom:8px;border-radius:4px;overflow:hidden}' +
+      '.gs-sp-cat-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer;background:var(--white,#fff)}' +
+      '.gs-sp-cat-header.has-selected{background:#FEFBF3}' +
+      '.gs-sp-cat-name{font-size:13px;font-weight:600}' +
+      '.gs-sp-cat-count{font-size:10px;color:var(--gold-dk,#8C6F2A);font-weight:700;background:#F0E4C4;padding:2px 8px;border-radius:10px;margin-left:8px}' +
+      '.gs-sp-cat-arrow{font-size:11px;color:var(--gray,#6B6B6B);transition:transform .2s;flex-shrink:0}' +
+      '.gs-sp-cat-arrow.open{transform:rotate(90deg)}' +
+      '.gs-sp-cat-body{display:none;padding:8px 12px 12px;border-top:1px solid var(--border,#E0D9CC)}' +
+      '.gs-sp-cat-body.open{display:block}' +
+      '.gs-sp-cat-body .gs-sp-chip-grid,.gs-sp-cat-body .gs-sp-row-grid{grid-template-columns:1fr}';
     document.head.appendChild(style);
   }
 
@@ -72,6 +87,86 @@
     return list;
   }
 
+  function itemHtml(inst, s) {
+    if (inst.mode === 'levels') {
+      var sel = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
+      var lvl = sel ? inst.svcLevel[svcKey(inst.propertyType, s.serviceName)] : null;
+      var levels = ['Level 1', 'Level 2', 'Level 3'];
+      var btns = levels.map(function (l, i) {
+        return '<div class="gs-sp-lvl-btn' + (lvl === l ? ' active' : '') + '" data-sku="' + escapeAttr(s.sku) + '" data-level="' + l + '">L' + (i + 1) + '</div>';
+      }).join('');
+      return '<div class="gs-sp-row' + (lvl ? ' selected' : '') + '">' +
+        '<span class="gs-sp-row-name">' + escapeHtml(s.serviceName) + '</span>' +
+        '<div class="gs-sp-lvl-group">' + btns + '</div></div>';
+    }
+    var active = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
+    return '<button type="button" class="gs-sp-chip-btn' + (active ? ' active' : '') + '" data-sku="' + escapeAttr(s.sku) + '">' + escapeHtml(s.serviceName) + '</button>';
+  }
+
+  function bindItemEvents(inst, pickerId, scopeEl) {
+    if (inst.mode === 'levels') {
+      Array.prototype.forEach.call(scopeEl.querySelectorAll('.gs-sp-lvl-btn'), function (btn) {
+        btn.addEventListener('click', function () { pickLevel(pickerId, btn.dataset.sku, btn.dataset.level); });
+      });
+    } else {
+      Array.prototype.forEach.call(scopeEl.querySelectorAll('.gs-sp-chip-btn'), function (btn) {
+        btn.addEventListener('click', function () { toggleChip(pickerId, btn.dataset.sku); });
+      });
+    }
+  }
+
+  function isSelected(inst, s) {
+    return String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
+  }
+
+  /* Acordeon por categoria -- confirmado con el usuario: sin
+     categorias reales de su catalogo (viene de QuickBooks, sin ese
+     campo), se mantiene a mano desde Developer. Servicios sin
+     categoria asignada todavia caen en "Uncategorized" al final, sin
+     perderse. Buscar abre solo las categorias con resultados (mismo
+     criterio ya aprobado en el mini). */
+  function renderGroupedGrid(pickerId, inst, list) {
+    var grid = inst.gridEl;
+    var q = inst.searchEl ? (inst.searchEl.value || '').trim().toLowerCase() : '';
+    var groups = {};
+    var order = [];
+    list.forEach(function (s) {
+      var cat = s.category || 'Uncategorized';
+      if (!groups[cat]) { groups[cat] = []; order.push(cat); }
+      groups[cat].push(s);
+    });
+    order.sort(function (a, b) {
+      if (a === 'Uncategorized') return 1;
+      if (b === 'Uncategorized') return -1;
+      return a.localeCompare(b);
+    });
+
+    grid.className = 'gs-sp-accordion';
+    grid.innerHTML = order.map(function (cat, i) {
+      var items = groups[cat];
+      var count = items.filter(function (s) { return isSelected(inst, s); }).length;
+      var isOpen = q ? true : !!inst.openCats[cat];
+      var gridClass = inst.mode === 'levels' ? 'gs-sp-row-grid' : 'gs-sp-chip-grid';
+      return '<div class="gs-sp-cat-group">' +
+        '<div class="gs-sp-cat-header' + (count ? ' has-selected' : '') + '" data-cat="' + escapeAttr(cat) + '">' +
+        '<span class="gs-sp-cat-name">' + escapeHtml(cat) + (count ? '<span class="gs-sp-cat-count">' + count + '</span>' : '') + '</span>' +
+        '<span class="gs-sp-cat-arrow' + (isOpen ? ' open' : '') + '">\u25B8</span>' +
+        '</div>' +
+        '<div class="gs-sp-cat-body' + (isOpen ? ' open' : '') + '"><div class="' + gridClass + '">' +
+        items.map(function (s) { return itemHtml(inst, s); }).join('') +
+        '</div></div></div>';
+    }).join('');
+
+    Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-cat-header'), function (header) {
+      header.addEventListener('click', function () {
+        var cat = header.dataset.cat;
+        inst.openCats[cat] = !inst.openCats[cat];
+        renderGrid(pickerId);
+      });
+    });
+    bindItemEvents(inst, pickerId, grid);
+  }
+
   function renderGrid(pickerId) {
     var inst = instances[pickerId];
     var grid = inst.gridEl;
@@ -86,32 +181,19 @@
       return;
     }
 
+    if (inst.groupByCategory) {
+      renderGroupedGrid(pickerId, inst, list);
+      return;
+    }
+
     if (inst.mode === 'levels') {
       grid.className = 'gs-sp-row-grid';
-      var levels = ['Level 1', 'Level 2', 'Level 3'];
-      grid.innerHTML = list.map(function (s) {
-        var sel = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
-        var lvl = sel ? inst.svcLevel[svcKey(inst.propertyType, s.serviceName)] : null;
-        var btns = levels.map(function (l, i) {
-          return '<div class="gs-sp-lvl-btn' + (lvl === l ? ' active' : '') + '" data-sku="' + escapeAttr(s.sku) + '" data-level="' + l + '">L' + (i + 1) + '</div>';
-        }).join('');
-        return '<div class="gs-sp-row' + (lvl ? ' selected' : '') + '">' +
-          '<span class="gs-sp-row-name">' + escapeHtml(s.serviceName) + '</span>' +
-          '<div class="gs-sp-lvl-group">' + btns + '</div></div>';
-      }).join('');
-      Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-lvl-btn'), function (btn) {
-        btn.addEventListener('click', function () { pickLevel(pickerId, btn.dataset.sku, btn.dataset.level); });
-      });
+      grid.innerHTML = list.map(function (s) { return itemHtml(inst, s); }).join('');
     } else {
       grid.className = 'gs-sp-chip-grid';
-      grid.innerHTML = list.map(function (s) {
-        var active = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
-        return '<button type="button" class="gs-sp-chip-btn' + (active ? ' active' : '') + '" data-sku="' + escapeAttr(s.sku) + '">' + escapeHtml(s.serviceName) + '</button>';
-      }).join('');
-      Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-chip-btn'), function (btn) {
-        btn.addEventListener('click', function () { toggleChip(pickerId, btn.dataset.sku); });
-      });
+      grid.innerHTML = list.map(function (s) { return itemHtml(inst, s); }).join('');
     }
+    bindItemEvents(inst, pickerId, grid);
   }
 
   function escapeHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -197,6 +279,8 @@
       crossDivision: !!options.crossDivision,
       showPropertyToggle: options.showPropertyToggle !== false,
       showSelectAll: !!options.showSelectAll,
+      groupByCategory: !!options.groupByCategory,
+      openCats: {},
       selected: options.initialSelected || {},
       svcLevel: options.initialLevels || {},
       selAllActive: null,
