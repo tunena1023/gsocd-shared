@@ -220,3 +220,11 @@ el primero (probablemente `Admingsocd.com`, para probar el proceso completo con 
   acordeon por categoria es el estandar en TODO lugar de Admin u Orders
   donde se pone o edita una orden (no aplica a tech.gsocd.com, ahi nunca
   se crean ordenes).
+
+## v1.11.0 — 2026-09-10
+
+- **service-picker**: BUG REAL -- se podian abrir varias categorias del
+  acordeon al mismo tiempo (la clase gs-sp-accordion tenia su CSS de 2
+  columnas de v1.10.0, pero el click de cada header solo volteaba su
+  propio estado, sin cerrar las demas). Ahora abrir una categoria cierra
+  las otras -- solo una abierta a la vez, encontrado al construir Recurring.
