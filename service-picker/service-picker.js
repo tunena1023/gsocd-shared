@@ -167,7 +167,12 @@
     Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-cat-header'), function (header) {
       header.addEventListener('click', function () {
         var cat = header.dataset.cat;
-        inst.openCats[cat] = !inst.openCats[cat];
+        var wasOpen = !!inst.openCats[cat];
+        /* Solo una categoria abierta a la vez: se cierran todas y,
+           si la que tocaste no estaba ya abierta, se abre nada mas
+           esa. Si ya estaba abierta, clic la cierra y no abre otra. */
+        inst.openCats = {};
+        if (!wasOpen) inst.openCats[cat] = true;
         renderGrid(pickerId);
       });
     });
