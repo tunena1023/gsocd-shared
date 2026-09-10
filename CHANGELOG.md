@@ -190,7 +190,7 @@ el primero (probablemente `Admingsocd.com`, para probar el proceso completo con 
   demas badges). Lee `o.NowOpenStatus` (ya calculado del lado del backend, cruzando
   horario semanal + Holidays), no calcula nada por su cuenta.
 
-## v1.9.0 — 2026-09-09 (sin publicar, en revision)
+## v1.9.0 — 2026-09-09
 
 - **service-picker**: nueva opcion `groupByCategory` -- agrupa los servicios en
   un acordeon por categoria (con contador de elegidos por categoria), en vez
@@ -204,3 +204,19 @@ el primero (probablemente `Admingsocd.com`, para probar el proceso completo con 
   cero en cada render.
 - Buscar abre automaticamente solo las categorias con resultados.
 - Servicios sin categoria asignada caen en "Uncategorized", nunca se pierden.
+
+## v1.10.0 — 2026-09-10
+
+- **service-picker**: BUG REAL -- la clase `gs-sp-accordion` (el contenedor
+  de las cajas de categoria del acordeon nuevo de v1.9.0) se le ponia al
+  grid desde JS pero nunca tuvo una regla CSS que la definiera. Resultado:
+  las categorias siempre se veian apiladas en 1 sola columna, en cualquier
+  ancho de pantalla, sin importar el dispositivo. Se agrega la regla que
+  faltaba: 2 columnas en desktop, 1 en mobile (`max-width:640px`, mismo
+  breakpoint que ya usa el resto del componente).
+- Estandarizado `groupByCategory: true` en los 2 lugares que se habian
+  quedado atras de v1.2.0 sin el acordeon (`developer.html` > tpl-admin,
+  `templates.html` > template-editor) -- confirmado con el usuario: el
+  acordeon por categoria es el estandar en TODO lugar de Admin u Orders
+  donde se pone o edita una orden (no aplica a tech.gsocd.com, ahi nunca
+  se crean ordenes).
