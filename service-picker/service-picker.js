@@ -55,7 +55,14 @@
       '.gs-sp-cat-arrow.open{transform:rotate(90deg)}' +
       '.gs-sp-cat-body{display:none;padding:8px 12px 12px;border-top:1px solid var(--border,#E0D9CC)}' +
       '.gs-sp-cat-body.open{display:block}' +
-      '.gs-sp-cat-body .gs-sp-chip-grid,.gs-sp-cat-body .gs-sp-row-grid{grid-template-columns:1fr}';
+      '.gs-sp-cat-body .gs-sp-chip-grid,.gs-sp-cat-body .gs-sp-row-grid{grid-template-columns:1fr}' +
+      /* El contenedor de las cajas de categoria (no lo de adentro de
+         cada una, eso ya tenia su propio grid arriba) -- 2 columnas
+         en desktop, 1 en mobile. Faltaba esta regla, la clase se
+         ponia en JS pero nunca tuvo CSS -- por eso siempre se veia
+         apilado en 1 sola columna sin importar el ancho. */
+      '.gs-sp-accordion{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}' +
+      '@media (max-width:640px){.gs-sp-accordion{grid-template-columns:1fr}}';
     document.head.appendChild(style);
   }
 
