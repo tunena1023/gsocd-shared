@@ -421,6 +421,23 @@
     });
   });
 
+  var repositionQueued = false;
+  function repositionOpenPopovers() {
+    if (repositionQueued) return;
+    repositionQueued = true;
+    (window.requestAnimationFrame || function (cb) { setTimeout(cb, 16); })(function () {
+      repositionQueued = false;
+      Array.prototype.forEach.call(document.querySelectorAll('.gs-dtp-popover.open'), function (pop) {
+        var fieldId = fieldIdFromPopId(pop.id);
+        if (fieldId) positionPopover(fieldId, pop);
+      });
+    });
+  }
+  // capture:true para agarrar el scroll de CUALQUIER contenedor (no solo la ventana),
+  // por si el campo esta dentro de un panel/modal con su propio scroll interno.
+  window.addEventListener('scroll', repositionOpenPopovers, true);
+  window.addEventListener('resize', repositionOpenPopovers);
+
   window.GSDateTimePicker = {
     dateHtml: dateHtml,
     timeHtml: timeHtml,
