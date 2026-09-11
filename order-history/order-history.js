@@ -335,6 +335,11 @@
     opts = opts || {};
     var mode = opts.mode === 'client' ? 'client' : 'staff';
     var catalog = opts.timesCatalog || null;
+    /* Tipos de evento que representan un RETROCESO real (algo que se
+       deshizo) -- si se pasa, esos renglones del historial se marcan
+       con un brillo distinto, para que salte a la vista que ahi paso
+       algo que vale la pena abrir y leer (no un avance normal mas). */
+    var regressionTypes = opts.regressionTypes || [];
     var idPrefix = 'goh-' + String(orderId || '').replace(/[^a-z0-9]/gi, '_') + '-' + mode;
 
     var rows = (history || []).filter(function (h) {
@@ -363,9 +368,10 @@
       }
       g._renderedLines = lines;
       var hasDetail = lines.length > 0;
+      var isRegression = regressionTypes.indexOf(String(h.ChangeType || '')) !== -1;
       var noteTxt = h.MergedNotes || noteFor(h);
       var detailId = idPrefix + '-' + idx;
-      return '<div class="goh-item' + (hasDetail ? ' has-detail' : '') + '"' +
+      return '<div class="goh-item' + (hasDetail ? ' has-detail' : '') + (isRegression ? ' goh-regression' : '') + '"' +
         (hasDetail ? ' onclick="GSOrderHistory.toggleDetail(\'' + detailId + '\')"' : '') + '>' +
         '<div class="goh-head">' +
           '<div class="goh-head-main">' +
@@ -399,6 +405,9 @@
       '.goh-rev{color:var(--gold-dk,#8C6F2A);font-weight:600}' +
       '.goh-by{color:var(--gray,#6B6B6B);font-size:12px;margin-left:8px}' +
       '.goh-item.has-detail{cursor:pointer}' +
+      '.goh-item.goh-regression .goh-type{color:#B33A3A}' +
+      '.goh-item.goh-regression.has-detail .goh-toggle{color:#B33A3A;font-weight:700;animation:goh-pulse 1.6s ease-in-out infinite}' +
+      '@keyframes goh-pulse{0%,100%{opacity:1}50%{opacity:.4}}' +
       '.goh-head{display:flex;align-items:baseline;gap:8px}' +
       '.goh-head-main{flex:1;min-width:0;line-height:1.6}' +
       '.goh-toggle{font-size:10px;color:var(--gold-dk,#8C6F2A);white-space:nowrap;flex-shrink:0}' +

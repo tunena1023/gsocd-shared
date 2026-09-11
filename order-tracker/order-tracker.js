@@ -65,6 +65,8 @@
       '.gs-trk-dot{width:64px;height:64px;display:flex;align-items:center;justify-content:center;' +
         'position:relative;filter:drop-shadow(0 0 0 rgba(201,168,76,0));transition:filter .4s}' +
       '.gs-trk-step.now .gs-trk-dot{filter:drop-shadow(0 0 8px rgba(201,168,76,.55))}' +
+      '.gs-trk-step.regression .gs-trk-dot-gold{stroke:#B33A3A}' +
+      '.gs-trk-step.regression .gs-trk-step-label{color:#B33A3A;font-weight:600}' +
       '.gs-trk-step.viewing .gs-trk-dot{filter:drop-shadow(0 0 8px rgba(107,107,107,.5))}' +
       '.gs-trk-step.clickable .gs-trk-dot{cursor:pointer}' +
       '.gs-trk-step.clickable:hover .gs-trk-dot{filter:drop-shadow(0 0 6px rgba(107,107,107,.35))}' +
@@ -108,8 +110,15 @@
     return sharedTriLen;
   }
 
-  function wedgeTotalOf(steps) {
-    return steps.filter(function (s) { return s.kind === 'wedge'; }).length;
+  /* fraccion del triangulo para una etapa dada -- ya NO cuenta cuantos
+     eventos tipo 'wedge' han pasado (eso solo podia subir). Ahora es
+     una funcion directa de en que etapa quedo la orden despues de ESE
+     evento (resultStage, que el llamador ya calculo) -- si la orden
+     retrocede a una etapa anterior, esto regresa un numero mas chico
+     tambien, y el triangulo visualmente se encoge. */
+  function triFracFor(resultStage, triangleMaxStage) {
+    if (!triangleMaxStage) return 0;
+    return Math.max(0, Math.min(1, resultStage / triangleMaxStage));
   }
 
   function render(fieldId) {
@@ -121,7 +130,9 @@
     var steps = inst.steps;
     var current = inst.current;
     var viewIndex = inst.viewIndex;
-    var wedgeTotal = wedgeTotalOf(steps);
+    var gStage = inst.gStage;
+    var sStage = inst.sStage;
+    var triangleMaxStage = inst.triangleMaxStage;
     var triLen = measureTriLen();
 
     var stageHtml;
@@ -142,16 +153,6 @@
         '<div class="gs-trk-stage-sub">' + esc(cur.detail || '') + '</div>';
     }
 
-    /* En que posicion real (dentro de TODOS los steps, no solo los
-       alcanzados) caen el paso que dispara la G y el que dispara la S.
-       Con esto se puede calcular cuanto de cada letra se ve en CADA
-       puntito, no solo encenderla de golpe en su propio paso. */
-    var gIndex = -1, sIndex = -1;
-    steps.forEach(function (s, i) {
-      if (s.kind === 'g' && gIndex === -1) gIndex = i;
-      if (s.kind === 's' && sIndex === -1) sIndex = i;
-    });
-
     var dotsHtml = steps.map(function (e, i) {
       var reached = i < current;
       var isNow = i === current - 1;
@@ -160,27 +161,18 @@
       if (isNow) cls.push('now');
       if (viewIndex === i) cls.push('viewing');
       if (reached) cls.push('clickable');
+      if (e.isRegression) cls.push('regression');
 
-      var fracForThisDot = 0;
-      if (reached || isNow) {
-        var wedgeIdx = steps.slice(0, i + 1).filter(function (s) { return s.kind === 'wedge'; }).length;
-        fracForThisDot = wedgeTotal ? Math.min(wedgeIdx, wedgeTotal) / wedgeTotal : 0;
-      }
-      var dashoffset = triLen - fracForThisDot * triLen;
-
-      /* La G se empieza a ver a medias justo en su propio paso, y
-         queda completa un paso despues (se va formando, no aparece
-         de golpe). La S hace lo mismo pero al reves: a medias un
-         paso ANTES de completarse, completa justo en su paso. */
-      var gFrac = 0, sFrac = 0;
-      if (reached || isNow) {
-        if (gIndex !== -1 && i >= gIndex) {
-          gFrac = Math.min(1, Math.max(0, (i - gIndex) * 0.5 + 0.5));
-        }
-        if (sIndex !== -1) {
-          sFrac = Math.min(1, Math.max(0, 1 - (sIndex - i) * 0.5));
-        }
-      }
+      /* El ícono de este puntito refleja la etapa en que quedo la
+         orden DESPUES de este evento (e.resultStage) -- el llamador
+         ya lo calculo caminando el historial (avanza/retrocede/se
+         queda igual segun el tipo de evento real). No es un conteo
+         que solo pueda subir. */
+      var stageHere = (reached || isNow) ? (e.resultStage || 0) : 0;
+      var triFrac = triFracFor(stageHere, triangleMaxStage);
+      var dashoffset = triLen - triFrac * triLen;
+      var gFrac = (gStage && stageHere >= gStage) ? 1 : 0;
+      var sFrac = (sStage && stageHere >= sStage) ? 1 : 0;
       /* 0/55 y 50/100: la G real ocupa del 0% al ~52% del ancho del
          lienzo (900px) y la S del ~52% al 100% (medido directo de los
          PNG). El avance tiene que moverse DENTRO de esos rangos, no
@@ -232,7 +224,10 @@
       steps: (options && options.steps) || [],
       current: (options && options.current) || 0,
       viewIndex: null,
-      containerId: containerId
+      containerId: containerId,
+      gStage: (options && options.gStage) || 0,
+      sStage: (options && options.sStage) || 0,
+      triangleMaxStage: (options && options.triangleMaxStage) || 0
     };
     render(fieldId);
   }
