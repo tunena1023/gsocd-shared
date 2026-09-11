@@ -141,6 +141,39 @@
     return s.SubOption || s.Level || '';
   }
 
+  /* Suma de minutos de un arreglo de servicios contra un catalogo de
+     tiempos (SKU -> {division, level1, level2, level3}) -- mismo
+     criterio que admin.html (Janitorial usa level2/level3 segun el
+     Level del servicio, todo lo demas usa level1). Opcional: solo
+     quien tiene el catalogo (hoy, Admin) ve esta linea -- Orders/Tech
+     llaman a este componente igual que siempre, sin nada nuevo. */
+  function catalogGet(catalog, sku) {
+    if (!catalog) return null;
+    return catalog.get ? catalog.get(String(sku || '').trim()) : catalog[String(sku || '').trim()];
+  }
+  function calcMinutesForCatalog(services, catalog) {
+    if (!catalog) return null;
+    var total = 0, any = false;
+    (services || []).forEach(function (s) {
+      var svc = catalogGet(catalog, s.SubOption);
+      if (!svc) return;
+      var minutes;
+      if (svc.division === 'Janitorial' && s.Level === 'Level 2') minutes = svc.level2;
+      else if (svc.division === 'Janitorial' && s.Level === 'Level 3') minutes = svc.level3;
+      else minutes = svc.level1;
+      if (minutes == null) return;
+      any = true;
+      total += minutes;
+    });
+    return any ? total : null;
+  }
+  function fmtMins(m) {
+    var h = Math.floor(m / 60), mm = m % 60;
+    if (h && mm) return h + 'h ' + mm + 'min';
+    if (h) return h + 'h';
+    return mm + 'min';
+  }
+
   function changeLine(icon, label, oldVal, newVal) {
     if (oldVal === newVal) return icon + ' ' + esc(label) + ': ' + esc(oldVal || '—');
     return icon + ' ' + esc(label) + ': ' + esc(oldVal || '(none)') + ' → ' + esc(newVal || '(none)');
@@ -152,7 +185,7 @@
      lo que traiga OldValue/NewValue. Misma logica sin importar el
      modo -- si algo no debe verse del cliente, se filtra el EVENTO
      completo antes de llegar aqui, no el detalle a medias. --- */
-  function detailLinesFor(h) {
+  function detailLinesFor(h, catalog) {
     var oldPay = parseServicesPayload(h.OldValue);
     var newPay = parseServicesPayload(h.NewValue);
     var oldSvcs = oldPay ? oldPay.services : null;
@@ -216,6 +249,13 @@
       });
       var dOld = (oldPay && oldPay.dirtLevel) || '', dNew = (newPay && newPay.dirtLevel) || '';
       if (dOld !== dNew && (dOld || dNew)) lines.push(changeLine('🧹', 'Condition', dOld, dNew));
+      var oldMins = calcMinutesForCatalog(oldSvcs, catalog);
+      var newMins = calcMinutesForCatalog(newSvcs, catalog);
+      if (oldMins != null && newMins != null && oldMins !== newMins) {
+        var delta = newMins - oldMins;
+        lines.push('🕐 Estimated time: ' + fmtMins(oldMins) + ' → ' + fmtMins(newMins) +
+          ' (' + (delta > 0 ? '+' : '-') + fmtMins(Math.abs(delta)) + ')');
+      }
       return lines;
     }
 
@@ -294,6 +334,7 @@
   function historyHtml(orderId, history, opts) {
     opts = opts || {};
     var mode = opts.mode === 'client' ? 'client' : 'staff';
+    var catalog = opts.timesCatalog || null;
     var idPrefix = 'goh-' + String(orderId || '').replace(/[^a-z0-9]/gi, '_') + '-' + mode;
 
     var rows = (history || []).filter(function (h) {
@@ -310,7 +351,7 @@
 
     return groups.map(function (g, idx) {
       var h = g.rep;
-      var lines = g.rows.reduce(function (acc, row) { return acc.concat(detailLinesFor(row)); }, []);
+      var lines = g.rows.reduce(function (acc, row) { return acc.concat(detailLinesFor(row, catalog)); }, []);
       /* No repetir la misma linea "antes -> despues" dos veces seguidas
          (la decision fusionada trae su propio detalle que puede calzar
          con el de la solicitud justo anterior). */
