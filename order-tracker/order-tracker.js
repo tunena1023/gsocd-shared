@@ -2,9 +2,10 @@
    gsocd-shared / order-tracker
    Tracker de pasos donde el marcador de cada puntito es un
    fragmento ACUMULATIVO del triangulo del logo real (no un punto
-   ni un diamante generico) -- cada puntito ya alcanzado muestra el
-   triangulo armado hasta ESE punto; al llegar al ultimo gajo entra
-   la G y despues la S.
+   ni un diamante generico) -- cada puntito muestra el triangulo
+   armado hasta la etapa en que quedo la orden DESPUES de ese
+   evento especifico. No es un conteo que solo pueda subir: si algo
+   deshace un avance previo, el triangulo se encoge tambien.
 
    Mismo patron que el resto de gsocd-shared: un solo <style>
    inyectado una vez, estado por fieldId (varios trackers pueden
@@ -14,33 +15,34 @@
    Uso:
      GSOrderTracker.mount('order-GS-2026-0512', 'tracker-mount', {
        steps: [
-         { label:'Creada',       stage:'Orden creada',
-           detail:'Recibida en oficina — 2 sep', kind:'wedge' },
-         { label:'Cambio pedido',stage:'Cambio solicitado',
-           detail:'El cliente pidió mover la fecha — 3 sep', kind:'wedge' },
+         { label:'Created',  stage:'Order created',
+           detail:'Received in office — Sep 2', resultStage:1 },
+         { label:'Assigned', stage:'Order assigned',
+           detail:'Assigned to Carlos Martinez — Sep 3', resultStage:2 },
          ...
-         { label:'En servicio',  stage:'En servicio',
-           detail:'Asignado: Carlos Martínez — 8 sep', kind:'g' },
-         { label:'Completada',   stage:'Orden completada',
-           detail:'Completado por: Carlos Martínez — 8 sep', kind:'s' }
+         { label:'Materials ready', stage:'Materials ready',
+           detail:'Sep 7', resultStage:4 },
+         { label:'Completed', stage:'Order completed',
+           detail:'Completed by Carlos Martinez — Sep 8', resultStage:5 }
        ],
-       current: 5   // cuantos pasos de la lista ya pasaron de verdad
+       current: 4,          // cuantos pasos de la lista ya pasaron de verdad
+       gStage: 2,            // etapa a partir de la cual entra la G
+       sStage: 5,            // etapa a partir de la cual entra la S
+       triangleMaxStage: 4   // etapa en la que el triangulo llega al 100%
      });
 
-     // cuando llega un evento nuevo de verdad (polling / websocket / etc):
-     GSOrderTracker.setCurrent('order-GS-2026-0512', 6);
+     // cuando llega un evento nuevo de verdad (el llamador ya calculo
+     // el resultStage correspondiente caminando su propio historial):
+     GSOrderTracker.setCurrent('order-GS-2026-0512', 5);
 
-   Reglas de "kind":
-     'wedge' -> cuenta como un gajo del triangulo (el numero total de
-                gajos = cuantos steps de tipo 'wedge' haya en total).
-     'g'     -> el triangulo ya deberia estar completo a estas alturas;
-                ademas entra la G.
-     's'     -> triangulo + G ya puestos; entra la S (logo completo).
+   resultStage: la etapa en que quedo la orden DESPUES de ese evento
+   puntual -- la calcula el llamador (ver STAGE_ADVANCE/STAGE_REGRESS
+   en orders/tracking.html) caminando su propio historial real.
 
    Clic en un puntito YA PASADO muestra su detalle abajo sin mover el
-   avance real de la orden (se ve la etiqueta "Revisando un paso
-   anterior"). Avanzar el progreso real (setCurrent) siempre regresa
-   la vista al paso actual.
+   avance real de la orden (se ve la etiqueta "Viewing a past step").
+   Avanzar el progreso real (setCurrent) siempre regresa la vista al
+   paso actual.
 ============================================================ */
 (function () {
   'use strict';
@@ -139,12 +141,12 @@
     if (viewIndex !== null) {
       var ev = steps[viewIndex];
       stageHtml =
-        '<div class="gs-trk-viewing-tag">Revisando un paso anterior</div>' +
+        '<div class="gs-trk-viewing-tag">Viewing a past step</div>' +
         '<div class="gs-trk-stage-name">' + esc(ev.stage) + '</div>' +
         '<div class="gs-trk-stage-sub">' + esc(ev.detail || '') + '</div>';
     } else if (current === 0) {
       stageHtml =
-        '<div class="gs-trk-stage-name">Todavía no arranca</div>' +
+        '<div class="gs-trk-stage-name">Not started yet</div>' +
         '<div class="gs-trk-stage-sub"></div>';
     } else {
       var cur = steps[current - 1];
