@@ -47,8 +47,9 @@
          mano (Developer > Catalog). Servicios sin categoria caen en
          "Uncategorized", nunca se pierden. */
       '.gs-sp-cat-group{border:1px solid var(--border,#E0D9CC);margin-bottom:8px;border-radius:4px;overflow:hidden}' +
-      '.gs-sp-cat-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer;background:var(--white,#fff)}' +
+      '.gs-sp-cat-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer;background:#F7F6F3}' +
       '.gs-sp-cat-header.has-selected{background:#FEFBF3}' +
+      '.gs-sp-cat-header.open{background:#EDE7D8}' +
       '.gs-sp-cat-name{font-size:13px;font-weight:600}' +
       '.gs-sp-cat-count{font-size:10px;color:var(--gold-dk,#8C6F2A);font-weight:700;background:#F0E4C4;padding:2px 8px;border-radius:10px;margin-left:8px}' +
       '.gs-sp-cat-arrow{font-size:11px;color:var(--gray,#6B6B6B);transition:transform .2s;flex-shrink:0}' +
@@ -155,7 +156,7 @@
       var isOpen = q ? true : !!inst.openCats[cat];
       var gridClass = inst.mode === 'levels' ? 'gs-sp-row-grid' : 'gs-sp-chip-grid';
       return '<div class="gs-sp-cat-group">' +
-        '<div class="gs-sp-cat-header' + (count ? ' has-selected' : '') + '" data-cat="' + escapeAttr(cat) + '">' +
+        '<div class="gs-sp-cat-header' + (count ? ' has-selected' : '') + (isOpen ? ' open' : '') + '" data-cat="' + escapeAttr(cat) + '">' +
         '<span class="gs-sp-cat-name">' + escapeHtml(cat) + (count ? '<span class="gs-sp-cat-count">' + count + '</span>' : '') + '</span>' +
         '<span class="gs-sp-cat-arrow' + (isOpen ? ' open' : '') + '">\u25B8</span>' +
         '</div>' +
