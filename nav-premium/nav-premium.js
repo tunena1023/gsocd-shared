@@ -158,5 +158,32 @@
     if (refreshFns[containerId]) refreshFns[containerId]();
   }
 
-  window.GSNavPremium = { init: init, refresh: refresh };
+  /* Parte GENERICA de "cambiar de pestana sin recargar": marca
+     [data-view=tab] como activa y muestra solo #panel-<tab> (el
+     resto de .panel se ocultan). Esto es todo lo que de verdad se
+     repite entre paginas -- los redirects propios de cada app
+     (ej. admin.html: "assigned" en realidad es "active" con un
+     sub-tab abierto) y los callbacks de "se acaba de abrir este tab"
+     se quedan en el showTab() de cada pagina, que llama a esto
+     adentro en vez de repetir la logica.
+
+     Uso tipico en cada pagina:
+       function showTab(tab) {
+         if (tab === 'algunAlias') { showTab('otroTab'); ...; return; }
+         GSNavPremium.showPanel(tab);
+         if (tab === 'x' && typeof onXOpened === 'function') onXOpened();
+       }
+  */
+  function showPanel(tab) {
+    document.querySelectorAll('[data-view]').forEach(function (t) {
+      t.classList.toggle('active', t.dataset.view === tab);
+    });
+    document.querySelectorAll('.panel').forEach(function (p) {
+      p.classList.remove('active');
+    });
+    var panel = document.getElementById('panel-' + tab);
+    if (panel) panel.classList.add('active');
+  }
+
+  window.GSNavPremium = { init: init, refresh: refresh, showPanel: showPanel };
 })();
