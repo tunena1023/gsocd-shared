@@ -139,7 +139,24 @@
       var r1 = activeEl.getBoundingClientRect(), r2 = row.getBoundingClientRect();
       x = Math.min(Math.max(r1.left - r2.left, 0), row.scrollWidth - logoW);
     }
+
+    /* Si algo de afuera cambia el ancho de una pestana DESPUES de
+       este init (tipico: un contador que llega en 0 y luego se
+       actualiza a un numero real, cambiando cuantos digitos tiene),
+       la linea dorada se queda mal puesta -- no se entera sola de
+       que el layout cambio. GSNavPremium.refresh(containerId) vuelve
+       a poner la linea en la pestana activa actual, sin tocar el
+       rebote del logo (que ya se recalcula solo cada cuadro). */
+    refreshFns[containerId] = function () {
+      var current = row.querySelector('.t.active') || row.querySelector('.t');
+      if (current) moveU(current);
+    };
   }
 
-  window.GSNavPremium = { init: init };
+  var refreshFns = {};
+  function refresh(containerId) {
+    if (refreshFns[containerId]) refreshFns[containerId]();
+  }
+
+  window.GSNavPremium = { init: init, refresh: refresh };
 })();
