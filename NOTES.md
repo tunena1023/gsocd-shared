@@ -151,7 +151,7 @@ nuevo apuntando a ese commit, 3) actualizar el `<script src>` en CADA
 HTML que lo consume (buscar `gsocd-shared@vX.X.X/nombre-componente/` en
 los 3 repos consumidores).
 
-## En local, sin subir (12/09/2026): unificar Office Access en order-form-premium
+## SUBIDO Y DESPLEGADO (12/09/2026): unificar Office Access en order-form-premium
 
 `order-form-premium.js`: se agregó `officeAccessHtml(dom, opts)`,
 `setOfficeNeed(dom, yes)`, `getOfficeNeedValue(dom)`,
@@ -182,14 +182,13 @@ Cambios de contenido pedidos por el dueño:
 Unit) — sin `compact`, mantiene el tamaño original del flujo de crear
 orden.
 
-Tag creado localmente: **v1.25.0** (commit `6298d16` reescrito con
-`--amend`, ver `git log`). **Pendiente: push a origin + push del tag** —
-no se ha hecho, sigue en el sandbox local hasta que el dueño autorice
-explícitamente subirlo. Esto es una librería compartida: afecta a los 3
-portales a la vez, así que el push aquí es más delicado que un cambio de
-un solo repo — conviene confirmar por separado antes de subirlo, aunque
-ya esté aprobado el contenido.
+Tag **v1.25.0** subido y confirmado en vivo (GitHub y jsDelivr) el
+12/09/2026 — se autorizó explícitamente después de que Admin y Orders
+quedaran listos y aprobados. Se subió primero (antes que Admin/Orders,
+que ya referencian este tag en su `<script src>`).
 
 Probado con jsdom (16/16): render normal y compact, título, quitar
 label, placeholder nuevo, toggle, candado, `getOfficeNeedNotes` regresa
-vacío con el toggle apagado, y el listener `onOfficeNeedChange`.
+vacío con el toggle apagado, y el listener `onOfficeNeedChange`. Después
+de subir, se confirmó con `raw.githubusercontent.com` que el contenido
+real del tag en GitHub trae el texto nuevo.
