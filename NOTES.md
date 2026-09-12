@@ -127,3 +127,69 @@ habían quedado en una versión vieja del componente sin el acordeón.
 - 404 de `Logo.jpg` / `NavBackground.jpg` en Orders (`/api/site-image`) —
   pendiente de que el dueño confirme el nombre real de esos archivos en la
   raíz del drive de SharePoint (Onlineorders).
+# NOTES.md — Cómo se trabaja en este proyecto
+
+Este repo no tenía NOTES.md propio todavía — se crea ahora (12/09/2026)
+porque por primera vez se editó directamente, no solo se consumió desde
+Admin/Orders/Tech. Lee también el NOTES.md de cualquiera de los otros 3
+repos para las reglas generales de trabajo (nada se sube sin "dale"
+explícito, minis antes de UI, etc.) — son las mismas aquí.
+
+## Cómo se versiona este repo (importante, ya se aprendió una vez)
+
+Los tags son de TODO el repo, no por componente. Antes de crear un tag
+nuevo, correr `git tag --sort=-v:refname | head -1` para saber cuál es
+el más alto de verdad — NO asumir que el siguiente número es "uno más"
+que el tag que trae puesto el componente que estás tocando (otros
+componentes pueden haber avanzado más adelante mientras el tuyo se quedó
+quieto). Ejemplo real: `order-form-premium` estaba en v1.19.0 pero el
+repo ya iba en v1.24.0 por cambios a `nav-premium`/`gallery-groups` — el
+tag correcto para el siguiente cambio fue v1.25.0, no v1.20.0.
+
+Subir un fix implica: 1) editar el archivo en `main`, 2) crear un tag
+nuevo apuntando a ese commit, 3) actualizar el `<script src>` en CADA
+HTML que lo consume (buscar `gsocd-shared@vX.X.X/nombre-componente/` en
+los 3 repos consumidores).
+
+## En local, sin subir (12/09/2026): unificar Office Access en order-form-premium
+
+`order-form-premium.js`: se agregó `officeAccessHtml(dom, opts)`,
+`setOfficeNeed(dom, yes)`, `getOfficeNeedValue(dom)`,
+`getOfficeNeedNotes(dom)` y `onOfficeNeedChange(dom, fn)`. Antes la
+tarjeta "Need anything from the office?" vivía duplicada 4 veces (2 en
+el flujo de crear orden de Admin/Orders, 2 en "Add Unit" de ambos), cada
+una con texto ligeramente distinto y sin forma de que un cambio se
+reflejara en las 4 a la vez. El dueño pidió unificarlo explícitamente
+("por que motivo estaria pagando por ti... si es para hacer todo el
+trabajo y dejarlo bien conectado en lugar de hacer parches") — no fue
+decisión unilateral.
+
+`onOfficeNeedChange` existe porque Orders/create-order hace algo que es
+SOLO SUYO al prender el toggle (renombra "Entry time" a "Office
+availability time" en otro campo de esa pantalla) — en vez de que el
+shared conozca esa lógica ajena, la página se suscribe con un callback.
+
+Cambios de contenido pedidos por el dueño:
+- Título: "Need anything from the office?" → "Do we need anything from
+  you?"
+- Se quitó el label de adentro de la caja ("What do we need from the
+  office?") — el placeholder sube a ocupar ese espacio.
+- Nuevos ejemplos en el placeholder: "Access keys, materials, special
+  instructions..." en vez de "Keys for the mailroom, gate code, access
+  to the roof...".
+
+`opts.compact=true` trae la versión delgada (aprobada en el mini de Add
+Unit) — sin `compact`, mantiene el tamaño original del flujo de crear
+orden.
+
+Tag creado localmente: **v1.25.0** (commit `6298d16` reescrito con
+`--amend`, ver `git log`). **Pendiente: push a origin + push del tag** —
+no se ha hecho, sigue en el sandbox local hasta que el dueño autorice
+explícitamente subirlo. Esto es una librería compartida: afecta a los 3
+portales a la vez, así que el push aquí es más delicado que un cambio de
+un solo repo — conviene confirmar por separado antes de subirlo, aunque
+ya esté aprobado el contenido.
+
+Probado con jsdom (16/16): render normal y compact, título, quitar
+label, placeholder nuevo, toggle, candado, `getOfficeNeedNotes` regresa
+vacío con el toggle apagado, y el listener `onOfficeNeedChange`.
