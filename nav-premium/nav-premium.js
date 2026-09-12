@@ -134,7 +134,11 @@
       });
     });
     var activeEl = row.querySelector('.t.active') || row.querySelector('.t');
-    if (activeEl) moveU(activeEl);
+    if (activeEl) {
+      moveU(activeEl);
+      var r1 = activeEl.getBoundingClientRect(), r2 = row.getBoundingClientRect();
+      x = Math.min(Math.max(r1.left - r2.left, 0), row.scrollWidth - logoW);
+    }
   }
 
   window.GSNavPremium = { init: init };
