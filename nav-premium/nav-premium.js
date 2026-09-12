@@ -48,7 +48,8 @@
     var attrs = t.href
       ? 'href="' + t.href + '"'
       : 'href="javascript:void(0)" onclick="' + (t.onclick || '') + '"';
-    return '<a class="t' + (t.active ? ' active' : '') + '" data-i="' + i + '" ' + attrs + '>' +
+    var idAttr = t.id ? ' id="' + t.id + '"' : '';
+    return '<a class="t' + (t.active ? ' active' : '') + '" data-i="' + i + '"' + idAttr + ' ' + attrs + '>' +
       t.label + (t.badgeHtml || '') + '</a>';
   }
 
