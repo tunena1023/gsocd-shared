@@ -49,7 +49,8 @@
       ? 'href="' + t.href + '"'
       : 'href="javascript:void(0)" onclick="' + (t.onclick || '') + '"';
     var idAttr = t.id ? ' id="' + t.id + '"' : '';
-    return '<a class="t' + (t.active ? ' active' : '') + '" data-i="' + i + '"' + idAttr + ' ' + attrs + '>' +
+    var dataAttr = t.dataView ? ' data-view="' + t.dataView + '"' : '';
+    return '<a class="t' + (t.active ? ' active' : '') + '" data-i="' + i + '"' + idAttr + dataAttr + ' ' + attrs + '>' +
       t.label + (t.badgeHtml || '') + '</a>';
   }
 
