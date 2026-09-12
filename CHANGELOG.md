@@ -228,3 +228,146 @@ el primero (probablemente `Admingsocd.com`, para probar el proceso completo con 
   columnas de v1.10.0, pero el click de cada header solo volteaba su
   propio estado, sin cerrar las demas). Ahora abrir una categoria cierra
   las otras -- solo una abierta a la vez, encontrado al construir Recurring.
+
+## v1.12.0 — 2026-09-10
+
+- Nuevo componente compartido: **order-tracker**. El marcador de cada paso
+  es un fragmento acumulativo del triangulo real del logo (no un punto ni
+  un diamante generico) -- cada puntito ya alcanzado muestra el triangulo
+  armado hasta ese punto; al completarse entra la G y despues la S,
+  tambien de forma progresiva.
+
+## v1.13.0 — 2026-09-10
+
+- **order-history**: acepta un `timesCatalog` opcional (SKU ->
+  {division, level1, level2, level3}) en options. Cuando se pasa,
+  cualquier evento con snapshot de servicios viejo/nuevo muestra ademas
+  "Estimated time: antes -> despues (+/-delta)". Sin el catalogo (Orders/
+  Tech, que no tienen los tiempos de Developer cargados), el componente
+  se comporta exactamente igual que antes.
+
+## v1.14.0 — 2026-09-10
+
+- **order-tracker**: reemplaza el conteo de eventos tipo "wedge" (solo
+  podia subir) por un modelo de ETAPA explicita por paso (`resultStage`,
+  que el llamador calcula caminando el historial). Esto permite que el
+  icono RETROCEDA de verdad cuando algo deshace un avance previo.
+
+## v1.15.0 — 2026-09-10
+
+- **order-tracker**: traducir a ingles todo el texto visible que se habia
+  ido en espanol por error ("Todavia no arranca" -> "Not started yet",
+  etc). Toda la app real esta en ingles, esto era la unica pieza suelta.
+
+## v1.16.0 — 2026-09-10
+
+- Nuevo componente compartido: **estimated-time**. Misma logica exacta de
+  calculo que ya usaba admin.html (Janitorial usa level1/2/3 segun el
+  Level del servicio, todo lo demas usa level1), sacada a pieza
+  compartida para que Orders la use sin reescribirla por su cuenta.
+
+## v1.17.0 — 2026-09-10
+
+- Nuevo componente compartido: **order-form-premium**. Formato OFICIAL
+  del flujo de orden nueva del lado del cliente -- tarjetas premium con
+  tono progresivo negro/bronce/dorado, el triangulo real del logo
+  girando, y el selector de division con destellos/herramientas
+  animadas usando vectores reales del negocio.
+
+## v1.18.0 — 2026-09-10
+
+- **service-picker**: las categorias ahora usan el mismo tono beige
+  calido (#F7F6F3) que las tarjetas de ordenes en Admin, en vez de
+  blanco liso -- y se ponen mas oscuras (#EDE7D8) cuando estan abiertas.
+
+## v1.19.0 — 2026-09-10
+
+- **order-form-premium**: agregar `.gs-ofp-unit-header` y
+  `.gs-ofp-add-unit-link` (se habian quedado solo en customer.html,
+  ahora en el compartido para que Admin tambien las tenga).
+
+## v1.20.0 — 2026-09-11
+
+- Nuevo componente compartido: **nav-premium**. Formato OFICIAL de la
+  barra de navegacion superior -- tarjeta dorada con el logo real de GS
+  Solutions flotando y rebotando (como screensaver de DVD) dentro,
+  destellos animados, y pestanas con linea subrayada deslizante.
+  `GSNavPremium.init(containerId, tabs)` construye toda la tarjeta;
+  cada pestana acepta `label` + (`href` o `onclick`) + `active` +
+  `badgeHtml` opcional.
+
+### v1.20.1 — 2026-09-11
+- **nav-premium**: agregar soporte de `id` personalizado por pestana
+  (necesario para tracking.html, que maneja processing/history con su
+  propio JS).
+
+### v1.20.2 — 2026-09-11
+- **nav-premium**: agregar soporte de `dataView` por pestana (necesario
+  para employee.html y supervisor.html de Tech, que buscan sus pestanas
+  por ese atributo).
+
+### v1.20.3 — 2026-09-11
+- **nav-premium**: BUG REAL -- el logo rebotaba mal cuando el ancho real
+  del renglon de pestanas cambiaba DESPUES de cargar la pagina (ej. el
+  tab de Developer en Admin, que arranca oculto y aparece solo si el
+  permiso se confirma; o los contadores de Review, que cambian de
+  digitos).
+
+### v1.20.4 — 2026-09-11
+- **nav-premium**: BUG REAL -- el logo siempre arrancaba cerca de la
+  primera pestana (Approvals) sin importar cual pestana estuviera
+  realmente activa al cargar la pagina.
+
+## v1.21.0 — 2026-09-11
+
+- Nuevo componente compartido: **gallery-groups**. Formato OFICIAL para
+  mostrar fotos/videos agrupados por orden -- cada orden es una tarjeta
+  desplegable, con su cuadricula de miniaturas adentro.
+
+### v1.21.1 — 2026-09-11
+- **gallery-groups**: agregar `opts.openOrderId` -- esa orden llega ya
+  abierta y con scroll automatico hacia ella, las demas quedan cerradas.
+
+## v1.22.0 — 2026-09-11
+
+- **nav-premium**: el contador de Approvals/Review/Active ahora se ve en
+  cualquier pagina de Admin, no solo en admin.html.
+
+### v1.22.1 — 2026-09-11
+- **nav-premium**: BUG REAL -- el estilo de `.tab-count` (la burbuja
+  dorada del numero) nunca se aplicaba en ninguna pagina -- se le habia
+  puesto por error el nombre de clase de OTRO componente compartido
+  (`.gs-ofp-tab`, de order-form-premium).
+
+### v1.22.2 — 2026-09-11
+- **nav-premium**: agregar `GSNavPremium.refresh(containerId)` --
+  reacomoda la linea dorada en la pestana activa actual, para cuando
+  algo de afuera le cambia el ancho a una pestana DESPUES de `init()`
+  (ej. un contador que arranca en 0 y luego se actualiza al numero real).
+
+## v1.23.0 — 2026-09-12
+
+- **nav-premium**: agregar `GSNavPremium.showPanel(tab)` -- la parte
+  GENERICA de cambiar de pestana sin recargar ni parpadear (marca
+  `[data-view]` activo, muestra solo `#panel-<tab>` y oculta el resto).
+  Es lo unico que de verdad se repetia igual entre paginas; los
+  redirects propios de cada app y los callbacks de "se abrio este tab"
+  se quedan en el `showTab()` de cada pagina, que ahora llama a esto
+  adentro en vez de repetir la logica de prender/apagar clases a mano.
+  Nace de fusionar los 4 paneles sueltos de Admin (Gallery, QuickBooks,
+  Recurring, Developer) dentro de admin.html en un solo archivo.
+
+## v1.24.0 — 2026-09-12
+
+- **nav-premium**: agregar `GSNavPremium.applyChrome()` -- inyecta las
+  dimensiones OFICIALES del `<nav>` de arriba (el que trae el logo, NO
+  la barra dorada de pestanas -- esa ya era compartida desde v1.20.0):
+  padding, alto minimo, tamano del logo. Antes cada portal (Admin,
+  Orders, Tech) traia estos valores copiados a mano en su propio CSS, y
+  se habian desincronizado sin que nadie se diera cuenta (Admin en
+  60px/48px de logo, Orders en 72px/80px, Tech en 48px sin min-height).
+  Ahora viven en un solo lugar: se llama una vez al cargar la pagina
+  (`GSNavPremium.applyChrome()`), inyecta un `<style>` una sola vez
+  (llamadas repetidas no duplican), y cada portal quita sus propias
+  reglas locales de `nav`/`.logo-diamond`/`.nav-logo img` para
+  depender de esta en vez de mantener su propia copia.

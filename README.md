@@ -44,6 +44,7 @@ use, uno a la vez — nunca los 3 al mismo tiempo sin haber probado primero.
 | Lightbox de fotos | [`lightbox/`](./lightbox) | Ver fotos en pantalla completa con flechas, sin descargarlas ni navegar a otra pestaña |
 | Reloj y calendario | [`date-time-picker/`](./date-time-picker) | Elegir fecha y/o hora con el estilo oficial ya usado en toda la app |
 | Selector de servicios | [`service-picker/`](./service-picker) | Buscador + chips o filas con niveles L1/L2/L3, para elegir servicios de un catálogo |
+| Barra de navegación | [`nav-premium/`](./nav-premium) | Tarjeta dorada de pestañas + `<nav>` con logo -- usada por las 3 apps |
 
 Los 3 quedan listos para conectar — todavía ningún portal usa el reloj/calendario ni el selector
 de servicios (solo Tech está conectado al lightbox por ahora).
@@ -86,6 +87,53 @@ const html = GSOrderHistory.html(orderId, history, { mode: 'client' });
 ```
 
 `history` es el arreglo COMPLETO tal cual viene del backend -- este componente nunca lo trunca por fecha ni por contexto (quien llama nunca debe recortarlo antes de mandarlo).
+
+## nav-premium
+
+Formato OFICIAL de la barra de navegación superior -- tarjeta dorada con el logo real de GS Solutions flotando y rebotando dentro, destellos animados, y pestañas con línea subrayada deslizante. La usan las 3 apps (Admin, Orders, Tech) para su barra de pestañas.
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@v1.24.0/nav-premium/nav-premium.js"></script>
+```
+
+**`GSNavPremium.init(containerId, tabs)`** -- construye la tarjeta dorada completa dentro de `<div id="containerId"></div>`. Cada pestaña acepta:
+
+```js
+GSNavPremium.init('gsNav', [
+  { label: 'New Order', href: 'customer.html', active: true },
+  { label: 'Templates', dataView: 'templates', onclick: "showTab('templates')" },
+  { label: 'Approvals', badgeHtml: '<span class="tab-count" id="appr-count">0</span>' }
+]);
+```
+- `label` (obligatorio)
+- `href` **o** `onclick` (string de JS) -- nunca ambos
+- `active` -- cuál pestaña corresponde a la página actual
+- `id` -- id personalizado del elemento (para páginas con lógica propia, ej. tracking.html)
+- `dataView` -- para páginas que buscan su pestaña por `[data-view]` (Tech)
+- `badgeHtml` -- HTML crudo de un contador, se agrega tal cual después del texto
+
+**`GSNavPremium.showPanel(tab)`** -- cambia de pestaña SIN recargar ni parpadear: marca `[data-view="tab"]` como activo y muestra solo `#panel-tab` (oculta los demás `.panel`). Es la parte genérica de cambiar de vista en una página de un solo archivo con varios paneles fusionados (ej. admin.html: Approvals/Review/Gallery/Developer/etc, todos viven en el mismo archivo). El `showTab()` propio de cada página llama a esto adentro, y encima le agrega sus propios redirects o callbacks:
+
+```js
+function showTab(tab) {
+  if (tab === 'assigned') { showTab('active'); showActiveSubTab('employee'); return; } // redirect propio
+  GSNavPremium.showPanel(tab); // parte generica
+  if (tab === 'schedule') onScheduleTabOpened(); // callback propio
+}
+```
+
+**`GSNavPremium.applyChrome()`** -- inyecta las dimensiones OFICIALES del `<nav>` de arriba (el que trae el logo, distinto de la tarjeta dorada de pestañas): padding, alto mínimo, tamaño del logo. Se llama una vez al arrancar la página; inyecta un `<style>` una sola vez aunque se llame varias veces. Con esto, ningún portal necesita repetir estos valores a mano en su propio CSS -- si hay que ajustar el tamaño, se cambia aquí una vez y las 3 apps se actualizan solas la próxima vez que suban esa versión:
+
+```js
+if (client) {
+  GSNavPremium.applyChrome();
+  // ... resto del arranque de la pagina
+}
+```
+
+Para que `applyChrome()` funcione, el HTML de cada página debe usar estos nombres: `<nav>` (el contenedor), y el logo dentro de `.nav-logo img` o con clase `.logo-diamond` -- si el logo usa otro selector, `applyChrome()` no lo va a alcanzar.
+
+**`GSNavPremium.refresh(containerId)`** -- reacomoda la línea dorada debajo de la pestaña activa actual. Se llama después de que algo de afuera le cambia el ancho a una pestaña YA renderizada (ej. un contador que arranca en 0 y luego se actualiza al número real).
 
 ## order-badges
 
