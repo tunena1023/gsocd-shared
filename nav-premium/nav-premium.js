@@ -84,9 +84,19 @@
     var logoW = 30, logoH = 28;
     var x = 14, y = 8, vx = 0.14, vy = 0.1, rot = 0;
 
+    /* Antes esto solo se recalculaba al cargar y al cambiar el
+       tamano de ventana -- pero el ancho real del renglon tambien
+       cambia SOLO cuando aparece el tab de Developer (tarda en
+       confirmar permiso) o cuando los contadores de Review cambian
+       de digitos. Un ResizeObserver vigila el ancho real en todo
+       momento, sin importar por que cambio. */
     function syncDecorWidth() { decor.style.width = row.scrollWidth + 'px'; }
     syncDecorWidth();
-    window.addEventListener('resize', syncDecorWidth);
+    if (window.ResizeObserver) {
+      new ResizeObserver(syncDecorWidth).observe(row);
+    } else {
+      window.addEventListener('resize', syncDecorWidth);
+    }
     scrollEl.addEventListener('scroll', function () {
       decor.style.transform = 'translateX(-' + scrollEl.scrollLeft + 'px)';
     });
