@@ -13,6 +13,9 @@
      <script>
        GSGalleryGroups.render('myGallery', groups, {
          emptyMessage: 'No photos yet.',
+         openOrderId: 'GS-1001-1013', // opcional: esa orden llega ya
+                                       // abierta y con scroll automatico;
+                                       // las demas quedan cerradas
          onPhotoClick: function(groupIndex, photoIndex, group) {
            GSLightbox.open(group.photos, photoIndex);
          }
@@ -69,9 +72,10 @@
           '<img src="' + escAttr(p.downloadUrl) + '" loading="lazy" alt="">' +
           '</div>';
       }).join('');
+      var isOpen = opts.openOrderId && g.orderId === opts.openOrderId;
 
       return '' +
-        '<div class="gs-gal-grp">' +
+        '<div class="gs-gal-grp' + (isOpen ? ' open' : '') + '"' + (isOpen ? ' id="gs-gal-open-target"' : '') + '>' +
           '<div class="gs-gal-grp-header">' +
             '<span class="gs-gal-grp-order">' + esc(g.orderId) + '</span>' +
             '<span class="gs-gal-grp-count">' + count + '</span>' +
@@ -83,6 +87,11 @@
           '<div class="gs-gal-grp-body"><div class="gs-gal-grid">' + photosHtml + '</div></div>' +
         '</div>';
     }).join('');
+
+    if (opts.openOrderId) {
+      var target = document.getElementById('gs-gal-open-target');
+      if (target && target.scrollIntoView) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 
     container.querySelectorAll('.gs-gal-grp-header').forEach(function (header) {
       header.addEventListener('click', function () {
