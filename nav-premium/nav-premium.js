@@ -185,5 +185,26 @@
     if (panel) panel.classList.add('active');
   }
 
-  window.GSNavPremium = { init: init, refresh: refresh, showPanel: showPanel };
+  /* Dimensiones OFICIALES del <nav> de arriba (el que trae el logo,
+     NO la barra dorada de pestanas -- esa ya vive en gs-navcard).
+     Antes cada pagina (Admin/Orders/Tech) traia sus propios valores
+     de padding/alto/tamano de logo copiados a mano, y se
+     desincronizaban entre si sin que nadie se diera cuenta. Ahora
+     viven en un solo lugar -- si hay que cambiar el tamano, se
+     cambia aqui UNA vez y las 3 paginas se actualizan solas la
+     proxima vez que se suba esta version del componente. */
+  var CHROME_STYLE_ID = 'gs-nav-chrome-style';
+  function applyChrome() {
+    if (document.getElementById(CHROME_STYLE_ID)) return;
+    var s = document.createElement('style');
+    s.id = CHROME_STYLE_ID;
+    s.textContent =
+      'nav { padding: 12px 40px !important; min-height: 72px !important; }' +
+      '.logo-diamond { height: 80px !important; width: auto !important; object-fit: contain !important; }' +
+      '.nav-logo img { height: 80px !important; object-fit: contain !important; }' +
+      '@media (max-width: 768px) { nav { padding: 0 20px !important; } }';
+    document.head.appendChild(s);
+  }
+
+  window.GSNavPremium = { init: init, refresh: refresh, showPanel: showPanel, applyChrome: applyChrome };
 })();
