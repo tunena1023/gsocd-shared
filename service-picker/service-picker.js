@@ -95,8 +95,21 @@
     return list;
   }
 
+  /* Janitorial es la unica division con niveles (L1/L2/L3) de verdad
+     -- las demas siempre fueron un simple toggle. Antes esto se
+     decidia por el modo GLOBAL del picker (inst.mode), asumiendo que
+     TODO lo que se muestra es de una sola division a la vez. Con
+     crossDivision (Admin ya lo usaba; Orders lo suma para su pestana
+     "Mixed") un mismo picker puede mostrar Janitorial MEZCLADO con
+     otras divisiones -- se decide por cada servicio individual segun
+     SU PROPIA division, para que Janitorial siempre tenga sus
+     niveles sin importar que mas se este mostrando junto. */
+  function isLeveledItem(s) {
+    return String(s.division || '').toLowerCase() === 'janitorial';
+  }
+
   function itemHtml(inst, s) {
-    if (inst.mode === 'levels') {
+    if (isLeveledItem(s)) {
       var sel = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
       var lvl = sel ? inst.svcLevel[svcKey(inst.propertyType, s.serviceName)] : null;
       var levels = ['Level 1', 'Level 2', 'Level 3'];
@@ -112,15 +125,15 @@
   }
 
   function bindItemEvents(inst, pickerId, scopeEl) {
-    if (inst.mode === 'levels') {
-      Array.prototype.forEach.call(scopeEl.querySelectorAll('.gs-sp-lvl-btn'), function (btn) {
-        btn.addEventListener('click', function () { pickLevel(pickerId, btn.dataset.sku, btn.dataset.level); });
-      });
-    } else {
-      Array.prototype.forEach.call(scopeEl.querySelectorAll('.gs-sp-chip-btn'), function (btn) {
-        btn.addEventListener('click', function () { toggleChip(pickerId, btn.dataset.sku); });
-      });
-    }
+    /* Se enganchan los 2 tipos de evento siempre, sin importar
+       inst.mode -- una pantalla mezclada puede tener botones de
+       nivel Y chips de toggle al mismo tiempo. */
+    Array.prototype.forEach.call(scopeEl.querySelectorAll('.gs-sp-lvl-btn'), function (btn) {
+      btn.addEventListener('click', function () { pickLevel(pickerId, btn.dataset.sku, btn.dataset.level); });
+    });
+    Array.prototype.forEach.call(scopeEl.querySelectorAll('.gs-sp-chip-btn'), function (btn) {
+      btn.addEventListener('click', function () { toggleChip(pickerId, btn.dataset.sku); });
+    });
   }
 
   function isSelected(inst, s) {
