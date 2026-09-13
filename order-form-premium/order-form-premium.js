@@ -37,7 +37,7 @@
     if (document.getElementById(STYLE_ID)) return;
     var tag = document.createElement('style');
     tag.id = STYLE_ID;
-    tag.textContent = ".gs-ofp-card { position: relative; overflow: hidden; border-radius: 8px; padding: 30px 32px 26px; margin-bottom: 24px;\n    box-shadow: 0 2px 4px rgba(0,0,0,.35), 0 14px 30px rgba(0,0,0,.28), 0 30px 60px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.08); }\n  .gs-ofp-card-1 { background: linear-gradient(155deg,#201c17 0%,#100e0c 60%,#171310 100%); }\n  .gs-ofp-card-2 { background: linear-gradient(155deg,#3a2c17 0%,#2b2010 60%,#372a15 100%); }\n  .gs-ofp-card-3 { background: linear-gradient(155deg,#7a5a22 0%,#634718 60%,#70521e 100%); }\n  .gs-ofp-tri { position: absolute; pointer-events: none; z-index: 1; animation: gs-ofp-spin 80s linear infinite; }\n  @keyframes gs-ofp-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }\n  @keyframes gs-ofp-spinrev { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }\n  .gs-ofp-name { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 24px; color: #fff; position: relative; z-index: 2; }\n  .gs-ofp-lines { font-size: 13px; color: #C9C4B8; line-height: 1.7; margin-top: 10px; position: relative; z-index: 2; }\n  .gs-ofp-email { font-size: 11.5px; color: #E8CE85; margin-top: 8px; position: relative; z-index: 2; }\n  .gs-ofp-goldbase { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; overflow: hidden; z-index: 2;\n    background: linear-gradient(90deg,transparent 0%,#8C6F2A 12%,#E8CE85 50%,#8C6F2A 88%,transparent 100%); }\n  .gs-ofp-goldbase::after { content:''; position:absolute; top:0; left:-35%; width:35%; height:100%;\n    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.85) 50%, transparent 100%);\n    animation: gs-ofp-shimmer 7s ease-in-out infinite; }\n  .gs-ofp-card-3 .gs-ofp-goldbase { background: linear-gradient(90deg,transparent 0%,#FFF3D6 12%,#fff 50%,#FFF3D6 88%,transparent 100%); }\n  @keyframes gs-ofp-shimmer { 0% { left: -35%; } 100% { left: 135%; } }\n  .gs-ofp-tabsrow { display: flex; justify-content: space-between; position: relative; z-index: 2; }\n  .gs-ofp-tab { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; cursor: pointer;\n    color: rgba(255,243,214,.55); padding-bottom: 14px; transition: color .25s; }\n  .gs-ofp-tab.active { color: #FFF8E8; }\n  .gs-ofp-uline-track { height: 1px; background: rgba(255,255,255,.22); position: relative; z-index: 2; }\n  .gs-ofp-uline-active { position: absolute; top: -1px; height: 2px; background: #FFF3D6; transition: left .3s cubic-bezier(.22,.9,.28,1), width .3s cubic-bezier(.22,.9,.28,1); }\n  .gs-ofp-deco { position: absolute; pointer-events: none; z-index: 1; opacity: 0; }\n  .gs-ofp-deco svg { width: 100%; height: 100%; }\n  @keyframes gs-ofp-twinkle { 0%, 100% { opacity: 0; transform: scale(.6) rotate(0deg); } 50% { opacity: var(--peak,.85); transform: scale(1) rotate(var(--rot,0deg)); } }\n  .gs-ofp-unitrow { display: flex; align-items: flex-end; gap: 26px; margin-bottom: 20px; }\n  .gs-ofp-unitfield { flex: 1; min-width: 0; }\n  .gs-ofp-unitfield-label { display: flex; align-items: center; gap: 6px; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray); font-weight: 600; margin-bottom: 8px; }\n  .gs-ofp-unitfield-label svg { width: 14px; height: 14px; color: var(--gold-dk); flex-shrink: 0; }\n  .gs-ofp-unitfield input { width: 100%; border: none; border-bottom: 1.5px solid var(--border); padding: 6px 2px 8px;\n    font-size: 15px; font-family: 'Inter', sans-serif; color: var(--black); background: transparent; outline: none; transition: border-color .2s; }\n  .gs-ofp-unitfield input:focus { border-bottom-color: var(--gold); }\n  .gs-ofp-unitline { flex-wrap: wrap; }\n  .gs-ofp-unitline-num { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--gold-dk); width: 18px; flex-shrink: 0; padding-bottom: 8px; }\n  .gs-ofp-unitselect {\n    width: 100%; border: none; border-bottom: 1.5px solid var(--border); padding: 6px 2px 8px;\n    font-size: 14px; font-family: 'Inter', sans-serif; color: var(--black); background: transparent; outline: none; transition: border-color .2s;\n  }\n  .gs-ofp-unitselect:focus { border-bottom-color: var(--gold); }\n  .gs-ofp-unit-remove { flex-shrink: 0; background: none; border: none; color: var(--gray); cursor: pointer; font-size: 18px; line-height: 1; padding: 0 0 8px 0; }\n  .gs-ofp-accessrow { display: flex; align-items: center; gap: 14px; position: relative; z-index: 2; }\n  .gs-ofp-lockwrap { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;\n    background: rgba(255,255,255,.05); border: 1px solid rgba(201,168,76,.3); transition: background .25s, border-color .25s; }\n  .gs-ofp-lockwrap.on { background: rgba(201,168,76,.16); border-color: #E8CE85; }\n  .gs-ofp-lockicon { width: 18px; height: 18px; color: #7a7368; transition: color .25s; }\n  .gs-ofp-lockwrap.on .gs-ofp-lockicon { color: #E8CE85; }\n  .gs-ofp-accesstext { flex: 1; }\n  .gs-ofp-accessq { font-size: 13px; color: #fff; font-weight: 500; }\n  .gs-ofp-notewrap { position: relative; }\n  .gs-ofp-notetextarea {\n    width: 100%; min-height: 80px; background: var(--white); border: none; border-radius: 6px;\n    padding: 16px 16px 14px; font-size: 11px; font-family: 'Inter', sans-serif; color: var(--black);\n    resize: vertical; outline: none; box-shadow: 0 2px 10px rgba(0,0,0,.15);\n  }\n  .gs-ofp-oa-compact { padding: 16px 22px 14px; margin-bottom: 14px; }\n  .gs-ofp-oa-compact .gs-ofp-accessrow { gap: 12px; }\n  .gs-ofp-oa-compact .gs-ofp-lockwrap { width: 32px; height: 32px; }\n  .gs-ofp-oa-compact .gs-ofp-lockicon { width: 14px; height: 14px; }\n  .gs-ofp-oa-compact .gs-ofp-accessq { font-size: 12px; }\n  .gs-ofp-oa-compact .toggle-b { width: 58px; height: 26px; }\n  .gs-ofp-oa-compact .toggle-b-thumb { width: 34px; height: 20px; font-size: 9px; }\n  .gs-ofp-oa-compact .toggle-b.on .toggle-b-thumb { transform: translateX(22px); }\n  .gs-ofp-oa-compact .gs-ofp-notetextarea { min-height: 38px; padding: 12px 12px 8px; font-size: 11px; }\n  .gs-ofp-unit-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }\n  .gs-ofp-add-unit-link {\n    background: none; border: none; color: var(--gold-dk); cursor: pointer;\n    font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif; letter-spacing: .02em;\n    padding: 0; transition: color .2s;\n  }\n  .gs-ofp-add-unit-link:hover { color: var(--gold); text-decoration: underline; }";
+    tag.textContent = ".gs-ofp-card { position: relative; overflow: hidden; border-radius: 8px; padding: 30px 32px 26px; margin-bottom: 24px;\n    box-shadow: 0 2px 4px rgba(0,0,0,.35), 0 14px 30px rgba(0,0,0,.28), 0 30px 60px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.08); }\n  .gs-ofp-card-1 { background: linear-gradient(155deg,#201c17 0%,#100e0c 60%,#171310 100%); }\n  .gs-ofp-card-2 { background: linear-gradient(155deg,#3a2c17 0%,#2b2010 60%,#372a15 100%); }\n  .gs-ofp-card-3 { background: linear-gradient(155deg,#7a5a22 0%,#634718 60%,#70521e 100%); }\n  .gs-ofp-tri { position: absolute; pointer-events: none; z-index: 1; animation: gs-ofp-spin 80s linear infinite; }\n  @keyframes gs-ofp-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }\n  @keyframes gs-ofp-spinrev { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }\n  .gs-ofp-name { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 24px; color: #fff; position: relative; z-index: 2; }\n  .gs-ofp-lines { font-size: 13px; color: #C9C4B8; line-height: 1.7; margin-top: 10px; position: relative; z-index: 2; }\n  .gs-ofp-email { font-size: 11.5px; color: #E8CE85; margin-top: 8px; position: relative; z-index: 2; }\n  .gs-ofp-goldbase { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; overflow: hidden; z-index: 2;\n    background: linear-gradient(90deg,transparent 0%,#8C6F2A 12%,#E8CE85 50%,#8C6F2A 88%,transparent 100%); }\n  .gs-ofp-goldbase::after { content:''; position:absolute; top:0; left:-35%; width:35%; height:100%;\n    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.85) 50%, transparent 100%);\n    animation: gs-ofp-shimmer 7s ease-in-out infinite; }\n  .gs-ofp-card-3 .gs-ofp-goldbase { background: linear-gradient(90deg,transparent 0%,#FFF3D6 12%,#fff 50%,#FFF3D6 88%,transparent 100%); }\n  @keyframes gs-ofp-shimmer { 0% { left: -35%; } 100% { left: 135%; } }\n  .gs-ofp-tabsrow { display: flex; justify-content: space-between; position: relative; z-index: 2; }\n  .gs-ofp-tab { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; cursor: pointer;\n    color: rgba(255,243,214,.55); padding-bottom: 14px; transition: color .25s; }\n  .gs-ofp-tab.active { color: #FFF8E8; }\n  .gs-ofp-uline-track { height: 1px; background: rgba(255,255,255,.22); position: relative; z-index: 2; }\n  .gs-ofp-uline-active { position: absolute; top: -1px; height: 2px; background: #FFF3D6; transition: left .3s cubic-bezier(.22,.9,.28,1), width .3s cubic-bezier(.22,.9,.28,1); }\n  .gs-ofp-deco { position: absolute; pointer-events: none; z-index: 1; opacity: 0; }\n  .gs-ofp-deco svg { width: 100%; height: 100%; }\n  @keyframes gs-ofp-twinkle { 0%, 100% { opacity: 0; transform: scale(.6) rotate(0deg); } 50% { opacity: var(--peak,.85); transform: scale(1) rotate(var(--rot,0deg)); } }\n  .gs-ofp-unitrow { display: flex; align-items: flex-end; gap: 26px; margin-bottom: 20px; }\n  .gs-ofp-unitfield { flex: 1; min-width: 0; }\n  .gs-ofp-unitfield-label { display: flex; align-items: center; gap: 6px; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray); font-weight: 600; margin-bottom: 8px; }\n  .gs-ofp-unitfield-label svg { width: 14px; height: 14px; color: var(--gold-dk); flex-shrink: 0; }\n  .gs-ofp-unitfield input { width: 100%; border: none; border-bottom: 1.5px solid var(--border); padding: 6px 2px 8px;\n    font-size: 15px; font-family: 'Inter', sans-serif; color: var(--black); background: transparent; outline: none; transition: border-color .2s; }\n  .gs-ofp-unitfield input:focus { border-bottom-color: var(--gold); }\n  .gs-ofp-unitline { flex-wrap: wrap; }\n  .gs-ofp-unitline-num { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--gold-dk); width: 18px; flex-shrink: 0; padding-bottom: 8px; }\n  .gs-ofp-unitselect {\n    width: 100%; border: none; border-bottom: 1.5px solid var(--border); padding: 6px 2px 8px;\n    font-size: 14px; font-family: 'Inter', sans-serif; color: var(--black); background: transparent; outline: none; transition: border-color .2s;\n  }\n  .gs-ofp-unitselect:focus { border-bottom-color: var(--gold); }\n  .gs-ofp-unit-remove { flex-shrink: 0; background: none; border: none; color: var(--gray); cursor: pointer; font-size: 18px; line-height: 1; padding: 0 0 8px 0; }\n  .gs-ofp-accessrow { display: flex; align-items: center; gap: 14px; position: relative; z-index: 2; }\n  .gs-ofp-lockwrap { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;\n    background: rgba(255,255,255,.05); border: 1px solid rgba(201,168,76,.3); transition: background .25s, border-color .25s; }\n  .gs-ofp-lockwrap.on { background: rgba(201,168,76,.16); border-color: #E8CE85; }\n  .gs-ofp-lockicon { width: 18px; height: 18px; color: #7a7368; transition: color .25s; }\n  .gs-ofp-lockwrap.on .gs-ofp-lockicon { color: #E8CE85; }\n  .gs-ofp-accesstext { flex: 1; }\n  .gs-ofp-accessq { font-size: 13px; color: #fff; font-weight: 500; }\n  .gs-ofp-notewrap { position: relative; }\n  .gs-ofp-notetextarea {\n    width: 100%; min-height: 80px; background: var(--white); border: none; border-radius: 6px;\n    padding: 16px 16px 14px; font-size: 11px; font-family: 'Inter', sans-serif; color: var(--black);\n    resize: vertical; outline: none; box-shadow: 0 2px 10px rgba(0,0,0,.15);\n  }\n  .gs-ofp-oa-compact { padding: 16px 22px 14px; margin-bottom: 14px; }\n  .gs-ofp-oa-compact .gs-ofp-accessrow { gap: 12px; }\n  .gs-ofp-oa-compact .gs-ofp-lockwrap { width: 32px; height: 32px; }\n  .gs-ofp-oa-compact .gs-ofp-lockicon { width: 14px; height: 14px; }\n  .gs-ofp-oa-compact .gs-ofp-accessq { font-size: 12px; }\n  .gs-ofp-oa-compact .toggle-b { width: 58px; height: 26px; }\n  .gs-ofp-oa-compact .toggle-b-thumb { width: 34px; height: 20px; font-size: 9px; }\n  .gs-ofp-oa-compact .toggle-b.on .toggle-b-thumb { transform: translateX(22px); }\n  .gs-ofp-oa-compact .gs-ofp-notetextarea { min-height: 38px; padding: 12px 12px 8px; font-size: 11px; }\n  .gs-ofp-oa-micro { padding: 10px 14px 8px; margin-bottom: 0; }\n  .gs-ofp-oa-micro .gs-ofp-accessrow { gap: 8px; }\n  .gs-ofp-oa-micro .gs-ofp-lockwrap { width: 24px; height: 24px; }\n  .gs-ofp-oa-micro .gs-ofp-lockicon { width: 11px; height: 11px; }\n  .gs-ofp-oa-micro .gs-ofp-accessq { font-size: 10.5px; }\n  .gs-ofp-oa-micro .gs-ofp-notetextarea { min-height: 30px; padding: 8px 10px 6px; font-size: 10px; }\n  .gs-ofp-unit-detail-grid { display: grid; gap: 16px; align-items: stretch; margin: 4px 0 18px; }\n  .gs-ofp-unit-detail-grid.has-buttons { grid-template-columns: 1.3fr 1fr 0.85fr; }\n  .gs-ofp-unit-detail-grid.no-buttons { grid-template-columns: 1.3fr 1fr; }\n  @media (max-width: 600px) { .gs-ofp-unit-detail-grid.has-buttons, .gs-ofp-unit-detail-grid.no-buttons { grid-template-columns: 1fr; } }\n  .gs-ofp-unit-detail-dates { display: flex; flex-direction: column; gap: 12px; justify-content: center; }\n  .gs-ofp-unit-detail-buttons { display: flex; flex-direction: column; gap: 10px; justify-content: center; }\n  .gs-ofp-unit-detail-field label { display: block; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--gray); font-weight: 600; margin-bottom: 6px; }\n  .gs-ofp-btn-primary { position: relative; overflow: hidden; isolation: isolate;\n    background: linear-gradient(155deg, #EAD9A0 0%, #C9A84C 45%, #8C6F2A 100%);\n    color: #171310; border: none; border-radius: 7px; padding: 15px 20px; font-size: 12px; font-weight: 700;\n    letter-spacing: .09em; text-transform: uppercase; cursor: pointer; font-family: 'Inter', sans-serif; width: 100%;\n    box-shadow: 0 1px 2px rgba(0,0,0,.2), 0 6px 14px rgba(140,111,42,.35), inset 0 1px 0 rgba(255,255,255,.45), inset 0 -2px 4px rgba(0,0,0,.12);\n    transition: transform .15s ease, box-shadow .15s ease; }\n  .gs-ofp-btn-primary::after { content: ''; position: absolute; top: 5px; left: 12px; width: 22px; height: 22px; z-index: 0;\n    background: radial-gradient(circle, rgba(255,255,255,.85) 0%, rgba(255,255,255,0) 70%);\n    border-radius: 50%; pointer-events: none; opacity: 0; animation: gs-ofp-twinkle 6.5s ease-in-out infinite; --peak: .3; }\n  .gs-ofp-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,.25), 0 10px 18px rgba(140,111,42,.4), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 4px rgba(0,0,0,.12); }\n  .gs-ofp-btn-primary:active { transform: translateY(0); }\n  .gs-ofp-btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }\n  .gs-ofp-btn-secondary { background: var(--white); border: 1.5px solid var(--border); color: var(--black); border-radius: 7px;\n    padding: 15px 20px; font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; cursor: pointer;\n    font-family: 'Inter', sans-serif; width: 100%; box-shadow: 0 1px 3px rgba(0,0,0,.05); transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease; }\n  .gs-ofp-btn-secondary:hover { border-color: var(--gold); transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,.08); }\n  .gs-ofp-btn-secondary:active { transform: translateY(0); }\n  .gs-ofp-unit-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }\n  .gs-ofp-add-unit-link {\n    background: none; border: none; color: var(--gold-dk); cursor: pointer;\n    font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif; letter-spacing: .02em;\n    padding: 0; transition: color .2s;\n  }\n  .gs-ofp-add-unit-link:hover { color: var(--gold); text-decoration: underline; }";
     document.head.appendChild(tag);
   }
 
@@ -155,25 +155,34 @@ const ICONS = {
      mas chicos, aprobada en el mini de "Add Unit" 12/09/2026). Sin
      compact, usa el tamano original del flujo de crear orden.
      ================================================================ */
-  const officeNeedState = {};
   const officeNeedListeners = {};
+  const officeNeedLastKnown = {};
 
-  /* Permite que UNA pagina en particular reaccione al cambio del
-     toggle con algo que es SOLO SUYO (ej. Orders/create-order le
-     cambia el nombre visible a otro campo de la pantalla cuando esto
-     se prende) -- sin que el componente compartido tenga que saber
+  /* Permite que UNA pagina en particular reaccione al cambio de "hay
+     texto / no hay texto" con algo que es SOLO SUYO (ej. Orders/
+     create-order le cambia el nombre visible a otro campo de la
+     pantalla) -- sin que el componente compartido tenga que saber
      nada de esa logica especifica de cada consumidor. */
   function onOfficeNeedChange(dom, fn) {
     officeNeedListeners[dom] = fn;
   }
 
+  /* Rediseño (12/09/2026, confirmado con el dueño): se quito el
+     toggle Yes/No -- la caja de notas ahora esta SIEMPRE abierta, y
+     NeedsOfficeAccess se deriva solo de si el cliente escribio algo
+     ahi o no (revisado: nada mas en los 3 repos depende del control
+     en si, solo del booleano final que ya se guarda). El candado se
+     prende/apaga solo, como retroalimentacion en vivo mientras se
+     escribe, sin que haya que darle click a nada. */
   function officeAccessHtml(dom, opts) {
     styleTag();
     opts = opts || {};
-    const compactClass = opts.compact ? ' gs-ofp-oa-compact' : '';
-    const rows = opts.compact ? 2 : 5;
+    let sizeClass = '';
+    if (opts.micro) sizeClass = ' gs-ofp-oa-micro';
+    else if (opts.compact) sizeClass = ' gs-ofp-oa-compact';
+    const rows = (opts.micro || opts.compact) ? 2 : 5;
     return '' +
-      '<div class="gs-ofp-card gs-ofp-card-2' + compactClass + '" id="' + dom + '-office-card">' +
+      '<div class="gs-ofp-card gs-ofp-card-2' + sizeClass + '" id="' + dom + '-office-card">' +
         '<svg class="gs-ofp-tri" style="top:calc(50% - 105px);left:calc(50% - 110px);width:240px;height:227px;opacity:.4;animation:gs-ofp-spinrev 95s linear infinite" viewBox="0 0 900 851">' +
           '<path d="M141.77,6.05 L209.78,829.96 L892.14,356.10 Z" fill="none" stroke="#F3DFA5" stroke-width="6"/>' +
         '</svg>' +
@@ -184,40 +193,118 @@ const ICONS = {
           '<div class="gs-ofp-accesstext">' +
             '<div class="gs-ofp-accessq">Do we need anything from you?</div>' +
           '</div>' +
-          '<div class="toggle-b" id="' + dom + '-office-toggle" onclick="GSOrderFormPremium.setOfficeNeed(\'' + dom + '\', !GSOrderFormPremium.getOfficeNeedValue(\'' + dom + '\'))">' +
-            '<div class="toggle-b-thumb" id="' + dom + '-office-toggle-thumb">No</div>' +
-          '</div>' +
         '</div>' +
-        '<div id="' + dom + '-office-detail" style="display:none;margin-top:10px;position:relative;z-index:2">' +
+        '<div style="margin-top:10px;position:relative;z-index:2">' +
           '<div class="gs-ofp-notewrap">' +
-            '<textarea id="' + dom + '-office-text" class="gs-ofp-notetextarea" rows="' + rows + '" placeholder="e.g. Access keys, materials, special instructions..."></textarea>' +
+            '<textarea id="' + dom + '-office-text" class="gs-ofp-notetextarea" rows="' + rows + '" placeholder="e.g. Access keys, materials, special instructions..." oninput="GSOrderFormPremium._onOfficeTextInput(\'' + dom + '\')"></textarea>' +
           '</div>' +
         '</div>' +
         '<div class="gs-ofp-goldbase"></div>' +
       '</div>';
   }
 
-  function setOfficeNeed(dom, yes) {
-    officeNeedState[dom] = !!yes;
-    const toggle = document.getElementById(dom + '-office-toggle');
-    const thumb = document.getElementById(dom + '-office-toggle-thumb');
-    const detail = document.getElementById(dom + '-office-detail');
+  function _onOfficeTextInput(dom) {
+    const el = document.getElementById(dom + '-office-text');
+    const hasText = !!(el && el.value.trim());
     const lock = document.getElementById(dom + '-office-lock');
-    if (toggle) toggle.classList.toggle('on', !!yes);
-    if (thumb) thumb.textContent = yes ? 'Yes' : 'No';
-    if (detail) detail.style.display = yes ? 'block' : 'none';
-    if (lock) lock.classList.toggle('on', !!yes);
-    if (officeNeedListeners[dom]) officeNeedListeners[dom](!!yes);
+    if (lock) lock.classList.toggle('on', hasText);
+    if (officeNeedLastKnown[dom] !== hasText) {
+      officeNeedLastKnown[dom] = hasText;
+      if (officeNeedListeners[dom]) officeNeedListeners[dom](hasText);
+    }
+  }
+
+  /* Para restaurar un borrador/orden existente (o limpiar el campo al
+     abrir el formulario de nuevo) -- pone el texto y sincroniza el
+     candado/listener con _onOfficeTextInput, sin necesidad de un
+     booleano aparte. */
+  function setOfficeNeedText(dom, text) {
+    const el = document.getElementById(dom + '-office-text');
+    if (el) el.value = text || '';
+    _onOfficeTextInput(dom);
   }
 
   function getOfficeNeedValue(dom) {
-    return !!officeNeedState[dom];
+    const el = document.getElementById(dom + '-office-text');
+    return !!(el && el.value.trim());
   }
 
   function getOfficeNeedNotes(dom) {
-    if (!officeNeedState[dom]) return '';
     const el = document.getElementById(dom + '-office-text');
     return el ? el.value.trim() : '';
+  }
+
+  /* ================================================================
+     Panel unificado: Office Access + fechas (+ hora opcional) + Save/
+     Cancel opcionales -- UN SOLO lugar para las 4 pantallas que lo
+     necesitan (12/09/2026, confirmado con el dueño: "es lo mismo
+     porque guardan la misma informacion en el mismo lugar"):
+       - Add Unit (Admin, Orders): compact + botones + sin hora
+       - Multi Units / "Customize" por unidad (Orders): micro + SIN
+         botones (todo se manda junto hasta Submit Order) + con hora
+       - New Order Paso 3 (Orders, Admin): tamaño normal + botones +
+         con hora
+
+     opts:
+       micro / compact  -- tamano de la tarjeta de Office Access
+       showTime         -- agrega el campo de Entry Time
+       showButtons      -- default true. false = solo Office Access +
+                           fechas, sin nada que guardar por separado
+       showCancel       -- default true (solo aplica si showButtons).
+                           false = arranca oculto (ver
+                           showUnitDetailCancel para prenderlo despues,
+                           ej. al entrar a modo edicion en Orders)
+       submitLabel/submitOnclick/cancelLabel/cancelOnclick
+     Los mounts de fecha/hora (dom+'-entry-mount' etc.) los llena quien
+     use esto, con GSDateTimePicker.dateHtml/timeHtml -- igual que ya
+     se hace con officeAccessHtml, este solo regresa el esqueleto. */
+  function unitDetailPanelHtml(dom, opts) {
+    styleTag();
+    opts = opts || {};
+    const showButtons = opts.showButtons !== false;
+    const showTime = !!opts.showTime;
+    const gridClass = showButtons ? 'has-buttons' : 'no-buttons';
+    const officeOpts = {};
+    if (opts.micro) officeOpts.micro = true;
+    else if (opts.compact) officeOpts.compact = true;
+
+    let html = '<div class="gs-ofp-unit-detail-grid ' + gridClass + '">';
+    html += officeAccessHtml(dom, officeOpts);
+    html += '<div class="gs-ofp-unit-detail-dates">';
+    html += '<div class="gs-ofp-unit-detail-field"><label id="' + dom + '-entry-label">Entry Date</label><div id="' + dom + '-entry-mount"></div></div>';
+    if (showTime) {
+      html += '<div class="gs-ofp-unit-detail-field"><label id="' + dom + '-entry-time-label">Entry Time</label><div id="' + dom + '-entry-time-mount"></div></div>';
+    }
+    html += '<div class="gs-ofp-unit-detail-field"><label id="' + dom + '-due-label">Due Date</label><div id="' + dom + '-due-mount"></div></div>';
+    html += '</div>';
+    if (showButtons) {
+      const cancelStyle = (opts.showCancel === false) ? ' style="display:none"' : '';
+      html += '<div class="gs-ofp-unit-detail-buttons">' +
+        '<button type="button" class="gs-ofp-btn-primary" id="' + dom + '-submit-btn" onclick="' + (opts.submitOnclick || '') + '">' + (opts.submitLabel || 'Save') + '</button>' +
+        '<div id="' + dom + '-cancel-wrap"' + cancelStyle + '>' +
+          '<button type="button" class="gs-ofp-btn-secondary" onclick="' + (opts.cancelOnclick || '') + '">' + (opts.cancelLabel || 'Cancel') + '</button>' +
+        '</div>' +
+      '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  /* Para casos como Orders/New Order, donde Cancel arranca oculto
+     (modo "orden nueva") y se revela solo al entrar a modo edicion
+     de una orden existente -- mismo criterio que ya existia con
+     #edit-actions, ahora dentro del panel unificado. */
+  function showUnitDetailCancel(dom, show) {
+    const wrap = document.getElementById(dom + '-cancel-wrap');
+    if (wrap) wrap.style.display = show ? '' : 'none';
+  }
+
+  /* Para el cambio de texto "Submit Order" -> "Save Changes" al
+     entrar a modo edicion (Orders), sin tener que regenerar todo el
+     HTML del panel. */
+  function setUnitDetailSubmitLabel(dom, label) {
+    const btn = document.getElementById(dom + '-submit-btn');
+    if (btn) btn.textContent = label;
   }
 
   window.GSOrderFormPremium = {
@@ -227,9 +314,13 @@ const ICONS = {
     renderDivDecos: renderDivDecos,
     activateDivTab: activateDivTab,
     officeAccessHtml: officeAccessHtml,
-    setOfficeNeed: setOfficeNeed,
+    setOfficeNeedText: setOfficeNeedText,
     getOfficeNeedValue: getOfficeNeedValue,
     getOfficeNeedNotes: getOfficeNeedNotes,
-    onOfficeNeedChange: onOfficeNeedChange
+    onOfficeNeedChange: onOfficeNeedChange,
+    _onOfficeTextInput: _onOfficeTextInput,
+    unitDetailPanelHtml: unitDetailPanelHtml,
+    showUnitDetailCancel: showUnitDetailCancel,
+    setUnitDetailSubmitLabel: setUnitDetailSubmitLabel
   };
 })();
