@@ -486,8 +486,8 @@ const ICONS = {
     return '<div style="display:flex;align-items:flex-end;flex-wrap:wrap;gap:24px;margin-bottom:14px">' +
         pills +
         '<div style="display:flex;gap:20px;flex-wrap:wrap">' +
-          '<div style="width:128px;flex-shrink:0">' + textFieldHtml('', '', icoClock, 'Opens at', { raw: openRawHtml }) + '</div>' +
-          '<div style="width:128px;flex-shrink:0">' + textFieldHtml('', '', icoClock, 'Closes at', { raw: closeRawHtml }) + '</div>' +
+          '<div style="flex:1 1 90px;min-width:90px;max-width:180px">' + textFieldHtml('', '', icoClock, 'Opens at', { raw: openRawHtml }) + '</div>' +
+          '<div style="flex:1 1 90px;min-width:90px;max-width:180px">' + textFieldHtml('', '', icoClock, 'Closes at', { raw: closeRawHtml }) + '</div>' +
         '</div>' +
       '</div>';
   }
