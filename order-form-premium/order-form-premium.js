@@ -415,9 +415,32 @@ const ICONS = {
      - raw: HTML ya armado (ej. el de GSDateTimePicker.dateHtml) -- para
        envolver un campo que ya tiene su propio widget, sin tocarlo
      - placeholder: placeholder del input/textarea */
+  /* Iconos comunes para los campos de Business Name/Contact/Address
+     que se repetian en Orders (profile.html, customer.html) y Admin
+     (admin.html) -- antes cada archivo traia su propia copia pegada
+     del mismo mapa. Ahora viven aqui una sola vez; el llamador solo
+     pasa la llave ('email', 'address', etc.) en vez del SVG completo. */
+  const FIELD_ICON_MAP = {
+    bname: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v16"/><path d="M12 21V9a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v12"/><path d="M8 8h1M8 12h1M8 16h1M16 12h1M16 16h1"/></svg>',
+    cperson: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
+    email: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+    phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 3a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c1 .3 2 .5 3 .7a2 2 0 0 1 1.7 2Z"/></svg>',
+    address: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+    suite: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M4 10h16"/></svg>',
+    city: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M6 21V8l6-4 6 4v13M10 21v-6h4v6"/></svg>',
+    zip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+    label: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m20.6 13.4-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1"/></svg>',
+    building: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v16"/><path d="M12 21V9a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v12"/><path d="M8 8h1M8 12h1M8 16h1M16 12h1M16 16h1"/></svg>'
+  };
   function textFieldHtml(id, value, icon, label, opts) {
     styleTag();
     opts = opts || {};
+    /* Si 'icon' es una llave corta conocida (no un SVG ya armado),
+       se resuelve aqui adentro -- asi el llamador no necesita traer
+       su propia copia del mapa de iconos. Un SVG crudo sigue
+       funcionando igual que siempre (para iconos que no son de este
+       set comun, como los de Request a Change). */
+    const resolvedIcon = (icon && FIELD_ICON_MAP[icon]) ? FIELD_ICON_MAP[icon] : (icon || '');
     let fieldHtml;
     if (opts.raw !== undefined) {
       fieldHtml = opts.raw;
@@ -428,10 +451,11 @@ const ICONS = {
     } else {
       fieldHtml = '<input type="' + (opts.type || 'text') + '" id="' + id + '" value="' + _escAttr(value) + '"' + (opts.placeholder ? ' placeholder="' + _escAttr(opts.placeholder) + '"' : '') + '>';
     }
-    return '<div class="gs-ofp-unitfield">' +
-        '<div class="gs-ofp-unitfield-label">' + icon + label + '</div>' +
+    const html = '<div class="gs-ofp-unitfield">' +
+        '<div class="gs-ofp-unitfield-label">' + resolvedIcon + label + '</div>' +
         fieldHtml +
       '</div>';
+    return opts.fullWidth ? '<div class="gs-ofp-unitrow">' + html + '</div>' : html;
   }
 
 
