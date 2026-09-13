@@ -129,6 +129,7 @@
       positionPopover(fieldId, pop);
       pop.classList.add('open');
       if (window.requestAnimationFrame) window.requestAnimationFrame(function () { positionPopover(fieldId, pop); });
+      startDtpTracking();
       renderCalGrid(fieldId);
     }
   }
@@ -142,6 +143,7 @@
       positionPopover(fieldId, pop);
       pop.classList.add('open');
       if (window.requestAnimationFrame) window.requestAnimationFrame(function () { positionPopover(fieldId, pop); });
+      startDtpTracking();
       var st = stateFor(fieldId);
       st.clockStep = 'hour';
       updateClockStepUI(fieldId);
@@ -421,22 +423,35 @@
     });
   });
 
-  var repositionQueued = false;
-  function repositionOpenPopovers() {
-    if (repositionQueued) return;
-    repositionQueued = true;
-    (window.requestAnimationFrame || function (cb) { setTimeout(cb, 16); })(function () {
-      repositionQueued = false;
-      Array.prototype.forEach.call(document.querySelectorAll('.gs-dtp-popover.open'), function (pop) {
-        var fieldId = fieldIdFromPopId(pop.id);
-        if (fieldId) positionPopover(fieldId, pop);
-      });
-    });
+  /* Ajuste (12/09/2026): el reposicionamiento por evento de scroll
+     (aunque throttleado a 1 vez por frame) siempre corria un frame
+     detras del scroll nativo -- el navegador pinta el scroll al
+     instante (va por el compositor), pero el JS que reacciona al
+     evento 'scroll' llega despues, y con scroll de inercia/trackpad
+     el evento no dispara tan seguido como se pinta cada frame. Eso
+     se sentia como un pequeno "retraso" (el dueño lo detecto asi:
+     "si se mueve pero con retraso, tiene que verse mas suave").
+
+     El fix real: un loop de requestAnimationFrame que corre en CADA
+     frame mientras haya un popover abierto, sin esperar a ningun
+     evento -- se sincroniza con el mismo reloj que usa el navegador
+     para pintar el scroll, asi que nunca se atrasa. Se prende al
+     abrir (startDtpTracking, ver toggleCal/toggleClock) y se apaga
+     solo cuando ya no hay ningun popover abierto (revisa cada vuelta
+     y no se vuelve a agendar si no hay nada que seguir). */
+  var dtpTrackRaf = null;
+  var dtpRaf = window.requestAnimationFrame || function (cb) { return setTimeout(cb, 16); };
+  function dtpTrackFrame() {
+    var openPop = document.querySelector('.gs-dtp-popover.open');
+    if (!openPop) { dtpTrackRaf = null; return; }
+    var fieldId = fieldIdFromPopId(openPop.id);
+    if (fieldId) positionPopover(fieldId, openPop);
+    dtpTrackRaf = dtpRaf(dtpTrackFrame);
   }
-  // capture:true para agarrar el scroll de CUALQUIER contenedor (no solo la ventana),
-  // por si el campo esta dentro de un panel/modal con su propio scroll interno.
-  window.addEventListener('scroll', repositionOpenPopovers, true);
-  window.addEventListener('resize', repositionOpenPopovers);
+  function startDtpTracking() {
+    if (dtpTrackRaf) return;
+    dtpTrackRaf = dtpRaf(dtpTrackFrame);
+  }
 
   window.GSDateTimePicker = {
     dateHtml: dateHtml,
