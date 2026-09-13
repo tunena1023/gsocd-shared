@@ -84,6 +84,34 @@
     var logoW = 30, logoH = 28;
     var x = 14, y = 8, vx = 0.14, vy = 0.1, rot = 0;
 
+    /* Pegar la barra de tabs justo debajo del <nav> del logo (si la
+       pagina tiene uno) al hacer scroll, y avisarle al resto de la
+       pagina cuanto espacio ocupan las dos juntas -- via una
+       variable CSS (--gs-nav-stack-height), NO con matematicas de
+       pixeles copiadas y pegadas en cada pagina. Cualquier elemento
+       propio de cada portal (ej. la barra de "Welcome back" de
+       Orders) solo necesita:
+         position: sticky; top: var(--gs-nav-stack-height, 0px);
+       sin volver a medir nada por su cuenta. <nav> puede no tener
+       altura fija de verdad (depende de applyChrome(), que puede
+       cambiar de version) -- por eso se mide en vivo, nunca a mano. */
+    function syncStickyStack() {
+      var navEl = document.querySelector('nav');
+      var navH = navEl ? navEl.offsetHeight : 0;
+      container.style.position = 'sticky';
+      container.style.top = navH + 'px';
+      container.style.zIndex = container.style.zIndex || '99';
+      document.documentElement.style.setProperty('--gs-nav-stack-height', (navH + container.offsetHeight) + 'px');
+    }
+    syncStickyStack();
+    if (window.ResizeObserver) {
+      var navElForObserver = document.querySelector('nav');
+      if (navElForObserver) new ResizeObserver(syncStickyStack).observe(navElForObserver);
+      new ResizeObserver(syncStickyStack).observe(container);
+    } else {
+      window.addEventListener('resize', syncStickyStack);
+    }
+
     /* Antes esto solo se recalculaba al cargar y al cambiar el
        tamano de ventana -- pero el ancho real del renglon tambien
        cambia SOLO cuando aparece el tab de Developer (tarda en
