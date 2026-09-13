@@ -370,6 +370,67 @@ const ICONS = {
     if (btn) btn.textContent = label;
   }
 
+  /* ===== Notification cards (Opcion B aprobada con mini, primero en
+     Orders/customer.html el 13/09/2026) -- tarjeta con icono +
+     switch visual en vez de un <select> plano.
+
+     2 modos:
+     - 'tristate' (default): Off / Default / On -- para ajustes POR
+       ORDEN, donde "Default" significa "sigue lo que diga la cuenta"
+       (customer.html, tracking.html: notificaciones de una orden
+       especifica). El switch tiene 3 posiciones (izq=Off rojo,
+       medio=Default gris, der=On dorado), un clic gira entre los 3.
+     - 'boolean': Off / On nomas -- para ajustes DE CUENTA, donde no
+       existe "heredar de otro lado" porque esto ES la fuente
+       (profile.html: notificaciones generales del cliente). El
+       switch solo tiene 2 posiciones.
+
+     El valor real via un <input type="hidden"> con id=fieldId, igual
+     que antes -- 'off'/'inherit'/'on' en tristate, 'off'/'on' en
+     boolean. Quien llama a esto sigue leyendo $(fieldId).value igual
+     que siempre, no cambia el contrato de datos hacia el backend. */
+  function notifToggleUiValue(v, mode) {
+    if (mode === 'boolean') return v ? 'on' : 'off';
+    if (v === 'Yes' || v === true) return 'on';
+    if (v === 'No' || v === false) return 'off';
+    return 'inherit';
+  }
+
+  function notifCardHtml(fieldId, value, icon, name, desc, opts) {
+    opts = opts || {};
+    const mode = opts.mode === 'boolean' ? 'boolean' : 'tristate';
+    const v = notifToggleUiValue(value, mode);
+    const showPill = mode === 'tristate' && v === 'inherit';
+    const safeName = String(name).replace(/'/g, "\\'");
+    return '<div class="notif-card" data-field="' + fieldId + '">' +
+        '<div class="notif-icon">' + icon + '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div class="notif-name" id="' + fieldId + '-label">' + name + (showPill ? '<span class="notif-default-pill">Default</span>' : '') + '</div>' +
+          '<div class="notif-desc">' + desc + '</div>' +
+          (opts.extraNote || '') +
+        '</div>' +
+        '<button type="button" class="notif-toggle-btn ' + v + '" id="' + fieldId + '-btn" ' +
+          'onclick="GSOrderFormPremium.cycleNotifToggle(\'' + fieldId + '\',\'' + safeName + '\',\'' + mode + '\')" aria-label="' + name + '"></button>' +
+      '</div>' +
+      '<input type="hidden" id="' + fieldId + '" value="' + v + '">';
+  }
+
+  function cycleNotifToggle(fieldId, name, mode) {
+    const input = document.getElementById(fieldId);
+    if (!input) return;
+    const order = mode === 'boolean' ? ['off', 'on'] : ['off', 'inherit', 'on'];
+    const next = order[(order.indexOf(input.value) + 1) % order.length];
+    input.value = next;
+    const btn = document.getElementById(fieldId + '-btn');
+    if (btn) btn.className = 'notif-toggle-btn ' + next;
+    const label = document.getElementById(fieldId + '-label');
+    if (label) {
+      const showPill = mode !== 'boolean' && next === 'inherit';
+      label.innerHTML = name + (showPill ? '<span class="notif-default-pill">Default</span>' : '');
+    }
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
   window.GSOrderFormPremium = {
     styleTag: styleTag,
     ICONS: ICONS,
@@ -388,6 +449,8 @@ const ICONS = {
     _onOfficeTextInput: _onOfficeTextInput,
     unitDetailPanelHtml: unitDetailPanelHtml,
     showUnitDetailCancel: showUnitDetailCancel,
-    setUnitDetailSubmitLabel: setUnitDetailSubmitLabel
+    setUnitDetailSubmitLabel: setUnitDetailSubmitLabel,
+    notifCardHtml: notifCardHtml,
+    cycleNotifToggle: cycleNotifToggle
   };
 })();
