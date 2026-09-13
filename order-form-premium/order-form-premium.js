@@ -135,6 +135,69 @@ const ICONS = {
     return tabEl;
   }
 
+  /* Genera las 4 pestanas de division (Janitorial/Renovations/
+     Exteriors/Mixed) -- antes cada pagina las escribia a mano, 6
+     veces repetidas entre Orders y Admin, y "Mixed" no existia en
+     ninguna. Un solo lugar para agregar/quitar/renombrar una division
+     de aqui en adelante. Janitorial siempre empieza activa (asi
+     empezaban las 6 paginas antes de esto). */
+  const DIVISIONS = ['Janitorial', 'Renovations', 'Exteriors', 'Mixed'];
+  function divTabsHtml(onclickFn) {
+    return DIVISIONS.map((d, i) =>
+      '<div class="gs-ofp-tab' + (i === 0 ? ' active' : '') + '" data-div="' + d + '" onclick="' + onclickFn + '(\'' + d + '\', this)">' + d + '</div>'
+    ).join('');
+  }
+
+  /* Variante de boton segmentado (fondo dorado solido en el activo,
+     bordes entre botones) -- usada en Office Templates (Admin y
+     Developer), estilo distinto al de gs-ofp-tab pero mismo problema:
+     escrito a mano en 2 lugares, sin Mixed. */
+  function divButtonsHtml(onclickFn) {
+    return DIVISIONS.map((d, i) => {
+      const activeStyle = i === 0
+        ? 'background:var(--gold);color:var(--black)'
+        : 'background:var(--white);color:var(--gray)';
+      const borderStyle = i === 0 ? '' : 'border-left:1.5px solid var(--border);';
+      return '<button type="button" class="' + (i === 0 ? 'active' : '') + '" data-div="' + d + '" onclick="' + onclickFn + '(\'' + d + '\', this)" ' +
+        'style="flex:1;padding:12px;border:none;' + borderStyle + activeStyle + ';cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:inherit">' + d + '</button>';
+    }).join('');
+  }
+
+  /* Maneja el estado activo del estilo de boton segmentado (clase +
+     fondo/color inline, ya que ese estilo no usa una linea deslizante
+     como gs-ofp-tab) -- misma logica que ya tenian Admin y Developer
+     por separado, ahora en un solo lugar. Acepta el elemento
+     clickeado (uso normal, onclick) O el nombre de la division como
+     string (para activarla por codigo, ej. al abrir un template ya
+     guardado con su division original, sin que el usuario haya dado
+     clic en nada). */
+  function activateDivButton(toggleId, elOrDiv) {
+    const toggle = document.getElementById(toggleId);
+    if (!toggle) return;
+    const targetEl = typeof elOrDiv === 'string'
+      ? toggle.querySelector('button[data-div="' + elOrDiv + '"]')
+      : elOrDiv;
+    toggle.querySelectorAll('button[data-div]').forEach(b => {
+      const active = b === targetEl;
+      b.classList.toggle('active', active);
+      b.style.background = active ? 'var(--gold)' : 'var(--white)';
+      b.style.color = active ? 'var(--black)' : 'var(--gray)';
+    });
+  }
+
+  /* La division REAL de un servicio siempre viene del catalogo (por
+     SKU), nunca de la pestana que estaba activa cuando se eligio --
+     critico para Mixed: ahi la pestana activa es literalmente
+     "Mixed", que no es una division de verdad. Sin esto, CADA
+     servicio elegido en Mixed se hubiera guardado con
+     Division:"Mixed" en vez de su division real, perdiendo ese dato
+     para siempre. Fuera de Mixed da lo mismo que usar la pestana
+     activa (el picker ya solo muestra servicios de esa division). */
+  function realDivisionForSku(catalog, sku, fallbackDiv) {
+    const entry = (catalog || []).find(c => String(c.sku) === String(sku));
+    return (entry && entry.division) || fallbackDiv;
+  }
+
   /* ================================================================
      "Do we need anything from you?" -- tarjeta de acceso/notas.
      UNIFICADA aqui 12/09/2026 -- antes vivia duplicada 4 veces (2 en
@@ -313,6 +376,10 @@ const ICONS = {
     SETS: SETS,
     renderDivDecos: renderDivDecos,
     activateDivTab: activateDivTab,
+    divTabsHtml: divTabsHtml,
+    divButtonsHtml: divButtonsHtml,
+    activateDivButton: activateDivButton,
+    realDivisionForSku: realDivisionForSku,
     officeAccessHtml: officeAccessHtml,
     setOfficeNeedText: setOfficeNeedText,
     getOfficeNeedValue: getOfficeNeedValue,
