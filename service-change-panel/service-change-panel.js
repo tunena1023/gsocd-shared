@@ -156,9 +156,17 @@
     var initialSelected = {};
     var initialLevels = {};
     initialSelected[propertyType] = {};
+    /* Cada servicio actual puede traer su propia categoria (Category =
+       propertyType del picker, como en las ordenes normales, que
+       mezclan Commercial/Residential) y su sku real (SubOption). Si
+       trae sku real se usa como llave y el picker lo reconoce de una
+       -- sin el quirk del doble clic. Si no (Recurring solo guarda el
+       nombre), cae al nombre como llave temporal. */
     (opts.currentServices || []).forEach(function (s) {
-      initialSelected[propertyType][s.ServiceName] = s.ServiceName; // sin sku real, el nombre es la llave (ver quirk arriba)
-      if (s.Level) initialLevels[propertyType + '|' + s.ServiceName] = s.Level;
+      var pt = s.Category || propertyType;
+      if (!initialSelected[pt]) initialSelected[pt] = {};
+      initialSelected[pt][s.ServiceName] = s.SubOption || s.ServiceName;
+      if (s.Level) initialLevels[pt + '|' + s.ServiceName] = s.Level;
       baseNames.push(s.ServiceName);
     });
 
@@ -219,8 +227,14 @@
           if (err) err.classList.remove('show');
           removedNotes.push({ serviceName: n, note: ta.value.trim() });
         });
+        /* El nivel de un agregado puede vivir bajo cualquier propertyType
+           (el cliente pudo cambiar el toggle) -- se busca en todos. */
         var services = d.added.map(function (n) {
-          return { serviceName: n, level: levels[propertyType + '|' + n] || '' };
+          var lvl = '';
+          Object.keys(levels).forEach(function (k) {
+            if (k.slice(k.indexOf('|') + 1) === n && !lvl) lvl = levels[k];
+          });
+          return { serviceName: n, level: lvl };
         });
         return { ok: ok, services: services, removedNotes: removedNotes, added: d.added, removed: d.removed };
       }
