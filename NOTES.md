@@ -210,3 +210,36 @@ label, placeholder nuevo, toggle, candado, `getOfficeNeedNotes` regresa
 vacío con el toggle apagado, y el listener `onOfficeNeedChange`. Después
 de subir, se confirmó con `raw.githubusercontent.com` que el contenido
 real del tag en GitHub trae el texto nuevo.
+
+## Nuevo componente (13/09/2026): photo-hover-preview
+
+`GSPhotoHoverPreview.setup()` + `GSPhotoHoverPreview.stripHtml(photos)`.
+Consolida lo que hasta ahora vivía copiado a mano, por separado, en
+Admingsocd.com y ordersgsocd.com (y en Orders, además, dos veces: una
+para `.order-photo-thumb` en `tracking.html`, otra para `.gs-gal-ph` en
+`customer.html`) — el preview de foto al pasar el mouse (1 segundo,
+tamaño máximo posible en pantalla, sin necesidad de clic) y la función
+que arma la tira de miniaturas de una orden.
+
+Cubre los dos tipos de miniatura que existen hoy:
+- `.order-photo-thumb` — el `<img>` mismo (Admin: Approvals/Review/
+  Active/History/Schedule. Orders: Processing/History).
+- `.gs-gal-ph` — un `<div>` que envuelve un `<img>` adentro, del
+  componente `gallery-groups`. También se usa para videos
+  (`.gs-gal-ph.video`) — los videos se excluyen del preview, un video
+  pausado agrandado no da el mismo vistazo rápido que una foto.
+
+`stripHtml(photos)` devuelve SOLO la tira (miniaturas + "+N"), sin
+envolverla en ningún link — Admin sigue envolviendo el resultado en su
+propio `<a onclick="openGalleryForOrder(...)">` porque esa navegación es
+específica de Admin, no algo que el componente compartido deba conocer.
+
+Tag **v1.26.0** (bump de MENOR, es un componente nuevo). Confirmado en
+vivo (GitHub raw + jsDelivr) el 13/09/2026. Conectado en
+`Admingsocd.com/admin.html` y en `ordersgsocd.com/customer.html` +
+`tracking.html` el mismo día — verificado que el comportamiento es
+idéntico al de las copias locales que reemplazó (mismas pruebas de
+Puppeteer que ya existían para cada página, todas siguen pasando igual).
+
+**Pendiente:** conectar en `tech.gsocd.com`, que todavía no tiene ni el
+hover-preview ni Gallery.
