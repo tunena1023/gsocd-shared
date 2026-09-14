@@ -257,10 +257,54 @@
     return ctrl;
   }
 
+  /* ---- 3. Diff puro (sin picker propio) ------------------------ */
+  /* Para paginas que YA tienen su propio GSServicePicker montado (Admin:
+     Active > Edit y Approvals) y solo quieren pintar el mismo diff
+     verde/rojo contra lo que la orden tenia. Regresa HTML, no toca el
+     DOM. requireNotes:false (default) = solo informativo, sin caja de
+     nota obligatoria -- Admin aplica directo, no manda a Review. */
+  function diffHtml(baseNames, nowNames, opts) {
+    injectStyle();
+    opts = opts || {};
+    baseNames = baseNames || [];
+    nowNames = nowNames || [];
+    var removed = baseNames.filter(function (n) { return nowNames.indexOf(n) === -1; });
+    var added = nowNames.filter(function (n) { return baseNames.indexOf(n) === -1; });
+    if (!removed.length && !added.length) {
+      return '<div class="gs-scp-diff"><span class="gs-scp-diff-empty">' + esc(opts.emptyText || 'No changes yet.') + '</span></div>';
+    }
+    var html = '<div class="gs-scp-diff">';
+    added.forEach(function (n) { html += '<div class="gs-scp-diff-line added">+ ' + esc(n) + '</div>'; });
+    removed.forEach(function (n, i) {
+      html += '<div class="gs-scp-diff-line removed">\u2212 ' + esc(n) + '</div>';
+      if (opts.requireNotes) {
+        html += '<div class="gs-scp-note-box">' +
+          '<label>Why remove "' + esc(n) + '"? (required)</label>' +
+          '<textarea data-removed-index="' + i + '"></textarea>' +
+          '<p class="gs-scp-note-error" data-removed-index="' + i + '">Please add a note.</p>' +
+        '</div>';
+      }
+    });
+    html += '</div>';
+    return html;
+  }
+
+  /* Nombres de servicio seleccionados a partir del shape del picker
+     ({ propertyType: { ServiceName: sku } }) -- util para diffHtml. */
+  function namesOf(selected) {
+    var out = [];
+    Object.keys(selected || {}).forEach(function (pt) {
+      Object.keys(selected[pt] || {}).forEach(function (n) { if (out.indexOf(n) === -1) out.push(n); });
+    });
+    return out;
+  }
+
   window.GSServiceChangePanel = {
     currentListHtml: currentListHtml,
     wireList: wireList,
     collectNotes: collectNotes,
-    mount: mount
+    mount: mount,
+    diffHtml: diffHtml,
+    namesOf: namesOf
   };
 })();
