@@ -243,3 +243,43 @@ Puppeteer que ya existían para cada página, todas siguen pasando igual).
 
 **Pendiente:** conectar en `tech.gsocd.com`, que todavía no tiene ni el
 hover-preview ni Gallery.
+
+## Nuevo componente (14/09/2026): service-change-panel (v1.27.0 → v1.27.2)
+
+"Lista + selector + diff" de servicios: la pieza reusable detrás de
+"Request a Change" del cliente (Recurring y Processing) y de la edición
+de servicios en Admin. Extraído de lo que primero se construyó y probó
+inline en `ordersgsocd.com` para Recurring — mismo patrón que ya usaba
+Supervisor (tech.gsocd.com, "Update Services") con GSServicePicker +
+diff propio.
+
+- `currentListHtml(services, opts)` — un renglón por servicio con nombre
+  + nota (opcional) + cámara, mismo look que `buildAdminSelectedListHtml`
+  de admin.html (Active > Edit). Cero `onclick` inline: la cámara va por
+  delegación (`wireList` + `opts.onCamera`). **Lección real:**
+  `toggleChangePanel`/`renderChangePanel` ya existían en customer.html
+  para el Request Change de órdenes normales y la copia de Recurring las
+  pisó — por eso todo lo del componente va con prefijo `gs-scp-` y sin
+  nombres globales.
+- `collectNotes(listEl, services)` — notas por servicio prefijadas con el
+  nombre, listas para el mensaje general (NO van ligadas a un servicio en
+  el backend, confirmado con el dueño).
+- `mount(opts)` — GSServicePicker real precargado + diff en vivo; regresa
+  controlador con `getDiff()`/`renderDiff()`/`collect()`. `collect()`
+  exige nota por cada quitado y arma `{services, removedNotes}` en el
+  mismo formato que `submit-recurring-update.js` /
+  `request-recurring-change.js` / `request-change.js`.
+- v1.27.1: cada servicio actual puede traer `Category` (propertyType del
+  picker) y `SubOption` (sku real). Con sku real quitar toma **un** clic;
+  sin sku (Recurring guarda solo nombre) queda el quirk heredado del
+  doble clic (el primer clic en cualquier nivel re-selecciona con el sku
+  real, el segundo sí quita). Mismo comportamiento que Supervisor.
+- v1.27.2: `diffHtml(baseNames, nowNames, {requireNotes, emptyText})` y
+  `namesOf(selected)` — diff puro para páginas con picker propio (Admin),
+  sin nota obligatoria por default porque ahí se aplica directo.
+
+Conectado en: Orders `recurring.html` + `customer.html` (Recurring, manda
+a Pending Review), Orders `tracking.html` + `customer.html` (Processing,
+Request a change, manda a Pending Review vía historial), Admin
+`admin.html` (Active > Edit y Approvals > Update, diff informativo,
+aplica directo). Todo verificado con Puppeteer y los componentes reales.
