@@ -44,6 +44,17 @@
      await GSCameraQueue.retryNow(id);        // un item a la fuerza
      await GSCameraQueue.retryAll();          // todos los que se pueda
 
+     // Caso especial: una foto que SI se debe guardar de inmediato
+     // pero todavia no se sabe a donde subirla (ej. foto tomada
+     // mientras se crea una orden nueva, sin OrderID real todavia).
+     const pendingId = await GSCameraQueue.enqueue({
+       endpoint: '/upload-client-photo', body: { orderId: null, imageBase64 },
+       notReady: true                        // no se toca sola hasta release()
+     });
+     // ... cuando ya se sepa el OrderID real:
+     await GSCameraQueue.release(pendingId, { orderId: realOrderId });
+     await GSCameraQueue.remove(pendingId);   // borrar sin subir (ej. se cancelo)
+
    Un item con "failed: true" ya agoto sus intentos automaticos (10
    por default) -- se queda guardado igual (nunca se borra solo),
    nomas deja de reintentarse el solo hasta que alguien le de
@@ -146,7 +157,7 @@
 
   function retryAll() {
     return dbGetAll().then(function (items) {
-      var todo = items.filter(function (it) { return !it.failed; });
+      var todo = items.filter(function (it) { return !it.failed && !it.notReady; });
       if (!todo.length) return;
       return Promise.all(todo.map(function (it) { return attemptUpload(it, false); }))
         .then(notifyChange);
@@ -171,6 +182,14 @@
       notifyChange();
     },
 
+    /* opts.notReady: true -- para cuando la foto SI se debe guardar
+       de inmediato (regla de oro, sin excepcion) pero todavia no se
+       sabe a donde subirla (ej. una foto tomada mientras se crea una
+       orden nueva, que aun no tiene OrderID real). El item se guarda
+       igual que cualquier otro, pero ni retryAll() ni el evento
+       "online" ni el temporizador lo tocan solos -- se queda
+       esperando hasta que alguien llame release() con el dato que
+       faltaba. */
     enqueue: function (opts) {
       var item = {
         endpoint: opts.endpoint,
@@ -178,11 +197,13 @@
         meta: opts.meta || {},
         attempts: 0,
         failed: false,
+        notReady: !!opts.notReady,
         lastError: null,
         createdAt: Date.now()
       };
       return dbAdd(item).then(function (id) {
         item.id = id;
+        if (item.notReady) { notifyChange(); return id; }
         /* Intento inmediato -- si hay señal, sube al toque; si no,
            ya quedo guardada de todos modos (eso ya paso arriba, antes
            de este intento). */
@@ -204,6 +225,22 @@
     },
 
     retryAll: function () { return retryAll().then(function () { notifyChange(); }); },
+
+    /* Completa un item que se guardo con notReady:true, en cuanto se
+       sepa el dato que faltaba (ej. el OrderID real ya existe) --
+       mezcla bodyPatch encima del body que ya tenia, quita notReady,
+       e intenta subir de inmediato (igual que un enqueue() normal). */
+    release: function (id, bodyPatch) {
+      return dbGetAll().then(function (items) {
+        var item = items.filter(function (it) { return it.id === id; })[0];
+        if (!item) return false;
+        item.body = Object.assign({}, item.body, bodyPatch || {});
+        item.notReady = false;
+        return attemptUpload(item, false).then(function (ok) { notifyChange(); return ok; });
+      });
+    },
+
+    remove: function (id) { return dbDelete(id).then(function () { notifyChange(); }); },
 
     onChange: function (fn) { changeListeners.push(fn); }
   };
