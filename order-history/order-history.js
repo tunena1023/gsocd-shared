@@ -238,9 +238,19 @@
         if (!prev) { lines.push(addedLine(s.ServiceName || '', label)); return; }
         var prevLabel = svcSubLabel(prev);
         if (prevLabel !== label) lines.push(changeLine('🔄', s.ServiceName || '', prevLabel || '(none)', label || '(none)'));
+        /* svcSubLabel() no sirve para esto: en Janitorial el SubOption
+           (sku) es siempre el mismo sin importar el nivel -- ese
+           "||" tapaba cualquier cambio de Level, porque SubOption
+           (con valor) siempre gana. Se compara Level aparte, igual de
+           explicito que NotCompleted abajo. */
+        if ((prev.Level || '') !== (s.Level || '')) {
+          lines.push(changeLine('🔄', s.ServiceName || '', prev.Level || '(none)', s.Level || '(none)'));
+        }
         if (isNC(prev) !== isNC(s)) {
           lines.push(changeLine(isNC(s) ? '⚠️' : '✅', s.ServiceName || '', isNC(s) ? 'Completed' : 'Not completed', isNC(s) ? 'Not completed' : 'Completed'));
           if (isNC(s) && s.NotCompletedReason) lines.push('&nbsp;&nbsp;Reason: ' + esc(s.NotCompletedReason));
+        } else if (isNC(s) && (prev.NotCompletedReason || '') !== (s.NotCompletedReason || '')) {
+          lines.push(changeLine('🔄', 'Reason (' + (s.ServiceName || '') + ')', prev.NotCompletedReason || '(empty)', s.NotCompletedReason || '(empty)'));
         }
       });
       oldSvcs.forEach(function (s) {
