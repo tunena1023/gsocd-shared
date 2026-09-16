@@ -128,19 +128,6 @@ Orders, más `tpl-admin` (Admin) y `template-editor` (Orders) para
 plantillas — estos últimos 2 se estandarizaron el 10/09/2026, antes se
 habían quedado en una versión vieja del componente sin el acordeón.
 
-## Pendientes conocidos (al 10/09/2026)
-
-- **En local, sin subir al repo:** fix en `service-picker.js` para que solo
-  una categoría del acordeón esté abierta a la vez (hoy se pueden abrir
-  varias al mismo tiempo). Vive en el sandbox de la sesión del 10/09/2026,
-  no en GitHub — si no aparece en el repo y no se sabe por qué, es por esto.
-- Bug sin resolver: banner "File downloaded... sharepoint.com" en Tech
-  (portal de empleados, celular) — el fondo o logo se descarga como archivo
-  en vez de solo mostrarse. No tocar hasta que el dueño lo pida
-  explícitamente.
-- 404 de `Logo.jpg` / `NavBackground.jpg` en Orders (`/api/site-image`) —
-  pendiente de que el dueño confirme el nombre real de esos archivos en la
-  raíz del drive de SharePoint (Onlineorders).
 # NOTES.md — Cómo se trabaja en este proyecto
 
 Este repo no tenía NOTES.md propio todavía — se crea ahora (12/09/2026)
