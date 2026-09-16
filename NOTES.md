@@ -130,10 +130,6 @@ habían quedado en una versión vieja del componente sin el acordeón.
 
 ## Pendientes conocidos (al 10/09/2026)
 
-- El **sistema de servicios recurrentes** (ubicaciones/clientes con
-  servicio recurrente, técnico asignado que ve y marca servicios como
-  hechos) está apenas empezado — no es funcional todavía. Documento de
-  referencia pendiente de analizar con el dueño.
 - **En local, sin subir al repo:** fix en `service-picker.js` para que solo
   una categoría del acordeón esté abierta a la vez (hoy se pueden abrir
   varias al mismo tiempo). Vive en el sandbox de la sesión del 10/09/2026,
@@ -376,12 +372,6 @@ reabre exactamente el mismo panel y se restaura el estado guardado encima.
 
 ### Pendiente -- para la siguiente sesión
 
-- **Nada de esto se ha probado en un navegador real todavía** (al momento
-  de escribir esto). Se validó con `node --check` (sintaxis) y, para la
-  cola en sí, con Node + fake-indexeddb (lógica real, 8 escenarios en
-  total). El flujo de cámara EN SÍ (`camera-capture.html` de Tech) sí se
-  probó en producción y quedó confirmado por el dueño -- las copias de
-  Admin/Orders reusan el mismo patrón pero nunca se abrieron de verdad.
 - Los paneles de "Update Services" de `supervisor.html` (tech.gsocd.com)
   siguen con su diseño viejo (modal aparte) -- el dueño ya confirmó que se
   quiere rediseñar para que se vean como las tarjetas de Active en Admin
