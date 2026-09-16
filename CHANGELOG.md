@@ -371,3 +371,66 @@ el primero (probablemente `Admingsocd.com`, para probar el proceso completo con 
   (llamadas repetidas no duplican), y cada portal quita sus propias
   reglas locales de `nav`/`.logo-diamond`/`.nav-logo img` para
   depender de esta en vez de mantener su propia copia.
+
+## v1.27.3 — 2026-09-15
+
+- **order-history**: `svcSubLabel()` tapaba los cambios de Nivel (Level) --
+  en un servicio Janitorial, el `SubOption` (sku) es siempre el mismo sin
+  importar el nivel, y el nivel se guarda aparte en `Level`. La comparación
+  vieja hacía `SubOption || Level`, y como `SubOption` casi siempre tiene
+  valor, ese `||` tapaba cualquier cambio real de `Level`. Se agrega una
+  comparación aparte y explícita de `Level`, igual de directa que la que ya
+  existía para `NotCompleted` ("🔄 ServiceName: Level 1 → Level 2"). De paso
+  se agrega el caso de la razón de "Not completed" editada SIN cambiar el
+  estado NC (antes solo se mostraba la razón al marcar/desmarcar).
+
+## v1.28.0 — 2026-09-15
+
+- **Nuevo componente: camera-queue** -- cola offline real para fotos.
+  Origen: un técnico tomó ~8 fotos en un edificio con punto muerto, solo se
+  guardó 1. Regla de oro confirmada con el dueño: LAS FOTOS SIEMPRE SE DEBEN
+  GUARDAR, no importa qué.
+
+  Usa IndexedDB (no `localStorage` -- una foto en base64 pesa varios MB,
+  `localStorage` tiene un límite total de ~5-10MB). La foto se guarda
+  completa ANTES de intentar subirla, no después de que falle -- así aunque
+  cierren la pestaña a medio camino, nada se pierde.
+
+  No sabe nada de endpoints ni de la forma del body -- cada página que lo use
+  ya tiene su propio helper de API (`GS.api` en Tech/Orders, `api()` en
+  Admin) y decide qué URL y qué datos van en cada foto; esto solo guarda,
+  reintenta (automático: evento `online` + cada 20-30s + al abrir la
+  página), y avisa cuando cambia el estado (`onChange`).
+
+  Hasta 10 intentos automáticos por foto (confirmado con el dueño). Al
+  agotarse, se marca `failed` -- deja de reintentarse sola, pero NUNCA se
+  borra; queda ahí para reintento manual (`retryNow`).
+
+  API completa: `init(config)`, `enqueue(opts)`, `getPending()`,
+  `retryNow(id)`, `retryAll()`, `onChange(fn)`. Ver v1.28.1 para
+  `notReady`/`release`/`remove`.
+
+  Probado con Node + fake-indexeddb antes de subir (4 escenarios: éxito
+  inmediato, fallo y reintento hasta pasar, agotar el límite de intentos y
+  dejar de reintentar solo, forzar un reintento manual sobre un item ya
+  marcado `failed`).
+
+## v1.28.1 — 2026-09-15
+
+- **camera-queue**: agregar `notReady`/`release()`/`remove()` -- caso real: el
+  cliente toma una foto mientras crea una orden nueva, y la orden todavía no
+  existe (no hay `OrderID` real todavía). La regla de oro sigue aplicando
+  igual (la foto se guarda al momento, sin excepción) pero la SUBIDA sí tiene
+  que esperar a que el dato que falta (el `OrderID`) exista.
+  - `enqueue({ notReady: true, ... })` -- guarda el item pero NO intenta
+    subirlo solo (ni al crearlo, ni `retryAll()`, ni el evento `online`, ni
+    el temporizador lo tocan).
+  - `release(id, bodyPatch)` -- mezcla los datos que faltaban (ej.
+    `{orderId: realId}`) encima del body ya guardado, quita `notReady`, e
+    intenta subir de inmediato.
+  - `remove(id)` -- borra sin subir (ej. el cliente canceló la orden antes
+    de crearla).
+  - Probado con Node + fake-indexeddb antes de subir (4 escenarios: notReady
+    nunca sube solo, `retryAll()` lo respeta, `release()` completa el body y
+    sube, `remove()` borra sin disparar ninguna subida).
+

@@ -283,3 +283,109 @@ a Pending Review), Orders `tracking.html` + `customer.html` (Processing,
 Request a change, manda a Pending Review vía historial), Admin
 `admin.html` (Active > Edit y Approvals > Update, diff informativo,
 aplica directo). Todo verificado con Puppeteer y los componentes reales.
+
+## Proyecto grande (15/09/2026): cámara propia + cola offline real
+
+**Origen real:** un técnico tomó ~8 fotos en un edificio con punto muerto
+conocido; solo se guardó 1. La cámara nativa del teléfono sube cada foto al
+tomarla, una por una, sin ninguna cola -- si falla, la foto se descarta por
+completo, no queda registro. Regla de oro que el dueño repitió varias veces
+sin excepción: **LAS FOTOS SIEMPRE SE DEBEN GUARDAR, no importa qué.**
+
+### Arquitectura (por qué quedó así, no de otra forma)
+
+- **`camera-queue/camera-queue.js`** (aquí, compartido) -- toda la lógica de
+  guardar/reintentar/reportar estado. Ver CHANGELOG v1.28.0/v1.28.1 para el
+  detalle técnico completo. Genérico a propósito: no sabe de endpoints ni de
+  la forma del body, cada app decide eso.
+- **`camera-capture.html`** (la página con la cámara en vivo en sí) --
+  **NO vive aquí**, existe UNA COPIA POR DOMINIO (`tech.gsocd.com/
+  camera-capture.html`, `Admingsocd.com/camera-capture.html`,
+  `ordersgsocd.com/camera-capture.html`). Esto no es duplicación evitable:
+  IndexedDB (donde vive la cola) **no cruza dominios** -- si la página de
+  cámara viviera en el CDN compartido (otro dominio), la cola de esa sesión
+  quedaría atrapada ahí y la app real (Tech/Admin/Orders) nunca podría
+  verla ni reintentarla. Las 3 copias son casi idénticas (mismo HTML/CSS/
+  flujo de captura), solo cambian: qué `shared.js`/`api()` usan para
+  autenticar, y qué contextos soportan.
+- **Video se queda con la cámara nativa del teléfono**, sin tocar --
+  grabar en vivo desde el navegador es notoriamente menos estable entre
+  teléfonos (sobre todo Android), y ya había bugs reales documentados en
+  este mismo código sobre eso. Confirmado con el dueño: solo fotos pasan a
+  la cámara nueva.
+- **`notReady`/`release`/`remove`** (v1.28.1) existen por un solo caso: la
+  foto de un cliente creando una orden nueva, donde el `OrderID` real no
+  existe todavía cuando se toma la foto.
+
+### Los 9 puntos de captura conectados (confirmado con el dueño: TODOS, sin
+excepción -- no se dejó ninguno con la cámara vieja a propósito)
+
+**Tech** (`employee.html` + `supervisor.html`, ambos igual):
+1. Take a photo (orden normal)
+2. Mark as Completed (foto obligatoria -- `requireAtLeastOne=1&completeAfter=1`)
+3. Foto de Recurring (opcional)
+
+**Admin** (`admin.html`):
+4. Foto de "Not Completed" en Active > Update Services
+
+**Orders** (`customer.html` + `recurring.html`/`tracking.html` standalone):
+5. Recurring (+ el ícono de cámara dentro de "Request a Change")
+6. Tracking/Processing (+ el ícono dentro de "Request a Change" ahí también)
+7. Orden nueva sin `OrderID` todavía -- usa `notReady`/`release`, ver abajo
+
+### El caso de la orden nueva (el más raro de los 9)
+
+Cuando el cliente toma una foto mientras llena el formulario de "New Order",
+la orden no existe todavía. Diseño final:
+- Antes de ir a la cámara, se fuerza `saveDraft()` (ya existía, normalmente
+  se dispara solo cada 3 segundos) -- así el RESTO del formulario (edificio,
+  unidad, servicios, fechas) también queda a salvo del lado del servidor,
+  no solo la foto.
+- La foto se guarda con `notReady:true` -- nunca intenta subir sola.
+- Al volver de la cámara, se reusa `?continue=<draftOrderId>` (mecanismo que
+  YA EXISTÍA, es el mismo que usa el botón "Continue" del diálogo de
+  drafts) para rellenar el formulario solo, sin reinventar nada.
+- Cuando `submitOrder()` de verdad confirma el/los `OrderID(s)` reales
+  (puede ser más de uno si es un lote de varias unidades -- la MISMA foto
+  se manda a cada uno), se llama `release()` para el primero y se
+  `enqueue()` una copia nueva por cada `OrderID` adicional.
+- **Si se está EDITANDO una orden existente** (no creando una nueva), el
+  `OrderID` ya es real desde el principio -- la foto sube directo, sin
+  `notReady`, sin esperar nada. Este caso se encontró a tiempo revisando el
+  código antes de romperlo (el botón "Add Photo" del formulario se
+  reutiliza para ambos modos).
+
+### Protección de "no perder edición sin guardar" (efecto secundario real)
+
+Al construir esto se encontró un problema aparte, no relacionado con fotos
+en sí: en varios lugares (`Update Services` de Admin y de Supervisor,
+`Request a Change` del cliente en Recurring y Tracking) hay edición viva
+que solo existe en memoria del navegador -- si la cámara nueva navega fuera
+de la página por completo (confirmado con el dueño: navegación completa, no
+iframe, por temas de permisos de cámara entre dominios), esa edición se
+perdería sin necesidad.
+
+Solución, mismo patrón en los 4 lugares: justo antes de navegar a la
+cámara, se guarda un snapshot completo del panel abierto en
+`sessionStorage` (para paneles con picker real como `GSServicePicker`, esto
+significa hacer awaitable la cadena de montaje que antes no lo era --
+`toggleRcUpdate`, `rcToggleChangePanel`, `toggleChangePanel`, etc., todas
+se volvieron `async` para poder saber desde afuera cuándo el picker ya está
+listo para pisarle la selección con `setSelected()`). Al volver, se
+reabre exactamente el mismo panel y se restaura el estado guardado encima.
+
+### Pendiente -- para la siguiente sesión
+
+- **Nada de esto se ha probado en un navegador real todavía** (al momento
+  de escribir esto). Se validó con `node --check` (sintaxis) y, para la
+  cola en sí, con Node + fake-indexeddb (lógica real, 8 escenarios en
+  total). El flujo de cámara EN SÍ (`camera-capture.html` de Tech) sí se
+  probó en producción y quedó confirmado por el dueño -- las copias de
+  Admin/Orders reusan el mismo patrón pero nunca se abrieron de verdad.
+- Los paneles de "Update Services" de `supervisor.html` (tech.gsocd.com)
+  siguen con su diseño viejo (modal aparte) -- el dueño ya confirmó que se
+  quiere rediseñar para que se vean como las tarjetas de Active en Admin
+  (X/undo en línea, pills L1/L2/L3, cámara por servicio individual), pero
+  eso se dejó **a propósito** para una sesión aparte de diseño. Lo que se
+  hizo en esta sesión fue solo proteger que la edición actual (con el
+  diseño viejo) no se pierda al ir a la cámara -- no tocar el diseño en sí.
