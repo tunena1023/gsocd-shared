@@ -118,6 +118,28 @@
     var popWidth = 260;
     var overflowRight = (r.left + popWidth) - window.innerWidth + 16;
     if (overflowRight > 0) pop.style.left = (r.left - overflowRight) + 'px';
+
+    /* Si el popover ya esta abierto (medible), revisar que quepa
+       verticalmente contra la ventana -- position:fixed lo saca del
+       flujo de la pagina, asi que si el campo esta cerca del final y
+       la pagina ya no puede bajar mas scroll, el popover se cortaba
+       sin ninguna forma de verlo completo. Si no cabe abajo pero SI
+       cabe arriba del campo, se abre hacia arriba en su lugar (mismo
+       patron que cualquier dropdown/select inteligente). Si tampoco
+       cabe arriba (campo entero mas alto que la ventana, caso raro),
+       se deja pegado arriba de la ventana -- lo maximo posible
+       visible es mejor que cortado por abajo sin remedio. */
+    var popHeight = pop.offsetHeight;
+    if (popHeight > 0) {
+      var margin = 12;
+      var spaceBelow = window.innerHeight - r.bottom - margin;
+      var spaceAbove = r.top - margin;
+      if (popHeight > spaceBelow && popHeight <= spaceAbove) {
+        pop.style.top = (r.top - popHeight - 8) + 'px';
+      } else if (popHeight > spaceBelow && popHeight > spaceAbove) {
+        pop.style.top = margin + 'px';
+      }
+    }
   }
 
   function toggleCal(fieldId) {

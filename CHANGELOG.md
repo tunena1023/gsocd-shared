@@ -2,6 +2,20 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.28.2 — 2026-09-17
+
+- **Arreglado:** BUG REAL -- el calendario de `date-time-picker` (usado en Admin >
+  Scheduling y otros lugares) siempre se abría hacia ABAJO del campo, sin revisar si
+  había espacio. Con el campo cerca del final de la página (ej. "Assigned Date" en el
+  panel de asignación de Scheduling) y la página ya en su límite de scroll, el calendario
+  se cortaba a la mitad -- no había forma de bajar más para verlo completo, era
+  `position:fixed`. Ahora `positionPopover()` mide la altura real del popover ya
+  renderizado y, si no cabe abajo pero sí cabe arriba del campo, lo abre hacia arriba en
+  su lugar (mismo patrón que cualquier dropdown inteligente). Si de plano no cabe en
+  ningún lado (campo más alto que la ventana, caso raro), se deja pegado arriba de la
+  ventana -- lo máximo visible posible en vez de cortado sin remedio. El caso normal
+  (con espacio de sobra abajo) sigue exactamente igual que antes.
+
 ## v1.1.10 — 2026-09-08
 
 - **Agregado:** nuevo evento `gs-popover-closed` -- se dispara cada vez que un popover
