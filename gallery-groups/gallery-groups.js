@@ -53,6 +53,26 @@
   }
   function escAttr(s) { return esc(s).replace(/"/g, '&quot;'); }
 
+  /* BUG REAL encontrado y arreglado (18/09/2026, reportado por el
+     dueño): g.date llega como timestamp ISO crudo del backend
+     ('2026-09-19T13:00:00.000Z') -- Admin y Orders lo mandaban tal
+     cual a este componente, sin formatear, asi que el encabezado de
+     cada grupo de fotos mostraba la fecha Y HORA UTC crudas. Solo
+     Tech lo formateaba ANTES de llamar (fmtDate(g.date) en
+     supervisor.html). Se arregla aqui adentro -- asi ningun llamador
+     tiene que acordarse. Si detecta un timestamp ISO completo, lo
+     convierte a fecha local corta (solo dia, sin hora -- un grupo de
+     fotos puede tener varias del mismo dia a horas distintas, la
+     hora individual ya la trae cada foto en su propio caption). Si
+     ya viene como texto corto (por compatibilidad con quien lo siga
+     pre-formateando), se deja tal cual, sin tocarlo. */
+  function fmtGroupDate(v) {
+    if (!v) return '';
+    if (!/^\d{4}-\d{2}-\d{2}T/.test(String(v))) return String(v);
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? String(v) : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
   function render(containerId, groups, opts) {
     styleTag();
     opts = opts || {};
@@ -82,7 +102,7 @@
           '<div class="gs-gal-grp-header">' +
             '<span class="gs-gal-grp-order">' + esc(g.orderId) + '</span>' +
             '<span class="gs-gal-grp-count">' + count + '</span>' +
-            '<span class="gs-gal-grp-meta">' + esc(g.date || '') +
+            '<span class="gs-gal-grp-meta">' + esc(fmtGroupDate(g.date)) +
               (g.clientLabel ? '<span class="gs-gal-client">' + esc(g.clientLabel) + '</span>' : '') +
             '</span>' +
             '<span class="gs-gal-grp-arrow">\u25B8</span>' +

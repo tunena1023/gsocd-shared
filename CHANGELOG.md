@@ -2,6 +2,16 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.28.6 — 2026-09-18
+
+- **Arreglado:** BUG REAL -- `gallery-groups.render()` mostraba `g.date` crudo (el
+  timestamp ISO tal cual, ej. `2026-09-19T13:00:00.000Z`) en el encabezado de cada grupo
+  de fotos, en vez de una fecha legible -- Admin y Orders nunca formateaban ese valor
+  antes de mandarlo al componente (solo Tech lo hacía). Ahora se formatea adentro del
+  propio componente (fecha corta, hora local del navegador) si detecta un timestamp ISO
+  completo; si ya llega pre-formateado (como sigue haciendo Tech) lo deja tal cual, sin
+  tocarlo -- compatible con ambos casos a la vez.
+
 ## v1.28.5 — 2026-09-18
 
 - **Arreglado:** BUG REAL -- `service-change-panel.mount()` nunca le pasaba `crossDivision`
