@@ -2,6 +2,15 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.28.4 — 2026-09-18
+
+- **Arreglado:** el evento "Batch Created" (fila resumen de un lote de varias unidades
+  creadas de un jalón) se mostraba en el Historial sin ninguna etiqueta ni detalle propio
+  -- se veía vacío/redundante justo debajo de "Order created", que ya trae toda la info
+  real (Entry/Due/servicios). Confirmado con captura real del dueño. Se agregó a
+  `ALWAYS_HIDDEN_TYPES` -- ya no se muestra, sin tocar el dato que sigue ahí por si
+  algún día hace falta.
+
 ## v1.28.3 — 2026-09-18
 
 - **Arreglado:** BUG REAL -- el evento "Order created" en `order-history` mostraba las

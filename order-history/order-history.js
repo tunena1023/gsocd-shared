@@ -86,7 +86,13 @@
 
   /* --- Ruido puramente operativo -- nunca aporta nada a "que paso
      con la orden", en ningun modo. --- */
-  var ALWAYS_HIDDEN_TYPES = ['Document Generated', 'Document Failed', 'Archived'];
+  var ALWAYS_HIDDEN_TYPES = ['Document Generated', 'Document Failed', 'Archived',
+    /* Fila resumen de lote (submit-order.js, Flujo D) -- nunca tuvo
+       etiqueta ni detalle propio en este archivo, se veia vacia/
+       redundante junto a "Order created", que ya trae Entry/Due/
+       servicios. BUG REAL reportado por el dueno con captura real,
+       18/09/2026. */
+    'Batch Created'];
 
   /* --- Ademas de lo anterior, esto se esconde SOLO del cliente --
      mismas reglas que ya existian en tracking.html, mas Office
