@@ -155,6 +155,10 @@
     var baseNames = [];
     var initialSelected = {};
     var initialLevels = {};
+    /* Cantidad -- paso 4 del pedido del dueño (puertas, ventanas,
+       persianas, etc.). Mismo criterio que initialLevels: se lee de
+       Quantity si el servicio ya la traia guardada. */
+    var initialQuantities = {};
     initialSelected[propertyType] = {};
     /* Cada servicio actual puede traer su propia categoria (Category =
        propertyType del picker, como en las ordenes normales, que
@@ -167,6 +171,7 @@
       if (!initialSelected[pt]) initialSelected[pt] = {};
       initialSelected[pt][s.ServiceName] = s.SubOption || s.ServiceName;
       if (s.Level) initialLevels[pt + '|' + s.ServiceName] = s.Level;
+      if (s.Quantity) initialQuantities[pt + '|' + s.ServiceName] = Number(s.Quantity);
       baseNames.push(s.ServiceName);
     });
 
@@ -227,14 +232,20 @@
           if (err) err.classList.remove('show');
           removedNotes.push({ serviceName: n, note: ta.value.trim() });
         });
-        /* El nivel de un agregado puede vivir bajo cualquier propertyType
-           (el cliente pudo cambiar el toggle) -- se busca en todos. */
+        /* El nivel (o la cantidad) de un agregado puede vivir bajo
+           cualquier propertyType (el cliente pudo cambiar el toggle)
+           -- se busca en todos, mismo criterio para los 2. */
+        var qtys = picker ? picker.getQuantities() : {};
         var services = d.added.map(function (n) {
           var lvl = '';
           Object.keys(levels).forEach(function (k) {
             if (k.slice(k.indexOf('|') + 1) === n && !lvl) lvl = levels[k];
           });
-          return { serviceName: n, level: lvl };
+          var qty = '';
+          Object.keys(qtys).forEach(function (k) {
+            if (k.slice(k.indexOf('|') + 1) === n && !qty) qty = qtys[k];
+          });
+          return { serviceName: n, level: lvl, qty: qty };
         });
         return { ok: ok, services: services, removedNotes: removedNotes, added: d.added, removed: d.removed };
       }
@@ -265,6 +276,7 @@
       showPropertyToggle: opts.showPropertyToggle !== false,
       initialSelected: initialSelected,
       initialLevels: initialLevels,
+      initialQuantities: initialQuantities,
       onChange: function () { ctrl.renderDiff(); }
     });
     ctrl.picker = picker;
