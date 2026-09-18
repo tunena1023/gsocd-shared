@@ -39,6 +39,14 @@
       '.gs-sp-lvl-btn.active{background:var(--gold,#C9A84C);color:var(--black,#111)}' +
       '.gs-sp-lvl-btn:hover:not(.active){background:var(--off,#F7F6F3)}' +
       '.gs-sp-empty{color:var(--gray,#6B6B6B);font-size:13px}' +
+      /* Cantidad -- servicios marcados en el catalogo (Developer >
+         Catalog, casilla "Requires quantity") como puertas, ventanas,
+         persianas, etc. que no son un simple si/no sino "cuantas".
+         Mismo layout de fila que Janitorial (gs-sp-row), en vez de
+         los botones de nivel va un numero. */
+      '.gs-sp-qty-input{width:52px;padding:6px 8px;border:1px solid var(--border,#E0D9CC);border-radius:4px;font-size:13px;font-family:inherit;text-align:center}' +
+      '.gs-sp-qty-input:focus{outline:none;border-color:var(--gold,#C9A84C)}' +
+      '.gs-sp-qty-label{font-size:10px;color:var(--gray,#6B6B6B);text-transform:uppercase;letter-spacing:.04em;margin-right:6px}' +
       '@media (max-width:900px){.gs-sp-chip-grid,.gs-sp-row-grid{grid-template-columns:1fr 1fr}}' +
       '@media (max-width:640px){.gs-sp-chip-grid,.gs-sp-row-grid{grid-template-columns:1fr}}' +
       /* Acordeon por categoria -- confirmado con el usuario: sin
@@ -71,11 +79,12 @@
 
   function fireChange(pickerId) {
     var inst = instances[pickerId];
-    if (inst.onChange) inst.onChange(inst.selected, inst.svcLevel, inst.propertyType);
+    if (inst.onChange) inst.onChange(inst.selected, inst.svcLevel, inst.propertyType, inst.svcQty);
     document.dispatchEvent(new CustomEvent('gs-services-changed', {
-      detail: { pickerId: pickerId, selected: inst.selected, svcLevel: inst.svcLevel, propertyType: inst.propertyType }
+      detail: { pickerId: pickerId, selected: inst.selected, svcLevel: inst.svcLevel, propertyType: inst.propertyType, svcQty: inst.svcQty }
     }));
   }
+
 
   function visibleList(inst) {
     var q = inst.searchEl ? (inst.searchEl.value || '').trim().toLowerCase() : '';
@@ -108,6 +117,14 @@
     return String(s.division || '').toLowerCase() === 'janitorial';
   }
 
+  /* Servicio marcado en el catalogo como "pide cantidad" -- puertas,
+     ventanas, persianas, etc. Se decide por servicio individual
+     (igual que isLeveledItem), asi que puede convivir con toggles y
+     niveles en el mismo picker sin problema. */
+  function isQuantityItem(s) {
+    return !!s.requiresQuantity;
+  }
+
   function itemHtml(inst, s) {
     if (isLeveledItem(s)) {
       var sel = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
@@ -120,19 +137,39 @@
         '<span class="gs-sp-row-name">' + escapeHtml(s.serviceName) + '</span>' +
         '<div class="gs-sp-lvl-group">' + btns + '</div></div>';
     }
+    if (isQuantityItem(s)) {
+      var qsel = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
+      var qty = qsel ? (inst.svcQty[svcKey(inst.propertyType, s.serviceName)] || '') : '';
+      return '<div class="gs-sp-row' + (qsel ? ' selected' : '') + '">' +
+        '<span class="gs-sp-row-name">' + escapeHtml(s.serviceName) + '</span>' +
+        '<span><span class="gs-sp-qty-label">Qty</span>' +
+        '<input type="number" class="gs-sp-qty-input" min="1" step="1" inputmode="numeric" ' +
+        'data-sku="' + escapeAttr(s.sku) + '" value="' + escapeAttr(qty) + '"></span></div>';
+    }
     var active = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
     return '<button type="button" class="gs-sp-chip-btn' + (active ? ' active' : '') + '" data-sku="' + escapeAttr(s.sku) + '">' + escapeHtml(s.serviceName) + '</button>';
   }
 
   function bindItemEvents(inst, pickerId, scopeEl) {
-    /* Se enganchan los 2 tipos de evento siempre, sin importar
+    /* Se enganchan los 3 tipos de evento siempre, sin importar
        inst.mode -- una pantalla mezclada puede tener botones de
-       nivel Y chips de toggle al mismo tiempo. */
+       nivel, chips de toggle, y campos de cantidad al mismo tiempo. */
     Array.prototype.forEach.call(scopeEl.querySelectorAll('.gs-sp-lvl-btn'), function (btn) {
       btn.addEventListener('click', function () { pickLevel(pickerId, btn.dataset.sku, btn.dataset.level); });
     });
     Array.prototype.forEach.call(scopeEl.querySelectorAll('.gs-sp-chip-btn'), function (btn) {
       btn.addEventListener('click', function () { toggleChip(pickerId, btn.dataset.sku); });
+    });
+    Array.prototype.forEach.call(scopeEl.querySelectorAll('.gs-sp-qty-input'), function (input) {
+      /* 'input' (cada tecla) solo actualiza el estado y avisa a quien
+         este escuchando -- NUNCA renderGrid aqui, o el campo se
+         recrea en cada tecla y el cursor/foco se pierde a media
+         escritura. 'change' (al salir del campo) si hace un render
+         completo, para limpiar el valor mostrado y actualizar el
+         contador de la categoria y el resaltado de "seleccionado". */
+      input.addEventListener('input', function () { setQuantity(pickerId, input.dataset.sku, input.value, false); });
+      input.addEventListener('change', function () { setQuantity(pickerId, input.dataset.sku, input.value, true); });
+      input.addEventListener('click', function (e) { e.stopPropagation(); });
     });
   }
 
@@ -259,9 +296,36 @@
     fireChange(pickerId);
   }
 
+  /* rerender=false en cada tecla (evita perder el foco, ver
+     bindItemEvents); rerender=true al salir del campo (change), para
+     limpiar el valor mostrado (numeros invalidos, negativos, etc.)
+     y refrescar el resaltado/contador. Cantidad vacia o menor a 1
+     deselecciona el servicio, igual que des-marcar un chip. */
+  function setQuantity(pickerId, sku, rawValue, rerender) {
+    var inst = instances[pickerId];
+    var svc = inst.catalog.find(function (s) { return String(s.sku) === String(sku); });
+    if (!svc) return;
+    var k = svcKey(inst.propertyType, svc.serviceName);
+    if (!inst.selected[inst.propertyType]) inst.selected[inst.propertyType] = {};
+    var n = parseInt(rawValue, 10);
+    if (!n || n < 1) {
+      delete inst.selected[inst.propertyType][svc.serviceName];
+      if (!Object.keys(inst.selected[inst.propertyType]).length) delete inst.selected[inst.propertyType];
+      delete inst.svcQty[k];
+    } else {
+      inst.selected[inst.propertyType][svc.serviceName] = sku;
+      inst.svcQty[k] = n;
+    }
+    if (rerender) renderGrid(pickerId);
+    fireChange(pickerId);
+  }
+
   function selectAllLevel(pickerId, level, idx) {
     var inst = instances[pickerId];
-    var visible = visibleList(inst);
+    /* Los de cantidad (puertas, ventanas, etc.) se excluyen -- no
+       tiene sentido "seleccionar todos con Level 2", necesitan que
+       alguien ponga un numero de verdad, uno por uno. */
+    var visible = visibleList(inst).filter(function (s) { return !isQuantityItem(s); });
     if (!inst.selected[inst.propertyType]) inst.selected[inst.propertyType] = {};
 
     if (inst.selAllActive === idx) {
@@ -309,6 +373,7 @@
       openCats: {},
       selected: options.initialSelected || {},
       svcLevel: options.initialLevels || {},
+      svcQty: options.initialQuantities || {},
       selAllActive: null,
       onChange: options.onChange || null
     };
@@ -370,10 +435,12 @@
     return {
       getSelected: function () { return inst.selected; },
       getLevels: function () { return inst.svcLevel; },
+      getQuantities: function () { return inst.svcQty; },
       getPropertyType: function () { return inst.propertyType; },
-      setSelected: function (selected, levels) {
+      setSelected: function (selected, levels, quantities) {
         inst.selected = selected || {};
         inst.svcLevel = levels || {};
+        inst.svcQty = quantities || {};
         renderGrid(pickerId);
       },
       setDivision: function (division) { inst.division = division; renderGrid(pickerId); },
