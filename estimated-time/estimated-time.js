@@ -70,7 +70,12 @@
       var minutes = svcMinutes(s.SubOption, s.Level, catalog);
       if (minutes == null) return;
       anyKnown = true;
-      total += minutes;
+      /* Pedido del dueno (18/09/2026): puertas, ventanas, persianas,
+         etc. -- el tiempo guardado en Service Times es por UNA sola
+         unidad, se multiplica por la cantidad elegida. Sin cantidad
+         puesta (o el servicio no la pide), se cuenta como 1, mismo
+         comportamiento de siempre. */
+      total += minutes * (Number(s.Quantity) || 1);
     });
     return anyKnown ? { totalMinutes: total } : null;
   }
