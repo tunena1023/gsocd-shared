@@ -2,6 +2,20 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.28.5 — 2026-09-18
+
+- **Arreglado:** BUG REAL -- `service-change-panel.mount()` nunca le pasaba `crossDivision`
+  a `GSServicePicker`, sin importar la división que el llamador mandara. Una orden Mixed
+  (Janitorial+Renovations+Exteriors combinadas) que abriera "Request a Change" en Orders
+  se quedaba con la barra de búsqueda de servicios completamente vacía -- ningún servicio
+  del catálogo tiene `division: 'Mixed'` de verdad, esa palabra no es una categoría real.
+  Se calcula ahora dentro del propio componente (`crossDivision` = división es "Mixed",
+  sin importar mayúsculas/minúsculas), así ningún llamador actual ni futuro tiene que
+  acordarse de hacerlo por su cuenta. Afecta los 4 lugares que usan este componente en
+  Orders (`customer.html` y `tracking.html`, "Request a Change" de una orden normal).
+  Verificado con render real: buscar "wall", "trash" y "land" en un picker Mixed
+  encuentra el servicio de Renovations, Janitorial y Exteriors respectivamente.
+
 ## v1.28.4 — 2026-09-18
 
 - **Arreglado:** el evento "Batch Created" (fila resumen de un lote de varias unidades

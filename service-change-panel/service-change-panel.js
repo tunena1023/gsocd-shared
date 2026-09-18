@@ -243,6 +243,21 @@
     picker = GSServicePicker.mount(instanceId, pickerMountEl, {
       catalog: opts.catalog || [],
       division: opts.division || 'Janitorial',
+      /* BUG REAL encontrado y arreglado (18/09/2026, reportado por el
+         dueño): este mount() nunca le pasaba crossDivision a
+         GSServicePicker, sin importar lo que el llamador mandara en
+         opts.division -- si una orden Mixed llegaba aqui (ej. "Request
+         a Change" del cliente en Orders), la barra de busqueda del
+         picker nunca encontraba nada, porque ningun servicio del
+         catalogo tiene division='mixed' de verdad (esa palabra no es
+         una categoria real, es Janitorial+Renovations+Exteriors
+         combinadas). Se calcula aqui mismo, adentro del componente
+         compartido, para que NINGUN llamador (los 4 que hay hoy, y
+         cualquiera que se agregue despues) tenga que acordarse de
+         hacerlo por su cuenta -- mismo criterio ya usado en los otros
+         5 lugares que SI llaman GSServicePicker.mount() directo
+         (Create Order, Templates x2, Approvals). */
+      crossDivision: String(opts.division || '').toLowerCase() === 'mixed',
       mode: opts.mode || 'levels',
       showSelectAll: !!opts.showSelectAll,
       groupByCategory: opts.groupByCategory !== false,
