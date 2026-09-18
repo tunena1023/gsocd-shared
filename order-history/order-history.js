@@ -196,8 +196,8 @@
 
     if (h.ChangeType === 'Created') {
       if (newPay) {
-        if (newPay.entryDate) lines.push('📅 Entry: ' + esc(newPay.entryDate));
-        if (newPay.dueDate) lines.push('📅 Due: ' + esc(newPay.dueDate));
+        if (newPay.entryDate) lines.push('📅 Entry: ' + esc(fmtDate(newPay.entryDate)));
+        if (newPay.dueDate) lines.push('📅 Due: ' + esc(fmtDate(newPay.dueDate)));
         if (newPay.serviceWindow) lines.push('🕐 Window: ' + esc(newPay.serviceWindow));
       }
       (newSvcs || []).forEach(function (s) {

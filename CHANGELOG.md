@@ -2,6 +2,16 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.28.3 — 2026-09-18
+
+- **Arreglado:** BUG REAL -- el evento "Order created" en `order-history` mostraba las
+  fechas de Entry/Due crudas, sin formatear (`2026-09-19T13:00:00.000Z`) en vez de
+  legibles (`Sep 19, 2026`) -- confirmado con captura real del dueño. Los demás lugares
+  del historial (cambio de fecha de entrada/vencimiento, Service Date de asignación) ya
+  usaban `fmtDate()` para esto, solo el detalle del evento de creación se había quedado
+  sin formatear. `fmtDate()` ya usa la hora LOCAL del navegador de quien lo ve (no UTC),
+  así que de paso corrige que la hora se viera desfasada.
+
 ## v1.28.2 — 2026-09-17
 
 - **Arreglado:** BUG REAL -- el calendario de `date-time-picker` (usado en Admin >
