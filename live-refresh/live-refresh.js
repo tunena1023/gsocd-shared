@@ -29,10 +29,11 @@
          return buildSignature(res.orders);
        },
        hasChanged: (oldSig, newSig) => {...}, // true si de verdad cambio algo
-       onChange: async (newSig) => {          // aplicar el cambio de verdad
+       onChange: async (newSig, prevSig) => {  // aplicar el cambio de verdad
          await reloadEverything();
          showToast('Updated with the latest info.');
-       }
+       }         // prevSig es el snapshot de ANTES del cambio -- util para
+                  // saber cuales IDs son nuevos de verdad (prevSig.has(id))
      });
 
      watcher.stop();       // dejar de revisar (ej. al salir de la pagina)
@@ -80,8 +81,9 @@
           checking = false;
           if (stopped) return;
           if (lastSnapshot !== null && cfg.hasChanged(lastSnapshot, snap)) {
+            var prevSnapshot = lastSnapshot;
             lastSnapshot = snap;
-            Promise.resolve(cfg.onChange(snap)).catch(function () {});
+            Promise.resolve(cfg.onChange(snap, prevSnapshot)).catch(function () {});
           } else {
             lastSnapshot = snap;
           }

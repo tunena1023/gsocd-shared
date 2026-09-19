@@ -2,6 +2,13 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.29.1 — 2026-09-19
+
+- **Mejorado:** `live-refresh` ahora le pasa a `onChange` también el snapshot de ANTES del
+  cambio (`onChange(newSnapshot, prevSnapshot)`), no solo el nuevo -- así cada app puede
+  saber exactamente cuáles IDs son nuevos de verdad (`!prevSnapshot.has(id)`) y no solo que
+  "algo cambió", para poder resaltar específicamente las tarjetas nuevas.
+
 ## v1.29.0 — 2026-09-19
 
 - **Nuevo componente:** `live-refresh` -- revisa en el fondo si hay datos nuevos en
