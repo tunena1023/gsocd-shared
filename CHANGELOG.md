@@ -2,6 +2,17 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.29.0 — 2026-09-19
+
+- **Nuevo componente:** `live-refresh` -- revisa en el fondo si hay datos nuevos en
+  SharePoint y actualiza la pantalla sola, con un toast pequeño avisando, en vez del
+  patrón anterior de "barra + botón Update" que Admin ya tenía (que nunca refrescaba
+  solo, por miedo a borrar una edición en curso). Ahora sí refresca solo, con una sola
+  protección interna: si el usuario tiene el cursor metido en un campo de texto justo
+  en el momento de revisar, ese ciclo se salta y se reintenta el siguiente tick. A
+  petición del dueño (19/09/2026), para reemplazar el mecanismo de Admin y llevarlo
+  también a Orders y Tech, todos desde la misma pieza compartida.
+
 ## v1.28.10 — 2026-09-19
 
 - **Arreglado:** BUG REAL reportado por el dueño en los 3 repos -- una foto tomada con
