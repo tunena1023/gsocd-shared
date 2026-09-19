@@ -68,6 +68,21 @@
   var dbPromise = null;
   var changeListeners = [];
   var retryTimer = null;
+  /* BUG REAL reportado por el dueno (19/09/2026, confirmado en los 3
+     repos): una foto salia duplicada -- el mismo item se subia 2
+     veces. Causa real: enqueue() dispara un intento inmediato de
+     subida, pero ese intento puede tardar (SharePoint via Graph no
+     es instantaneo); mientras sigue en curso, el temporizador de
+     retryAll() (cada retryIntervalMs) o el evento "online" pueden
+     disparar OTRO intento para el MISMO item -- sigue en la cola
+     (nadie lo borro todavia, eso solo pasa cuando el upload termina
+     bien) asi que retryAll() lo vuelve a tomar. Los 2 intentos suben
+     la foto en paralelo antes de que cualquiera alcance a borrarlo.
+     Fix: un guard en memoria (uploadingIds), compartido por
+     enqueue()/retryAll()/retryNow() dentro de la MISMA pagina --
+     mientras un item ya se esta subiendo, cualquier otro intento
+     para ese mismo id se ignora en vez de duplicar la subida. */
+  var uploadingIds = {};
 
   function openDB() {
     if (dbPromise) return dbPromise;
@@ -145,9 +160,13 @@
      contador de intentos ya hechos. */
   function attemptUpload(item, force) {
     if (item.failed && !force) return Promise.resolve(false);
+    if (uploadingIds[item.id]) return Promise.resolve(false); // ya se esta subiendo -- no dupliques
+    uploadingIds[item.id] = true;
     return cfg.uploadFn(item).then(function () {
+      delete uploadingIds[item.id];
       return dbDelete(item.id).then(function () { return true; });
     }).catch(function (err) {
+      delete uploadingIds[item.id];
       item.attempts = (item.attempts || 0) + 1;
       item.lastError = (err && err.message) || String(err);
       item.failed = item.attempts >= (cfg.maxAttempts || 10);

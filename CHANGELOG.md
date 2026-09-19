@@ -2,6 +2,21 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.28.10 — 2026-09-19
+
+- **Arreglado:** BUG REAL reportado por el dueño en los 3 repos -- una foto tomada con
+  la cámara nueva (`camera-capture.html`) a veces salía duplicada (2 copias idénticas
+  guardadas). Causa real: `enqueue()` dispara un intento de subida inmediato, pero ese
+  intento puede tardar (SharePoint vía Graph no es instantáneo); si el temporizador de
+  `retryAll()` (o el evento `online`) disparaba OTRO intento para el MISMO item mientras
+  el primero seguía en curso -- todavía seguía en la cola, nadie lo había borrado, eso
+  solo pasa cuando el upload termina bien -- los 2 intentos subían la foto en paralelo
+  antes de que cualquiera alcanzara a borrarlo de la cola. Se agregó un guard en memoria
+  (`uploadingIds`) compartido entre `enqueue()`/`retryAll()`/`retryNow()`: mientras un
+  item ya se está subiendo, cualquier otro intento para ese mismo id se ignora en vez de
+  duplicar la subida. Afecta los 9 puntos de captura en los 3 repos por igual (todos
+  seguían apuntados a v1.28.1 desde que se creó este componente).
+
 ## v1.28.6 — 2026-09-18
 
 - **Arreglado:** BUG REAL -- `gallery-groups.render()` mostraba `g.date` crudo (el
