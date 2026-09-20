@@ -2,6 +2,22 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.34.0 — 2026-09-20
+
+- **Nuevo: primera pieza de BACKEND (Node)** -- hasta ahora este repo solo tenia piezas de
+  navegador (cargadas con `<script src="...jsdelivr...">`). Se agrega `package.json` +
+  `index.js` para que el repo se pueda instalar como dependencia real de git
+  (`github:tunena1023/gsocd-shared#v1.34.0`) desde el `package.json` de cada portal, y
+  requerirse con `require()` normal desde su backend (funciones serverless). Ver la seccion
+  nueva "Piezas de backend (Node)" en el README.
+- **Nuevo componente: `lib/division-rules.js`** -- decide si una orden debe pasar a
+  `Division: 'Mixed'` cuando se le guardan servicios de una division distinta a la que ya
+  tenia (confirmado con el dueño, 20/09/2026: se detecta por SKU contra el catalogo real, no
+  por el campo Division que ya venga en cada renglon de servicio, porque ese puede venir mal
+  heredado en bloque de la orden completa). Funcion pura, sin nada de SharePoint/Graph adentro
+  -- cada portal sigue haciendo sus propias consultas y guardando sus propios datos. Probado
+  con Node solo (`lib/division-rules.test.js`, 9 escenarios, sin necesitar credenciales).
+
 ## v1.33.0 — 2026-09-20
 
 - **order-history**: `parseServicesPayload` y `servicesDiffKind` ahora son públicos

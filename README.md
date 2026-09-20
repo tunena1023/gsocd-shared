@@ -37,6 +37,44 @@ regreso.
 Para pasar a una versión nueva, se cambia el número (`@v1.0.0` → `@v1.1.0`) en cada portal que la
 use, uno a la vez — nunca los 3 al mismo tiempo sin haber probado primero.
 
+## Piezas de backend (Node) -- desde v1.34.0
+
+Hasta v1.33.0, todo lo de este repo era código de **navegador**: se sirve por jsDelivr y se
+carga con `<script src="...">` en las páginas HTML de los 3 portales.
+
+Desde v1.34.0 este repo *también* puede tener piezas de **backend (Node)** -- lógica que corre
+del lado del servidor, en las funciones serverless de cada portal (`admin-update-order.js`,
+`submit-supervisor-update.js`, etc.), no en el navegador. Esas piezas viven en `lib/` (ver
+`lib/division-rules.js` para el primer ejemplo real).
+
+**Cómo lo usa cada portal (distinto al navegador):** en vez de una URL de jsDelivr, el repo se
+instala como una dependencia real de `npm`, apuntando a un tag fijo (mismo criterio de "nunca
+la más nueva, siempre una versión específica" que ya usa todo lo demás aquí):
+
+```json
+"dependencies": {
+  "gsocd-shared": "github:tunena1023/gsocd-shared#v1.34.0"
+}
+```
+
+Y se usa con `require()` normal, como cualquier otro paquete de `node_modules`:
+
+```js
+const { resolveOrderDivision } = require('gsocd-shared/lib/division-rules');
+// o, si se necesita mas de una pieza:
+const { divisionRules } = require('gsocd-shared');
+```
+
+Para pasar a una versión nueva: cambiar el tag en el `package.json` de cada portal (uno a la
+vez, igual que con las piezas de navegador) y correr `npm install` de nuevo -- Vercel lo hace
+solo en cada deploy.
+
+Las piezas de backend son funciones **puras** a propósito: no hacen sus propias consultas a
+SharePoint/Graph ni saben nada de `createListItem`/`updateListItemByItemId` -- cada portal
+sigue siendo el que hace sus propias consultas y guarda sus propios datos; estas piezas solo
+calculan, para poder probarlas con Node solo (`node lib/division-rules.test.js`), sin necesitar
+credenciales ni conexión a nada.
+
 ## Componentes disponibles
 
 | Componente | Carpeta | Qué hace |
@@ -47,6 +85,7 @@ use, uno a la vez — nunca los 3 al mismo tiempo sin haber probado primero.
 | Barra de navegación | [`nav-premium/`](./nav-premium) | Tarjeta dorada de pestañas + `<nav>` con logo -- usada por las 3 apps |
 | Preview de foto al pasar el mouse | [`photo-hover-preview/`](./photo-hover-preview) | Al quedarse 1s con el mouse sobre una miniatura, crece a tamaño máximo en pantalla sin clic. Usado en Admin y Orders. |
 | Lista + selector + diff de servicios | [`service-change-panel/`](./service-change-panel) | Servicios actuales (nombre + nota + cámara), selector real y diff agregados/quitados con nota obligatoria. Usado en Orders (Recurring, Processing) y Admin. |
+| Regla de Division Mixed (backend) | [`lib/division-rules.js`](./lib/division-rules.js) | Detecta si los servicios que se van a guardar en una orden pertenecen a otra división y calcula el cambio a 'Mixed' -- función pura de Node, no de navegador. Usado en Admin, Tech y Orders. |
 
 Los 3 quedan listos para conectar — todavía ningún portal usa el reloj/calendario ni el selector
 de servicios (solo Tech está conectado al lightbox por ahora).
