@@ -2,6 +2,16 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.40.0 — 2026-09-20
+
+- **Nuevo:** a petición del dueño -- clic afuera del tracker (en cualquier otra parte de la
+  página) cierra la vista de un paso pasado y regresa al paso actual. Clic en OTRO paso del
+  mismo tracker sigue cambiando la vista directo, sin necesitar cerrar primero. Mismo patrón
+  exacto que ya usa `date-time-picker.js` para sus popovers (un solo listener en `document`,
+  registrado una vez, no por instancia -- soporta varios trackers en la misma página).
+  Verificado con Puppeteer: 4 escenarios (vista por default, clic en un paso, clic en otro
+  paso sin cerrar antes, clic afuera) -- los 4 correctos.
+
 ## v1.39.0 — 2026-09-20
 
 - **Arreglado:** BUG REAL reportado por el dueño -- `detailLines` (nuevo en v1.36.0) se estaba

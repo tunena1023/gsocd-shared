@@ -272,6 +272,31 @@
     return inst ? inst.current : 0;
   }
 
+  /* A peticion del dueño (20/09/2026): si el usuario le dio clic a un
+     paso pasado (viendo su detalle) y despues hace clic en CUALQUIER
+     otro lado de la pagina (no en otro paso del mismo tracker), la
+     vista debe cerrarse sola y regresar al paso actual -- clic en
+     otro paso SI cambia la vista a ese paso (eso ya lo hace el
+     listener de cada .gs-trk-step de arriba), pero clic afuera del
+     tracker completo debe cerrar. Mismo patron exacto que ya usa
+     date-time-picker.js para sus popovers -- un solo listener en
+     document, registrado una vez aqui (no dentro de mount(), para no
+     duplicarlo si hay varios trackers en la misma pagina). */
+  document.addEventListener('click', function (e) {
+    var path = e.composedPath ? e.composedPath() : null;
+    Object.keys(instances).forEach(function (fieldId) {
+      var inst = instances[fieldId];
+      if (inst.viewIndex === null) return;
+      var el = document.getElementById(inst.containerId);
+      if (!el) return;
+      var isInside = path ? (path.indexOf(el) !== -1) : el.contains(e.target);
+      if (!isInside) {
+        inst.viewIndex = null;
+        render(fieldId);
+      }
+    });
+  });
+
   window.GSOrderTracker = {
     mount: mount,
     setCurrent: setCurrent,
