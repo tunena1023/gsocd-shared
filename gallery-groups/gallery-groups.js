@@ -164,7 +164,7 @@
         (p.caption ? '<div class="gs-gal-dept-cap">' + esc(p.caption) + '</div>' : '') +
       '</div>';
     }).join('');
-    return '<div class="gs-gal-section-label">Fotos del departamento</div>' +
+    return '<div class="gs-gal-section-label">Department Photos</div>' +
       '<div class="gs-gal-dept-grid">' + tiles + '</div>';
   }
 
@@ -182,7 +182,7 @@
         '</div>' +
       '</div>';
     }).join('');
-    return '<div class="gs-gal-section-label">Por servicio</div>' +
+    return '<div class="gs-gal-section-label">By Service</div>' +
       '<div class="gs-gal-svc-grid">' + rows + '</div>';
   }
 
@@ -228,11 +228,11 @@
         '<div class="gs-gal-tools">' +
           '<div class="gs-gal-sort-btn" data-sort-toggle="' + gi + '">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M10 18h4"/></svg>' +
-            'Ordenar' +
+            'Sort' +
           '</div>' +
           '<div class="gs-gal-sort-pop" data-sort-pop="' + gi + '">' +
-            '<div class="gs-gal-sort-opt' + (mode === 'date' ? ' active' : '') + '" data-sort-opt="' + gi + '" data-sort-mode="date"><span class="gs-gal-sort-dot"></span>Por fecha</div>' +
-            '<div class="gs-gal-sort-opt' + (mode === 'service' ? ' active' : '') + '" data-sort-opt="' + gi + '" data-sort-mode="service"><span class="gs-gal-sort-dot"></span>Por servicio</div>' +
+            '<div class="gs-gal-sort-opt' + (mode === 'date' ? ' active' : '') + '" data-sort-opt="' + gi + '" data-sort-mode="date"><span class="gs-gal-sort-dot"></span>By Date</div>' +
+            '<div class="gs-gal-sort-opt' + (mode === 'service' ? ' active' : '') + '" data-sort-opt="' + gi + '" data-sort-mode="service"><span class="gs-gal-sort-dot"></span>By Service</div>' +
           '</div>' +
         '</div>'
       ) : '';
