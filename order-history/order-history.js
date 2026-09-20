@@ -167,8 +167,21 @@
     } catch (e) { return null; }
   }
 
+  /* BUG REAL encontrado y arreglado (20/09/2026, reportado por el
+     dueño con una orden real): mostraba SubOption tal cual, ANTES
+     que nada -- para el catalogo nuevo (basado en SKU), eso imprimia
+     el SKU crudo directo (ej. "110-38") en el historial de las 3
+     apps, incluido el lado del cliente (Orders). Nunca revisaba
+     Quantity tampoco. Mismo criterio correcto que ya usan
+     customer.html/tracking.html (su propio svcSubLabel, definido por
+     separado ahi) -- isSkuFormat primero, y solo entonces Level o
+     Quantity; el texto crudo de SubOption solo se muestra para
+     ordenes viejas de antes del catalogo SKU (formato legado, texto
+     libre real, no un codigo interno). */
+  function isSkuFormat(sub) { return /^\d{3}-\d+$/.test(String(sub || '')); }
   function svcSubLabel(s) {
-    return s.SubOption || s.Level || '';
+    if (isSkuFormat(s.SubOption)) return s.Level || (s.Quantity ? 'Qty: ' + s.Quantity : '');
+    return s.SubOption || '';
   }
 
   /* Suma de minutos de un arreglo de servicios contra un catalogo de

@@ -2,6 +2,20 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.43.0 — 2026-09-20
+
+- **Arreglado:** BUG REAL grave reportado por el dueño -- `svcSubLabel()` mostraba `SubOption`
+  tal cual, sin revisar si era un SKU real del catálogo nuevo -- para servicios basados en SKU
+  (todos los nuevos), esto imprimía el **SKU crudo** directo en el historial de las 3 apps,
+  incluido el lado del cliente (Orders). Nunca revisaba `Quantity` tampoco -- un servicio de
+  cantidad se veía sin ningún detalle. Mismo criterio correcto que ya usan `customer.html`/
+  `tracking.html` en `ordersgsocd.com` (su propio `svcSubLabel`, definido por separado):
+  `isSkuFormat` primero, y solo entonces `Level` o `Quantity`; el texto crudo de `SubOption`
+  solo se muestra para órdenes viejas de antes del catálogo SKU. Afecta el evento "Created" y
+  el diff de "Services Updated" (Added/Removed) en las 3 apps. Verificado con Puppeteer contra
+  el escenario exacto usado para probar v1.37.0 (Carpet Cleaning Spot, SKU 110-38) -- ya no
+  aparece el SKU, y un servicio de cantidad nuevo (Trim painting, Qty 3) ya muestra "Qty: 3".
+
 ## v1.42.0 — 2026-09-20
 
 - **Arreglado:** BUG REAL reportado por el dueño -- 'Tech Marked Complete' mostraba el nombre
