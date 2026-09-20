@@ -2,6 +2,18 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.38.0 — 2026-09-20
+
+- **order-history**: renderizado dedicado para 'Expected Ready Date' y 'Materials Ready' -- a
+  petición del dueño, con captura real: se veían como texto suelto ("Expected ready date set
+  to 2026-09-21. Ready for entry at 06:00.") en vez de una caja con ícono como el resto del
+  historial. Ahora `save-expected-ready-date.js`/`set-materials-ready.js` (Orders) mandan el
+  dato real en `NewValue` en vez de solo la oración en `Notes`, y aquí se formatea bonito
+  (📅 Ready date: ... / 🕐 Ready for entry at: ...), en la misma caja expandible que ya usa
+  todo lo demás. Nuevo helper `fmtTime24` (24h a 12h). Renglones viejos (sin `NewValue`, de
+  antes de este cambio) siguen mostrando su nota como texto plano -- no se pierde información
+  de lo que ya está guardado, solo lo nuevo sale con el formato bonito.
+
 ## v1.37.0 — 2026-09-20
 
 - **order-history**: nueva pasada de fusión -- 'Expected Ready Date' y 'Materials Ready' son 2

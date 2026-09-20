@@ -47,6 +47,15 @@
     if (isNaN(d.getTime())) return String(iso);
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
+  /* '06:00' (24h, como lo guarda EntryTime) -> '6:00 AM'. */
+  function fmtTime24(t) {
+    var m = /^(\d{1,2}):(\d{2})/.exec(String(t || ''));
+    if (!m) return String(t || '');
+    var h = parseInt(m[1], 10), min = m[2];
+    var period = h >= 12 ? 'PM' : 'AM';
+    var h12 = h % 12; if (h12 === 0) h12 = 12;
+    return h12 + ':' + min + ' ' + period;
+  }
 
   /* --- Etiquetas legibles por ChangeType. Misma etiqueta para todos
      los modos -- lo que cambia entre staff/client es que se ve o no,
@@ -260,6 +269,25 @@
        usa el resto del historial para servicios agregados -- NewValue
        trae {division, causedBy:[{serviceName,division},...]} en vez de
        solo el nombre de la division nueva. */
+    /* A peticion del dueño (20/09/2026, con captura real): se veia
+       como texto suelto ("Expected ready date set to 2026-09-21.
+       Ready for entry at 06:00.") en vez de una caja con icono como
+       el resto del historial. save-expected-ready-date.js/
+       set-materials-ready.js ahora mandan NewValue con el dato real
+       (la fecha o la hora, sin envolver en una oracion) -- aqui se
+       formatea bonito. Si NewValue viene vacio (rows viejos, de antes
+       de este cambio, o la fecha se borro/la orden se apago), no pasa
+       nada -- Notes se sigue viendo tal cual como fallback (ver
+       noteFor), nunca se pierde informacion de un renglon viejo. */
+    if (h.ChangeType === 'Expected Ready Date') {
+      if (h.NewValue) lines.push('📅 Ready date: ' + esc(fmtDate(h.NewValue)));
+      return lines;
+    }
+    if (h.ChangeType === 'Materials Ready') {
+      if (h.NewValue) lines.push('🕐 Ready for entry at: ' + esc(fmtTime24(h.NewValue)));
+      return lines;
+    }
+
     if (h.ChangeType === 'Division Changed') {
       var dc = null;
       try { dc = JSON.parse(h.NewValue || 'null'); } catch (e) {}
