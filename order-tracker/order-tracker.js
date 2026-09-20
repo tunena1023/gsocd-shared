@@ -165,11 +165,16 @@
         '<div class="gs-trk-stage-name">Not started yet</div>' +
         '<div class="gs-trk-stage-sub"></div>';
     } else {
+      /* A peticion del dueño (20/09/2026): el detalle (detailLines)
+         solo debe verse cuando el usuario le da clic a un paso --
+         "de otra forma debe estar cerrado". Aqui (la vista por
+         default, current sin clic) NUNCA se llama detailLinesHtml --
+         a diferencia de la rama de arriba (viewIndex !== null, que
+         SI es un clic real). */
       var cur = steps[current - 1];
       stageHtml =
         '<div class="gs-trk-stage-name">' + esc(cur.stage) + '</div>' +
-        '<div class="gs-trk-stage-sub">' + esc(cur.detail || '') + '</div>' +
-        detailLinesHtml(cur);
+        '<div class="gs-trk-stage-sub">' + esc(cur.detail || '') + '</div>';
     }
 
     var dotsHtml = steps.map(function (e, i) {

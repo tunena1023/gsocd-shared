@@ -2,6 +2,15 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.39.0 — 2026-09-20
+
+- **Arreglado:** BUG REAL reportado por el dueño -- `detailLines` (nuevo en v1.36.0) se estaba
+  mostrando también en la vista por default del tracker (el paso actual, sin ningún clic), no
+  solo al hacer clic en un paso pasado como se pensaba. A petición del dueño: el detalle debe
+  estar cerrado a menos que el usuario le dé clic a un paso. Se quitó `detailLinesHtml()` de
+  la rama "vista por default" -- solo la rama "viewIndex !== null" (un clic real) lo muestra.
+  Verificado con Puppeteer: sin clic no hay caja de detalle, tras el clic sí aparece.
+
 ## v1.38.0 — 2026-09-20
 
 - **order-history**: renderizado dedicado para 'Expected Ready Date' y 'Materials Ready' -- a
