@@ -105,6 +105,13 @@
       .map(function (l) { return '<div class="gs-ordhdr-sub">' + esc(l.join(' · ')) + '</div>'; })
       .join('');
 
+    /* extraLine: texto libre YA FORMATEADO, para lo que un tab
+       necesite y no encaje en Order/Division, Unit/bd-ba o
+       Assigned/Completed -- ej. Approvals quiere "submitted <fecha>"
+       (la orden todavia no tiene supervisor ni fecha de completado).
+       Se agrega como renglon aparte, siempre al final. */
+    if (o.extraLine) subLines += '<div class="gs-ordhdr-sub">' + esc(o.extraLine) + '</div>';
+
     return top + subLines;
   }
 
