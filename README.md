@@ -150,3 +150,17 @@ GSOrderBadges.occupied(o)       // badge azul, o '' si no aplica
 GSOrderBadges.officeNeed(o)     // badge morado, o '' si no aplica
 GSOrderBadges.officeNeedNote(o) // texto completo, o '' si no aplica
 ```
+
+## print-button
+
+Botón "Print"/"Print PDF" de una orden -- una sola pieza para Admingsocd.com (staff) y ordersgsocd.com (cliente), para que los 2 portales impriman bajo las mismas reglas.
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@v1.30.0/print-button/print-button.js"></script>
+```
+
+```js
+GSPrintButton.html(order, { label: 'Print', className: 'gs-ofp-btn-secondary', storedDoc: null })
+```
+
+Se habilita desde que la orden ya se asignó (`Status !== 'Received'`) -- ya no depende de que exista un archivo guardado en ese momento; el backend (`get-order-document.js`) genera uno sobre la marcha si hace falta. Si el estatus es `Completed`, pide el documento de completion (con fotos) en vez del normal -- todo esto resuelto adentro del `onclick` que ya trae el HTML, sin que el portal tenga que conectar nada aparte.
