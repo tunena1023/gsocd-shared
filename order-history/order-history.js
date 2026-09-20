@@ -112,6 +112,21 @@
     if (fc === 'Supervisor') return true;
     if (fc === 'Inspection Date') return true;
     if (fc === 'Delay Reason' || fc === 'Delay Reason Notes') return true;
+    /* A peticion del dueño (20/09/2026, con captura real): 'Order
+       Approved' ("Marked as seen") es el momento en que la oficina
+       confirma internamente que YA VIO una orden que se autoasigno
+       sola (desde Scheduling) -- le importa a oficina (staff mode
+       sigue mostrandolo tal cual, esto NO toca esa vista), pero para
+       el cliente no aporta nada nuevo: FieldChanged siempre es
+       'Status' (admin-approve-order.js), y los cambios de Status
+       nunca generan una linea de detalle propia (ver mas abajo,
+       "nunca se imprime: el evento... ya va en su propia columna").
+       Ademas 'Order Assigned' ("Assigned") ya se creo justo antes, en
+       la MISMA accion real de oficina, y ese SI le dice al cliente lo
+       unico que importa (quien y cuando) -- 'Marked as seen' se
+       queda como un renglon vacio pegado justo despues, repitiendo lo
+       mismo sin decir nada nuevo. */
+    if (String(h.ChangeType || '') === 'Order Approved') return true;
     return false;
   }
 

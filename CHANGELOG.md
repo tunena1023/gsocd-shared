@@ -2,6 +2,17 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.41.0 — 2026-09-20
+
+- **order-history**: 'Order Approved' ("Marked as seen") ya no se muestra al cliente -- a
+  petición del dueño, con captura real: es el momento en que la oficina confirma
+  internamente que ya vio una orden que se autoasignó sola (desde Scheduling); le importa a
+  oficina (staff mode sigue mostrándolo igual, sin cambios), pero para el cliente no aporta
+  nada nuevo -- `FieldChanged` siempre es `'Status'` (nunca genera línea de detalle propia) y
+  'Order Assigned' ("Assigned") ya se creó justo antes, en la misma acción real de oficina,
+  diciéndole al cliente lo único que importa (quién y cuándo). Verificado con Puppeteer: modo
+  staff sigue trayendo "Marked as seen", modo cliente ya no.
+
 ## v1.40.0 — 2026-09-20
 
 - **Nuevo:** a petición del dueño -- clic afuera del tracker (en cualquier otra parte de la

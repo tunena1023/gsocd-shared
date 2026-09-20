@@ -1,6 +1,6 @@
 {
   "name": "gsocd-shared",
-  "version": "1.40.0",
+  "version": "1.41.0",
   "private": true,
   "description": "Piezas de codigo (navegador y, desde v1.34.0, backend/Node) reutilizadas por los 3 portales de GS Solutions (tech.gsocd.com, admin.gsocd.com, orders.gsocd.com). Ver README.md.",
   "main": "index.js"
