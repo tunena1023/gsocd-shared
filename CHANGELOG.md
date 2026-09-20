@@ -2,6 +2,13 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.42.0 — 2026-09-20
+
+- **Arreglado:** BUG REAL reportado por el dueño -- 'Tech Marked Complete' mostraba el nombre
+  interno crudo del campo y los booleanos tal cual ("🔄 TechMarkedComplete: false → true") por
+  encima de su propia nota en prosa, que ya explica todo bien por su cuenta. `TechMarkedComplete`
+  se agrega a la misma exclusión que ya tenía `'Status'` en la línea genérica de detalle.
+
 ## v1.41.0 — 2026-09-20
 
 - **order-history**: 'Order Approved' ("Marked as seen") ya no se muestra al cliente -- a

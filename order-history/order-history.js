@@ -367,7 +367,16 @@
       return lines;
     }
 
-    if (h.FieldChanged && h.FieldChanged !== 'Status' && (h.OldValue || h.NewValue)) {
+    /* BUG REAL arreglado (20/09/2026, reportado por el dueño): esto
+       mostraba el nombre interno crudo del campo y los booleanos tal
+       cual ("🔄 TechMarkedComplete: false → true") para
+       submit-employee-complete.js (Tech), un renglon tecnico feo
+       encima de su propia Notes en prosa ("Andres marked their work
+       as done...") que ya explica todo bien por su cuenta. Mismo
+       criterio que 'Status' (excluido de esta linea generica porque
+       el ChangeType/Notes ya lo cubren) -- 'TechMarkedComplete' se
+       agrega a la misma exclusion. */
+    if (h.FieldChanged && h.FieldChanged !== 'Status' && h.FieldChanged !== 'TechMarkedComplete' && (h.OldValue || h.NewValue)) {
       lines.push(changeLine('🔄', h.FieldChanged, h.OldValue || '', h.NewValue || ''));
     }
     return lines;
