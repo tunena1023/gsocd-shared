@@ -494,6 +494,17 @@
        tenia que reinventarlo. Mismo parser exacto que ya usa este
        archivo para su propio diff visual, nada nuevo. */
     parseServicesPayload: parseServicesPayload,
-    servicesDiffKind: servicesDiffKind
+    servicesDiffKind: servicesDiffKind,
+    /* Publico desde v1.36.0 -- mismas lineas de detalle (HTML ya
+       armado y escapado) que este archivo ya calcula para su propia
+       caja expandible de cada renglon (servicios agregados/quitados,
+       cambio de nivel, cambio de tiempo estimado, etc.). El Order
+       Tracker (order-tracker.js) lo necesita para mostrar el mismo
+       detalle rico al hacer clic en un paso -- antes solo mostraba
+       "fecha - quien", sin decir que paso de verdad. Un solo renglon
+       de historial por llamada (h), igual que ya usa este archivo
+       internamente -- el llamador decide como agrupar/deduplicar si
+       hace falta, esta funcion no lo hace por su cuenta. */
+    detailLines: detailLinesFor
   };
 })();

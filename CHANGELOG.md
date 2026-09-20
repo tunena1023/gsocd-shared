@@ -2,6 +2,22 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.36.0 — 2026-09-20
+
+- **order-history**: `detailLinesFor` ahora es público (`GSOrderHistory.detailLines(h, catalog)`)
+  -- mismas líneas de detalle (servicios agregados/quitados, cambio de nivel, cambio de
+  tiempo estimado, etc.) que este archivo ya calculaba para su propia caja expandible, ahora
+  reutilizables por otros componentes.
+- **order-tracker**: nuevo campo opcional `detailLines` en cada `step` -- a petición del dueño
+  con captura real: al hacer clic en un paso del tracker, el detalle de abajo solo decía
+  "fecha - quién", sin decir qué pasó de verdad, aunque esa misma información ya se calculaba
+  y se veía en History para el mismo renglón. Ahora el llamador puede pasar
+  `GSOrderHistory.detailLines(h, catalog)` como `step.detailLines` y el tracker las muestra
+  debajo del resumen, mismo formato (íconos ➕/➖/🔄/🕐) que ya usa el resto del historial. No
+  rompe nada existente -- `detailLines` es opcional, un `step` sin él se ve exactamente igual
+  que antes. Verificado con Puppeteer: el mismo evento ("Services Updated") muestra las mismas
+  líneas en el tracker que en History.
+
 ## v1.35.0 — 2026-09-20
 
 - **Arreglado:** BUG REAL reportado por el dueño con captura real -- el renglón de historial

@@ -85,7 +85,9 @@
       '.gs-trk-viewing-tag{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;' +
         'color:var(--gray,#6B6B6B);font-weight:700;margin-bottom:4px}' +
       '.gs-trk-stage-name{font-family:\'Cormorant Garamond\',serif;font-size:18px;font-weight:600;color:var(--black,#111)}' +
-      '.gs-trk-stage-sub{font-size:11.5px;color:var(--gray,#6B6B6B);margin-top:2px}';
+      '.gs-trk-stage-sub{font-size:11.5px;color:var(--gray,#6B6B6B);margin-top:2px}' +
+      '.gs-trk-detail-lines{margin-top:8px;padding:10px 12px;background:var(--bg,#F7F6F3);border-radius:6px;font-size:12.5px;color:var(--black,#111)}' +
+      '.gs-trk-detail-lines>div{padding:2px 0}';
     var tag = document.createElement('style');
     tag.id = STYLE_ID;
     tag.textContent = css;
@@ -137,13 +139,27 @@
     var triangleMaxStage = inst.triangleMaxStage;
     var triLen = measureTriLen();
 
+    /* detailLines (opcional): array de HTML ya armado (mismas lineas
+       que ya calcula order-history.js para el mismo evento -- ver
+       GSOrderHistory.detailLines() desde v1.36.0) con lo que de
+       verdad paso en ese paso (servicios agregados/quitados, cambio
+       de tiempo estimado, etc.), no solo quien y cuando. Viene YA
+       escapado por quien lo arma -- no se vuelve a escapar aqui, a
+       diferencia de stage/detail (texto plano). */
+    function detailLinesHtml(ev) {
+      return (ev.detailLines && ev.detailLines.length)
+        ? '<div class="gs-trk-detail-lines">' + ev.detailLines.map(function (l) { return '<div>' + l + '</div>'; }).join('') + '</div>'
+        : '';
+    }
+
     var stageHtml;
     if (viewIndex !== null) {
       var ev = steps[viewIndex];
       stageHtml =
         '<div class="gs-trk-viewing-tag">Viewing a past step</div>' +
         '<div class="gs-trk-stage-name">' + esc(ev.stage) + '</div>' +
-        '<div class="gs-trk-stage-sub">' + esc(ev.detail || '') + '</div>';
+        '<div class="gs-trk-stage-sub">' + esc(ev.detail || '') + '</div>' +
+        detailLinesHtml(ev);
     } else if (current === 0) {
       stageHtml =
         '<div class="gs-trk-stage-name">Not started yet</div>' +
@@ -152,7 +168,8 @@
       var cur = steps[current - 1];
       stageHtml =
         '<div class="gs-trk-stage-name">' + esc(cur.stage) + '</div>' +
-        '<div class="gs-trk-stage-sub">' + esc(cur.detail || '') + '</div>';
+        '<div class="gs-trk-stage-sub">' + esc(cur.detail || '') + '</div>' +
+        detailLinesHtml(cur);
     }
 
     var dotsHtml = steps.map(function (e, i) {
