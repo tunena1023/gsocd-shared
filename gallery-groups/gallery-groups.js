@@ -22,6 +22,17 @@
        permanente, se cierra solo al hacer clic fuera. El "Ordenar"
        es POR ORDEN (independiente) -- a peticion explicita del
        dueño, no es un control global para toda la galeria.
+   v1.29.8 (19/09/2026): reacomodo del header a peticion del dueño --
+   el nombre del cliente pasa al lugar/tamaño que antes tenia el
+   numero de orden (arriba, en negritas). Debajo, 3 renglones nuevos,
+   cada uno se arma solo con lo que este disponible:
+     1) Order # · Division
+     2) Unit # · Bathrooms · Bedrooms  (unitNumber es campo nuevo)
+     3) Assigned · Completed date       (completedDate es campo nuevo)
+   Si no hay clientLabel (portal de clientes -- cada quien ve solo sus
+   propias ordenes, no aplica mostrar "cliente"), el nombre cae de
+   vuelta al numero de orden.
+
    v1.29.7 (19/09/2026): CORRECCION -- la tarjeta CERRADA de cada orden
    perdio los detalles que antes traia (bed/bath, division, supervisor
    asignado), reportado por el dueño. Se agrega un renglon de detalles
@@ -88,10 +99,11 @@
 
    "groups" es un arreglo de:
      { orderId, clientLabel, date (string ya formateada),
-       bedrooms, bathrooms, division, supervisor (todos opcionales --
-         string, se muestran en un renglon de detalles debajo del
-         encabezado cuando la tarjeta esta cerrada; cualquiera
-         ausente simplemente no aparece), photos: [
+       bedrooms, bathrooms, division, supervisor, unitNumber,
+       completedDate (todos opcionales -- string, se muestran en los
+         renglones de detalle debajo del encabezado cuando la tarjeta
+         esta cerrada; cualquiera ausente simplemente no aparece),
+       photos: [
          { downloadUrl, isVideo (opcional, bool),
            serviceName (string o null -- null/ausente = foto del
              departamento, no ligada a ningun servicio),
@@ -121,7 +133,7 @@
     if (document.getElementById(STYLE_ID)) return;
     var tag = document.createElement('style');
     tag.id = STYLE_ID;
-    tag.textContent = "\n  .gs-gal-search { display: flex; align-items: center; gap: 10px; border: 1px solid #E0D9CC; border-radius: 6px; padding: 10px 14px; margin-bottom: 18px; }\n  .gs-gal-search svg { width: 15px; height: 15px; color: #8C6F2A; flex-shrink: 0; }\n  .gs-gal-search input { border: none; outline: none; font-size: 13px; font-family: inherit; color: #111; width: 100%; background: none; }\n  .gs-gal-search input::placeholder { color: #999; }\n\n  .gs-gal-grp { border: 1px solid #F0EBDD; border-radius: 6px; margin-bottom: 10px; overflow: hidden; }\n  .gs-gal-grp-header { display: block; padding: 14px 16px; background: #F7F6F3; cursor: pointer; }\n  .gs-gal-grp.open > .gs-gal-grp-header { background: #EDE7D8; }\n  .gs-gal-grp-header-top { display: flex; align-items: center; gap: 12px; }\n  .gs-gal-grp-order { font-weight: 700; font-size: 14px; color: #111; white-space: nowrap; }\n  .gs-gal-grp-count { background: #E9DDBB; color: #6B5A22; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 10px; }\n  .gs-gal-grp-meta { font-size: 12px; color: #8C6F2A; margin-left: auto; text-align: right; }\n  .gs-gal-grp-meta .gs-gal-client { display: block; color: #6B6B6B; font-weight: 400; }\n  .gs-gal-grp-arrow { color: #999; font-size: 11px; transition: transform .2s; flex-shrink: 0; }\n  .gs-gal-grp.open > .gs-gal-grp-header .gs-gal-grp-arrow { transform: rotate(90deg); }\n  .gs-gal-grp-sub { font-size: 11px; color: #6B6B6B; margin-top: 5px; }\n\n  .gs-gal-grp-body { display: none; padding: 16px; background: #fff; }\n  .gs-gal-grp.open > .gs-gal-grp-body { display: block; }\n\n  .gs-gal-empty { font-size: 13px; color: #999; text-align: center; padding: 40px 0; }\n\n  .gs-gal-tools { display: flex; justify-content: flex-end; margin-bottom: 10px; position: relative; }\n  .gs-gal-sort-btn { display: flex; align-items: center; gap: 5px; background: #fff; border: 1px solid #E0D9CC; border-radius: 20px; padding: 5px 10px; font-size: 11px; font-weight: 600; color: #6B6B6B; cursor: pointer; user-select: none; transition: border-color .15s, color .15s; }\n  .gs-gal-sort-btn:hover, .gs-gal-sort-btn.open { border-color: #C9A227; color: #8C6F2A; }\n  .gs-gal-sort-btn svg { width: 12px; height: 12px; flex-shrink: 0; }\n  .gs-gal-sort-pop { display: none; position: absolute; top: calc(100% + 6px); right: 0; background: #fff; border: 1px solid #E0D9CC; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.09); padding: 4px; z-index: 5; min-width: 150px; }\n  .gs-gal-sort-pop.open { display: block; }\n  .gs-gal-sort-opt { display: flex; align-items: center; gap: 7px; padding: 8px 10px; font-size: 12.5px; border-radius: 6px; cursor: pointer; color: #111; }\n  .gs-gal-sort-opt:hover { background: #F7F6F3; }\n  .gs-gal-sort-opt.active { color: #8C6F2A; font-weight: 700; }\n  .gs-gal-sort-opt .gs-gal-sort-dot { width: 5px; height: 5px; border-radius: 50%; background: #C9A227; opacity: 0; }\n  .gs-gal-sort-opt.active .gs-gal-sort-dot { opacity: 1; }\n\n  .gs-gal-section-label { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #6B6B6B; margin: 2px 0 8px; }\n  .gs-gal-section-label:not(:first-child) { margin-top: 6px; }\n\n  .gs-gal-dept-grid { display: grid; grid-template-columns: repeat(auto-fill, 3in); gap: 10px; margin-bottom: 18px; }\n  .gs-gal-dept-ph { position: relative; width: 3in; height: 3in; border-radius: 8px; overflow: hidden; cursor: pointer; background: #eee; box-shadow: 0 1px 3px rgba(0,0,0,.08); }\n  .gs-gal-dept-ph img { width: 100%; height: 100%; object-fit: cover; display: block; }\n  .gs-gal-dept-ph.video::after { content: \"\\25B6\"; position: absolute; top: 6px; right: 7px; color: #FFF3D6; font-size: 11px; background: rgba(17,17,17,.6); width: 19px; height: 19px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }\n  .gs-gal-dept-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 9px 7px; background: linear-gradient(to top, rgba(0,0,0,.62), rgba(0,0,0,0)); color: #fff; font-size: 10.5px; }\n\n  .gs-gal-svc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 10px; }\n  .gs-gal-svc-row { display: flex; align-items: center; gap: 9px; padding: 6px; border-radius: 7px; cursor: pointer; }\n  .gs-gal-svc-row:hover { background: #F7F6F3; }\n  .gs-gal-svc-thumb { position: relative; width: 1.5in; height: 1.5in; border-radius: 6px; overflow: hidden; flex-shrink: 0; background: #eee; }\n  .gs-gal-svc-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }\n  .gs-gal-svc-thumb.video::after { content: \"\\25B6\"; position: absolute; bottom: 4px; right: 4px; color: #FFF3D6; font-size: 11px; background: rgba(17,17,17,.6); width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }\n  .gs-gal-svc-info { min-width: 0; }\n  .gs-gal-svc-name { font-size: 12px; font-weight: 700; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }\n  .gs-gal-svc-level { font-weight: 400; color: #6B6B6B; }\n  .gs-gal-svc-reason { font-size: 10.5px; color: #8C6F2A; font-style: italic; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }\n  .gs-gal-svc-date { font-size: 10.5px; color: #6B6B6B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }\n\n  /* Tarjetas de ORDEN en 2 columnas (no las fotos de adentro -- eso\n     se malentendio antes). En mobile 1 sola columna: 2 tarjetas\n     abiertas, cada una con su propia cuadricula de fotos adentro, no\n     caben lado a lado en un telefono sin verse aplastadas. */\n  .gs-gal-cards-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }\n  @media (max-width: 700px) {\n    .gs-gal-cards-2col { grid-template-columns: 1fr; }\n  }\n";
+    tag.textContent = "\n  .gs-gal-search { display: flex; align-items: center; gap: 10px; border: 1px solid #E0D9CC; border-radius: 6px; padding: 10px 14px; margin-bottom: 18px; }\n  .gs-gal-search svg { width: 15px; height: 15px; color: #8C6F2A; flex-shrink: 0; }\n  .gs-gal-search input { border: none; outline: none; font-size: 13px; font-family: inherit; color: #111; width: 100%; background: none; }\n  .gs-gal-search input::placeholder { color: #999; }\n\n  .gs-gal-grp { border: 1px solid #F0EBDD; border-radius: 6px; margin-bottom: 10px; overflow: hidden; }\n  .gs-gal-grp-header { display: block; padding: 14px 16px; background: #F7F6F3; cursor: pointer; }\n  .gs-gal-grp.open > .gs-gal-grp-header { background: #EDE7D8; }\n  .gs-gal-grp-header-top { display: flex; align-items: center; gap: 12px; min-width: 0; }\n  .gs-gal-grp-order { font-weight: 700; font-size: 14px; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex-shrink: 1; }\n  .gs-gal-grp-count { background: #E9DDBB; color: #6B5A22; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 10px; flex-shrink: 0; }\n  .gs-gal-grp-arrow { color: #999; font-size: 11px; transition: transform .2s; flex-shrink: 0; margin-left: auto; }\n  .gs-gal-grp.open > .gs-gal-grp-header .gs-gal-grp-arrow { transform: rotate(90deg); }\n  .gs-gal-grp-sub { font-size: 11px; color: #6B6B6B; margin-top: 5px; }\n\n  .gs-gal-grp-body { display: none; padding: 16px; background: #fff; }\n  .gs-gal-grp.open > .gs-gal-grp-body { display: block; }\n\n  .gs-gal-empty { font-size: 13px; color: #999; text-align: center; padding: 40px 0; }\n\n  .gs-gal-tools { display: flex; justify-content: flex-end; margin-bottom: 10px; position: relative; }\n  .gs-gal-sort-btn { display: flex; align-items: center; gap: 5px; background: #fff; border: 1px solid #E0D9CC; border-radius: 20px; padding: 5px 10px; font-size: 11px; font-weight: 600; color: #6B6B6B; cursor: pointer; user-select: none; transition: border-color .15s, color .15s; }\n  .gs-gal-sort-btn:hover, .gs-gal-sort-btn.open { border-color: #C9A227; color: #8C6F2A; }\n  .gs-gal-sort-btn svg { width: 12px; height: 12px; flex-shrink: 0; }\n  .gs-gal-sort-pop { display: none; position: absolute; top: calc(100% + 6px); right: 0; background: #fff; border: 1px solid #E0D9CC; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.09); padding: 4px; z-index: 5; min-width: 150px; }\n  .gs-gal-sort-pop.open { display: block; }\n  .gs-gal-sort-opt { display: flex; align-items: center; gap: 7px; padding: 8px 10px; font-size: 12.5px; border-radius: 6px; cursor: pointer; color: #111; }\n  .gs-gal-sort-opt:hover { background: #F7F6F3; }\n  .gs-gal-sort-opt.active { color: #8C6F2A; font-weight: 700; }\n  .gs-gal-sort-opt .gs-gal-sort-dot { width: 5px; height: 5px; border-radius: 50%; background: #C9A227; opacity: 0; }\n  .gs-gal-sort-opt.active .gs-gal-sort-dot { opacity: 1; }\n\n  .gs-gal-section-label { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #6B6B6B; margin: 2px 0 8px; }\n  .gs-gal-section-label:not(:first-child) { margin-top: 6px; }\n\n  .gs-gal-dept-grid { display: grid; grid-template-columns: repeat(auto-fill, 3in); gap: 10px; margin-bottom: 18px; }\n  .gs-gal-dept-ph { position: relative; width: 3in; height: 3in; border-radius: 8px; overflow: hidden; cursor: pointer; background: #eee; box-shadow: 0 1px 3px rgba(0,0,0,.08); }\n  .gs-gal-dept-ph img { width: 100%; height: 100%; object-fit: cover; display: block; }\n  .gs-gal-dept-ph.video::after { content: \"\\25B6\"; position: absolute; top: 6px; right: 7px; color: #FFF3D6; font-size: 11px; background: rgba(17,17,17,.6); width: 19px; height: 19px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }\n  .gs-gal-dept-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 9px 7px; background: linear-gradient(to top, rgba(0,0,0,.62), rgba(0,0,0,0)); color: #fff; font-size: 10.5px; }\n\n  .gs-gal-svc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 10px; }\n  .gs-gal-svc-row { display: flex; align-items: center; gap: 9px; padding: 6px; border-radius: 7px; cursor: pointer; }\n  .gs-gal-svc-row:hover { background: #F7F6F3; }\n  .gs-gal-svc-thumb { position: relative; width: 1.5in; height: 1.5in; border-radius: 6px; overflow: hidden; flex-shrink: 0; background: #eee; }\n  .gs-gal-svc-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }\n  .gs-gal-svc-thumb.video::after { content: \"\\25B6\"; position: absolute; bottom: 4px; right: 4px; color: #FFF3D6; font-size: 11px; background: rgba(17,17,17,.6); width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }\n  .gs-gal-svc-info { min-width: 0; }\n  .gs-gal-svc-name { font-size: 12px; font-weight: 700; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }\n  .gs-gal-svc-level { font-weight: 400; color: #6B6B6B; }\n  .gs-gal-svc-reason { font-size: 10.5px; color: #8C6F2A; font-style: italic; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }\n  .gs-gal-svc-date { font-size: 10.5px; color: #6B6B6B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }\n\n  /* Tarjetas de ORDEN en 2 columnas (no las fotos de adentro -- eso\n     se malentendio antes). En mobile 1 sola columna: 2 tarjetas\n     abiertas, cada una con su propia cuadricula de fotos adentro, no\n     caben lado a lado en un telefono sin verse aplastadas. */\n  .gs-gal-cards-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }\n  @media (max-width: 700px) {\n    .gs-gal-cards-2col { grid-template-columns: 1fr; }\n  }\n";
     document.head.appendChild(tag);
   }
 
@@ -259,25 +271,46 @@
       var count = (g.photos || []).length;
       var isOpen = opts.openOrderId && g.orderId === opts.openOrderId;
 
-      var subParts = [];
-      if (g.bedrooms) subParts.push(g.bedrooms + ' Bed');
-      if (g.bathrooms) subParts.push(g.bathrooms + ' Bath');
-      if (g.division) subParts.push(g.division);
-      if (g.supervisor) subParts.push('Assigned: ' + g.supervisor);
-      var subHtml = subParts.length ? '<div class="gs-gal-grp-sub">' + esc(subParts.join(' · ')) + '</div>' : '';
+      /* Header reacomodado a peticion del dueño (19/09/2026): el
+         nombre del cliente ocupa el lugar/tamaño que antes tenia el
+         numero de orden. Debajo, 3 renglones de detalle -- cada uno
+         se arma solo con lo que venga disponible, sin dejar
+         separadores huerfanos si falta algo:
+           1) Order # · Division
+           2) Unit # · Bathrooms · Bedrooms
+           3) Assigned · Completed date
+         Si no hay clientLabel (portal de clientes, donde no aplica --
+         cada quien ve solo sus propias ordenes), el nombre cae de
+         vuelta al numero de orden, igual que antes. */
+      var nameLine = g.clientLabel || g.orderId;
+
+      var row1 = [];
+      if (g.orderId) row1.push(g.orderId);
+      if (g.division) row1.push(g.division);
+
+      var row2 = [];
+      if (g.unitNumber) row2.push('Unit ' + g.unitNumber);
+      if (g.bathrooms) row2.push(g.bathrooms + ' Bath');
+      if (g.bedrooms) row2.push(g.bedrooms + ' Bed');
+
+      var row3 = [];
+      if (g.supervisor) row3.push('Assigned: ' + g.supervisor);
+      if (g.completedDate) row3.push('Completed: ' + fmtGroupDate(g.completedDate));
+
+      var subRowsHtml = [row1, row2, row3]
+        .filter(function (r) { return r.length; })
+        .map(function (r) { return '<div class="gs-gal-grp-sub">' + esc(r.join(' · ')) + '</div>'; })
+        .join('');
 
       return '' +
         '<div class="gs-gal-grp' + (isOpen ? ' open' : '') + '"' + (isOpen ? ' id="gs-gal-open-target"' : '') + '>' +
           '<div class="gs-gal-grp-header" data-grp-header="' + gi + '">' +
             '<div class="gs-gal-grp-header-top">' +
-              '<span class="gs-gal-grp-order">' + esc(g.orderId) + '</span>' +
+              '<span class="gs-gal-grp-order">' + esc(nameLine) + '</span>' +
               '<span class="gs-gal-grp-count">' + count + '</span>' +
-              '<span class="gs-gal-grp-meta">' + esc(fmtGroupDate(g.date)) +
-                (g.clientLabel ? '<span class="gs-gal-client">' + esc(g.clientLabel) + '</span>' : '') +
-              '</span>' +
               '<span class="gs-gal-grp-arrow">\u25B8</span>' +
             '</div>' +
-            subHtml +
+            subRowsHtml +
           '</div>' +
           '<div class="gs-gal-grp-body" data-grp-body="' + gi + '">' + bodyHtml(gi) + '</div>' +
         '</div>';
