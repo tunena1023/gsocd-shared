@@ -180,6 +180,31 @@
     return mm + 'min';
   }
 
+  /* Clasifica que tan grande es un cambio de servicios, comparando
+     por Category|ServiceName (mismo criterio que ya usa detailLinesFor
+     mas abajo para el diff visual del historial):
+       'none'          -- identicos, nada cambio
+       'level-only'    -- mismos servicios (nada agregado/quitado),
+                          solo cambio Level en alguno
+       'added-removed' -- se agrego o quito al menos un servicio
+     Agregado 20/09/2026 para que Admin pueda distinguir "Approve"
+     (nomas nivel, se aplica directo) de "Reassign" (servicio nuevo de
+     verdad, la oficina lo confirma a proposito) en la tarjeta de
+     cambio sugerido por un supervisor. */
+  function servicesDiffKind(oldSvcs, newSvcs) {
+    var keyOf = function (s) { return (s.Category || '') + '|' + (s.ServiceName || ''); };
+    var oldMap = {}; (oldSvcs || []).forEach(function (s) { oldMap[keyOf(s)] = s; });
+    var newMap = {}; (newSvcs || []).forEach(function (s) { newMap[keyOf(s)] = s; });
+    var oldKeys = Object.keys(oldMap), newKeys = Object.keys(newMap);
+    for (var i = 0; i < newKeys.length; i++) { if (!oldMap[newKeys[i]]) return 'added-removed'; }
+    for (var j = 0; j < oldKeys.length; j++) { if (!newMap[oldKeys[j]]) return 'added-removed'; }
+    var levelChanged = false;
+    newKeys.forEach(function (k) {
+      if ((oldMap[k].Level || '') !== (newMap[k].Level || '')) levelChanged = true;
+    });
+    return levelChanged ? 'level-only' : 'none';
+  }
+
   function changeLine(icon, label, oldVal, newVal) {
     if (oldVal === newVal) return icon + ' ' + esc(label) + ': ' + esc(oldVal || '—');
     return icon + ' ' + esc(label) + ': ' + esc(oldVal || '(none)') + ' → ' + esc(newVal || '(none)');
@@ -438,6 +463,13 @@
 
   window.GSOrderHistory = {
     html: historyHtml,
-    toggleDetail: toggleDetail
+    toggleDetail: toggleDetail,
+    /* Publicos desde v1.33.0 -- antes eran privados de este modulo,
+       cada portal que necesitaba leer un snapshot de servicios
+       pendiente (OldValue/NewValue de un renglon Change Requested)
+       tenia que reinventarlo. Mismo parser exacto que ya usa este
+       archivo para su propio diff visual, nada nuevo. */
+    parseServicesPayload: parseServicesPayload,
+    servicesDiffKind: servicesDiffKind
   };
 })();

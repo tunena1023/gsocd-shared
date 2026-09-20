@@ -2,6 +2,18 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.33.0 — 2026-09-20
+
+- **order-history**: `parseServicesPayload` y `servicesDiffKind` ahora son públicos
+  (`GSOrderHistory.parseServicesPayload`, `GSOrderHistory.servicesDiffKind`) -- antes eran
+  privados de este módulo. Admin y Orders necesitaban leer/clasificar el snapshot de
+  servicios propuesto en un cambio pendiente (`OldValue`/`NewValue` de un renglón `Change
+  Requested`) y cada quien lo iba a reinventar por su cuenta -- se expone el mismo parser y
+  se agrega `servicesDiffKind(oldSvcs, newSvcs)` (clasifica un diff como `'none'` /
+  `'level-only'` / `'added-removed'`, mismo criterio de comparación por `Category|ServiceName`
+  que ya usa el diff visual del historial). No cambia nada de lo que ya funcionaba -- versión
+  MENOR.
+
 ## v1.29.1 — 2026-09-19
 
 - **Mejorado:** `live-refresh` ahora le pasa a `onChange` también el snapshot de ANTES del
