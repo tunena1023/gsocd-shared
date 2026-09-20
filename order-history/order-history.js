@@ -395,6 +395,46 @@
     return out;
   }
 
+  /* --- Pasada 4 (a peticion del dueño, 20/09/2026, con captura
+     real): 'Expected Ready Date' y 'Materials Ready' son 2 llamadas
+     SEPARADAS al backend (fecha y hora se escogen por separado en el
+     picker del cliente -- ver save-expected-ready-date.js y
+     set-materials-ready.js), pero para el cliente es UNA sola accion
+     ("ya estoy listo, aqui esta cuando"). Se fusionan si son
+     consecutivas, mismo actor, cerca en tiempo -- en CUALQUIER orden
+     (el cliente puede elegir fecha o hora primero, no hay un orden
+     fijo). A diferencia de mergeRescheduleRequest (que descarta la
+     nota del evento que se fusiona), aqui las 2 notas se conservan
+     juntas -- las 2 traen informacion real y distinta (la fecha Y la
+     hora), perder cualquiera de las 2 dejaria al lector sin la mitad
+     de lo que paso. Se usa 'Materials Ready' como representante (el
+     hito mas definitivo), sin importar cual de las 2 llego primero. */
+  function mergeMaterialsReadyWithDate(groups) {
+    var out = [];
+    groups.forEach(function (g) {
+      var prev = out[out.length - 1];
+      var type = String(g.rep.ChangeType || '');
+      var prevType = prev && String(prev.rep.ChangeType || '');
+      var isPair = (type === 'Materials Ready' && prevType === 'Expected Ready Date') ||
+        (type === 'Expected Ready Date' && prevType === 'Materials Ready');
+      var sameActor = prev && String(prev.rep.ChangedBy || '') === String(g.rep.ChangedBy || '');
+      var closeInTime = prev && Math.abs(new Date(g.rep.ChangeDate) - new Date(prev.rep.ChangeDate)) < GROUP_WINDOW_MS;
+      if (isPair && sameActor && closeInTime) {
+        var earlier = new Date(prev.rep.ChangeDate) <= new Date(g.rep.ChangeDate) ? prev.rep : g.rep;
+        var later = earlier === prev.rep ? g.rep : prev.rep;
+        var combinedNotes = [noteFor(earlier), noteFor(later)].filter(Boolean).join(' ');
+        /* El representante final SIEMPRE es el renglon 'Materials
+           Ready' de los 2 (sin importar si quedo en prev o en g). */
+        var rep = (prevType === 'Materials Ready') ? prev.rep : g.rep;
+        prev.rep = Object.assign({}, rep, { MergedNotes: combinedNotes });
+        prev.rows = prev.rows.concat(g.rows);
+      } else {
+        out.push(g);
+      }
+    });
+    return out;
+  }
+
   /* --- API PUBLICA --- */
   function historyHtml(orderId, history, opts) {
     opts = opts || {};
@@ -418,6 +458,7 @@
     var groups = groupDatesConfirmed(rows);
     groups = mergeDecisionWithDetail(groups);
     groups = mergeRescheduleRequest(groups);
+    groups = mergeMaterialsReadyWithDate(groups);
 
     return groups.map(function (g, idx) {
       var h = g.rep;

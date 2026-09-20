@@ -2,6 +2,18 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.37.0 — 2026-09-20
+
+- **order-history**: nueva pasada de fusión -- 'Expected Ready Date' y 'Materials Ready' son 2
+  llamadas separadas al backend (fecha y hora se escogen por separado en el picker del
+  cliente), pero para el cliente es una sola acción. A petición del dueño, con captura real:
+  se veían como 2 renglones de historial aparte, aunque pasaron en el mismo momento. Ahora se
+  fusionan si son consecutivos, mismo actor, cerca en tiempo -- en cualquier orden (el
+  cliente puede elegir fecha o hora primero). Las 2 notas se conservan juntas (a diferencia
+  de `mergeRescheduleRequest`, que descarta una) porque ambas traen información real y
+  distinta. Verificado con Puppeteer en ambos órdenes, y confirmado que 'Materials Ready
+  Cancelled' (tipo distinto) no se fusiona por error.
+
 ## v1.36.0 — 2026-09-20
 
 - **order-history**: `detailLinesFor` ahora es público (`GSOrderHistory.detailLines(h, catalog)`)
