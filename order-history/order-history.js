@@ -248,6 +248,30 @@
       return lines;
     }
 
+    /* Division Mixed automatica (gsocd-shared v1.35.0+, division-rules.js
+       del lado backend): antes del detalle propio, Notes traia la
+       explicacion en una frase completa ("Division changed from X to
+       Mixed because of: ..."), que se veia repetida/de mas junto al
+       renglon 'Division: X → Y' de aqui abajo (mismo patron generico
+       de FieldChanged/OldValue/NewValue que usa cualquier otro campo).
+       BUG REAL reportado por el dueño con captura real, 20/09/2026:
+       ahora Notes se manda vacio y el servicio (o servicios) que causo
+       el cambio va en el MISMO detalle, con el mismo formato ➕ que ya
+       usa el resto del historial para servicios agregados -- NewValue
+       trae {division, causedBy:[{serviceName,division},...]} en vez de
+       solo el nombre de la division nueva. */
+    if (h.ChangeType === 'Division Changed') {
+      var dc = null;
+      try { dc = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+      var newDivisionVal = (dc && dc.division) || h.NewValue || '';
+      lines.push(changeLine('🔀', 'Division', h.OldValue || '', newDivisionVal));
+      var causedBy = (dc && Array.isArray(dc.causedBy)) ? dc.causedBy : [];
+      causedBy.forEach(function (s) {
+        lines.push(addedLine(s.serviceName || '', s.division || ''));
+      });
+      return lines;
+    }
+
     if (oldDates || newDates) {
       var od = oldDates || {}, nd = newDates || {};
       if ((od.entryDate || '') !== (nd.entryDate || '') || (nd.entryDate && !od.entryDate))

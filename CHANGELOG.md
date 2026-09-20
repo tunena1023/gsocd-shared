@@ -2,6 +2,20 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.35.0 — 2026-09-20
+
+- **Arreglado:** BUG REAL reportado por el dueño con captura real -- el renglón de historial
+  `Division Changed` (nuevo en v1.34.0) mostraba una nota en prosa completa ("Division changed
+  from Janitorial to Mixed because of: ...") que se veía repetida/de más junto al detalle
+  "Division: X → Y" de abajo. Ahora `order-history/order-history.js` tiene un renderizado
+  dedicado para `ChangeType: 'Division Changed'`: muestra el cambio de división y, en el
+  MISMO detalle, el o los servicios que lo causaron (mismo formato ➕ que ya usa el resto del
+  historial), sin ninguna nota en prosa. Requiere que `NewValue` traiga
+  `{division, causedBy:[{serviceName,division},...]}` en vez de solo el nombre de la división
+  -- ver `lib/division-rules.js`, `divisionChangeHistoryPayload()` (reemplaza a
+  `divisionChangeNotes()`, que ya no se usa). Verificado con Puppeteer contra un historial de
+  prueba real.
+
 ## v1.34.0 — 2026-09-20
 
 - **Nuevo: primera pieza de BACKEND (Node)** -- hasta ahora este repo solo tenia piezas de
