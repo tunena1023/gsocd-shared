@@ -81,7 +81,21 @@
     'Dates Confirmed':          'Schedule confirmed',
     'Reschedule Requested':     'New dates requested',
     'Expected Ready Date':      'Ready Date & Time',
-    'Archived':                 'Archived'
+    'Archived':                 'Archived',
+    /* "Assign by service" (Admin > Scheduling/Active, 21/09/2026) --
+       una orden puede asignarse servicio por servicio en vez de como
+       un solo bloque. El evento generico de categoria va aqui; el
+       servicio especifico + quien + cuando va en Notes o en
+       NewValue, segun el caso (ver detailLinesFor mas abajo). */
+    'Service Scheduled':          'Service scheduled',
+    'Order Moved To Active':      'Order moved to Active',
+    'Service Marked Done By Tech':'Service marked done by tech',
+    'Service Completed':          'Service completed',
+    'Service Now Active':         'Service now active',
+    'Service Needs Scheduling':   'Needs scheduling',
+    'Service Order Changed':      'Service order changed',
+    'Service Added':              'Service added to order',
+    'Service Removed':            'Service removed from order'
   };
   function labelFor(ct) { return LABELS[String(ct || '')] || String(ct || 'Update'); }
 
@@ -127,6 +141,21 @@
        queda como un renglon vacio pegado justo despues, repitiendo lo
        mismo sin decir nada nuevo. */
     if (String(h.ChangeType || '') === 'Order Approved') return true;
+    /* "Assign by service" -- pasos internos/mecanicos del modelo por
+       servicio (el tecnico ya dijo "ya acabe" pero oficina todavia no
+       lo confirma, el sistema avanzando solo al siguiente servicio,
+       reordenar la cola, o el aviso interno de "hace falta
+       programar"). No le agregan nada nuevo al cliente que 'Service
+       Scheduled'/'Service Completed' no le digan ya. A peticion
+       explicita del dueño: "el cliente solo ve asignaciones y
+       servicios completados". OJO: esto deja 'Service Marked Done By
+       Tech' oculto del cliente, a diferencia de como 'Tech Marked
+       Complete' (el evento de todo-el-pedido de hoy) se comporta hoy
+       -- ese NO esta oculto. Confirmar con el dueño si quiere igualar
+       ese comportamiento tambien para el caso de todo-el-pedido. */
+    var perServiceHiddenTypes = ['Order Moved To Active', 'Service Marked Done By Tech',
+      'Service Now Active', 'Service Needs Scheduling', 'Service Order Changed'];
+    if (perServiceHiddenTypes.indexOf(String(h.ChangeType || '')) !== -1) return true;
     return false;
   }
 
@@ -377,6 +406,62 @@
         lines.push('🕐 Estimated time: ' + fmtMins(oldMins) + ' → ' + fmtMins(newMins) +
           ' (' + (delta > 0 ? '+' : '-') + fmtMins(Math.abs(delta)) + ')');
       }
+      return lines;
+    }
+
+    /* "Assign by service" -- mismo patron que el resto del archivo:
+       NewValue trae el dato estructurado (JSON), aqui se convierte en
+       lineas con icono para la caja de detalle expandible. */
+    if (h.ChangeType === 'Service Scheduled') {
+      var ss = null; try { ss = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+      if (ss) {
+        lines.push(changeLine('👤', ss.serviceName, ss.assigned, ss.assigned));
+        lines.push(changeLine('📅', 'Date', ss.date, ss.date));
+      }
+      return lines;
+    }
+    if (h.ChangeType === 'Service Marked Done By Tech') {
+      var sm = null; try { sm = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+      if (sm) lines.push('🕐 ' + esc(sm.serviceName) + ' — waiting on office to confirm');
+      return lines;
+    }
+    if (h.ChangeType === 'Service Completed') {
+      var sc = null; try { sc = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+      if (sc) {
+        lines.push(changeLine('👤', sc.serviceName + ' — Completed by', sc.completedBy, sc.completedBy));
+        lines.push('📅 Finished: ' + esc(sc.finishedText));
+        if (sc.confirmedNote) lines.push('✅ ' + esc(sc.confirmedNote));
+      }
+      return lines;
+    }
+    if (h.ChangeType === 'Service Now Active') {
+      var sn = null; try { sn = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+      if (sn) lines.push('✅ ' + esc(sn.serviceName) + ' — already scheduled: ' + esc(sn.assigned) + ', ' + esc(sn.date));
+      return lines;
+    }
+    if (h.ChangeType === 'Service Needs Scheduling') {
+      var sq = null; try { sq = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+      if (sq) lines.push('📋 ' + esc(sq.serviceName) + ' needs to be scheduled before work can continue');
+      return lines;
+    }
+    if (h.ChangeType === 'Service Order Changed') {
+      var so = null; try { so = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+      (so && so.order || []).forEach(function (name, i) { lines.push('🔀 ' + (i + 1) + '. ' + esc(name)); });
+      return lines;
+    }
+    if (h.ChangeType === 'Service Added') {
+      var sa = null; try { sa = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+      if (sa) lines.push(addedLine(sa.serviceName, 'needs scheduling like any other service'));
+      return lines;
+    }
+    if (h.ChangeType === 'Service Removed') {
+      var sr = null; try { sr = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+      if (sr) lines.push(removedLine(sr.serviceName, 'approved by office, was not completed'));
+      return lines;
+    }
+    if (h.ChangeType === 'Completed' && h.FieldChanged === 'PerServiceRecap') {
+      var rc = null; try { rc = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+      (rc && rc.recap || []).forEach(function (r) { lines.push('✅ ' + esc(r.serviceName) + ' — ' + esc(r.completedBy)); });
       return lines;
     }
 
