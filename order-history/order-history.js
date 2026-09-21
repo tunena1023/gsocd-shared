@@ -419,9 +419,20 @@
            "en fechas y horas nunca debe aparecer UTC"): ss.date se
            mostraba tal cual llega del backend (YYYY-MM-DD crudo),
            sin pasar por fmtDate() como SI hace el resto del archivo
-           en cualquier otro changeLine('📅', ...). */
+           en cualquier otro changeLine('📅', ...).
+
+           SEGUNDO BUG REAL, tambien reportado en vivo ("se ven
+           repetidos los iconos"): en el tracker del cliente, varios
+           servicios distintos terminan fusionados en un solo punto
+           (ver tracking.html, "Assigned") -- ahi, la linea de fecha
+           generica ('📅 Date: ...') se repite identica para cada
+           servicio, sin decir de CUAL es, aunque la de arriba (👤)
+           si trae el nombre. Se ve como el mismo icono duplicado.
+           Ahora el nombre del servicio va en las 2 lineas, no solo
+           en la primera -- cada linea se entiende por su cuenta,
+           sin depender de la de arriba. */
         lines.push(changeLine('👤', ss.serviceName, ss.assigned, ss.assigned));
-        lines.push(changeLine('📅', 'Date', fmtDate(ss.date), fmtDate(ss.date)));
+        lines.push(changeLine('📅', ss.serviceName + ' date', fmtDate(ss.date), fmtDate(ss.date)));
       }
       return lines;
     }
@@ -435,9 +446,11 @@
       if (sc) {
         /* BUG REAL: sc.finishedText es el ISOString crudo que manda
            complete-service-assignment.js (con hora Y "Z" de UTC) --
-           nunca se le aplicaba fmtDateTime(), se imprimia tal cual. */
+           nunca se le aplicaba fmtDateTime(), se imprimia tal cual.
+           Mismo arreglo de "que servicio es" que Service Scheduled
+           arriba -- el nombre va en cada linea, no solo en la primera. */
         lines.push(changeLine('👤', sc.serviceName + ' — Completed by', sc.completedBy, sc.completedBy));
-        lines.push('📅 Finished: ' + esc(fmtDateTime(sc.finishedText)));
+        lines.push('📅 ' + esc(sc.serviceName) + ' finished: ' + esc(fmtDateTime(sc.finishedText)));
         if (sc.confirmedNote) lines.push('✅ ' + esc(sc.confirmedNote));
       }
       return lines;
