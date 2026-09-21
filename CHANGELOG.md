@@ -2,6 +2,21 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.44.0 — 2026-09-21
+
+- **order-history**: 9 `ChangeType` nuevos para "Assign by service" (Admin > Scheduling/Active,
+  aprobado con mini interactivo): `Service Scheduled`, `Order Moved To Active`,
+  `Service Marked Done By Tech`, `Service Completed`, `Service Now Active`,
+  `Service Needs Scheduling`, `Service Order Changed`, `Service Added`, `Service Removed`.
+  Cada uno con su label en `LABELS` y sus líneas de detalle con ícono en `detailLinesFor`
+  (mismo patrón que `Order Assigned`/`Division Changed` -- `NewValue` trae el dato
+  estructurado en JSON). `isHiddenFromClient()` esconde 5 de los 9 (los pasos puramente
+  internos/mecánicos del modelo por servicio) -- a petición explícita del dueño, "el cliente
+  solo ve asignaciones y servicios completados". OJO: `Service Marked Done By Tech` queda
+  oculto del cliente, a diferencia de cómo `Tech Marked Complete` (el evento de todo-el-pedido
+  de hoy) se comporta hoy -- ese NO está oculto. Pendiente confirmar con el dueño si quiere
+  igualar ese comportamiento también para el caso de todo-el-pedido.
+
 ## v1.43.0 — 2026-09-20
 
 - **Arreglado:** BUG REAL grave reportado por el dueño -- `svcSubLabel()` mostraba `SubOption`
