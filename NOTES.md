@@ -375,3 +375,49 @@ reabre exactamente el mismo panel y se restaura el estado guardado encima.
   eso se dejó **a propósito** para una sesión aparte de diseño. Lo que se
   hizo en esta sesión fue solo proteger que la edición actual (con el
   diseño viejo) no se pierda al ir a la cámara -- no tocar el diseño en sí.
+
+## Pendiente (21/09/2026): lib/order-pdf.js + lib/pdf.js existen, pero NADIE los usa todavia
+
+Se creo `lib/order-pdf.js` (contenido puro del PDF de ordenes -- buildOrderPdf/
+buildCompletionPdf/buildRequestPdf/historyDetailLine/renderServicesTable/etc,
+la logica que antes vivia duplicada a mano en Admingsocd.com y ordersgsocd.com)
+y `lib/pdf.js` (el generador de PDF de bajo nivel, PdfDoc). Etiquetados v1.45.0.
+Ambos estan probados y funcionan bien por su cuenta -- generan un PDF real y
+valido con Node directo (`buildOrderPdf({...}) ` produce bytes de PDF correctos,
+confirmado visualmente con pdftoppm).
+
+**Pero ningun portal los usa en produccion ahorita.** Se intento conectar los
+2 (Admin y Orders, cambiando su `package.json` a `gsocd-shared#v1.45.0` y su
+`lib/orderpdf.js` local para hacer `require('gsocd-shared/lib/order-pdf')`) y
+tumbo produccion en los 2 -- `Cannot find module 'gsocd-shared/lib/order-pdf'`
+en tiempo de ejecucion, aunque `npm install` local SI lo encontraba bien.
+
+Causa real, confirmada con el log de build de Vercel (no es un misterio):
+Vercel restauro el cache de build del deploy ANTERIOR (uno que no tenia
+v1.45.0 en su node_modules) y el `npm install` dijo "up to date" en 484ms --
+demasiado rapido para haber ido a buscar algo nuevo a GitHub. Como este repo
+no comitea `package-lock.json` (gitignored, a proposito, documentado arriba
+en este mismo archivo) no hay nada que le avise a Vercel que la dependencia
+de verdad cambio.
+
+Confirmado con clones 100% frescos (sin nada de cache local) que el codigo en
+si esta bien -- `npm install` desde cero SI baja el paquete correcto y todo
+carga y funciona.
+
+**Se revirtio la conexion en los 2 portales** -- cada uno se quedo otra vez
+con su propia copia local completa de `orderpdf.js` (con el arreglo de
+"Assign by service" aplicado a mano, por separado, en cada uno).
+
+### Si alguien quiere volver a intentar conectar esto:
+
+- Verificar en el log de build que de verdad diga algo como "added N packages"
+  (bajando de verdad) y NO "up to date" en menos de 1 segundo -- eso es la
+  señal de que esta reusando cache viejo.
+- Considerar dejar de ignorar `package-lock.json` (o al menos para los
+  portales que dependen de `gsocd-shared` va Node), para que exista algo
+  real que le diga a Vercel "esta dependencia cambio" -- no se investigo a
+  fondo si esto resuelve el problema de raiz, solo es la sospecha mas fuerte.
+- Probar en un portal a la vez, no los 2 juntos -- mas facil de diagnosticar
+  y revertir si algo sale mal.
+- El dueño pidio explicitamente pausar esto por ahora -- no retomar sin que
+  el lo pida.
