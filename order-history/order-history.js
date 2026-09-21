@@ -415,8 +415,13 @@
     if (h.ChangeType === 'Service Scheduled') {
       var ss = null; try { ss = JSON.parse(h.NewValue || 'null'); } catch (e) {}
       if (ss) {
+        /* BUG REAL encontrado (21/09/2026, reportado por el dueño --
+           "en fechas y horas nunca debe aparecer UTC"): ss.date se
+           mostraba tal cual llega del backend (YYYY-MM-DD crudo),
+           sin pasar por fmtDate() como SI hace el resto del archivo
+           en cualquier otro changeLine('📅', ...). */
         lines.push(changeLine('👤', ss.serviceName, ss.assigned, ss.assigned));
-        lines.push(changeLine('📅', 'Date', ss.date, ss.date));
+        lines.push(changeLine('📅', 'Date', fmtDate(ss.date), fmtDate(ss.date)));
       }
       return lines;
     }
@@ -428,15 +433,21 @@
     if (h.ChangeType === 'Service Completed') {
       var sc = null; try { sc = JSON.parse(h.NewValue || 'null'); } catch (e) {}
       if (sc) {
+        /* BUG REAL: sc.finishedText es el ISOString crudo que manda
+           complete-service-assignment.js (con hora Y "Z" de UTC) --
+           nunca se le aplicaba fmtDateTime(), se imprimia tal cual. */
         lines.push(changeLine('👤', sc.serviceName + ' — Completed by', sc.completedBy, sc.completedBy));
-        lines.push('📅 Finished: ' + esc(sc.finishedText));
+        lines.push('📅 Finished: ' + esc(fmtDateTime(sc.finishedText)));
         if (sc.confirmedNote) lines.push('✅ ' + esc(sc.confirmedNote));
       }
       return lines;
     }
     if (h.ChangeType === 'Service Now Active') {
       var sn = null; try { sn = JSON.parse(h.NewValue || 'null'); } catch (e) {}
-      if (sn) lines.push('✅ ' + esc(sn.serviceName) + ' — already scheduled: ' + esc(sn.assigned) + ', ' + esc(sn.date));
+      /* BUG REAL: sn.date crudo, y ademas construido como una sola
+         oracion de texto plano en vez de usar changeLine() como el
+         resto del archivo -- mismo "sin diseno" que senalo el dueño. */
+      if (sn) lines.push(changeLine('✅', sn.serviceName + ' — already scheduled', sn.assigned + ', ' + fmtDate(sn.date), sn.assigned + ', ' + fmtDate(sn.date)));
       return lines;
     }
     if (h.ChangeType === 'Service Needs Scheduling') {
