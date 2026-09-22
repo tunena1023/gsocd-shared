@@ -211,6 +211,19 @@
     });
     var panel = document.getElementById('panel-' + tab);
     if (panel) panel.classList.add('active');
+    /* BUG REAL encontrado por el dueño (22/09/2026, cambios de tab
+       "de los que se mueven solos" dejaban la linea dorada
+       desalineada): la linea solo se reposiciona con moveU(), que
+       antes vivia UNICAMENTE dentro del listener de click de cada
+       pestana -- un cambio de tab programatico (showTab() llamado
+       desde codigo, no por un clic real, ej. showOrderWherever tras
+       marcar una orden) nunca disparaba ese click, asi que
+       actualizaba el panel visible correctamente pero la linea se
+       quedaba donde estaba antes. refresh() ya sabia reposicionarla
+       segun cual pestana tiene la clase 'active' -- solo faltaba
+       llamarlo aqui tambien, para todos los nav instanciados en la
+       pagina (normalmente uno solo, pero por si acaso). */
+    Object.keys(refreshFns).forEach(function (id) { refresh(id); });
   }
 
   /* Dimensiones OFICIALES del <nav> de arriba (el que trae el logo,
