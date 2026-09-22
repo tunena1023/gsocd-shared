@@ -38,7 +38,15 @@
 
      watcher.stop();       // dejar de revisar (ej. al salir de la pagina)
      watcher.checkNow();   // forzar una revision inmediata
-============================================================ */
+
+   GSLiveRefresh.flashElement(el):
+     Le pone un destello dorado breve (~900ms) a un elemento del DOM --
+     pensado para usarse dentro de onChange, justo despues de repintar
+     SOLO la tarjeta/renglon que de verdad cambio (no toda la lista),
+     para que el usuario note cual fue. No hace nada mas -- onChange
+     sigue siendo responsabilidad de cada app: decidir si repinta todo
+     o solo el elemento afectado. Requiere el CSS de mas abajo
+     (inyectado solo, una vez, la primera vez que se usa). */
 (function () {
   'use strict';
   if (window.GSLiveRefresh) return;
@@ -60,8 +68,32 @@
     return false;
   }
 
+  /* Inyecta el CSS del destello una sola vez por pagina, sin importar
+     cuantos watchers o llamadas a flashElement haya. */
+  function ensureFlashCSS() {
+    if (document.getElementById('gs-live-refresh-flash-css')) return;
+    var style = document.createElement('style');
+    style.id = 'gs-live-refresh-flash-css';
+    style.textContent =
+      '@keyframes gsLiveRefreshFlash {' +
+      '0%{background-color:rgba(201,168,76,.35);box-shadow:0 0 0 2px rgba(201,168,76,.55)}' +
+      '100%{background-color:transparent;box-shadow:0 0 0 2px rgba(201,168,76,0)}}' +
+      '.gs-live-refresh-flash{animation:gsLiveRefreshFlash .9s ease-out}';
+    document.head.appendChild(style);
+  }
+
   window.GSLiveRefresh = {
+    flashElement: function (el) {
+      if (!el) return;
+      ensureFlashCSS();
+      /* Si ya estaba destellando (2 cambios muy seguidos), se reinicia
+         la animacion en vez de que se corten una a la otra. */
+      el.classList.remove('gs-live-refresh-flash');
+      void el.offsetWidth; // fuerza reflow -- sin esto el navegador no reinicia la animacion
+      el.classList.add('gs-live-refresh-flash');
+    },
     watch: function (config) {
+      ensureFlashCSS();
       var cfg = Object.assign({ intervalMs: 30000 }, config);
       if (!cfg.checkFn) throw new Error('GSLiveRefresh.watch needs checkFn');
       if (!cfg.hasChanged) throw new Error('GSLiveRefresh.watch needs hasChanged');
