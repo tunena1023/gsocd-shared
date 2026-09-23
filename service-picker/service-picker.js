@@ -197,7 +197,7 @@
         'data-sku="' + escapeAttr(s.sku) + '" value="' + escapeAttr(qty) + '"></span></div>';
     }
     var active = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
-    return '<button type="button" class="gs-sp-chip-btn' + (active ? ' active' : '') + '" data-sku="' + escapeAttr(s.sku) + '">' + nameWithTip(s) + '</button>';
+    return '<button type="button" class="gs-sp-chip-btn' + (active ? ' active' : '') + '" data-sku="' + escapeAttr(s.sku) + '">' + nameWithTip(s) + priceHtml(inst, s) + '</button>';
   }
 
   function bindItemEvents(inst, pickerId, scopeEl) {
