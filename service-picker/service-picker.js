@@ -88,6 +88,16 @@
       '.gs-sp-area-body .gs-sp-row-grid,.gs-sp-area-body .gs-sp-chip-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}' +
       '.gs-sp-others{display:inline-block;margin:12px 0 4px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-dk,#8C6F2A);cursor:pointer}' +
       '.gs-sp-others-box{margin-top:6px}' +
+      /* v1.52.0: paquetes como plantilla (modo Units) */
+      '.gs-sp-sec-title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin:14px 0 8px}' +
+      '.gs-sp-sec-title:first-child{margin-top:0}' +
+      '.gs-sp-area-card.used{border-color:#3E7A4C;background:#F6FAF6}' +
+      '.gs-sp-pkg-use{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin:0 0 6px}' +
+      '.gs-sp-pkg-lines{margin-top:10px;border-top:1px dashed var(--border,#E0D9CC);padding-top:6px}' +
+      '.gs-sp-pkg-line{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:6px 0;border-bottom:1px dashed var(--border,#E0D9CC)}' +
+      '.gs-sp-pkg-line:last-child{border-bottom:none}' +
+      '.gs-sp-pkg-line .lv{color:var(--gold-dk,#8C6F2A);font-weight:700;font-size:11px;white-space:nowrap}' +
+      '.gs-sp-inpkg{font-size:10px;font-weight:700;color:#3E7A4C;margin-left:6px;text-transform:uppercase;letter-spacing:.04em}' +
       '@media (max-width:640px){.gs-sp-accordion{grid-template-columns:1fr}}';
     document.head.appendChild(style);
   }
@@ -317,6 +327,59 @@
     if (inst.showOthers && others.length) renderGroupedGrid(pickerId, inst, others, document.getElementById('gs-sp-others-' + pickerId));
   }
 
+  /* v1.52.0 -- Units: los paquetes (servicios con s.packageItems) salen
+     arriba como PLANTILLA: tarjeta con lo que incluye; elegir el nivel
+     del paquete = usarlo. La orden guarda solo la linea del paquete (lo
+     que se factura); el checklist se arma al mostrarlo. Los servicios
+     que ya vienen en un paquete en uso se marcan "In package" en las
+     categorias de abajo. Pedido y aprobado con mini por el dueño. */
+  function packagesInUse(inst) {
+    return inst.catalog.filter(function (s) { return Array.isArray(s.packageItems) && s.packageItems.length && isSelected(inst, s); });
+  }
+  function renderUnits(pickerId, inst, list) {
+    var grid = inst.gridEl;
+    var bySku = {};
+    inst.catalog.forEach(function (s) { bySku[String(s.sku)] = s; });
+    var pkgs = list.filter(function (s) { return Array.isArray(s.packageItems) && s.packageItems.length; });
+    var pkgSkus = {};
+    pkgs.forEach(function (p) { pkgSkus[String(p.sku)] = true; });
+    var included = {};
+    packagesInUse(inst).forEach(function (p) { p.packageItems.forEach(function (x) { included[String(x.sku)] = true; }); });
+    var cards = pkgs.map(function (p) {
+      var open = !!inst.openPkgs[p.sku], used = isSelected(inst, p);
+      var names = p.packageItems.map(function (x) { var s = bySku[String(x.sku)]; return s ? s.serviceName : ''; }).filter(Boolean);
+      return '<div class="gs-sp-area-card' + (open ? ' open' : '') + (used ? ' used' : '') + '">' +
+        '<div class="gs-sp-area-head" data-pkg="' + escapeAttr(p.sku) + '"><div><div class="gs-sp-area-name">' + nameWithTip(p) +
+        (used ? '<span class="gs-sp-area-sel">In use</span>' : '') + '</div>' +
+        '<div class="gs-sp-area-prev">Includes ' + names.length + (names.length === 1 ? ' service' : ' services') +
+        (open ? '' : ': ' + escapeHtml(names.slice(0, 3).join(', ')) + (names.length > 3 ? '\u2026' : '')) + '</div></div>' +
+        '<span class="gs-sp-area-count">Package</span></div>' +
+        (open ? '<div class="gs-sp-area-body"><p class="gs-sp-pkg-use">Use this package</p><div class="' + (inst.mode === 'levels' ? 'gs-sp-row-grid' : 'gs-sp-chip-grid') + '">' + itemHtml(inst, p) + '</div>' +
+          '<div class="gs-sp-pkg-lines">' + p.packageItems.map(function (x) {
+            var s = bySku[String(x.sku)]; if (!s) return '';
+            return '<div class="gs-sp-pkg-line"><span>' + nameWithTip(s) + '</span><span class="lv">' + escapeHtml(String(x.level || '').replace('Level ', 'L')) + '</span></div>';
+          }).join('') + '</div></div>' : '') +
+        '</div>';
+    }).join('');
+    var rest = list.filter(function (s) { return !pkgSkus[String(s.sku)]; });
+    grid.className = '';
+    grid.innerHTML = (pkgs.length ? '<p class="gs-sp-sec-title">Packages</p><div class="gs-sp-area-grid" id="gs-sp-pkgs-' + pickerId + '">' + cards + '</div>' +
+      '<p class="gs-sp-sec-title">Or pick services by room</p>' : '') + '<div id="gs-sp-rooms-' + pickerId + '"></div>';
+    Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-area-head[data-pkg]'), function (h) {
+      h.addEventListener('click', function () { var k = h.dataset.pkg; inst.openPkgs[k] = !inst.openPkgs[k]; renderGrid(pickerId); });
+    });
+    var pk = document.getElementById('gs-sp-pkgs-' + pickerId);
+    if (pk) bindItemEvents(inst, pickerId, pk);
+    var rooms = document.getElementById('gs-sp-rooms-' + pickerId);
+    if (rest.length) renderGroupedGrid(pickerId, inst, rest, rooms);
+    Array.prototype.forEach.call(rooms.querySelectorAll('[data-sku]'), function (b) {
+      if (!included[String(b.dataset.sku)]) return;
+      var row = b.closest('.gs-sp-row') || b;
+      var name = row.querySelector('.gs-sp-row-name') || row;
+      if (!name.querySelector('.gs-sp-inpkg')) name.insertAdjacentHTML('beforeend', '<span class="gs-sp-inpkg">In package</span>');
+    });
+  }
+
   function renderGrid(pickerId) {
     var inst = instances[pickerId];
     var grid = inst.gridEl;
@@ -334,6 +397,10 @@
     var q = inst.searchEl ? (inst.searchEl.value || '').trim() : '';
     if (inst.groupByCategory && inst.workMode === 'recurring' && !q && inst.filterMode === 'all') {
       renderAreaCards(pickerId, inst, list);
+      return;
+    }
+    if (inst.groupByCategory && inst.workToggle && inst.workMode === 'units' && !q && inst.filterMode === 'all') {
+      renderUnits(pickerId, inst, list);
       return;
     }
     if (inst.groupByCategory) {
@@ -472,6 +539,7 @@
       areasTouched: false,
       showOthers: false,
       onWorkModeChange: options.onWorkModeChange || null,
+      openPkgs: {},
       selected: options.initialSelected || {},
       svcLevel: options.initialLevels || {},
       svcQty: options.initialQuantities || {},
