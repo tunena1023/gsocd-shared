@@ -349,28 +349,32 @@
      que ya vienen en un paquete en uso se marcan "In package" en las
      categorias de abajo. Pedido y aprobado con mini por el dueño. */
   function packagesInUse(inst) {
-    return inst.catalog.filter(function (s) { return Array.isArray(s.packageItems) && s.packageItems.length && isSelected(inst, s); });
+    return inst.catalog.filter(function (s) { return ((Array.isArray(s.packageItems) && s.packageItems.length) || /^packages?$/i.test(String(s.category || ''))) && isSelected(inst, s); });
   }
   function renderUnits(pickerId, inst, list) {
     var grid = inst.gridEl;
     var bySku = {};
     inst.catalog.forEach(function (s) { bySku[String(s.sku)] = s; });
-    var pkgs = list.filter(function (s) { return Array.isArray(s.packageItems) && s.packageItems.length; });
+    /* v1.56.0: TODO paquete sale como tarjeta (categoria Package o con
+       contenido), aunque todavia no tenga definido que incluye. */
+    var isPkg = function (s) { return (Array.isArray(s.packageItems) && s.packageItems.length) || /^packages?$/i.test(String(s.category || '')); };
+    var pkgs = list.filter(isPkg);
     var pkgSkus = {};
     pkgs.forEach(function (p) { pkgSkus[String(p.sku)] = true; });
     var included = {};
-    packagesInUse(inst).forEach(function (p) { p.packageItems.forEach(function (x) { included[String(x.sku)] = true; }); });
+    packagesInUse(inst).forEach(function (p) { (p.packageItems || []).forEach(function (x) { included[String(x.sku)] = true; }); });
     var cards = pkgs.map(function (p) {
       var open = !!inst.openPkgs[p.sku], used = isSelected(inst, p);
-      var names = p.packageItems.map(function (x) { var s = bySku[String(x.sku)]; return s ? s.serviceName : ''; }).filter(Boolean);
+      var items = Array.isArray(p.packageItems) ? p.packageItems : [];
+      var names = items.map(function (x) { var s = bySku[String(x.sku)]; return s ? s.serviceName : ''; }).filter(Boolean);
       return '<div class="gs-sp-area-card' + (open ? ' open' : '') + (used ? ' used' : '') + '">' +
         '<div class="gs-sp-area-head" data-pkg="' + escapeAttr(p.sku) + '"><div><div class="gs-sp-area-name">' + nameWithTip(p) + priceHtml(inst, p) +
         (used ? '<span class="gs-sp-area-sel">In use</span>' : '') + '</div>' +
-        '<div class="gs-sp-area-prev">Includes ' + names.length + (names.length === 1 ? ' service' : ' services') +
-        (open ? '' : ': ' + escapeHtml(names.slice(0, 3).join(', ')) + (names.length > 3 ? '\u2026' : '')) + '</div></div>' +
+        '<div class="gs-sp-area-prev">' + (names.length ? 'Includes ' + names.length + (names.length === 1 ? ' service' : ' services') +
+        (open ? '' : ': ' + escapeHtml(names.slice(0, 3).join(', ')) + (names.length > 3 ? '\u2026' : '')) : 'Contents not set yet') + '</div></div>' +
         '<span class="gs-sp-area-count">Package</span></div>' +
         (open ? '<div class="gs-sp-area-body"><p class="gs-sp-pkg-use">Use this package</p><div class="' + (inst.mode === 'levels' ? 'gs-sp-row-grid' : 'gs-sp-chip-grid') + '">' + itemHtml(inst, p) + '</div>' +
-          '<div class="gs-sp-pkg-lines">' + p.packageItems.map(function (x) {
+          '<div class="gs-sp-pkg-lines">' + items.map(function (x) {
             var s = bySku[String(x.sku)]; if (!s) return '';
             return '<div class="gs-sp-pkg-line"><span>' + nameWithTip(s) + (inst.showPrices ? '<span class="gs-sp-price inc">Included</span>' : '') + '</span><span class="lv">' + escapeHtml(String(x.level || '').replace('Level ', 'L')) + '</span></div>';
           }).join('') + '</div></div>' : '') +
