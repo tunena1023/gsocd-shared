@@ -125,6 +125,14 @@
     return !!s.requiresQuantity;
   }
 
+  /* v1.50.0: nombre con su descripcion en tooltip (gsocd-shared/
+     service-tooltip), si esa pieza esta cargada y el servicio trae
+     description. Sin ella, el nombre sale igual que siempre. */
+  function nameWithTip(s) {
+    var text = escapeHtml(s.serviceName);
+    return (window.GSServiceTooltip && s.description) ? window.GSServiceTooltip.nameHtml(s.sku, text) : text;
+  }
+
   function itemHtml(inst, s) {
     if (isLeveledItem(s)) {
       var sel = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
@@ -134,20 +142,20 @@
         return '<div class="gs-sp-lvl-btn' + (lvl === l ? ' active' : '') + '" data-sku="' + escapeAttr(s.sku) + '" data-level="' + l + '">L' + (i + 1) + '</div>';
       }).join('');
       return '<div class="gs-sp-row' + (lvl ? ' selected' : '') + '">' +
-        '<span class="gs-sp-row-name">' + escapeHtml(s.serviceName) + '</span>' +
+        '<span class="gs-sp-row-name">' + nameWithTip(s) + '</span>' +
         '<div class="gs-sp-lvl-group">' + btns + '</div></div>';
     }
     if (isQuantityItem(s)) {
       var qsel = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
       var qty = qsel ? (inst.svcQty[svcKey(inst.propertyType, s.serviceName)] || '') : '';
       return '<div class="gs-sp-row' + (qsel ? ' selected' : '') + '">' +
-        '<span class="gs-sp-row-name">' + escapeHtml(s.serviceName) + '</span>' +
+        '<span class="gs-sp-row-name">' + nameWithTip(s) + '</span>' +
         '<span><span class="gs-sp-qty-label">Qty</span>' +
         '<input type="number" class="gs-sp-qty-input" min="1" step="1" inputmode="numeric" ' +
         'data-sku="' + escapeAttr(s.sku) + '" value="' + escapeAttr(qty) + '"></span></div>';
     }
     var active = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
-    return '<button type="button" class="gs-sp-chip-btn' + (active ? ' active' : '') + '" data-sku="' + escapeAttr(s.sku) + '">' + escapeHtml(s.serviceName) + '</button>';
+    return '<button type="button" class="gs-sp-chip-btn' + (active ? ' active' : '') + '" data-sku="' + escapeAttr(s.sku) + '">' + nameWithTip(s) + '</button>';
   }
 
   function bindItemEvents(inst, pickerId, scopeEl) {
@@ -378,6 +386,7 @@
       onChange: options.onChange || null
     };
     instances[pickerId] = inst;
+    if (window.GSServiceTooltip) window.GSServiceTooltip.register(inst.catalog);
 
     var html = '';
     if (inst.showPropertyToggle) {
@@ -449,7 +458,7 @@
         if (toggleEl) toggleEl.checked = type === 'Residential';
         renderGrid(pickerId);
       },
-      setCatalog: function (catalog) { inst.catalog = catalog; renderGrid(pickerId); },
+      setCatalog: function (catalog) { inst.catalog = catalog; if (window.GSServiceTooltip) window.GSServiceTooltip.register(catalog); renderGrid(pickerId); },
       destroy: function () { delete instances[pickerId]; container.innerHTML = ''; }
     };
   }

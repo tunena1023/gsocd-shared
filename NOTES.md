@@ -283,3 +283,15 @@ con su propia copia local completa de `orderpdf.js` (con el arreglo de
   y revertir si algo sale mal.
 - El dueño pidio explicitamente pausar esto por ahora -- no retomar sin que
   el lo pida.
+
+## v1.50.0 (23/09/2026): service-tooltip + GSServicePicker con descripcion en tooltip
+
+Nueva pieza `service-tooltip/service-tooltip.js`: la descripcion de un
+servicio (Sales Description de QuickBooks -> ServicesCatalog.Description)
+en una burbuja al pasar el mouse (350 ms) o al dejar el dedo presionado
+en celular (450 ms), sin campo visible (solo un subrayado punteado
+tenue). Aprobado con mini por el dueño. `GSServicePicker` v1.50.0 la usa
+sola si esta cargada y el catalogo trae `description`; sin ella el picker
+se ve y funciona igual que v1.28.9 (unico cambio en el picker desde esa
+version). Un dedo presionado sobre un chip muestra la descripcion y NO
+lo selecciona al soltar.
