@@ -97,6 +97,8 @@
       '.gs-sp-pkg-line{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:6px 0;border-bottom:1px dashed var(--border,#E0D9CC)}' +
       '.gs-sp-pkg-line:last-child{border-bottom:none}' +
       '.gs-sp-pkg-line .lv{color:var(--gold-dk,#8C6F2A);font-weight:700;font-size:11px;white-space:nowrap}' +
+      '.gs-sp-price{display:inline-block;margin-left:8px;font-size:11px;font-weight:700;color:var(--gold-dk,#8C6F2A);background:#FBF7EC;border:1px solid rgba(201,168,76,.35);padding:1px 7px;border-radius:10px;white-space:nowrap;vertical-align:1px}' +
+      '.gs-sp-price.inc{color:#3E7A4C;background:#F1F7F2;border-color:#CFE3D3}' +
       '.gs-sp-inpkg{font-size:10px;font-weight:700;color:#3E7A4C;margin-left:6px;text-transform:uppercase;letter-spacing:.04em}' +
       '@media (max-width:640px){.gs-sp-accordion{grid-template-columns:1fr}}';
     document.head.appendChild(style);
@@ -160,6 +162,19 @@
     return (window.GSServiceTooltip && s.description) ? window.GSServiceTooltip.nameHtml(s.sku, text) : text;
   }
 
+  /* v1.55.0 -- precios (solo si showPrices: el dueño decide por cliente,
+     apagado por default). s.price = precio de QuickBooks (Level 1);
+     s.levelPrices = { 'Level 1': x, 'Level 2': y, 'Level 3': z } cuando
+     el servicio tiene ajuste por nivel (Service Times). Se muestra el
+     precio del nivel elegido, o el de Level 1 si no hay nivel. */
+  function priceHtml(inst, s) {
+    if (!inst.showPrices) return '';
+    var lv = inst.svcLevel[svcKey(s.propertyType, s.serviceName)] || 'Level 1';
+    var p = s.levelPrices && s.levelPrices[lv] != null ? s.levelPrices[lv] : s.price;
+    if (p == null || p === '' || isNaN(Number(p))) return '';
+    var n = Number(p);
+    return '<span class="gs-sp-price">$' + (n % 1 ? n.toFixed(2) : String(n)) + '</span>';
+  }
   function itemHtml(inst, s) {
     if (isLeveledItem(s)) {
       var sel = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
@@ -169,14 +184,14 @@
         return '<div class="gs-sp-lvl-btn' + (lvl === l ? ' active' : '') + '" data-sku="' + escapeAttr(s.sku) + '" data-level="' + l + '">L' + (i + 1) + '</div>';
       }).join('');
       return '<div class="gs-sp-row' + (lvl ? ' selected' : '') + '">' +
-        '<span class="gs-sp-row-name">' + nameWithTip(s) + '</span>' +
+        '<span class="gs-sp-row-name">' + nameWithTip(s) + priceHtml(inst, s) + '</span>' +
         '<div class="gs-sp-lvl-group">' + btns + '</div></div>';
     }
     if (isQuantityItem(s)) {
       var qsel = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
       var qty = qsel ? (inst.svcQty[svcKey(inst.propertyType, s.serviceName)] || '') : '';
       return '<div class="gs-sp-row' + (qsel ? ' selected' : '') + '">' +
-        '<span class="gs-sp-row-name">' + nameWithTip(s) + '</span>' +
+        '<span class="gs-sp-row-name">' + nameWithTip(s) + priceHtml(inst, s) + '</span>' +
         '<span><span class="gs-sp-qty-label">Qty</span>' +
         '<input type="number" class="gs-sp-qty-input" min="1" step="1" inputmode="numeric" ' +
         'data-sku="' + escapeAttr(s.sku) + '" value="' + escapeAttr(qty) + '"></span></div>';
@@ -349,7 +364,7 @@
       var open = !!inst.openPkgs[p.sku], used = isSelected(inst, p);
       var names = p.packageItems.map(function (x) { var s = bySku[String(x.sku)]; return s ? s.serviceName : ''; }).filter(Boolean);
       return '<div class="gs-sp-area-card' + (open ? ' open' : '') + (used ? ' used' : '') + '">' +
-        '<div class="gs-sp-area-head" data-pkg="' + escapeAttr(p.sku) + '"><div><div class="gs-sp-area-name">' + nameWithTip(p) +
+        '<div class="gs-sp-area-head" data-pkg="' + escapeAttr(p.sku) + '"><div><div class="gs-sp-area-name">' + nameWithTip(p) + priceHtml(inst, p) +
         (used ? '<span class="gs-sp-area-sel">In use</span>' : '') + '</div>' +
         '<div class="gs-sp-area-prev">Includes ' + names.length + (names.length === 1 ? ' service' : ' services') +
         (open ? '' : ': ' + escapeHtml(names.slice(0, 3).join(', ')) + (names.length > 3 ? '\u2026' : '')) + '</div></div>' +
@@ -357,7 +372,7 @@
         (open ? '<div class="gs-sp-area-body"><p class="gs-sp-pkg-use">Use this package</p><div class="' + (inst.mode === 'levels' ? 'gs-sp-row-grid' : 'gs-sp-chip-grid') + '">' + itemHtml(inst, p) + '</div>' +
           '<div class="gs-sp-pkg-lines">' + p.packageItems.map(function (x) {
             var s = bySku[String(x.sku)]; if (!s) return '';
-            return '<div class="gs-sp-pkg-line"><span>' + nameWithTip(s) + '</span><span class="lv">' + escapeHtml(String(x.level || '').replace('Level ', 'L')) + '</span></div>';
+            return '<div class="gs-sp-pkg-line"><span>' + nameWithTip(s) + (inst.showPrices ? '<span class="gs-sp-price inc">Included</span>' : '') + '</span><span class="lv">' + escapeHtml(String(x.level || '').replace('Level ', 'L')) + '</span></div>';
           }).join('') + '</div></div>' : '') +
         '</div>';
     }).join('');
@@ -535,6 +550,7 @@
       /* v1.54.0: paquetes como plantilla SIN el toggle (clientes que no
          ven la opcion Recurring en el portal). */
       showPackages: !!options.showPackages,
+      showPrices: !!options.showPrices,
       workMode: options.workMode === 'recurring' ? 'recurring' : 'units',
       areaNames: options.areaNames || null,
       placeArea: options.placeArea || '',
@@ -635,6 +651,7 @@
         renderGrid(pickerId);
       },
       setDivision: function (division) { inst.division = division; renderGrid(pickerId); },
+      setShowPrices: function (on) { inst.showPrices = !!on; renderGrid(pickerId); },
       setWorkMode: function (m) { inst.workMode = m === 'recurring' ? 'recurring' : 'units'; if (workEl) workEl.checked = inst.workMode === 'units'; renderGrid(pickerId); },
       setPlaceArea: function (a) { inst.placeArea = a || ''; inst.areasTouched = false; renderGrid(pickerId); },
       setPropertyType: function (type) {
