@@ -40,6 +40,9 @@
       '.gs-ms.up .gs-ms-panel{transform:translateY(4px)}' +
       '.gs-ms.open .gs-ms-panel{opacity:1;transform:translateY(0)}' +
       '.gs-ms-list{max-height:260px;overflow-y:auto;padding:6px 0}' +
+      '.gs-ms-search{display:block;width:calc(100% - 20px);margin:10px 10px 4px;padding:8px 10px;border:1px solid var(--border,#E0D9CC);border-radius:4px;font:inherit;font-size:13px;box-sizing:border-box}' +
+      '.gs-ms-search:focus{outline:none;border-color:var(--gold,#C9A84C);box-shadow:0 0 0 3px rgba(201,168,76,.15)}' +
+      '.gs-ms-empty{padding:10px 14px;font-size:12px;color:var(--gray,#6B6B6B)}' +
       '.gs-ms-opt{display:flex;align-items:center;gap:10px;padding:8px 14px;font-size:13px;cursor:pointer;outline:none}' +
       '.gs-ms-opt:hover,.gs-ms-opt:focus{background:#FBF7EC}' +
       '.gs-ms-box{flex-shrink:0;width:16px;height:16px;border:1.5px solid #CFC6B2;border-radius:3px;display:flex;align-items:center;justify-content:center;background:var(--white,#fff);transition:background .12s ease,border-color .12s ease}' +
@@ -58,32 +61,48 @@
     if (!container) return null;
     var id = 'gs-ms-' + (++seq);
     var options = (opts && opts.options) || [];
-    var sel = ((opts && opts.selected) || []).filter(function (v) { return options.indexOf(v) !== -1; });
+    var sel = [];
     var before = null;
     var root = document.createElement('div');
     root.className = 'gs-ms';
     root.innerHTML = '<button type="button" class="gs-ms-btn" aria-haspopup="listbox" aria-expanded="false" aria-controls="' + id + '"></button>' +
-      '<div class="gs-ms-panel" hidden><div class="gs-ms-list" role="listbox" aria-multiselectable="true" id="' + id + '"></div>' +
+      '<div class="gs-ms-panel" hidden>' + (opts && opts.search ? '<input type="text" class="gs-ms-search" placeholder="Search\u2026" aria-label="Search">' : '') +
+      '<div class="gs-ms-list" role="listbox" aria-multiselectable="true" id="' + id + '"></div>' +
       '<div class="gs-ms-foot"><button type="button" class="gs-ms-clear">Clear</button><button type="button" class="gs-ms-done">Done</button></div></div>';
     container.innerHTML = '';
     container.appendChild(root);
     var btn = root.querySelector('.gs-ms-btn'), panel = root.querySelector('.gs-ms-panel'), list = root.querySelector('.gs-ms-list');
+    searchEl = root.querySelector('.gs-ms-search');
+    (function () { var w = ((opts && opts.selected) || []).map(String); sel = options.map(val).filter(function (o) { return w.indexOf(o) !== -1; }); })();
+    if (searchEl) {
+      searchEl.addEventListener('input', drawList);
+      searchEl.addEventListener('keydown', function (e) { if (e.key === 'ArrowDown') { e.preventDefault(); var f = list.querySelector('.gs-ms-opt'); if (f) f.focus(); } });
+    }
 
+    function labelOf(v) { for (var i = 0; i < options.length; i++) { if (val(options[i]) === v) return lab(options[i]); } return v; }
     function drawBtn() {
       if (!sel.length) { btn.innerHTML = '<span class="gs-ms-ph">' + esc((opts && opts.placeholder) || 'Choose\u2026') + '</span>'; return; }
-      var shown = sel.slice(0, 2).map(function (v) { return '<span class="gs-ms-chip">' + esc(v) + '</span>'; }).join('');
+      var shown = sel.slice(0, 2).map(function (v) { return '<span class="gs-ms-chip">' + esc(labelOf(v)) + '</span>'; }).join('');
       btn.innerHTML = shown + (sel.length > 2 ? '<span class="gs-ms-more">+' + (sel.length - 2) + '</span>' : '');
-      btn.setAttribute('aria-label', sel.join(', '));
+      btn.setAttribute('aria-label', sel.map(labelOf).join(', '));
     }
+    var searchEl;
+    /* v1.54.0: options pueden ser texto o {value, label}; con search:true
+       el panel trae un buscador arriba (listas largas, ej. clientes). */
+    function val(o) { return (o && typeof o === 'object') ? String(o.value) : String(o); }
+    function lab(o) { return (o && typeof o === 'object') ? String(o.label || o.value) : String(o); }
     function drawList() {
-      list.innerHTML = options.map(function (v, i) {
-        return '<div class="gs-ms-opt" role="option" tabindex="-1" data-i="' + i + '" aria-selected="' + (sel.indexOf(v) !== -1) + '"><span class="gs-ms-box"></span>' + esc(v) + '</div>';
+      var q = searchEl ? searchEl.value.trim().toLowerCase() : '';
+      var html = options.map(function (o, i) {
+        if (q && lab(o).toLowerCase().indexOf(q) === -1) return '';
+        return '<div class="gs-ms-opt" role="option" tabindex="-1" data-i="' + i + '" aria-selected="' + (sel.indexOf(val(o)) !== -1) + '"><span class="gs-ms-box"></span>' + esc(lab(o)) + '</div>';
       }).join('');
+      list.innerHTML = html || '<div class="gs-ms-empty">No matches.</div>';
     }
     function toggle(i) {
-      var v = options[i], k = sel.indexOf(v);
+      var v = val(options[i]), k = sel.indexOf(v);
       if (k === -1) sel.push(v); else sel.splice(k, 1);
-      sel = options.filter(function (o) { return sel.indexOf(o) !== -1; });
+      sel = options.map(val).filter(function (o) { return sel.indexOf(o) !== -1; });
       var el = list.querySelector('[data-i="' + i + '"]');
       if (el) el.setAttribute('aria-selected', String(k === -1));
       drawBtn();
@@ -106,8 +125,8 @@
       requestAnimationFrame(function () { root.classList.add('open'); });
       btn.setAttribute('aria-expanded', 'true');
       openInst = api;
-      var first = list.querySelector('.gs-ms-opt');
-      if (first) first.focus({ preventScroll: true });
+      if (searchEl) { searchEl.value = ''; drawList(); searchEl.focus({ preventScroll: true }); }
+      else { var first = list.querySelector('.gs-ms-opt'); if (first) first.focus({ preventScroll: true }); }
     }
     function close(focusBtn) {
       if (panel.hidden) return;
@@ -136,7 +155,7 @@
 
     var api = {
       get: function () { return sel.slice(); },
-      set: function (values) { sel = options.filter(function (o) { return (values || []).indexOf(o) !== -1; }); drawBtn(); if (!panel.hidden) drawList(); },
+      set: function (values) { var w = (values || []).map(String); sel = options.map(val).filter(function (o) { return w.indexOf(o) !== -1; }); drawBtn(); if (!panel.hidden) drawList(); },
       open: open, close: close, root: root,
       destroy: function () { if (openInst === api) openInst = null; container.innerHTML = ''; }
     };

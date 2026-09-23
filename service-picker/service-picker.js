@@ -399,7 +399,7 @@
       renderAreaCards(pickerId, inst, list);
       return;
     }
-    if (inst.groupByCategory && inst.workToggle && inst.workMode === 'units' && !q && inst.filterMode === 'all') {
+    if (inst.groupByCategory && (inst.workToggle || inst.showPackages) && inst.workMode === 'units' && !q && inst.filterMode === 'all') {
       renderUnits(pickerId, inst, list);
       return;
     }
@@ -532,6 +532,9 @@
       openCats: {},
       /* v1.51.0 -- toggle Recurring / Units (solo si workToggle) */
       workToggle: !!options.workToggle,
+      /* v1.54.0: paquetes como plantilla SIN el toggle (clientes que no
+         ven la opcion Recurring en el portal). */
+      showPackages: !!options.showPackages,
       workMode: options.workMode === 'recurring' ? 'recurring' : 'units',
       areaNames: options.areaNames || null,
       placeArea: options.placeArea || '',
