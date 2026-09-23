@@ -71,6 +71,23 @@
          ponia en JS pero nunca tuvo CSS -- por eso siempre se veia
          apilado en 1 sola columna sin importar el ancho. */
       '.gs-sp-accordion{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}' +
+      /* v1.51.0: toggle Recurring / Units + tarjetas por area */
+      '.gs-sp-toggles{display:flex;flex-wrap:wrap;gap:4px 28px}' +
+      '.gs-sp-area-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}' +
+      '.gs-sp-area-card{border:1px solid var(--border,#E0D9CC);background:var(--white,#fff);transition:border-color .15s ease,box-shadow .15s ease}' +
+      '.gs-sp-area-card:hover{border-color:#D8CBA6;box-shadow:0 2px 8px rgba(0,0,0,.05)}' +
+      '.gs-sp-area-card.open{grid-column:1/-1;border-color:var(--gold,#C9A84C)}' +
+      '.gs-sp-area-card.match{border-color:var(--gold,#C9A84C)}' +
+      '.gs-sp-area-head{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;cursor:pointer}' +
+      '.gs-sp-area-name{font-size:13px;font-weight:700}' +
+      '.gs-sp-area-prev{font-size:11px;color:var(--gray,#6B6B6B);margin-top:3px;line-height:1.4}' +
+      '.gs-sp-area-count{margin-left:auto;font-size:10px;color:var(--gold-dk,#8C6F2A);font-weight:700;background:#F0E4C4;padding:2px 8px;border-radius:10px;white-space:nowrap}' +
+      '.gs-sp-area-tag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gold-dk,#8C6F2A);margin-left:8px}' +
+      '.gs-sp-area-sel{font-size:10px;color:#3E7A4C;font-weight:700;margin-left:6px}' +
+      '.gs-sp-area-body{border-top:1px solid var(--border,#E0D9CC);padding:10px 12px 12px}' +
+      '.gs-sp-area-body .gs-sp-row-grid,.gs-sp-area-body .gs-sp-chip-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}' +
+      '.gs-sp-others{display:inline-block;margin:12px 0 4px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-dk,#8C6F2A);cursor:pointer}' +
+      '.gs-sp-others-box{margin-top:6px}' +
       '@media (max-width:640px){.gs-sp-accordion{grid-template-columns:1fr}}';
     document.head.appendChild(style);
   }
@@ -191,8 +208,8 @@
      categoria asignada todavia caen en "Uncategorized" al final, sin
      perderse. Buscar abre solo las categorias con resultados (mismo
      criterio ya aprobado en el mini). */
-  function renderGroupedGrid(pickerId, inst, list) {
-    var grid = inst.gridEl;
+  function renderGroupedGrid(pickerId, inst, list, targetEl) {
+    var grid = targetEl || inst.gridEl;
     var q = inst.searchEl ? (inst.searchEl.value || '').trim().toLowerCase() : '';
     var groups = {};
     var order = [];
@@ -238,6 +255,68 @@
     bindItemEvents(inst, pickerId, grid);
   }
 
+  /* v1.51.0 -- Recurring: Common Areas en tarjetas por AREA (donde se
+     hace el trabajo), no una lista interminable. Cada servicio trae
+     s.areas (lista, un servicio puede estar en varias tarjetas). La
+     tarjeta de placeArea (el lugar que se esta editando) se abre sola
+     y va primero. Los servicios de Common Areas sin area marcada caen
+     en "More common areas". Lo demas (Floors, Kitchen & Bathrooms...)
+     queda a un clic en "+ Other services". Pedido y aprobado con mini
+     por el dueño (23/09/2026). */
+  var DEFAULT_AREAS = ['Restrooms & Locker Rooms', 'Hallways & Floors', 'Lobby & Entry', 'Elevators & Stairs', 'Trash',
+    'Kitchen & Breakroom', 'Offices & Meeting Rooms', 'Amenities', 'Exterior'];
+  function renderAreaCards(pickerId, inst, list) {
+    var grid = inst.gridEl;
+    var names = (inst.areaNames || DEFAULT_AREAS).slice();
+    var byArea = {};
+    names.forEach(function (a) { byArea[a] = []; });
+    var untagged = [];
+    list.forEach(function (s) {
+      var areas = Array.isArray(s.areas) ? s.areas : [];
+      var placed = false;
+      areas.forEach(function (a) { if (byArea[a]) { byArea[a].push(s); placed = true; } });
+      if (!placed && (s.category || '') === 'Common Areas') untagged.push(s);
+    });
+    if (untagged.length) { names.push('More common areas'); byArea['More common areas'] = untagged; }
+    names = names.filter(function (a) { return byArea[a].length; });
+    if (inst.placeArea && byArea[inst.placeArea]) {
+      names.sort(function (a, b) { return a === inst.placeArea ? -1 : b === inst.placeArea ? 1 : 0; });
+      if (!inst.areasTouched) { inst.openAreas = {}; inst.openAreas[inst.placeArea] = true; }
+    }
+    var gridClass = inst.mode === 'levels' ? 'gs-sp-row-grid' : 'gs-sp-chip-grid';
+    var cards = names.map(function (a) {
+      var items = byArea[a];
+      var open = !!inst.openAreas[a];
+      var n = items.filter(function (s) { return isSelected(inst, s); }).length;
+      var prev = items.slice(0, 3).map(function (s) { return s.serviceName; }).join(', ') + (items.length > 3 ? '\u2026' : '');
+      var match = a === inst.placeArea;
+      return '<div class="gs-sp-area-card' + (open ? ' open' : '') + (match ? ' match' : '') + '">' +
+        '<div class="gs-sp-area-head" data-area="' + escapeAttr(a) + '"><div><div class="gs-sp-area-name">' + escapeHtml(a) +
+        (match ? '<span class="gs-sp-area-tag">This place</span>' : '') + (n ? '<span class="gs-sp-area-sel">' + n + ' picked</span>' : '') + '</div>' +
+        (open ? '' : '<div class="gs-sp-area-prev">' + escapeHtml(prev) + '</div>') + '</div>' +
+        '<span class="gs-sp-area-count">' + items.length + '</span></div>' +
+        (open ? '<div class="gs-sp-area-body"><div class="' + gridClass + '">' + items.map(function (s) { return itemHtml(inst, s); }).join('') + '</div></div>' : '') +
+        '</div>';
+    }).join('');
+    var others = list.filter(function (s) { var c = s.category || ''; return c !== 'Common Areas' && c !== 'Package' && c !== 'Packages'; });
+    grid.className = '';
+    grid.innerHTML = '<div class="gs-sp-area-grid">' + cards + '</div>' +
+      (others.length ? '<span class="gs-sp-others" data-others="1">' + (inst.showOthers ? '\u2212 Hide other services' : '+ Other services (floors, kitchen & bathrooms, windows\u2026)') + '</span>' +
+        '<div class="gs-sp-others-box" id="gs-sp-others-' + pickerId + '"></div>' : '');
+    Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-area-head'), function (h) {
+      h.addEventListener('click', function () {
+        var a = h.dataset.area;
+        inst.areasTouched = true;
+        inst.openAreas[a] = !inst.openAreas[a];
+        renderGrid(pickerId);
+      });
+    });
+    var oth = grid.querySelector('.gs-sp-others');
+    if (oth) oth.addEventListener('click', function () { inst.showOthers = !inst.showOthers; renderGrid(pickerId); });
+    bindItemEvents(inst, pickerId, grid.querySelector('.gs-sp-area-grid'));
+    if (inst.showOthers && others.length) renderGroupedGrid(pickerId, inst, others, document.getElementById('gs-sp-others-' + pickerId));
+  }
+
   function renderGrid(pickerId) {
     var inst = instances[pickerId];
     var grid = inst.gridEl;
@@ -252,6 +331,11 @@
       return;
     }
 
+    var q = inst.searchEl ? (inst.searchEl.value || '').trim() : '';
+    if (inst.groupByCategory && inst.workMode === 'recurring' && !q && inst.filterMode === 'all') {
+      renderAreaCards(pickerId, inst, list);
+      return;
+    }
     if (inst.groupByCategory) {
       renderGroupedGrid(pickerId, inst, list);
       return;
@@ -379,6 +463,15 @@
       showSelectAll: !!options.showSelectAll,
       groupByCategory: !!options.groupByCategory,
       openCats: {},
+      /* v1.51.0 -- toggle Recurring / Units (solo si workToggle) */
+      workToggle: !!options.workToggle,
+      workMode: options.workMode === 'recurring' ? 'recurring' : 'units',
+      areaNames: options.areaNames || null,
+      placeArea: options.placeArea || '',
+      openAreas: {},
+      areasTouched: false,
+      showOthers: false,
+      onWorkModeChange: options.onWorkModeChange || null,
       selected: options.initialSelected || {},
       svcLevel: options.initialLevels || {},
       svcQty: options.initialQuantities || {},
@@ -388,7 +481,16 @@
     instances[pickerId] = inst;
     if (window.GSServiceTooltip) window.GSServiceTooltip.register(inst.catalog);
 
-    var html = '';
+    var html = '<div class="gs-sp-toggles">';
+    if (inst.workToggle) {
+      html +=
+        '<div class="gs-sp-res-wrap">' +
+        '<span class="gs-sp-res-label">Recurring</span>' +
+        '<label class="gs-sp-toggle">' +
+        '<input type="checkbox" id="gs-sp-worktoggle-' + pickerId + '"' + (inst.workMode === 'units' ? ' checked' : '') + '>' +
+        '<span class="gs-sp-toggle-track"></span></label>' +
+        '<span class="gs-sp-res-label">Units</span></div>';
+    }
     if (inst.showPropertyToggle) {
       html +=
         '<div class="gs-sp-res-wrap">' +
@@ -398,6 +500,7 @@
         '<span class="gs-sp-toggle-track"></span></label>' +
         '<span class="gs-sp-res-label">Residential</span></div>';
     }
+    html += '</div>';
     html +=
       '<div class="gs-sp-toolbar-row">' +
       '<input type="text" class="gs-sp-search" id="gs-sp-search-' + pickerId + '" placeholder="Search services\u2026">';
@@ -423,6 +526,14 @@
 
     inst.searchEl.addEventListener('input', function () { renderGrid(pickerId); });
 
+    var workEl = document.getElementById('gs-sp-worktoggle-' + pickerId);
+    if (workEl) {
+      workEl.addEventListener('change', function () {
+        inst.workMode = workEl.checked ? 'units' : 'recurring';
+        renderGrid(pickerId);
+        if (inst.onWorkModeChange) inst.onWorkModeChange(inst.workMode);
+      });
+    }
     var toggleEl = document.getElementById('gs-sp-restoggle-' + pickerId);
     if (toggleEl) {
       toggleEl.addEventListener('change', function () {
@@ -453,6 +564,8 @@
         renderGrid(pickerId);
       },
       setDivision: function (division) { inst.division = division; renderGrid(pickerId); },
+      setWorkMode: function (m) { inst.workMode = m === 'recurring' ? 'recurring' : 'units'; if (workEl) workEl.checked = inst.workMode === 'units'; renderGrid(pickerId); },
+      setPlaceArea: function (a) { inst.placeArea = a || ''; inst.areasTouched = false; renderGrid(pickerId); },
       setPropertyType: function (type) {
         inst.propertyType = type;
         if (toggleEl) toggleEl.checked = type === 'Residential';
