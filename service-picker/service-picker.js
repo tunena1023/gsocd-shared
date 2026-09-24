@@ -109,6 +109,18 @@
       '.gs-sp-pkg-rm{background:none;border:none;color:var(--gray,#6B6B6B);font-size:16px;line-height:1;cursor:pointer;padding:2px 4px}' +
       '.gs-sp-pkg-rm:hover{color:#c0392b}' +
       '.gs-sp-pkg-add{display:flex;gap:8px;margin-top:10px}' +
+      '.gs-sp-pkg-search{display:flex;align-items:center;gap:8px;margin-top:12px;padding:0 12px;border:1.5px solid #E6D3A0;border-radius:8px;background:#FFFDF7;transition:border-color .2s,box-shadow .2s}' +
+      '.gs-sp-pkg-search:focus-within{border-color:var(--gold,#C9A84C);box-shadow:0 0 0 3px rgba(201,168,76,.15)}' +
+      '.gs-sp-pkg-search svg{width:16px;height:16px;color:var(--gold-dk,#8C6F2A);flex-shrink:0}' +
+      '.gs-sp-pkg-search input{flex:1;min-width:0;border:none;outline:none;background:transparent;padding:11px 0;font-size:13.5px;font-family:inherit;color:var(--black,#111)}' +
+      '.gs-sp-pkg-search input::placeholder{color:#A89A78}' +
+      '.gs-sp-pkg-results{display:none;margin-top:6px;border:1px solid #EFE6CF;border-radius:8px;background:var(--white,#fff);overflow:hidden}' +
+      '.gs-sp-pkg-hit{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:13px;cursor:pointer;border-top:1px solid #F4EFE3}' +
+      '.gs-sp-pkg-hit:first-child{border-top:none}' +
+      '.gs-sp-pkg-hit:hover{background:#FBF6E8}' +
+      '.gs-sp-pkg-hit .cat{font-size:11px;color:var(--gray,#6B6B6B)}' +
+      '.gs-sp-pkg-hit .add{margin-left:auto;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-dk,#8C6F2A)}' +
+      '.gs-sp-pkg-nohit{padding:10px 12px;font-size:12.5px;color:var(--gray,#6B6B6B)}' +
       '.gs-sp-pkg-add select{flex:1;min-width:0;padding:8px 10px;border:1px solid var(--border,#E0D9CC);border-radius:3px;font-size:13px;font-family:inherit;background:var(--white,#fff)}' +
       '.gs-sp-pkg-add button,.gs-sp-pkg-foot button{font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:8px 14px;cursor:pointer}' +
       '.gs-sp-pkg-add button{background:var(--white,#fff);border:1.5px solid var(--border,#E0D9CC)}' +
@@ -417,15 +429,20 @@
           return !isPkg(s) && !inPkg[String(s.sku)] && s.propertyType === inst.propertyType &&
             (inst.crossDivision || !inst.division || String(s.division || '').toLowerCase() === String(inst.division).toLowerCase());
         }).sort(function (a, b) { return String(a.serviceName).localeCompare(String(b.serviceName)); });
+        inst.pkgPool = pool;
         body = '<div class="gs-sp-area-body"><div class="gs-sp-pkg-lines">' + items.map(function (x, i) {
             var s = bySku[String(x.sku)]; if (!s) return '';
             return '<div class="gs-sp-pkg-eline"><span>' + nameWithTip(s) + '</span><span class="gs-sp-pkg-eright"><span class="gs-sp-lvl-group">' +
               LEVELS.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (x.level === l ? ' active' : '') + '" data-pedit-i="' + i + '" data-pedit-lv="' + l + '">L' + (k + 1) + '</div>'; }).join('') +
               '</span><button type="button" class="gs-sp-pkg-rm" data-pedit-rm="' + i + '" title="Remove">\u2715</button></span></div>';
           }).join('') + (items.length ? '' : '<p class="gs-sp-pkg-note">No services in this package yet.</p>') + '</div>' +
-          '<div class="gs-sp-pkg-add"><select data-pedit-pool><option value="">Add a service\u2026</option>' +
-          pool.map(function (s) { return '<option value="' + escapeAttr(s.sku) + '">' + escapeHtml(s.serviceName) + '</option>'; }).join('') +
-          '</select><button type="button" data-pedit-add>+ Add</button></div>' +
+          /* v1.60.0 (24/09/2026, pedido del dueño): en vez del <select>,
+             una barra de busqueda con contorno dorado suave; escribir
+             muestra los servicios que se pueden agregar y un clic lo mete
+             al paquete (en L1). */
+          '<div class="gs-sp-pkg-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>' +
+          '<input type="text" data-pedit-q placeholder="Start your search here\u2026" autocomplete="off"></div>' +
+          '<div class="gs-sp-pkg-results" data-pedit-results></div>' +
           '<div class="gs-sp-pkg-foot"><button type="button" class="gs-sp-pkg-cancel" data-pedit-cancel>Cancel</button>' +
           '<button type="button" class="gs-sp-pkg-save" data-pedit-save' + (inst.pkgSaving ? ' disabled' : '') + '>' + (inst.pkgSaving ? 'Saving\u2026' : 'Save for ' + escapeHtml(pe.clientId)) + '</button></div>' +
           '<p class="gs-sp-pkg-note">Only ' + escapeHtml(pe.clientId) + ' gets this version. Orders already created keep what they had.</p></div>';
@@ -439,16 +456,17 @@
         var real = items.filter(function (x) { return bySku[String(x.sku)]; });
         var cols = real.length > 8 ? 3 : 2;
         var ov = inst.pkgItemLevels[String(p.sku)] || {};
+        var perItem = inst.packageItemLevels !== false;
         body = '<div class="gs-sp-area-body"><p class="gs-sp-pkg-use">Use this package</p><div class="' + (inst.mode === 'levels' ? 'gs-sp-row-grid' : 'gs-sp-chip-grid') + '">' + itemHtml(inst, p) + '</div>' +
           '<div class="gs-sp-pkg-lines gs-sp-pkg-cols' + cols + (used ? '' : ' off') + '">' + real.map(function (x) {
             var s = bySku[String(x.sku)];
             var lv = ov[String(x.sku)] || x.level || '';
             return '<div class="gs-sp-pkg-line"><span class="gs-sp-pkg-lname">' + nameWithTip(s) + (inst.showPrices ? '<span class="gs-sp-price inc">Included</span>' : '') + '</span>' +
-              '<span class="gs-sp-lvl-group gs-sp-pkg-ilv">' + LEVELS.map(function (l, k) {
+              (perItem ? '<span class="gs-sp-lvl-group gs-sp-pkg-ilv">' + LEVELS.map(function (l, k) {
                 return '<div class="gs-sp-lvl-btn' + (used && lv === l ? ' active' : '') + '" data-pkgitem="' + escapeAttr(p.sku) + '" data-isku="' + escapeAttr(x.sku) + '" data-ilevel="' + l + '">L' + (k + 1) + '</div>';
-              }).join('') + '</span></div>';
+              }).join('') + '</span>' : '<span class="lv">' + escapeHtml(String(lv).replace('Level ', 'L')) + '</span>') + '</div>';
           }).join('') + '</div>' +
-          (used ? '' : '<p class="gs-sp-pkg-note">Pick the package level first; then you can change any service.</p>') + '</div>';
+          (used || !perItem ? '' : '<p class="gs-sp-pkg-note">Pick the package level first; then you can change any service.</p>') + '</div>';
       }
       return '<div class="gs-sp-area-card' + (open ? ' open' : '') + (used ? ' used' : '') + (isCustom ? ' custom' : '') + '">' +
         '<div class="gs-sp-area-head" data-pkg="' + escapeAttr(p.sku) + '"><div><div class="gs-sp-area-name">' + nameWithTip(p) + priceHtml(inst, p) +
@@ -480,7 +498,7 @@
         e.stopPropagation();
         var pkgSku = String(b.dataset.pkgitem);
         var p = inst.catalog.find(function (s) { return String(s.sku) === pkgSku; });
-        if (!p || !isSelected(inst, p)) return;
+        if (!p || !isSelected(inst, p) || inst.packageItemLevels === false) return;
         (inst.pkgItemLevels[pkgSku] = inst.pkgItemLevels[pkgSku] || {})[String(b.dataset.isku)] = b.dataset.ilevel;
         renderGrid(pickerId);
         fireChange(pickerId);
@@ -517,10 +535,28 @@
     Array.prototype.forEach.call(q('[data-pedit-rm]'), function (b) {
       b.addEventListener('click', function () { inst.pkgDraft.items.splice(+b.dataset.peditRm, 1); renderGrid(pickerId); });
     });
-    Array.prototype.forEach.call(q('[data-pedit-add]'), function (b) {
-      b.addEventListener('click', function () {
-        var sel = scope.querySelector('[data-pedit-pool]'); if (!sel || !sel.value) return;
-        inst.pkgDraft.items.push({ sku: String(sel.value), level: 'Level 1' }); renderGrid(pickerId);
+    Array.prototype.forEach.call(q('[data-pedit-q]'), function (input) {
+      var box = scope.querySelector('[data-pedit-results]');
+      function show() {
+        var t = input.value.trim().toLowerCase();
+        if (!t) { box.innerHTML = ''; box.style.display = 'none'; return; }
+        var hits = (inst.pkgPool || []).filter(function (s) { return String(s.serviceName).toLowerCase().indexOf(t) > -1 || String(s.category || '').toLowerCase().indexOf(t) > -1 || String(s.sku).indexOf(t) > -1; }).slice(0, 8);
+        box.style.display = 'block';
+        box.innerHTML = hits.length ? hits.map(function (s) {
+          return '<div class="gs-sp-pkg-hit" data-pedit-hit="' + escapeAttr(s.sku) + '"><span>' + escapeHtml(s.serviceName) + '</span>' + (s.category ? '<span class="cat">' + escapeHtml(s.category) + '</span>' : '') + '<span class="add">+ Add</span></div>';
+        }).join('') : '<div class="gs-sp-pkg-nohit">No services match \u201c' + escapeHtml(input.value.trim()) + '\u201d.</div>';
+      }
+      input.addEventListener('input', show);
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { var first = box.querySelector('[data-pedit-hit]'); if (first) { e.preventDefault(); first.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); } }
+        if (e.key === 'Escape') { input.value = ''; show(); }
+      });
+      box.addEventListener('mousedown', function (e) {
+        var h = e.target.closest('[data-pedit-hit]'); if (!h) return;
+        e.preventDefault();
+        inst.pkgDraft.items.push({ sku: String(h.dataset.peditHit), level: 'Level 1' });
+        renderGrid(pickerId);
+        var again = document.querySelector('#gs-sp-pkgs-' + pickerId + ' [data-pedit-q]'); if (again) again.focus();
       });
     });
     Array.prototype.forEach.call(q('[data-pedit-cancel]'), function (b) {
@@ -711,7 +747,7 @@
       areasTouched: false,
       showOthers: false,
       onWorkModeChange: options.onWorkModeChange || null,
-      openPkgs: {}, pkgItemLevels: (function (m) { var o = {}; Object.keys(m || {}).forEach(function (k) { var x = {}; (m[k] || []).forEach(function (i) { if (i && i.sku && i.level) x[String(i.sku)] = i.level; }); o[String(k)] = x; }); return o; })(options.initialPackageLevels),
+      packageItemLevels: options.packageItemLevels !== false, openPkgs: {}, pkgItemLevels: (function (m) { var o = {}; Object.keys(m || {}).forEach(function (k) { var x = {}; (m[k] || []).forEach(function (i) { if (i && i.sku && i.level) x[String(i.sku)] = i.level; }); o[String(k)] = x; }); return o; })(options.initialPackageLevels),
       /* v1.57.0: { clientId, customSkus: {sku:true}, onSave(sku, items), onReset(sku) } -- solo Admin */
       packageEdit: options.packageEdit || null,
       pkgDraft: null,
