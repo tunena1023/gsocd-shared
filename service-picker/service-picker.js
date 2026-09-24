@@ -92,6 +92,12 @@
       '.gs-sp-sec-title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin:14px 0 8px}' +
       '.gs-sp-sec-title:first-child{margin-top:0}' +
       '.gs-sp-area-card.used{border-color:#3E7A4C;background:#F6FAF6}' +
+      '.gs-sp-pkg-pick{flex-shrink:0;width:26px;height:26px;border-radius:50%;border:1.5px solid #D9C38A;background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;margin-top:1px;transition:transform .15s,box-shadow .2s,background .2s,border-color .2s;color:transparent}' +
+      '.gs-sp-pkg-pick svg{width:14px;height:14px}' +
+      '.gs-sp-pkg-pick:hover{transform:scale(1.08);box-shadow:0 0 0 4px rgba(201,168,76,.15);color:#D9C38A}' +
+      '.gs-sp-pkg-pick.on{border-color:transparent;background:linear-gradient(155deg,#EAD9A0 0%,#C9A84C 45%,#8C6F2A 100%);color:#fff;box-shadow:0 2px 6px rgba(140,111,42,.35)}' +
+      '.gs-sp-pkg-pick.pop{animation:gs-sp-pop .35s cubic-bezier(.22,1.6,.36,1)}' +
+      '@keyframes gs-sp-pop{0%{transform:scale(.6)}60%{transform:scale(1.18)}100%{transform:scale(1)}}' +
       '.gs-sp-pkg-use{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin:0 0 6px}' +
       '.gs-sp-pkg-lines{margin-top:10px;border-top:1px dashed var(--border,#E0D9CC);padding-top:6px}' +
       '.gs-sp-pkg-line{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:6px 0;border-bottom:1px dashed var(--border,#E0D9CC)}' +
@@ -466,10 +472,12 @@
                 return '<div class="gs-sp-lvl-btn' + (used && lv === l ? ' active' : '') + '" data-pkgitem="' + escapeAttr(p.sku) + '" data-isku="' + escapeAttr(x.sku) + '" data-ilevel="' + l + '">L' + (k + 1) + '</div>';
               }).join('') + '</span>' : '<span class="lv">' + escapeHtml(String(lv).replace('Level ', 'L')) + '</span>') + '</div>';
           }).join('') + '</div>' +
-          (used || !perItem ? '' : '<p class="gs-sp-pkg-note">Pick the package level first; then you can change any service.</p>') + '</div>';
+          (used || !perItem ? '' : '<p class="gs-sp-pkg-note">Tap the circle next to the name to use this package; then you can change any service.</p>') + '</div>';
       }
       return '<div class="gs-sp-area-card' + (open ? ' open' : '') + (used ? ' used' : '') + (isCustom ? ' custom' : '') + '">' +
-        '<div class="gs-sp-area-head" data-pkg="' + escapeAttr(p.sku) + '"><div><div class="gs-sp-area-name">' + nameWithTip(p) + priceHtml(inst, p) +
+        '<div class="gs-sp-area-head" data-pkg="' + escapeAttr(p.sku) + '">' +
+        (inst.packageItemLevels !== false && !editing ? '<span class="gs-sp-pkg-pick' + (used ? ' on' : '') + (inst.justPicked === String(p.sku) ? ' pop' : '') + '" data-pkg-pick="' + escapeAttr(p.sku) + '" role="checkbox" aria-checked="' + (used ? 'true' : 'false') + '" title="' + (used ? 'Remove this package' : 'Use this package') + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>' : '') +
+        '<div><div class="gs-sp-area-name">' + nameWithTip(p) + priceHtml(inst, p) +
         (used ? '<span class="gs-sp-area-sel">In use</span>' : '') +
         (isCustom ? '<span class="gs-sp-pkg-cust">Custom for ' + escapeHtml(pe.clientId) + '</span>' : '') + '</div>' +
         '<div class="gs-sp-area-prev">' + (names.length ? 'Includes ' + names.length + (names.length === 1 ? ' service' : ' services') +
@@ -483,33 +491,47 @@
     grid.className = '';
     grid.innerHTML = (pkgs.length ? '<p class="gs-sp-sec-title">Packages</p><div class="gs-sp-area-grid" id="gs-sp-pkgs-' + pickerId + '">' + cards + '</div>' +
       '<p class="gs-sp-sec-title">Or pick services by room</p>' : '') + '<div id="gs-sp-rooms-' + pickerId + '"></div>';
-    Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-area-head[data-pkg]'), function (h) {
-      h.addEventListener('click', function (e) {
-        if (e.target.closest('[data-pedit-open],[data-pedit-reset]')) return;
-        var k = h.dataset.pkg; inst.openPkgs[k] = !inst.openPkgs[k];
-        if (!inst.openPkgs[k] && inst.pkgDraft && inst.pkgDraft.sku === String(k)) inst.pkgDraft = null;
-        /* v1.60.0 (24/09/2026, el dueño: "el paquete se debe seleccionar
-           automatico cuando se abre, algo asi como los servicios
-           sueltos"): abrir un paquete que no esta en uso lo SELECCIONA,
-           con cada servicio en su nivel estandar (el que trae el
-           paquete) y el paquete en el nivel que mas se repite adentro.
-           Cerrar la tarjeta no lo quita (igual que un servicio suelto);
-           se quita picando otra vez su nivel en "Use this package". Solo
-           donde se guarda el nivel por servicio (packageItemLevels). */
-        var pkgSvc = inst.catalog.find(function (s) { return String(s.sku) === String(k); });
-        if (inst.openPkgs[k] && pkgSvc && inst.packageItemLevels !== false && !isSelected(inst, pkgSvc)) {
+    /* v1.60.0 (24/09/2026, el dueño: "como se seleccionaria el paquete?
+       inventate algun mecanismo"): el circulo del encabezado SELECCIONA
+       el paquete (como la palomita de un servicio suelto) -- se prende
+       dorado, la tarjeta se abre sola y lo de adentro queda activo con
+       su nivel estandar; el paquete en el nivel que mas se repite
+       adentro. Otro clic lo quita. Picar el resto del encabezado solo
+       abre/cierra para ver que trae, SIN seleccionarlo. */
+    Array.prototype.forEach.call(grid.querySelectorAll('[data-pkg-pick]'), function (c) {
+      c.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var k = String(c.dataset.pkgPick);
+        var pkgSvc = inst.catalog.find(function (s) { return String(s.sku) === k; });
+        if (!pkgSvc) return;
+        var kk = svcKey(inst.propertyType, pkgSvc.serviceName);
+        if (!inst.selected[inst.propertyType]) inst.selected[inst.propertyType] = {};
+        if (isSelected(inst, pkgSvc)) {
+          delete inst.selected[inst.propertyType][pkgSvc.serviceName];
+          if (!Object.keys(inst.selected[inst.propertyType]).length) delete inst.selected[inst.propertyType];
+          delete inst.svcLevel[kk];
+          delete inst.pkgItemLevels[k];
+        } else {
           var its = Array.isArray(pkgSvc.packageItems) ? pkgSvc.packageItems : [];
           var cnt = {}, best = 'Level 1', bestN = 0;
           its.forEach(function (x) { if (/^Level [123]$/.test(x.level || '')) { cnt[x.level] = (cnt[x.level] || 0) + 1; if (cnt[x.level] > bestN) { bestN = cnt[x.level]; best = x.level; } } });
-          if (!inst.selected[inst.propertyType]) inst.selected[inst.propertyType] = {};
           inst.selected[inst.propertyType][pkgSvc.serviceName] = pkgSvc.sku;
-          inst.svcLevel[svcKey(inst.propertyType, pkgSvc.serviceName)] = best;
+          inst.svcLevel[kk] = best;
           var m = {}; its.forEach(function (x) { m[String(x.sku)] = /^Level [123]$/.test(x.level || '') ? x.level : best; });
-          inst.pkgItemLevels[String(k)] = m;
-          renderGrid(pickerId);
-          fireChange(pickerId);
-          return;
+          inst.pkgItemLevels[k] = m;
+          inst.openPkgs[k] = true;
+          inst.justPicked = k;
         }
+        renderGrid(pickerId);
+        fireChange(pickerId);
+        inst.justPicked = null;
+      });
+    });
+    Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-area-head[data-pkg]'), function (h) {
+      h.addEventListener('click', function (e) {
+        if (e.target.closest('[data-pedit-open],[data-pedit-reset],[data-pkg-pick]')) return;
+        var k = h.dataset.pkg; inst.openPkgs[k] = !inst.openPkgs[k];
+        if (!inst.openPkgs[k] && inst.pkgDraft && inst.pkgDraft.sku === String(k)) inst.pkgDraft = null;
         renderGrid(pickerId);
       });
     });
