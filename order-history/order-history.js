@@ -91,6 +91,9 @@
     'Order Moved To Active':      'Order moved to Active',
     'Service Marked Done By Tech':'Service marked done by tech',
     'Service Completed':          'Service completed',
+    /* v1.58.0 -- recurrentes: la oficina cierra TODO lo de una persona
+       de un jalon (Admin > Active, boton por persona). */
+    'Work Completed':             'Work completed',
     'Service Now Active':         'Service now active',
     'Service Needs Scheduling':   'Needs scheduling',
     'Service Order Changed':      'Service order changed',
@@ -441,8 +444,47 @@
       if (sm) lines.push('🕐 ' + esc(sm.serviceName) + ' — waiting on office to confirm');
       return lines;
     }
+    /* v1.58.0 (24/09/2026, pedido del dueño): cuando la oficina marca
+       completado a una PERSONA en una recurrente, el historial dice
+       quien termino y la lista de lo que hizo, agrupada por lugar.
+       NewValue: { person, items:[{place, service, level}], finishedText,
+       confirmedNote }. Tambien entiende el formato del primer dia
+       ('Service Completed' con services:["Lugar · Servicio"]). */
+    function workLines(person, items, finished, note) {
+      var out = [];
+      out.push('👤 <b>' + esc(person) + '</b> finished their work' + (finished ? ' — ' + esc(fmtDateTime(finished)) : ''));
+      if (note) out.push('✅ ' + esc(note));
+      var byPlace = [], idx = {};
+      (items || []).forEach(function (it) {
+        var k = it.place || '';
+        if (!(k in idx)) { idx[k] = byPlace.length; byPlace.push({ place: k, svcs: [] }); }
+        byPlace[idx[k]].svcs.push(esc(it.service) + (it.level ? ' <span style="color:#8C6F2A;font-weight:700;font-size:10px">' + esc(String(it.level).replace('Level ', 'L')) + '</span>' : ''));
+      });
+      byPlace.forEach(function (g) { out.push('📍 ' + (g.place ? '<b>' + esc(g.place) + '</b>: ' : '') + g.svcs.join(', ')); });
+      return out;
+    }
+    if (h.ChangeType === 'Work Completed') {
+      var wc = null; try { wc = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+      /* Varias personas en UN solo evento (el dueño: "en un mismo evento,
+         pero si por separado"): { people:[{person, items, confirmedNote}],
+         finishedText } -- una seccion por persona, separadas. */
+      if (wc && Array.isArray(wc.people)) {
+        wc.people.forEach(function (pp, i) {
+          if (i > 0) lines.push('<span style="display:block;border-top:1px dashed #E0DDD6;margin:4px 0"></span>');
+          lines = lines.concat(workLines(pp.person, pp.items, i === 0 ? wc.finishedText : '', pp.confirmedNote || wc.confirmedNote));
+        });
+        return lines;
+      }
+      if (wc) return workLines(wc.person, wc.items, wc.finishedText, wc.confirmedNote);
+      return lines;
+    }
     if (h.ChangeType === 'Service Completed') {
       var sc = null; try { sc = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+      if (sc && Array.isArray(sc.services) && sc.completedBy && !sc.serviceName.indexOf('All of ')) {
+        return workLines(sc.completedBy, sc.services.map(function (t) {
+          var parts = String(t).split(' · '); return parts.length > 1 ? { place: parts[0], service: parts.slice(1).join(' · ') } : { place: '', service: t };
+        }), sc.finishedText, sc.confirmedNote);
+      }
       if (sc) {
         /* BUG REAL: sc.finishedText es el ISOString crudo que manda
            complete-service-assignment.js (con hora Y "Z" de UTC) --
