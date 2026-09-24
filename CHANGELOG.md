@@ -2,6 +2,17 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.60.0 — 2026-09-24
+
+- **service-picker**: (1) **abrir un paquete lo selecciona** (como un servicio suelto): cada servicio de
+  adentro en su nivel estandar y el paquete en el nivel que mas se repite adentro; se quita picando su
+  nivel ACTIVO en "Use this package" (cerrar la tarjeta no lo quita). (2) **Edit de paquete** (Admin):
+  el `<select>` "Add a service…" se cambia por una barra de busqueda con contorno dorado suave y
+  "Start your search here…"; escribir muestra hasta 8 servicios, clic/Enter lo agrega en L1.
+  (3) Opcion de mount `packageItemLevels: false` para pantallas donde no se guarda el nivel por
+  servicio de adentro del paquete: ahi se ve el nivel en texto (en columnas) y no se auto-selecciona.
+  Aprobado con minis por el dueño (un circulo para seleccionar se probo y se rechazo).
+
 ## v1.59.0 — 2026-09-24
 
 - **service-picker**: el paquete ABIERTO (fuera de Edit) muestra lo que incluye en **2 columnas**
