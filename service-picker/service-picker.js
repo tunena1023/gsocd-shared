@@ -119,6 +119,16 @@
       '.gs-sp-pkg-note{font-size:11px;color:var(--gray,#6B6B6B);margin-top:8px}' +
       '@media (max-width:420px){.gs-sp-pkg-eline{flex-wrap:wrap}.gs-sp-pkg-eright{margin-left:auto}}' +
       '.gs-sp-pkg-line .lv{color:var(--gold-dk,#8C6F2A);font-weight:700;font-size:11px;white-space:nowrap}' +
+      '.gs-sp-pkg-cols2,.gs-sp-pkg-cols3{display:grid;column-gap:28px;align-items:start}' +
+      '.gs-sp-pkg-cols2{grid-template-columns:repeat(2,minmax(0,1fr))}' +
+      '.gs-sp-pkg-cols3{grid-template-columns:repeat(3,minmax(0,1fr))}' +
+      '.gs-sp-pkg-cols2 .gs-sp-pkg-line,.gs-sp-pkg-cols3 .gs-sp-pkg-line{align-items:center;border-bottom:1px dashed var(--border,#E0D9CC)}' +
+      '.gs-sp-pkg-lname{min-width:0;display:flex;align-items:center;gap:6px;flex-wrap:wrap}' +
+      '.gs-sp-pkg-ilv{flex-shrink:0}' +
+      '.gs-sp-pkg-ilv .gs-sp-lvl-btn{padding:4px 8px;font-size:10.5px}' +
+      '.gs-sp-pkg-lines.off .gs-sp-pkg-ilv{opacity:.35;pointer-events:none}' +
+      '@media (max-width:1100px){.gs-sp-pkg-cols3{grid-template-columns:repeat(2,minmax(0,1fr))}}' +
+      '@media (max-width:700px){.gs-sp-pkg-cols2,.gs-sp-pkg-cols3{grid-template-columns:1fr}}' +
       '.gs-sp-price{display:inline-block;margin-left:8px;font-size:11px;font-weight:700;color:var(--gold-dk,#8C6F2A);background:#FBF7EC;border:1px solid rgba(201,168,76,.35);padding:1px 7px;border-radius:10px;white-space:nowrap;vertical-align:1px}' +
       '.gs-sp-price.inc{color:#3E7A4C;background:#F1F7F2;border-color:#CFE3D3}' +
       '.gs-sp-inpkg{font-size:10px;font-weight:700;color:#3E7A4C;margin-left:6px;text-transform:uppercase;letter-spacing:.04em}' +
@@ -420,11 +430,25 @@
           '<button type="button" class="gs-sp-pkg-save" data-pedit-save' + (inst.pkgSaving ? ' disabled' : '') + '>' + (inst.pkgSaving ? 'Saving\u2026' : 'Save for ' + escapeHtml(pe.clientId)) + '</button></div>' +
           '<p class="gs-sp-pkg-note">Only ' + escapeHtml(pe.clientId) + ' gets this version. Orders already created keep what they had.</p></div>';
       } else if (open) {
+        /* v1.59.0 (24/09/2026, pedido del dueño): lo que incluye el
+           paquete en 2 columnas (3 si son muchos), y cada servicio con su
+           propio L1/L2/L3. El nivel de "Use this package" pone TODOS en
+           ese nivel; despues se puede cambiar uno por uno (mix & match).
+           Antes de escoger el nivel del paquete los de adentro se ven
+           apagados. getPackageLevels() regresa lo escogido. */
+        var real = items.filter(function (x) { return bySku[String(x.sku)]; });
+        var cols = real.length > 8 ? 3 : 2;
+        var ov = inst.pkgItemLevels[String(p.sku)] || {};
         body = '<div class="gs-sp-area-body"><p class="gs-sp-pkg-use">Use this package</p><div class="' + (inst.mode === 'levels' ? 'gs-sp-row-grid' : 'gs-sp-chip-grid') + '">' + itemHtml(inst, p) + '</div>' +
-          '<div class="gs-sp-pkg-lines">' + items.map(function (x) {
-            var s = bySku[String(x.sku)]; if (!s) return '';
-            return '<div class="gs-sp-pkg-line"><span>' + nameWithTip(s) + (inst.showPrices ? '<span class="gs-sp-price inc">Included</span>' : '') + '</span><span class="lv">' + escapeHtml(String(x.level || '').replace('Level ', 'L')) + '</span></div>';
-          }).join('') + '</div></div>';
+          '<div class="gs-sp-pkg-lines gs-sp-pkg-cols' + cols + (used ? '' : ' off') + '">' + real.map(function (x) {
+            var s = bySku[String(x.sku)];
+            var lv = ov[String(x.sku)] || x.level || '';
+            return '<div class="gs-sp-pkg-line"><span class="gs-sp-pkg-lname">' + nameWithTip(s) + (inst.showPrices ? '<span class="gs-sp-price inc">Included</span>' : '') + '</span>' +
+              '<span class="gs-sp-lvl-group gs-sp-pkg-ilv">' + LEVELS.map(function (l, k) {
+                return '<div class="gs-sp-lvl-btn' + (used && lv === l ? ' active' : '') + '" data-pkgitem="' + escapeAttr(p.sku) + '" data-isku="' + escapeAttr(x.sku) + '" data-ilevel="' + l + '">L' + (k + 1) + '</div>';
+              }).join('') + '</span></div>';
+          }).join('') + '</div>' +
+          (used ? '' : '<p class="gs-sp-pkg-note">Pick the package level first; then you can change any service.</p>') + '</div>';
       }
       return '<div class="gs-sp-area-card' + (open ? ' open' : '') + (used ? ' used' : '') + (isCustom ? ' custom' : '') + '">' +
         '<div class="gs-sp-area-head" data-pkg="' + escapeAttr(p.sku) + '"><div><div class="gs-sp-area-name">' + nameWithTip(p) + priceHtml(inst, p) +
@@ -451,6 +475,17 @@
     });
     var pk = document.getElementById('gs-sp-pkgs-' + pickerId);
     if (pk) bindItemEvents(inst, pickerId, pk);
+    if (pk) Array.prototype.forEach.call(pk.querySelectorAll('[data-pkgitem]'), function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var pkgSku = String(b.dataset.pkgitem);
+        var p = inst.catalog.find(function (s) { return String(s.sku) === pkgSku; });
+        if (!p || !isSelected(inst, p)) return;
+        (inst.pkgItemLevels[pkgSku] = inst.pkgItemLevels[pkgSku] || {})[String(b.dataset.isku)] = b.dataset.ilevel;
+        renderGrid(pickerId);
+        fireChange(pickerId);
+      });
+    });
     if (pk && pe) bindPkgEdit(pickerId, inst, pk);
     var rooms = document.getElementById('gs-sp-rooms-' + pickerId);
     if (rest.length) renderGroupedGrid(pickerId, inst, rest, rooms);
@@ -576,6 +611,14 @@
       inst.selected[inst.propertyType][svc.serviceName] = sku;
       inst.svcLevel[k] = level;
     }
+    /* v1.59.0: nivel de un paquete = todos sus servicios a ese nivel. */
+    if (Array.isArray(svc.packageItems) && svc.packageItems.length) {
+      if (already) delete inst.pkgItemLevels[String(sku)];
+      else {
+        var m = {}; svc.packageItems.forEach(function (x) { m[String(x.sku)] = level; });
+        inst.pkgItemLevels[String(sku)] = m;
+      }
+    }
     renderGrid(pickerId);
     fireChange(pickerId);
   }
@@ -668,7 +711,7 @@
       areasTouched: false,
       showOthers: false,
       onWorkModeChange: options.onWorkModeChange || null,
-      openPkgs: {},
+      openPkgs: {}, pkgItemLevels: (function (m) { var o = {}; Object.keys(m || {}).forEach(function (k) { var x = {}; (m[k] || []).forEach(function (i) { if (i && i.sku && i.level) x[String(i.sku)] = i.level; }); o[String(k)] = x; }); return o; })(options.initialPackageLevels),
       /* v1.57.0: { clientId, customSkus: {sku:true}, onSave(sku, items), onReset(sku) } -- solo Admin */
       packageEdit: options.packageEdit || null,
       pkgDraft: null,
@@ -755,11 +798,27 @@
 
     return {
       getSelected: function () { return inst.selected; },
+      /* v1.59.0: por cada paquete EN USO, la lista de lo que incluye con
+         el nivel escogido para ESTA orden: { pkgSku: [{sku, level}] }. */
+      getPackageLevels: function () {
+        var out = {};
+        packagesInUse(inst).forEach(function (p) {
+          var ov = inst.pkgItemLevels[String(p.sku)] || {};
+          out[String(p.sku)] = (p.packageItems || []).map(function (x) { return { sku: String(x.sku), level: ov[String(x.sku)] || x.level || '' }; });
+        });
+        return out;
+      },
+      setPackageLevels: function (m) {
+        inst.pkgItemLevels = {};
+        Object.keys(m || {}).forEach(function (k) { var o = {}; (m[k] || []).forEach(function (x) { if (x && x.sku && x.level) o[String(x.sku)] = x.level; }); inst.pkgItemLevels[String(k)] = o; });
+        renderGrid(pickerId);
+      },
       getLevels: function () { return inst.svcLevel; },
       getQuantities: function () { return inst.svcQty; },
       getPropertyType: function () { return inst.propertyType; },
-      setSelected: function (selected, levels, quantities) {
+      setSelected: function (selected, levels, quantities, packageLevels) {
         inst.selected = selected || {};
+        if (packageLevels !== undefined) { inst.pkgItemLevels = {}; Object.keys(packageLevels || {}).forEach(function (k) { var o = {}; (packageLevels[k] || []).forEach(function (x) { if (x && x.sku && x.level) o[String(x.sku)] = x.level; }); inst.pkgItemLevels[String(k)] = o; }); }
         inst.svcLevel = levels || {};
         inst.svcQty = quantities || {};
         renderGrid(pickerId);

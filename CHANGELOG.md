@@ -2,6 +2,21 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.59.0 — 2026-09-24
+
+- **service-picker**: el paquete ABIERTO (fuera de Edit) muestra lo que incluye en **2 columnas**
+  (3 si son mas de 8; 2 a <=1100px y 1 a <=700px) y cada servicio con su **propio L1/L2/L3**.
+  El nivel de "Use this package" pone TODOS sus servicios en ese nivel; despues se puede cambiar
+  uno por uno (mix & match). Antes de escoger el nivel del paquete, los de adentro se ven
+  apagados ("Pick the package level first…"). Quitar el paquete borra lo escogido adentro.
+  API nueva: `getPackageLevels()` → `{ pkgSku: [{sku, level}] }` (solo paquetes en uso),
+  `setPackageLevels(m)`, `setSelected(sel, lv, qty, packageLevels)` y la opcion de mount
+  `initialPackageLevels` (para no perderlo al re-montar). Pedido y aprobado con mini por el dueño.
+
+## v1.58.0 — 2026-09-24
+
+- **order-history**: evento `Work Completed` (quien termino y la lista de lo que hizo, por lugar; una o varias personas en un evento).
+
 ## v1.57.0 — 2026-09-24
 
 - **service-picker**: opcion nueva `packageEdit: { clientId, customSkus, onSave(sku, items), onReset(sku) }`
