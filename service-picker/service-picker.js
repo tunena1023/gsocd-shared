@@ -92,6 +92,8 @@
       '.gs-sp-sec-title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin:14px 0 8px}' +
       '.gs-sp-sec-title:first-child{margin-top:0}' +
       '.gs-sp-area-card.used{border-color:#3E7A4C;background:#F6FAF6}' +
+      '.gs-sp-usebtn{padding:6px 14px;min-width:70px;text-align:center}' +
+      '.gs-sp-inchip{font-size:11.5px;padding:5px 12px;flex-shrink:0}' +
       '.gs-sp-usual-tag.saved{background:#E6F2EF;color:#2F6F62}' +
       '.gs-sp-usual-name{margin-top:12px}' +
       '.gs-sp-usual-name label{display:block;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin-bottom:6px}' +
@@ -406,7 +408,7 @@
   function usualItems(inst, key) {
     var u = allSets(inst).find(function (x) { return String(x.key) === String(key); });
     if (!u) return [];
-    return (u.items || []).map(function (x) { var s = inst.catalog.find(function (c) { return String(c.sku) === String(x.sku); }); return s ? { s: s, level: x.level || 'Level 1' } : null; })
+    return (u.items || []).map(function (x) { var s = inst.catalog.find(function (c) { return String(c.sku) === String(x.sku); }); return s ? { s: s, level: x.level || 'Level 1', qty: x.qty } : null; })
       .filter(function (x) { return x && x.s.propertyType === inst.propertyType && !(Array.isArray(x.s.packageItems) && x.s.packageItems.length) &&
         (inst.crossDivision || !inst.division || String(x.s.division || '').toLowerCase() === String(inst.division).toLowerCase()); });
   }
@@ -419,6 +421,7 @@
       if (level === false) { delete inst.selected[inst.propertyType][x.s.serviceName]; delete inst.svcLevel[k]; return; }
       inst.selected[inst.propertyType][x.s.serviceName] = x.s.sku;
       if (isLeveledItem(x.s)) inst.svcLevel[k] = level || x.level;
+      if (isQuantityItem(x.s)) inst.svcQty[k] = inst.svcQty[k] || parseInt(x.qty, 10) || 1;
     });
     if (!Object.keys(inst.selected[inst.propertyType]).length) delete inst.selected[inst.propertyType];
   }
@@ -449,11 +452,20 @@
     var cards = pkgs.map(function (p) {
       var open = !!inst.openPkgs[p.sku], used = isSelected(inst, p);
       var editing = !!(pe && open && inst.pkgDraft && inst.pkgDraft.sku === String(p.sku));
+      /* v1.62.0 (24/09/2026, el dueño: "falto el boton de Edit en los
+         packages, deben funcionar mas o menos igual"): en el portal (hay
+         usualEdit y NO packageEdit de Admin) cualquier paquete trae Edit:
+         el cliente lo ajusta y lo guarda con nombre como "My package". El
+         paquete original no cambia. */
+      var cEdit = !pe && inst.usualEdit;
+      var cEditing = !!(cEdit && open && inst.usualDraft && inst.usualDraft.key === 'pkg:' + p.sku);
       var isCustom = !!(pe && pe.customSkus && pe.customSkus[String(p.sku)]);
       var items = editing ? inst.pkgDraft.items : (Array.isArray(p.packageItems) ? p.packageItems : []);
       var names = items.map(function (x) { var s = bySku[String(x.sku)]; return s ? s.serviceName : ''; }).filter(Boolean);
       var body = '';
-      if (open && editing) {
+      if (cEditing) {
+        body = setEditBodyHtml(inst, bySku, isPkg);
+      } else if (open && editing) {
         var inPkg = {}; items.forEach(function (x) { inPkg[String(x.sku)] = true; });
         var pool = inst.catalog.filter(function (s) {
           return !isPkg(s) && !inPkg[String(s.sku)] && s.propertyType === inst.propertyType &&
@@ -498,7 +510,7 @@
           }).join('') + '</div>' +
           (used || !perItem ? '' : '<p class="gs-sp-pkg-note">Pick the package level first; then you can change any service.</p>') + '</div>';
       }
-      return '<div class="gs-sp-area-card' + (open ? ' open' : '') + (used ? ' used' : '') + (isCustom ? ' custom' : '') + '">' +
+      return '<div class="gs-sp-area-card' + (open ? ' open' : '') + (used && !cEditing ? ' used' : '') + (isCustom ? ' custom' : '') + '">' +
         '<div class="gs-sp-area-head" data-pkg="' + escapeAttr(p.sku) + '"><div><div class="gs-sp-area-name">' + nameWithTip(p) + priceHtml(inst, p) +
         (used ? '<span class="gs-sp-area-sel">In use</span>' : '') +
         (isCustom ? '<span class="gs-sp-pkg-cust">Custom for ' + escapeHtml(pe.clientId) + '</span>' : '') + '</div>' +
@@ -506,6 +518,7 @@
         (open ? '' : ': ' + escapeHtml(names.slice(0, 3).join(', ')) + (names.length > 3 ? '\u2026' : '')) : 'Contents not set yet') +
         (isCustom && open && !editing ? '<span class="gs-sp-pkg-reset" data-pedit-reset="' + escapeAttr(p.sku) + '">Reset to standard</span>' : '') + '</div></div>' +
         (pe && open && !editing ? '<button type="button" class="gs-sp-pkg-edit" data-pedit-open="' + escapeAttr(p.sku) + '">Edit</button>' : '') +
+        (cEdit && open && !cEditing ? '<button type="button" class="gs-sp-pkg-edit" data-pkg-cedit="' + escapeAttr(p.sku) + '">Edit</button>' : '') +
         '<span class="gs-sp-area-count">Package</span></div>' +
         body + '</div>';
     }).join('');
@@ -518,7 +531,7 @@
        nivel activo los quita; cada servicio se cambia solo. Viene de quien
        monta el picker: usualSets [{key, name, division, items:[{sku, level}]}]. */
     var usualCards = allSets(inst).map(function (u) {
-      var its = (u.items || []).map(function (x) { var s = bySku[String(x.sku)]; return s ? { s: s, level: x.level || 'Level 1' } : null; })
+      var its = (u.items || []).map(function (x) { var s = bySku[String(x.sku)]; return s ? { s: s, level: x.level || 'Level 1', qty: x.qty } : null; })
         .filter(function (x) { return x && x.s.propertyType === inst.propertyType && !isPkg(x.s) &&
           (inst.crossDivision || !inst.division || String(x.s.division || '').toLowerCase() === String(inst.division).toLowerCase()); });
       if (!its.length) return '';
@@ -530,42 +543,34 @@
       /* Arriba se marca el nivel que mas se repite (como el nivel de un
          paquete): picarlo quita todo, igual que en los paquetes. */
       var allLv = null;
-      if (used) { var cnt = {}, bn = 0; its.forEach(function (x) { var l = lvOf(x); if (l) { cnt[l] = (cnt[l] || 0) + 1; if (cnt[l] > bn) { bn = cnt[l]; allLv = l; } } }); }
+      if (used) { var cnt = {}, bn = 0; its.forEach(function (x) { var l = isLeveledItem(x.s) ? lvOf(x) : null; if (l) { cnt[l] = (cnt[l] || 0) + 1; if (cnt[l] > bn) { bn = cnt[l]; allLv = l; } } }); }
+      var anyLv = its.some(function (x) { return isLeveledItem(x.s); });
       var body = '';
       var ue = inst.usualEdit, uEditing = !!(ue && open && inst.usualDraft && inst.usualDraft.key === key);
       if (uEditing) {
-        /* v1.61.0: Edit del "Usual order" (lo usa el cliente): quitar /
-           agregar servicios (barra de busqueda), cambiarles el nivel y
-           guardarlo con un nombre como paquete propio. */
-        var dItems = inst.usualDraft.items;
-        var inDraft = {}; dItems.forEach(function (x) { inDraft[String(x.sku)] = true; });
-        inst.pkgPool = inst.catalog.filter(function (s) {
-          return !isPkg(s) && !inDraft[String(s.sku)] && s.propertyType === inst.propertyType &&
-            (inst.crossDivision || !inst.division || String(s.division || '').toLowerCase() === String(inst.division).toLowerCase());
-        }).sort(function (a, b) { return String(a.serviceName).localeCompare(String(b.serviceName)); });
-        body = '<div class="gs-sp-area-body"><div class="gs-sp-pkg-lines">' + dItems.map(function (x, i) {
-            var s2 = bySku[String(x.sku)]; if (!s2) return '';
-            return '<div class="gs-sp-pkg-eline"><span>' + nameWithTip(s2) + '</span><span class="gs-sp-pkg-eright"><span class="gs-sp-lvl-group">' +
-              LEVELS.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (x.level === l ? ' active' : '') + '" data-uedit-i="' + i + '" data-uedit-lv="' + l + '">L' + (k + 1) + '</div>'; }).join('') +
-              '</span><button type="button" class="gs-sp-pkg-rm" data-uedit-rm="' + i + '" title="Remove">\u2715</button></span></div>';
-          }).join('') + (dItems.length ? '' : '<p class="gs-sp-pkg-note">No services yet.</p>') + '</div>' +
-          '<div class="gs-sp-pkg-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>' +
-          '<input type="text" data-uedit-q placeholder="Start your search here\u2026" autocomplete="off"></div>' +
-          '<div class="gs-sp-pkg-results" data-uedit-results></div>' +
-          '<div class="gs-sp-usual-name"><label>Name your package</label><input type="text" data-uedit-name maxlength="60" placeholder="e.g. Weekly unit turnover" value="' + escapeAttr(inst.usualDraft.name || '') + '"></div>' +
-          '<div class="gs-sp-pkg-foot"><button type="button" class="gs-sp-pkg-cancel" data-uedit-cancel>Cancel</button>' +
-          '<button type="button" class="gs-sp-pkg-save" data-uedit-save' + (inst.usualSaving ? ' disabled' : '') + '>' + (inst.usualSaving ? 'Saving\u2026' : 'Save my package') + '</button></div>' +
-          '<p class="gs-sp-pkg-note" data-uedit-err></p></div>';
+        body = setEditBodyHtml(inst, bySku, isPkg);
       } else if (open) {
         var cols = its.length > 8 ? 3 : 2;
         body = '<div class="gs-sp-area-body"><p class="gs-sp-pkg-use">Use these services</p>' +
+          /* v1.62.0: sin servicios con nivel (Renovations, Exteriors) el
+             selector de arriba es un solo boton "Use" que se prende/apaga. */
           '<div class="gs-sp-row-grid"><div class="gs-sp-row' + (used ? ' selected' : '') + '"><span class="gs-sp-row-name">' + escapeHtml(u.name || 'Usual order') + '</span><div class="gs-sp-lvl-group">' +
-          LEVELS.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (allLv === l ? ' active' : '') + '" data-usual-all="' + escapeAttr(key) + '" data-level="' + l + '">L' + (k + 1) + '</div>'; }).join('') +
+          (anyLv ? LEVELS.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (allLv === l ? ' active' : '') + '" data-usual-all="' + escapeAttr(key) + '" data-level="' + l + '">L' + (k + 1) + '</div>'; }).join('')
+            : '<div class="gs-sp-lvl-btn gs-sp-usebtn' + (used ? ' active' : '') + '" data-usual-all="' + escapeAttr(key) + '" data-level="">' + (used ? '\u2713 In use' : 'Use') + '</div>') +
           '</div></div></div>' +
           '<div class="gs-sp-pkg-lines gs-sp-pkg-cols' + cols + '">' + its.map(function (x) {
             var lv = lvOf(x);
-            return '<div class="gs-sp-pkg-line"><span class="gs-sp-pkg-lname">' + nameWithTip(x.s) + priceHtml(inst, x.s) + '</span><span class="gs-sp-lvl-group gs-sp-pkg-ilv">' +
-              LEVELS.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (lv === l ? ' active' : '') + '" data-sku="' + escapeAttr(x.s.sku) + '" data-level="' + l + '">L' + (k + 1) + '</div>'; }).join('') + '</span></div>';
+            var ctl;
+            if (isQuantityItem(x.s)) {
+              var qv = isSelected(inst, x.s) ? (inst.svcQty[svcKey(inst.propertyType, x.s.serviceName)] || '') : '';
+              ctl = '<span><span class="gs-sp-qty-label">Qty</span><input type="number" class="gs-sp-qty-input" min="1" step="1" inputmode="numeric" data-sku="' + escapeAttr(x.s.sku) + '" value="' + escapeAttr(qv) + '"></span>';
+            } else if (isLeveledItem(x.s)) {
+              ctl = '<span class="gs-sp-lvl-group gs-sp-pkg-ilv">' + LEVELS.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (lv === l ? ' active' : '') + '" data-sku="' + escapeAttr(x.s.sku) + '" data-level="' + l + '">L' + (k + 1) + '</div>'; }).join('') + '</span>';
+            } else {
+              var on = isSelected(inst, x.s);
+              ctl = '<button type="button" class="gs-sp-chip-btn gs-sp-inchip' + (on ? ' active' : '') + '" data-sku="' + escapeAttr(x.s.sku) + '">' + (on ? '\u2713 In order' : 'Add') + '</button>';
+            }
+            return '<div class="gs-sp-pkg-line"><span class="gs-sp-pkg-lname">' + nameWithTip(x.s) + priceHtml(inst, x.s) + '</span>' + ctl + '</div>';
           }).join('') + '</div>' +
           (sel.length && !used ? '<p class="gs-sp-pkg-note">' + sel.length + ' of ' + its.length + ' in your order.</p>' : '') + '</div>';
       }
@@ -583,8 +588,9 @@
       '<p class="gs-sp-sec-title">Or pick services by room</p>' : '') + '<div id="gs-sp-rooms-' + pickerId + '"></div>';
     Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-area-head[data-pkg]'), function (h) {
       h.addEventListener('click', function (e) {
-        if (e.target.closest('[data-pedit-open],[data-pedit-reset]')) return;
+        if (e.target.closest('[data-pedit-open],[data-pedit-reset],[data-pkg-cedit],[data-uedit-name],[data-uedit-q]')) return;
         var k = h.dataset.pkg; inst.openPkgs[k] = !inst.openPkgs[k];
+        if (!inst.openPkgs[k] && inst.usualDraft && inst.usualDraft.key === 'pkg:' + k) inst.usualDraft = null;
         if (!inst.openPkgs[k] && inst.pkgDraft && inst.pkgDraft.sku === String(k)) inst.pkgDraft = null;
         /* v1.60.0 (24/09/2026, el dueño: "el paquete se debe seleccionar
            automatico cuando se abre, algo asi como los servicios
@@ -628,8 +634,20 @@
         e.stopPropagation();
         var its = usualItems(inst, String(b.dataset.usualAll));
         if (b.classList.contains('active')) setUsual(inst, its, false);
-        else setUsual(inst, its, b.dataset.level);
+        else setUsual(inst, its, b.dataset.level || null);
         renderGrid(pickerId); fireChange(pickerId);
+      });
+    });
+    Array.prototype.forEach.call(grid.querySelectorAll('[data-pkg-cedit]'), function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var sku = String(b.dataset.pkgCedit);
+        var p = inst.catalog.find(function (c) { return String(c.sku) === sku; });
+        var ov = inst.pkgItemLevels[sku] || {};
+        inst.usualDraft = { key: 'pkg:' + sku, source: 'package', name: '', items: ((p && p.packageItems) || []).map(function (x) {
+          var s2 = inst.catalog.find(function (c) { return String(c.sku) === String(x.sku); });
+          return { sku: String(x.sku), level: s2 && isLeveledItem(s2) ? (ov[String(x.sku)] || x.level || 'Level 1') : '' }; }) };
+        renderGrid(pickerId);
       });
     });
     bindUsualEdit(pickerId, inst, grid);
@@ -657,6 +675,32 @@
     });
   }
 
+  /* v1.62.0: cuerpo del Edit (del usual y, en el portal, de cualquier
+     paquete): quitar, nivel (solo servicios con nivel), agregar con la
+     barra de busqueda, nombre y "Save my package". */
+  function setEditBodyHtml(inst, bySku, isPkg) {
+    var dItems = inst.usualDraft.items;
+    var inDraft = {}; dItems.forEach(function (x) { inDraft[String(x.sku)] = true; });
+    inst.pkgPool = inst.catalog.filter(function (s) {
+      return !isPkg(s) && !inDraft[String(s.sku)] && s.propertyType === inst.propertyType &&
+        (inst.crossDivision || !inst.division || String(s.division || '').toLowerCase() === String(inst.division).toLowerCase());
+    }).sort(function (a, b) { return String(a.serviceName).localeCompare(String(b.serviceName)); });
+    var LV = ['Level 1', 'Level 2', 'Level 3'];
+    return '<div class="gs-sp-area-body"><div class="gs-sp-pkg-lines">' + dItems.map(function (x, i) {
+        var s2 = bySku[String(x.sku)]; if (!s2) return '';
+        return '<div class="gs-sp-pkg-eline"><span>' + nameWithTip(s2) + '</span><span class="gs-sp-pkg-eright">' +
+          (isLeveledItem(s2) ? '<span class="gs-sp-lvl-group">' + LV.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (x.level === l ? ' active' : '') + '" data-uedit-i="' + i + '" data-uedit-lv="' + l + '">L' + (k + 1) + '</div>'; }).join('') + '</span>' : '') +
+          '<button type="button" class="gs-sp-pkg-rm" data-uedit-rm="' + i + '" title="Remove">\u2715</button></span></div>';
+      }).join('') + (dItems.length ? '' : '<p class="gs-sp-pkg-note">No services yet.</p>') + '</div>' +
+      '<div class="gs-sp-pkg-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>' +
+      '<input type="text" data-uedit-q placeholder="Start your search here\u2026" autocomplete="off"></div>' +
+      '<div class="gs-sp-pkg-results" data-uedit-results></div>' +
+      '<div class="gs-sp-usual-name"><label>Name your package</label><input type="text" data-uedit-name maxlength="60" placeholder="e.g. Weekly unit turnover" value="' + escapeAttr(inst.usualDraft.name || '') + '"></div>' +
+      '<div class="gs-sp-pkg-foot"><button type="button" class="gs-sp-pkg-cancel" data-uedit-cancel>Cancel</button>' +
+      '<button type="button" class="gs-sp-pkg-save" data-uedit-save' + (inst.usualSaving ? ' disabled' : '') + '>' + (inst.usualSaving ? 'Saving\u2026' : 'Save my package') + '</button></div>' +
+      '<p class="gs-sp-pkg-note" data-uedit-err></p></div>';
+  }
+
   /* v1.61.0 -- eventos del Edit del "Usual order". Borrador en
      inst.usualDraft; nada se guarda hasta "Save my package", que llama a
      usualEdit.onSave(name, items) (quien monta el picker lo guarda y
@@ -669,9 +713,9 @@
         e.stopPropagation();
         var k = String(b.dataset.ueditOpen);
         var its = usualItems(inst, k);
-        inst.usualDraft = { key: k, name: '', items: its.map(function (x) {
+        inst.usualDraft = { key: k, source: 'usual', name: '', items: its.map(function (x) {
           var cur = isSelected(inst, x.s) ? inst.svcLevel[svcKey(inst.propertyType, x.s.serviceName)] : null;
-          return { sku: String(x.s.sku), level: cur || x.level || 'Level 1' }; }) };
+          return { sku: String(x.s.sku), level: isLeveledItem(x.s) ? (cur || x.level || 'Level 1') : '' }; }) };
         renderGrid(pickerId);
       });
     });
@@ -704,7 +748,8 @@
         var h = e.target.closest('[data-uedit-hit]'); if (!h) return;
         e.preventDefault(); e.stopPropagation();
         keepName();
-        inst.usualDraft.items.push({ sku: String(h.dataset.ueditHit), level: 'Level 1' });
+        var hs = inst.catalog.find(function (c) { return String(c.sku) === String(h.dataset.ueditHit); });
+        inst.usualDraft.items.push({ sku: String(h.dataset.ueditHit), level: hs && isLeveledItem(hs) ? 'Level 1' : '' });
         renderGrid(pickerId);
         var again = document.querySelector('#gs-sp-pkgs-' + pickerId + ' [data-uedit-q]'); if (again) again.focus();
       });
@@ -721,7 +766,7 @@
         if (!d.items.length) { if (err) err.textContent = 'Add at least one service.'; return; }
         if (!ue.onSave || inst.usualSaving) return;
         inst.usualSaving = true; renderGrid(pickerId);
-        Promise.resolve(ue.onSave(d.name.trim(), d.items.slice())).then(function () { inst.usualDraft = null; })
+        Promise.resolve(ue.onSave(d.name.trim(), d.items.slice(), d.source || 'usual')).then(function () { inst.usualDraft = null; })
           .catch(function () { /* quien monta avisa el error; el borrador se queda */ })
           .then(function () { inst.usualSaving = false; renderGrid(pickerId); });
       });
