@@ -488,6 +488,28 @@
         if (e.target.closest('[data-pedit-open],[data-pedit-reset]')) return;
         var k = h.dataset.pkg; inst.openPkgs[k] = !inst.openPkgs[k];
         if (!inst.openPkgs[k] && inst.pkgDraft && inst.pkgDraft.sku === String(k)) inst.pkgDraft = null;
+        /* v1.60.0 (24/09/2026, el dueño: "el paquete se debe seleccionar
+           automatico cuando se abre, algo asi como los servicios
+           sueltos"): abrir un paquete que no esta en uso lo SELECCIONA,
+           con cada servicio en su nivel estandar (el que trae el
+           paquete) y el paquete en el nivel que mas se repite adentro.
+           Cerrar la tarjeta no lo quita (igual que un servicio suelto);
+           se quita picando otra vez su nivel en "Use this package". Solo
+           donde se guarda el nivel por servicio (packageItemLevels). */
+        var pkgSvc = inst.catalog.find(function (s) { return String(s.sku) === String(k); });
+        if (inst.openPkgs[k] && pkgSvc && inst.packageItemLevels !== false && !isSelected(inst, pkgSvc)) {
+          var its = Array.isArray(pkgSvc.packageItems) ? pkgSvc.packageItems : [];
+          var cnt = {}, best = 'Level 1', bestN = 0;
+          its.forEach(function (x) { if (/^Level [123]$/.test(x.level || '')) { cnt[x.level] = (cnt[x.level] || 0) + 1; if (cnt[x.level] > bestN) { bestN = cnt[x.level]; best = x.level; } } });
+          if (!inst.selected[inst.propertyType]) inst.selected[inst.propertyType] = {};
+          inst.selected[inst.propertyType][pkgSvc.serviceName] = pkgSvc.sku;
+          inst.svcLevel[svcKey(inst.propertyType, pkgSvc.serviceName)] = best;
+          var m = {}; its.forEach(function (x) { m[String(x.sku)] = /^Level [123]$/.test(x.level || '') ? x.level : best; });
+          inst.pkgItemLevels[String(k)] = m;
+          renderGrid(pickerId);
+          fireChange(pickerId);
+          return;
+        }
         renderGrid(pickerId);
       });
     });
