@@ -92,6 +92,7 @@
       '.gs-sp-sec-title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin:14px 0 8px}' +
       '.gs-sp-sec-title:first-child{margin-top:0}' +
       '.gs-sp-area-card.used{border-color:#3E7A4C;background:#F6FAF6}' +
+      '.gs-sp-usual-tag{display:inline-flex;align-items:center;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:#F0E8FA;color:#6B3FA0;padding:3px 9px;border-radius:20px;white-space:nowrap;margin-left:auto;flex-shrink:0}' +
       '.gs-sp-pkg-use{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin:0 0 6px}' +
       '.gs-sp-pkg-lines{margin-top:10px;border-top:1px dashed var(--border,#E0D9CC);padding-top:6px}' +
       '.gs-sp-pkg-line{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:6px 0;border-bottom:1px dashed var(--border,#E0D9CC)}' +
@@ -248,7 +249,7 @@
     /* Se enganchan los 3 tipos de evento siempre, sin importar
        inst.mode -- una pantalla mezclada puede tener botones de
        nivel, chips de toggle, y campos de cantidad al mismo tiempo. */
-    Array.prototype.forEach.call(scopeEl.querySelectorAll('.gs-sp-lvl-btn'), function (btn) {
+    Array.prototype.forEach.call(scopeEl.querySelectorAll('.gs-sp-lvl-btn[data-sku]'), function (btn) {
       btn.addEventListener('click', function () { pickLevel(pickerId, btn.dataset.sku, btn.dataset.level); });
     });
     Array.prototype.forEach.call(scopeEl.querySelectorAll('.gs-sp-chip-btn'), function (btn) {
@@ -392,6 +393,26 @@
      que se factura); el checklist se arma al mostrarlo. Los servicios
      que ya vienen en un paquete en uso se marcan "In package" en las
      categorias de abajo. Pedido y aprobado con mini por el dueño. */
+  /* v1.61.0: helpers del "Usual order" (servicios sueltos). */
+  function usualItems(inst, key) {
+    var u = (inst.usualSets || []).find(function (x) { return String(x.key) === String(key); });
+    if (!u) return [];
+    return (u.items || []).map(function (x) { var s = inst.catalog.find(function (c) { return String(c.sku) === String(x.sku); }); return s ? { s: s, level: x.level || 'Level 1' } : null; })
+      .filter(function (x) { return x && x.s.propertyType === inst.propertyType && !(Array.isArray(x.s.packageItems) && x.s.packageItems.length) &&
+        (inst.crossDivision || !inst.division || String(x.s.division || '').toLowerCase() === String(inst.division).toLowerCase()); });
+  }
+  /* level: null = cada uno en su nivel del set; 'Level N' = todos a ese;
+     false = quitarlos todos. */
+  function setUsual(inst, its, level) {
+    if (!inst.selected[inst.propertyType]) inst.selected[inst.propertyType] = {};
+    its.forEach(function (x) {
+      var k = svcKey(inst.propertyType, x.s.serviceName);
+      if (level === false) { delete inst.selected[inst.propertyType][x.s.serviceName]; delete inst.svcLevel[k]; return; }
+      inst.selected[inst.propertyType][x.s.serviceName] = x.s.sku;
+      if (isLeveledItem(x.s)) inst.svcLevel[k] = level || x.level;
+    });
+    if (!Object.keys(inst.selected[inst.propertyType]).length) delete inst.selected[inst.propertyType];
+  }
   function packagesInUse(inst) {
     return inst.catalog.filter(function (s) { return ((Array.isArray(s.packageItems) && s.packageItems.length) || /^packages?$/i.test(String(s.category || ''))) && isSelected(inst, s); });
   }
@@ -479,9 +500,50 @@
         '<span class="gs-sp-area-count">Package</span></div>' +
         body + '</div>';
     }).join('');
+    /* v1.61.0 (24/09/2026, pedido del dueño): "Usual order" -- el set de
+       servicios que ESTE cliente ha pedido 10 veces seguidas. Se ve como
+       un paquete normal pero con su burbuja "Most used"; NO es un
+       paquete de verdad: usarlo selecciona esos servicios SUELTOS con su
+       nivel (se cobran servicio por servicio como siempre). Abrirlo lo
+       selecciona; el selector de arriba pone todos en un nivel y picar el
+       nivel activo los quita; cada servicio se cambia solo. Viene de quien
+       monta el picker: usualSets [{key, name, division, items:[{sku, level}]}]. */
+    var usualCards = (inst.usualSets || []).map(function (u) {
+      var its = (u.items || []).map(function (x) { var s = bySku[String(x.sku)]; return s ? { s: s, level: x.level || 'Level 1' } : null; })
+        .filter(function (x) { return x && x.s.propertyType === inst.propertyType && !isPkg(x.s) &&
+          (inst.crossDivision || !inst.division || String(x.s.division || '').toLowerCase() === String(inst.division).toLowerCase()); });
+      if (!its.length) return '';
+      var key = String(u.key);
+      var open = !!inst.openUsual[key];
+      var sel = its.filter(function (x) { return isSelected(inst, x.s); });
+      var used = sel.length === its.length;
+      var lvOf = function (x) { return isSelected(inst, x.s) ? inst.svcLevel[svcKey(inst.propertyType, x.s.serviceName)] : null; };
+      var allLv = used ? lvOf(its[0]) : null;
+      if (used && its.some(function (x) { return lvOf(x) !== allLv; })) allLv = null;
+      var body = '';
+      if (open) {
+        var cols = its.length > 8 ? 3 : 2;
+        body = '<div class="gs-sp-area-body"><p class="gs-sp-pkg-use">Use these services</p>' +
+          '<div class="gs-sp-row-grid"><div class="gs-sp-row' + (used ? ' selected' : '') + '"><span class="gs-sp-row-name">' + escapeHtml(u.name || 'Usual order') + '</span><div class="gs-sp-lvl-group">' +
+          LEVELS.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (allLv === l ? ' active' : '') + '" data-usual-all="' + escapeAttr(key) + '" data-level="' + l + '">L' + (k + 1) + '</div>'; }).join('') +
+          '</div></div></div>' +
+          '<div class="gs-sp-pkg-lines gs-sp-pkg-cols' + cols + '">' + its.map(function (x) {
+            var lv = lvOf(x);
+            return '<div class="gs-sp-pkg-line"><span class="gs-sp-pkg-lname">' + nameWithTip(x.s) + priceHtml(inst, x.s) + '</span><span class="gs-sp-lvl-group gs-sp-pkg-ilv">' +
+              LEVELS.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (lv === l ? ' active' : '') + '" data-sku="' + escapeAttr(x.s.sku) + '" data-level="' + l + '">L' + (k + 1) + '</div>'; }).join('') + '</span></div>';
+          }).join('') + '</div>' +
+          (sel.length && !used ? '<p class="gs-sp-pkg-note">' + sel.length + ' of ' + its.length + ' in your order.</p>' : '') + '</div>';
+      }
+      return '<div class="gs-sp-area-card gs-sp-usual' + (open ? ' open' : '') + (used ? ' used' : '') + '">' +
+        '<div class="gs-sp-area-head" data-usual="' + escapeAttr(key) + '"><div><div class="gs-sp-area-name">' + escapeHtml(u.name || 'Usual order') +
+        (used ? '<span class="gs-sp-area-sel">In use</span>' : '') + '</div>' +
+        '<div class="gs-sp-area-prev">' + its.length + (its.length === 1 ? ' service' : ' services') + (open ? '' : ': ' + escapeHtml(its.slice(0, 3).map(function (x) { return x.s.serviceName; }).join(', ')) + (its.length > 3 ? '\u2026' : '')) + '</div></div>' +
+        '<span class="gs-sp-usual-tag">Most used</span></div>' + body + '</div>';
+    }).join('');
     var rest = list.filter(function (s) { return !pkgSkus[String(s.sku)]; });
     grid.className = '';
-    grid.innerHTML = (pkgs.length ? '<p class="gs-sp-sec-title">Packages</p><div class="gs-sp-area-grid" id="gs-sp-pkgs-' + pickerId + '">' + cards + '</div>' +
+    var hasTop = pkgs.length || usualCards;
+    grid.innerHTML = (hasTop ? '<p class="gs-sp-sec-title">Packages</p><div class="gs-sp-area-grid" id="gs-sp-pkgs-' + pickerId + '">' + usualCards + cards + '</div>' +
       '<p class="gs-sp-sec-title">Or pick services by room</p>' : '') + '<div id="gs-sp-rooms-' + pickerId + '"></div>';
     Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-area-head[data-pkg]'), function (h) {
       h.addEventListener('click', function (e) {
@@ -511,6 +573,25 @@
           return;
         }
         renderGrid(pickerId);
+      });
+    });
+    Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-area-head[data-usual]'), function (h) {
+      h.addEventListener('click', function () {
+        var k = String(h.dataset.usual); inst.openUsual[k] = !inst.openUsual[k];
+        if (inst.openUsual[k]) {
+          var its = usualItems(inst, k);
+          if (its.length && !its.every(function (x) { return isSelected(inst, x.s); })) { setUsual(inst, its, null); renderGrid(pickerId); fireChange(pickerId); return; }
+        }
+        renderGrid(pickerId);
+      });
+    });
+    Array.prototype.forEach.call(grid.querySelectorAll('[data-usual-all]'), function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var its = usualItems(inst, String(b.dataset.usualAll));
+        if (b.classList.contains('active')) setUsual(inst, its, false);
+        else setUsual(inst, its, b.dataset.level);
+        renderGrid(pickerId); fireChange(pickerId);
       });
     });
     var pk = document.getElementById('gs-sp-pkgs-' + pickerId);
@@ -769,7 +850,7 @@
       areasTouched: false,
       showOthers: false,
       onWorkModeChange: options.onWorkModeChange || null,
-      packageItemLevels: options.packageItemLevels !== false, openPkgs: {}, pkgItemLevels: (function (m) { var o = {}; Object.keys(m || {}).forEach(function (k) { var x = {}; (m[k] || []).forEach(function (i) { if (i && i.sku && i.level) x[String(i.sku)] = i.level; }); o[String(k)] = x; }); return o; })(options.initialPackageLevels),
+      packageItemLevels: options.packageItemLevels !== false, usualSets: options.usualSets || [], openUsual: {}, openPkgs: {}, pkgItemLevels: (function (m) { var o = {}; Object.keys(m || {}).forEach(function (k) { var x = {}; (m[k] || []).forEach(function (i) { if (i && i.sku && i.level) x[String(i.sku)] = i.level; }); o[String(k)] = x; }); return o; })(options.initialPackageLevels),
       /* v1.57.0: { clientId, customSkus: {sku:true}, onSave(sku, items), onReset(sku) } -- solo Admin */
       packageEdit: options.packageEdit || null,
       pkgDraft: null,
@@ -891,6 +972,7 @@
         renderGrid(pickerId);
       },
       setPackageEdit: function (pe) { inst.packageEdit = pe || null; renderGrid(pickerId); },
+      setUsualSets: function (u) { inst.usualSets = u || []; renderGrid(pickerId); },
       setCatalog: function (catalog) { inst.catalog = catalog; if (window.GSServiceTooltip) window.GSServiceTooltip.register(catalog); renderGrid(pickerId); },
       destroy: function () { delete instances[pickerId]; container.innerHTML = ''; }
     };
