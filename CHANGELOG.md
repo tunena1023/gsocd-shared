@@ -2,6 +2,17 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.57.0 — 2026-09-24
+
+- **service-picker**: opcion nueva `packageEdit: { clientId, customSkus, onSave(sku, items), onReset(sku) }`
+  (solo la pasa Admin > Clients > Create Order; aprobado con mini por el dueño). El paquete ABIERTO
+  trae un boton **Edit** entre el nombre y la etiqueta "Package": niveles L1/L2/L3 y ✕ por servicio,
+  "Add a service…" + "+ Add", Cancel (tira el borrador) y "Save for <cliente>". La etiqueta
+  "Custom for <cliente>" y el link "Reset to standard" salen solo cuando `customSkus` lo marca (o sea,
+  despues de guardar, nunca mientras se edita). El borrador vive en el picker; quien lo monta guarda
+  (lista ClientPackages) y le regresa el catalogo con los packageItems del cliente via `setCatalog` /
+  `setPackageEdit`. Sin `packageEdit` el picker se comporta igual que v1.56.0.
+
 ## v1.44.0 — 2026-09-21
 
 - **order-history**: 9 `ChangeType` nuevos para "Assign by service" (Admin > Scheduling/Active,
