@@ -92,6 +92,11 @@
       '.gs-sp-sec-title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin:14px 0 8px}' +
       '.gs-sp-sec-title:first-child{margin-top:0}' +
       '.gs-sp-area-card.used{border-color:#3E7A4C;background:#F6FAF6}' +
+      '.gs-sp-usual-tag.saved{background:#E6F2EF;color:#2F6F62}' +
+      '.gs-sp-usual-name{margin-top:12px}' +
+      '.gs-sp-usual-name label{display:block;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin-bottom:6px}' +
+      '.gs-sp-usual-name input{width:100%;box-sizing:border-box;border:1.5px solid var(--border,#E0D9CC);border-radius:8px;padding:10px 12px;font-size:13.5px;font-family:inherit;outline:none}' +
+      '.gs-sp-usual-name input:focus{border-color:var(--gold,#C9A84C)}' +
       '.gs-sp-usual-tag{display:inline-flex;align-items:center;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:#F0E8FA;color:#6B3FA0;padding:3px 9px;border-radius:20px;white-space:nowrap;margin-left:auto;flex-shrink:0}' +
       '.gs-sp-pkg-use{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin:0 0 6px}' +
       '.gs-sp-pkg-lines{margin-top:10px;border-top:1px dashed var(--border,#E0D9CC);padding-top:6px}' +
@@ -394,8 +399,12 @@
      que ya vienen en un paquete en uso se marcan "In package" en las
      categorias de abajo. Pedido y aprobado con mini por el dueño. */
   /* v1.61.0: helpers del "Usual order" (servicios sueltos). */
+  function allSets(inst) {
+    return (inst.savedSets || []).map(function (u) { return { kind: 'saved', key: 'saved:' + u.key, name: u.name, items: u.items || [], raw: u }; })
+      .concat((inst.usualHidden ? [] : (inst.usualSets || [])).map(function (u) { return { kind: 'usual', key: 'usual:' + u.key, name: u.name, items: u.items || [], raw: u }; }));
+  }
   function usualItems(inst, key) {
-    var u = (inst.usualSets || []).find(function (x) { return String(x.key) === String(key); });
+    var u = allSets(inst).find(function (x) { return String(x.key) === String(key); });
     if (!u) return [];
     return (u.items || []).map(function (x) { var s = inst.catalog.find(function (c) { return String(c.sku) === String(x.sku); }); return s ? { s: s, level: x.level || 'Level 1' } : null; })
       .filter(function (x) { return x && x.s.propertyType === inst.propertyType && !(Array.isArray(x.s.packageItems) && x.s.packageItems.length) &&
@@ -508,7 +517,7 @@
        selecciona; el selector de arriba pone todos en un nivel y picar el
        nivel activo los quita; cada servicio se cambia solo. Viene de quien
        monta el picker: usualSets [{key, name, division, items:[{sku, level}]}]. */
-    var usualCards = (inst.usualSets || []).map(function (u) {
+    var usualCards = allSets(inst).map(function (u) {
       var its = (u.items || []).map(function (x) { var s = bySku[String(x.sku)]; return s ? { s: s, level: x.level || 'Level 1' } : null; })
         .filter(function (x) { return x && x.s.propertyType === inst.propertyType && !isPkg(x.s) &&
           (inst.crossDivision || !inst.division || String(x.s.division || '').toLowerCase() === String(inst.division).toLowerCase()); });
@@ -523,7 +532,31 @@
       var allLv = null;
       if (used) { var cnt = {}, bn = 0; its.forEach(function (x) { var l = lvOf(x); if (l) { cnt[l] = (cnt[l] || 0) + 1; if (cnt[l] > bn) { bn = cnt[l]; allLv = l; } } }); }
       var body = '';
-      if (open) {
+      var ue = inst.usualEdit, uEditing = !!(ue && open && inst.usualDraft && inst.usualDraft.key === key);
+      if (uEditing) {
+        /* v1.61.0: Edit del "Usual order" (lo usa el cliente): quitar /
+           agregar servicios (barra de busqueda), cambiarles el nivel y
+           guardarlo con un nombre como paquete propio. */
+        var dItems = inst.usualDraft.items;
+        var inDraft = {}; dItems.forEach(function (x) { inDraft[String(x.sku)] = true; });
+        inst.pkgPool = inst.catalog.filter(function (s) {
+          return !isPkg(s) && !inDraft[String(s.sku)] && s.propertyType === inst.propertyType &&
+            (inst.crossDivision || !inst.division || String(s.division || '').toLowerCase() === String(inst.division).toLowerCase());
+        }).sort(function (a, b) { return String(a.serviceName).localeCompare(String(b.serviceName)); });
+        body = '<div class="gs-sp-area-body"><div class="gs-sp-pkg-lines">' + dItems.map(function (x, i) {
+            var s2 = bySku[String(x.sku)]; if (!s2) return '';
+            return '<div class="gs-sp-pkg-eline"><span>' + nameWithTip(s2) + '</span><span class="gs-sp-pkg-eright"><span class="gs-sp-lvl-group">' +
+              LEVELS.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (x.level === l ? ' active' : '') + '" data-uedit-i="' + i + '" data-uedit-lv="' + l + '">L' + (k + 1) + '</div>'; }).join('') +
+              '</span><button type="button" class="gs-sp-pkg-rm" data-uedit-rm="' + i + '" title="Remove">\u2715</button></span></div>';
+          }).join('') + (dItems.length ? '' : '<p class="gs-sp-pkg-note">No services yet.</p>') + '</div>' +
+          '<div class="gs-sp-pkg-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>' +
+          '<input type="text" data-uedit-q placeholder="Start your search here\u2026" autocomplete="off"></div>' +
+          '<div class="gs-sp-pkg-results" data-uedit-results></div>' +
+          '<div class="gs-sp-usual-name"><label>Name your package</label><input type="text" data-uedit-name maxlength="60" placeholder="e.g. Weekly unit turnover" value="' + escapeAttr(inst.usualDraft.name || '') + '"></div>' +
+          '<div class="gs-sp-pkg-foot"><button type="button" class="gs-sp-pkg-cancel" data-uedit-cancel>Cancel</button>' +
+          '<button type="button" class="gs-sp-pkg-save" data-uedit-save' + (inst.usualSaving ? ' disabled' : '') + '>' + (inst.usualSaving ? 'Saving\u2026' : 'Save my package') + '</button></div>' +
+          '<p class="gs-sp-pkg-note" data-uedit-err></p></div>';
+      } else if (open) {
         var cols = its.length > 8 ? 3 : 2;
         body = '<div class="gs-sp-area-body"><p class="gs-sp-pkg-use">Use these services</p>' +
           '<div class="gs-sp-row-grid"><div class="gs-sp-row' + (used ? ' selected' : '') + '"><span class="gs-sp-row-name">' + escapeHtml(u.name || 'Usual order') + '</span><div class="gs-sp-lvl-group">' +
@@ -536,11 +569,12 @@
           }).join('') + '</div>' +
           (sel.length && !used ? '<p class="gs-sp-pkg-note">' + sel.length + ' of ' + its.length + ' in your order.</p>' : '') + '</div>';
       }
-      return '<div class="gs-sp-area-card gs-sp-usual' + (open ? ' open' : '') + (used ? ' used' : '') + '">' +
+      return '<div class="gs-sp-area-card gs-sp-usual' + (open ? ' open' : '') + (used && !uEditing ? ' used' : '') + '">' +
         '<div class="gs-sp-area-head" data-usual="' + escapeAttr(key) + '"><div><div class="gs-sp-area-name">' + escapeHtml(u.name || 'Usual order') +
         (used ? '<span class="gs-sp-area-sel">In use</span>' : '') + '</div>' +
         '<div class="gs-sp-area-prev">' + its.length + (its.length === 1 ? ' service' : ' services') + (open ? '' : ': ' + escapeHtml(its.slice(0, 3).map(function (x) { return x.s.serviceName; }).join(', ')) + (its.length > 3 ? '\u2026' : '')) + '</div></div>' +
-        '<span class="gs-sp-usual-tag">Most used</span></div>' + body + '</div>';
+        (ue && u.kind === 'usual' && open && !uEditing ? '<button type="button" class="gs-sp-pkg-edit" data-uedit-open="' + escapeAttr(key) + '">Edit</button>' : '') +
+        (u.kind === 'saved' ? '<span class="gs-sp-usual-tag saved">My package</span>' : '<span class="gs-sp-usual-tag">Most used</span>') + '</div>' + body + '</div>';
     }).join('');
     var rest = list.filter(function (s) { return !pkgSkus[String(s.sku)]; });
     grid.className = '';
@@ -578,8 +612,10 @@
       });
     });
     Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-area-head[data-usual]'), function (h) {
-      h.addEventListener('click', function () {
+      h.addEventListener('click', function (e) {
+        if (e.target.closest('[data-uedit-open]')) return;
         var k = String(h.dataset.usual); inst.openUsual[k] = !inst.openUsual[k];
+        if (!inst.openUsual[k] && inst.usualDraft && inst.usualDraft.key === k) inst.usualDraft = null;
         if (inst.openUsual[k]) {
           var its = usualItems(inst, k);
           if (its.length && !its.every(function (x) { return isSelected(inst, x.s); })) { setUsual(inst, its, null); renderGrid(pickerId); fireChange(pickerId); return; }
@@ -596,6 +632,7 @@
         renderGrid(pickerId); fireChange(pickerId);
       });
     });
+    bindUsualEdit(pickerId, inst, grid);
     var pk = document.getElementById('gs-sp-pkgs-' + pickerId);
     if (pk) bindItemEvents(inst, pickerId, pk);
     if (pk) Array.prototype.forEach.call(pk.querySelectorAll('[data-pkgitem]'), function (b) {
@@ -617,6 +654,77 @@
       var row = b.closest('.gs-sp-row') || b;
       var name = row.querySelector('.gs-sp-row-name') || row;
       if (!name.querySelector('.gs-sp-inpkg')) name.insertAdjacentHTML('beforeend', '<span class="gs-sp-inpkg">In package</span>');
+    });
+  }
+
+  /* v1.61.0 -- eventos del Edit del "Usual order". Borrador en
+     inst.usualDraft; nada se guarda hasta "Save my package", que llama a
+     usualEdit.onSave(name, items) (quien monta el picker lo guarda y
+     regresa los sets nuevos con setSavedSets / setUsualSets). */
+  function bindUsualEdit(pickerId, inst, scope) {
+    var ue = inst.usualEdit; if (!ue) return;
+    function q(sel) { return scope.querySelectorAll(sel); }
+    Array.prototype.forEach.call(q('[data-uedit-open]'), function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var k = String(b.dataset.ueditOpen);
+        var its = usualItems(inst, k);
+        inst.usualDraft = { key: k, name: '', items: its.map(function (x) {
+          var cur = isSelected(inst, x.s) ? inst.svcLevel[svcKey(inst.propertyType, x.s.serviceName)] : null;
+          return { sku: String(x.s.sku), level: cur || x.level || 'Level 1' }; }) };
+        renderGrid(pickerId);
+      });
+    });
+    Array.prototype.forEach.call(q('[data-uedit-lv]'), function (b) {
+      b.addEventListener('click', function (e) { e.stopPropagation(); inst.usualDraft.items[+b.dataset.ueditI].level = b.dataset.ueditLv; keepName(); renderGrid(pickerId); });
+    });
+    Array.prototype.forEach.call(q('[data-uedit-rm]'), function (b) {
+      b.addEventListener('click', function (e) { e.stopPropagation(); inst.usualDraft.items.splice(+b.dataset.ueditRm, 1); keepName(); renderGrid(pickerId); });
+    });
+    function keepName() { var n = scope.querySelector('[data-uedit-name]'); if (n && inst.usualDraft) inst.usualDraft.name = n.value; }
+    Array.prototype.forEach.call(q('[data-uedit-name]'), function (n) { n.addEventListener('input', function () { if (inst.usualDraft) inst.usualDraft.name = n.value; }); n.addEventListener('click', function (e) { e.stopPropagation(); }); });
+    Array.prototype.forEach.call(q('[data-uedit-q]'), function (input) {
+      var box = scope.querySelector('[data-uedit-results]');
+      input.addEventListener('click', function (e) { e.stopPropagation(); });
+      function show() {
+        var t = input.value.trim().toLowerCase();
+        if (!t) { box.innerHTML = ''; box.style.display = 'none'; return; }
+        var hits = (inst.pkgPool || []).filter(function (s) { return String(s.serviceName).toLowerCase().indexOf(t) > -1 || String(s.category || '').toLowerCase().indexOf(t) > -1; }).slice(0, 8);
+        box.style.display = 'block';
+        box.innerHTML = hits.length ? hits.map(function (s) {
+          return '<div class="gs-sp-pkg-hit" data-uedit-hit="' + escapeAttr(s.sku) + '"><span>' + escapeHtml(s.serviceName) + '</span>' + (s.category ? '<span class="cat">' + escapeHtml(s.category) + '</span>' : '') + '<span class="add">+ Add</span></div>';
+        }).join('') : '<div class="gs-sp-pkg-nohit">No services match \u201c' + escapeHtml(input.value.trim()) + '\u201d.</div>';
+      }
+      input.addEventListener('input', show);
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { var first = box.querySelector('[data-uedit-hit]'); if (first) { e.preventDefault(); first.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); } }
+        if (e.key === 'Escape') { input.value = ''; show(); }
+      });
+      box.addEventListener('mousedown', function (e) {
+        var h = e.target.closest('[data-uedit-hit]'); if (!h) return;
+        e.preventDefault(); e.stopPropagation();
+        keepName();
+        inst.usualDraft.items.push({ sku: String(h.dataset.ueditHit), level: 'Level 1' });
+        renderGrid(pickerId);
+        var again = document.querySelector('#gs-sp-pkgs-' + pickerId + ' [data-uedit-q]'); if (again) again.focus();
+      });
+    });
+    Array.prototype.forEach.call(q('[data-uedit-cancel]'), function (b) {
+      b.addEventListener('click', function (e) { e.stopPropagation(); inst.usualDraft = null; renderGrid(pickerId); });
+    });
+    Array.prototype.forEach.call(q('[data-uedit-save]'), function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        keepName();
+        var d = inst.usualDraft, err = scope.querySelector('[data-uedit-err]');
+        if (!d.name || !d.name.trim()) { if (err) err.textContent = 'Give your package a name.'; var n = scope.querySelector('[data-uedit-name]'); if (n) n.focus(); return; }
+        if (!d.items.length) { if (err) err.textContent = 'Add at least one service.'; return; }
+        if (!ue.onSave || inst.usualSaving) return;
+        inst.usualSaving = true; renderGrid(pickerId);
+        Promise.resolve(ue.onSave(d.name.trim(), d.items.slice())).then(function () { inst.usualDraft = null; })
+          .catch(function () { /* quien monta avisa el error; el borrador se queda */ })
+          .then(function () { inst.usualSaving = false; renderGrid(pickerId); });
+      });
     });
   }
 
@@ -852,7 +960,7 @@
       areasTouched: false,
       showOthers: false,
       onWorkModeChange: options.onWorkModeChange || null,
-      packageItemLevels: options.packageItemLevels !== false, usualSets: options.usualSets || [], openUsual: {}, openPkgs: {}, pkgItemLevels: (function (m) { var o = {}; Object.keys(m || {}).forEach(function (k) { var x = {}; (m[k] || []).forEach(function (i) { if (i && i.sku && i.level) x[String(i.sku)] = i.level; }); o[String(k)] = x; }); return o; })(options.initialPackageLevels),
+      packageItemLevels: options.packageItemLevels !== false, usualSets: options.usualSets || [], savedSets: options.savedSets || [], usualEdit: options.usualEdit || null, openUsual: {}, openPkgs: {}, pkgItemLevels: (function (m) { var o = {}; Object.keys(m || {}).forEach(function (k) { var x = {}; (m[k] || []).forEach(function (i) { if (i && i.sku && i.level) x[String(i.sku)] = i.level; }); o[String(k)] = x; }); return o; })(options.initialPackageLevels),
       /* v1.57.0: { clientId, customSkus: {sku:true}, onSave(sku, items), onReset(sku) } -- solo Admin */
       packageEdit: options.packageEdit || null,
       pkgDraft: null,
@@ -975,6 +1083,7 @@
       },
       setPackageEdit: function (pe) { inst.packageEdit = pe || null; renderGrid(pickerId); },
       setUsualSets: function (u) { inst.usualSets = u || []; renderGrid(pickerId); },
+      setSavedSets: function (u) { inst.savedSets = u || []; renderGrid(pickerId); },
       setCatalog: function (catalog) { inst.catalog = catalog; if (window.GSServiceTooltip) window.GSServiceTooltip.register(catalog); renderGrid(pickerId); },
       destroy: function () { delete instances[pickerId]; container.innerHTML = ''; }
     };
