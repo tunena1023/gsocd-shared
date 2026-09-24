@@ -518,8 +518,10 @@
       var sel = its.filter(function (x) { return isSelected(inst, x.s); });
       var used = sel.length === its.length;
       var lvOf = function (x) { return isSelected(inst, x.s) ? inst.svcLevel[svcKey(inst.propertyType, x.s.serviceName)] : null; };
-      var allLv = used ? lvOf(its[0]) : null;
-      if (used && its.some(function (x) { return lvOf(x) !== allLv; })) allLv = null;
+      /* Arriba se marca el nivel que mas se repite (como el nivel de un
+         paquete): picarlo quita todo, igual que en los paquetes. */
+      var allLv = null;
+      if (used) { var cnt = {}, bn = 0; its.forEach(function (x) { var l = lvOf(x); if (l) { cnt[l] = (cnt[l] || 0) + 1; if (cnt[l] > bn) { bn = cnt[l]; allLv = l; } } }); }
       var body = '';
       if (open) {
         var cols = its.length > 8 ? 3 : 2;
