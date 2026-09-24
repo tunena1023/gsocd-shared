@@ -2,6 +2,17 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.61.0 — 2026-09-24
+
+- **service-picker**: opciones nuevas `usualSets` y `savedSets` (`[{key, name, division, items:[{sku, level}]}]`)
+  y `usualEdit: { onSave(name, items) }`. Salen arriba de los paquetes como tarjetas de paquete: el
+  "usual" del cliente con burbuja morada **Most used** y sus paquetes guardados con burbuja verde
+  **My package**. NO son paquetes de verdad: usarlos selecciona esos servicios SUELTOS con su nivel.
+  Abrirlo lo selecciona; "Use these services" pone todos en un nivel (marca el que mas se repite) y
+  picar el marcado los quita; cada servicio se cambia solo. Con `usualEdit` (portal) el usual trae
+  **Edit**: quitar, cambiar nivel, agregar con la barra de busqueda, nombrarlo y "Save my package".
+  API: `setUsualSets`, `setSavedSets`. Aprobado con minis por el dueño.
+
 ## v1.60.0 — 2026-09-24
 
 - **service-picker**: (1) **abrir un paquete lo selecciona** (como un servicio suelto): cada servicio de
