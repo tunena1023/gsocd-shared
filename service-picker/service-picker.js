@@ -92,7 +92,7 @@
       '.gs-sp-sec-title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin:14px 0 8px}' +
       '.gs-sp-sec-title:first-child{margin-top:0}' +
       '.gs-sp-area-card.used{border-color:#3E7A4C;background:#F6FAF6}' +
-      '.gs-sp-usebtn{padding:6px 14px;min-width:70px;text-align:center}' +
+      '.gs-sp-usebtn{padding:6px 14px;min-width:70px;text-align:center;white-space:nowrap}' +
       '.gs-sp-inchip{font-size:11.5px;padding:5px 12px;flex-shrink:0}' +
       '.gs-sp-usual-tag.saved{background:#E6F2EF;color:#2F6F62}' +
       '.gs-sp-usual-name{margin-top:12px}' +
