@@ -2,6 +2,16 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.67.0 — 2026-09-24
+
+- **service-picker**: (1) **Areas de Recurring seleccionables como paquetes**: cada area es un set (misma tarjeta que el
+  usual / My package): abrirla selecciona todos sus servicios (L1 los que tienen nivel), "Use these services" pone
+  un nivel a todos y picar el marcado los quita; una sola abierta, a la izquierda. La del lugar que se edita
+  (placeArea) se abre sola SIN seleccionar. Refactor: setCardHtml / splitCardsHtml / bindSetCards compartidos.
+  (2) **Residential desactiva el switch Recurring/Units** (Recurring = areas comunes, Commercial); estando en
+  Recurring el switch Residential tambien queda desactivado para no quedar atorado. Nada se esconde ni cambia solo.
+  Pedido y aprobado con mini por el dueño.
+
 ## v1.66.0 — 2026-09-24
 
 - **service-picker**: (1) el aviso de Recurring ⇄ Units ya no es `confirm()` del navegador: tarjeta propia del estilo

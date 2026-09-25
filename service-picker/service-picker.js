@@ -95,6 +95,8 @@
       '.gs-sp-otherdiv{font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:#E8F0FA;color:#2D5F8A;padding:2px 7px;border-radius:10px;white-space:nowrap}' +
       '.gs-sp-usebtn{padding:6px 14px;min-width:70px;text-align:center;white-space:nowrap}' +
       '.gs-sp-inchip{font-size:11.5px;padding:5px 12px;flex-shrink:0}' +
+      '.gs-sp-res-wrap.gs-sp-locked{opacity:.4;cursor:not-allowed}' +
+      '.gs-sp-res-wrap.gs-sp-locked .gs-sp-toggle{pointer-events:none}' +
       '.gs-sp-pkgs-split{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:12px;align-items:start}' +
       '.gs-sp-pkgs-side{display:flex;flex-direction:column;gap:10px}' +
       '.gs-sp-pkgs-main>.gs-sp-area-card,.gs-sp-pkgs-side>.gs-sp-area-card{grid-column:auto!important;margin:0}' +
@@ -363,39 +365,34 @@
     names = names.filter(function (a) { return byArea[a].length; });
     if (inst.placeArea && byArea[inst.placeArea]) {
       names.sort(function (a, b) { return a === inst.placeArea ? -1 : b === inst.placeArea ? 1 : 0; });
-      if (!inst.areasTouched) { inst.openAreas = {}; inst.openAreas[inst.placeArea] = true; }
+      /* La tarjeta del lugar que se edita se abre sola (sin seleccionar nada). */
+      if (!inst.areasTouched) { inst.openUsual = {}; inst.openUsual['area:' + inst.placeArea] = true; }
     }
-    var gridClass = inst.mode === 'levels' ? 'gs-sp-row-grid' : 'gs-sp-chip-grid';
-    var cards = names.map(function (a) {
-      var items = byArea[a];
-      var open = !!inst.openAreas[a];
-      var n = items.filter(function (s) { return isSelected(inst, s); }).length;
-      var prev = items.slice(0, 3).map(function (s) { return s.serviceName; }).join(', ') + (items.length > 3 ? '\u2026' : '');
-      var match = a === inst.placeArea;
-      return '<div class="gs-sp-area-card' + (open ? ' open' : '') + (match ? ' match' : '') + '">' +
-        '<div class="gs-sp-area-head" data-area="' + escapeAttr(a) + '"><div><div class="gs-sp-area-name">' + escapeHtml(a) +
-        (match ? '<span class="gs-sp-area-tag">This place</span>' : '') + (n ? '<span class="gs-sp-area-sel">' + n + ' picked</span>' : '') + '</div>' +
-        (open ? '' : '<div class="gs-sp-area-prev">' + escapeHtml(prev) + '</div>') + '</div>' +
-        '<span class="gs-sp-area-count">' + items.length + '</span></div>' +
-        (open ? '<div class="gs-sp-area-body"><div class="' + gridClass + '">' + items.map(function (s) { return itemHtml(inst, s); }).join('') + '</div></div>' : '') +
-        '</div>';
-    }).join('');
+    /* v1.67.0 (24/09/2026, el dueño: "en Recurring no se pueden seleccionar
+       las areas... se deben poder seleccionar como paquetes: si hago clic en
+       Hallways & Floors se selecciona todo lo que este ahi"): cada area es un
+       SET como el usual -- abrirla selecciona todos sus servicios (Level 1
+       los que tienen nivel), "Use these services" pone un nivel a todos y
+       picar el marcado los quita; cada servicio se cambia solo. Una sola
+       abierta, a la izquierda; las demas a la derecha. */
+    var bySku = {}; inst.catalog.forEach(function (c) { bySku[String(c.sku)] = c; });
+    var isPkg = function (c) { return (Array.isArray(c.packageItems) && c.packageItems.length) || /^packages?$/i.test(String(c.category || '')); };
+    inst.areaSets = names.map(function (a) {
+      return { kind: 'area', key: 'area:' + a, name: a, match: a === inst.placeArea, items: byArea[a].map(function (sv) { return { sku: String(sv.sku), level: 'Level 1' }; }) };
+    });
+    var cards = inst.areaSets.map(function (u) { return setCardHtml(inst, u, bySku, isPkg); }).join('');
     var others = list.filter(function (s) { var c = s.category || ''; return c !== 'Common Areas' && c !== 'Package' && c !== 'Packages'; });
     grid.className = '';
-    grid.innerHTML = '<div class="gs-sp-area-grid">' + cards + '</div>' +
+    grid.innerHTML = splitCardsHtml(cards, 'gs-sp-areas-' + pickerId) +
       (others.length ? '<span class="gs-sp-others" data-others="1">' + (inst.showOthers ? '\u2212 Hide other services' : '+ Other services (floors, kitchen & bathrooms, windows\u2026)') + '</span>' +
         '<div class="gs-sp-others-box" id="gs-sp-others-' + pickerId + '"></div>' : '');
-    Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-area-head'), function (h) {
-      h.addEventListener('click', function () {
-        var a = h.dataset.area;
-        inst.areasTouched = true;
-        inst.openAreas[a] = !inst.openAreas[a];
-        renderGrid(pickerId);
-      });
+    Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-area-head[data-usual]'), function (h) {
+      h.addEventListener('click', function () { inst.areasTouched = true; }, true);
     });
+    bindSetCards(pickerId, inst, grid);
     var oth = grid.querySelector('.gs-sp-others');
     if (oth) oth.addEventListener('click', function () { inst.showOthers = !inst.showOthers; renderGrid(pickerId); });
-    bindItemEvents(inst, pickerId, grid.querySelector('.gs-sp-area-grid'));
+    bindItemEvents(inst, pickerId, document.getElementById('gs-sp-areas-' + pickerId));
     if (inst.showOthers && others.length) renderGroupedGrid(pickerId, inst, others, document.getElementById('gs-sp-others-' + pickerId));
   }
 
@@ -408,7 +405,8 @@
   /* v1.61.0: helpers del "Usual order" (servicios sueltos). */
   function allSets(inst) {
     return (inst.savedSets || []).map(function (u) { return { kind: 'saved', key: 'saved:' + u.key, name: u.name, items: u.items || [], raw: u }; })
-      .concat((inst.usualHidden ? [] : (inst.usualSets || [])).map(function (u) { return { kind: 'usual', key: 'usual:' + u.key, name: u.name, items: u.items || [], raw: u }; }));
+      .concat((inst.usualHidden ? [] : (inst.usualSets || [])).map(function (u) { return { kind: 'usual', key: 'usual:' + u.key, name: u.name, items: u.items || [], raw: u }; }))
+      .concat(inst.areaSets || []);
   }
   function usualItems(inst, key) {
     var u = allSets(inst).find(function (x) { return String(x.key) === String(key); });
@@ -537,57 +535,7 @@
        selecciona; el selector de arriba pone todos en un nivel y picar el
        nivel activo los quita; cada servicio se cambia solo. Viene de quien
        monta el picker: usualSets [{key, name, division, items:[{sku, level}]}]. */
-    var usualCards = allSets(inst).map(function (u) {
-      var its = (u.items || []).map(function (x) { var s = bySku[String(x.sku)]; return s ? { s: s, level: x.level || 'Level 1', qty: x.qty } : null; })
-        .filter(function (x) { return x && x.s.propertyType === inst.propertyType && !isPkg(x.s) &&
-          (inst.crossDivision || !inst.division || String(x.s.division || '').toLowerCase() === String(inst.division).toLowerCase()); });
-      if (!its.length) return '';
-      var key = String(u.key);
-      var open = !!inst.openUsual[key];
-      var sel = its.filter(function (x) { return isSelected(inst, x.s); });
-      var used = sel.length === its.length;
-      var lvOf = function (x) { return isSelected(inst, x.s) ? inst.svcLevel[svcKey(inst.propertyType, x.s.serviceName)] : null; };
-      /* Arriba se marca el nivel que mas se repite (como el nivel de un
-         paquete): picarlo quita todo, igual que en los paquetes. */
-      var allLv = null;
-      if (used) { var cnt = {}, bn = 0; its.forEach(function (x) { var l = isLeveledItem(x.s) ? lvOf(x) : null; if (l) { cnt[l] = (cnt[l] || 0) + 1; if (cnt[l] > bn) { bn = cnt[l]; allLv = l; } } }); }
-      var anyLv = its.some(function (x) { return isLeveledItem(x.s); });
-      var body = '';
-      var ue = inst.usualEdit, uEditing = !!(ue && open && inst.usualDraft && inst.usualDraft.key === key);
-      if (uEditing) {
-        body = setEditBodyHtml(inst, bySku, isPkg);
-      } else if (open) {
-        var cols = its.length > 8 ? 3 : 2;
-        body = '<div class="gs-sp-area-body"><p class="gs-sp-pkg-use">Use these services</p>' +
-          /* v1.62.0: sin servicios con nivel (Renovations, Exteriors) el
-             selector de arriba es un solo boton "Use" que se prende/apaga. */
-          '<div class="gs-sp-row-grid"><div class="gs-sp-row' + (used ? ' selected' : '') + '"><span class="gs-sp-row-name">' + escapeHtml(u.name || 'Usual order') + '</span><div class="gs-sp-lvl-group">' +
-          (anyLv ? LEVELS.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (allLv === l ? ' active' : '') + '" data-usual-all="' + escapeAttr(key) + '" data-level="' + l + '">L' + (k + 1) + '</div>'; }).join('')
-            : '<div class="gs-sp-lvl-btn gs-sp-usebtn' + (used ? ' active' : '') + '" data-usual-all="' + escapeAttr(key) + '" data-level="">' + (used ? '\u2713 In use' : 'Use') + '</div>') +
-          '</div></div></div>' +
-          '<div class="gs-sp-pkg-lines gs-sp-pkg-cols' + cols + '">' + its.map(function (x) {
-            var lv = lvOf(x);
-            var ctl;
-            if (isQuantityItem(x.s)) {
-              var qv = isSelected(inst, x.s) ? (inst.svcQty[svcKey(inst.propertyType, x.s.serviceName)] || '') : '';
-              ctl = '<span><span class="gs-sp-qty-label">Qty</span><input type="number" class="gs-sp-qty-input" min="1" step="1" inputmode="numeric" data-sku="' + escapeAttr(x.s.sku) + '" value="' + escapeAttr(qv) + '"></span>';
-            } else if (isLeveledItem(x.s)) {
-              ctl = '<span class="gs-sp-lvl-group gs-sp-pkg-ilv">' + LEVELS.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (lv === l ? ' active' : '') + '" data-sku="' + escapeAttr(x.s.sku) + '" data-level="' + l + '">L' + (k + 1) + '</div>'; }).join('') + '</span>';
-            } else {
-              var on = isSelected(inst, x.s);
-              ctl = '<button type="button" class="gs-sp-chip-btn gs-sp-inchip' + (on ? ' active' : '') + '" data-sku="' + escapeAttr(x.s.sku) + '">' + (on ? '\u2713 In order' : 'Add') + '</button>';
-            }
-            return '<div class="gs-sp-pkg-line"><span class="gs-sp-pkg-lname">' + nameWithTip(x.s) + priceHtml(inst, x.s) + '</span>' + ctl + '</div>';
-          }).join('') + '</div>' +
-          (sel.length && !used ? '<p class="gs-sp-pkg-note">' + sel.length + ' of ' + its.length + ' in your order.</p>' : '') + '</div>';
-      }
-      return '<div class="gs-sp-area-card gs-sp-usual' + (open ? ' open' : '') + (used && !uEditing ? ' used' : '') + '">' +
-        '<div class="gs-sp-area-head" data-usual="' + escapeAttr(key) + '"><div><div class="gs-sp-area-name">' + escapeHtml(u.name || 'Usual order') +
-        (used ? '<span class="gs-sp-area-sel">In use</span>' : '') + '</div>' +
-        '<div class="gs-sp-area-prev">' + its.length + (its.length === 1 ? ' service' : ' services') + (open ? '' : ': ' + escapeHtml(its.slice(0, 3).map(function (x) { return x.s.serviceName; }).join(', ')) + (its.length > 3 ? '\u2026' : '')) + '</div></div>' +
-        (ue && u.kind === 'usual' && open && !uEditing ? '<button type="button" class="gs-sp-pkg-edit" data-uedit-open="' + escapeAttr(key) + '">Edit</button>' : '') +
-        (u.kind === 'saved' ? '<span class="gs-sp-usual-tag saved">My package</span>' : '<span class="gs-sp-usual-tag">Most used</span>') + '</div>' + body + '</div>';
-    }).join('');
+    var usualCards = allSets(inst).filter(function (u) { return u.kind !== 'area'; }).map(function (u) { return setCardHtml(inst, u, bySku, isPkg); }).join('');
     var rest = list.filter(function (s) { return !pkgSkus[String(s.sku)]; });
     grid.className = '';
     var hasTop = pkgs.length || usualCards;
@@ -597,17 +545,7 @@
        package) se parte en dos -- la abierta a la izquierda (2/3) y las
        demas cerradas en una columna a la derecha (1/3), en su mismo
        orden. En celular la abierta arriba y las demas abajo. */
-    var topHtml = usualCards + cards;
-    var tmpBox = document.createElement('div'); tmpBox.innerHTML = topHtml;
-    var openCard = Array.prototype.find.call(tmpBox.children, function (c) { return c.classList.contains('open'); });
-    var pkgsInner;
-    if (openCard) {
-      var others = Array.prototype.filter.call(tmpBox.children, function (c) { return c !== openCard; }).map(function (c) { return c.outerHTML; }).join('');
-      pkgsInner = '<div class="gs-sp-pkgs-split" id="gs-sp-pkgs-' + pickerId + '"><div class="gs-sp-pkgs-main">' + openCard.outerHTML + '</div>' +
-        (others ? '<div class="gs-sp-pkgs-side">' + others + '</div>' : '') + '</div>';
-    } else {
-      pkgsInner = '<div class="gs-sp-area-grid" id="gs-sp-pkgs-' + pickerId + '">' + topHtml + '</div>';
-    }
+    var pkgsInner = splitCardsHtml(usualCards + cards, 'gs-sp-pkgs-' + pickerId);
     grid.innerHTML = (hasTop ? '<p class="gs-sp-sec-title">Packages</p>' + pkgsInner +
       '<p class="gs-sp-sec-title">Or pick services by room</p>' : '') + '<div id="gs-sp-rooms-' + pickerId + '"></div>';
     Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-area-head[data-pkg]'), function (h) {
@@ -649,32 +587,7 @@
         renderGrid(pickerId);
       });
     });
-    Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-area-head[data-usual]'), function (h) {
-      h.addEventListener('click', function (e) {
-        if (e.target.closest('[data-uedit-open]')) return;
-        var k = String(h.dataset.usual); var willOpenU = !inst.openUsual[k];
-        if (willOpenU) {
-          inst.openPkgs = {}; inst.openUsual = {}; inst.pkgDraft = null;
-          if (inst.usualDraft && inst.usualDraft.key !== k) inst.usualDraft = null;
-        }
-        inst.openUsual[k] = willOpenU;
-        if (!inst.openUsual[k] && inst.usualDraft && inst.usualDraft.key === k) inst.usualDraft = null;
-        if (inst.openUsual[k]) {
-          var its = usualItems(inst, k);
-          if (its.length && !its.every(function (x) { return isSelected(inst, x.s); })) { setUsual(inst, its, null); renderGrid(pickerId); fireChange(pickerId); return; }
-        }
-        renderGrid(pickerId);
-      });
-    });
-    Array.prototype.forEach.call(grid.querySelectorAll('[data-usual-all]'), function (b) {
-      b.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var its = usualItems(inst, String(b.dataset.usualAll));
-        if (b.classList.contains('active')) setUsual(inst, its, false);
-        else setUsual(inst, its, b.dataset.level || null);
-        renderGrid(pickerId); fireChange(pickerId);
-      });
-    });
+    bindSetCards(pickerId, inst, grid);
     Array.prototype.forEach.call(grid.querySelectorAll('[data-pkg-cedit]'), function (b) {
       b.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -726,6 +639,106 @@
     inst.crossDivision = true;
     inst.mode = 'levels';
     if (inst.onGoMixed) { try { inst.onGoMixed(); } catch (e) { /* nada */ } }
+  }
+
+  /* v1.67.0: tarjeta de un SET de servicios sueltos -- usual ("Most used"),
+     My package y, desde v1.67.0, las AREAS de Recurring. Mismo
+     comportamiento: abrirla selecciona todo, "Use these services" pone un
+     nivel a todos (picar el marcado quita todo) y cada servicio se cambia
+     solo. */
+  function setCardHtml(inst, u, bySku, isPkg) {
+      var its = (u.items || []).map(function (x) { var s = bySku[String(x.sku)]; return s ? { s: s, level: x.level || 'Level 1', qty: x.qty } : null; })
+        .filter(function (x) { return x && x.s.propertyType === inst.propertyType && !isPkg(x.s) &&
+          (inst.crossDivision || !inst.division || String(x.s.division || '').toLowerCase() === String(inst.division).toLowerCase()); });
+      if (!its.length) return '';
+      var LEVELS = ['Level 1', 'Level 2', 'Level 3'];
+      var key = String(u.key);
+      var open = !!inst.openUsual[key];
+      var sel = its.filter(function (x) { return isSelected(inst, x.s); });
+      var used = sel.length === its.length;
+      var lvOf = function (x) { return isSelected(inst, x.s) ? inst.svcLevel[svcKey(inst.propertyType, x.s.serviceName)] : null; };
+      /* Arriba se marca el nivel que mas se repite (como el nivel de un
+         paquete): picarlo quita todo, igual que en los paquetes. */
+      var allLv = null;
+      if (used) { var cnt = {}, bn = 0; its.forEach(function (x) { var l = isLeveledItem(x.s) ? lvOf(x) : null; if (l) { cnt[l] = (cnt[l] || 0) + 1; if (cnt[l] > bn) { bn = cnt[l]; allLv = l; } } }); }
+      var anyLv = its.some(function (x) { return isLeveledItem(x.s); });
+      var body = '';
+      var ue = inst.usualEdit, uEditing = !!(ue && open && inst.usualDraft && inst.usualDraft.key === key);
+      if (uEditing) {
+        body = setEditBodyHtml(inst, bySku, isPkg);
+      } else if (open) {
+        var cols = its.length > 8 ? 3 : 2;
+        body = '<div class="gs-sp-area-body"><p class="gs-sp-pkg-use">Use these services</p>' +
+          /* v1.62.0: sin servicios con nivel (Renovations, Exteriors) el
+             selector de arriba es un solo boton "Use" que se prende/apaga. */
+          '<div class="gs-sp-row-grid"><div class="gs-sp-row' + (used ? ' selected' : '') + '"><span class="gs-sp-row-name">' + escapeHtml(u.name || 'Usual order') + '</span><div class="gs-sp-lvl-group">' +
+          (anyLv ? LEVELS.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (allLv === l ? ' active' : '') + '" data-usual-all="' + escapeAttr(key) + '" data-level="' + l + '">L' + (k + 1) + '</div>'; }).join('')
+            : '<div class="gs-sp-lvl-btn gs-sp-usebtn' + (used ? ' active' : '') + '" data-usual-all="' + escapeAttr(key) + '" data-level="">' + (used ? '\u2713 In use' : 'Use') + '</div>') +
+          '</div></div></div>' +
+          '<div class="gs-sp-pkg-lines gs-sp-pkg-cols' + cols + '">' + its.map(function (x) {
+            var lv = lvOf(x);
+            var ctl;
+            if (isQuantityItem(x.s)) {
+              var qv = isSelected(inst, x.s) ? (inst.svcQty[svcKey(inst.propertyType, x.s.serviceName)] || '') : '';
+              ctl = '<span><span class="gs-sp-qty-label">Qty</span><input type="number" class="gs-sp-qty-input" min="1" step="1" inputmode="numeric" data-sku="' + escapeAttr(x.s.sku) + '" value="' + escapeAttr(qv) + '"></span>';
+            } else if (isLeveledItem(x.s)) {
+              ctl = '<span class="gs-sp-lvl-group gs-sp-pkg-ilv">' + LEVELS.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (lv === l ? ' active' : '') + '" data-sku="' + escapeAttr(x.s.sku) + '" data-level="' + l + '">L' + (k + 1) + '</div>'; }).join('') + '</span>';
+            } else {
+              var on = isSelected(inst, x.s);
+              ctl = '<button type="button" class="gs-sp-chip-btn gs-sp-inchip' + (on ? ' active' : '') + '" data-sku="' + escapeAttr(x.s.sku) + '">' + (on ? '\u2713 In order' : 'Add') + '</button>';
+            }
+            return '<div class="gs-sp-pkg-line"><span class="gs-sp-pkg-lname">' + nameWithTip(x.s) + priceHtml(inst, x.s) + '</span>' + ctl + '</div>';
+          }).join('') + '</div>' +
+          (sel.length && !used ? '<p class="gs-sp-pkg-note">' + sel.length + ' of ' + its.length + ' in your order.</p>' : '') + '</div>';
+      }
+      return '<div class="gs-sp-area-card gs-sp-usual' + (open ? ' open' : '') + (used && !uEditing ? ' used' : '') + (u.match ? ' match' : '') + '">' +
+        '<div class="gs-sp-area-head" data-usual="' + escapeAttr(key) + '"><div><div class="gs-sp-area-name">' + escapeHtml(u.name || 'Usual order') +
+        (u.match ? '<span class="gs-sp-area-tag">This place</span>' : '') +
+        (used ? '<span class="gs-sp-area-sel">In use</span>' : (sel.length ? '<span class="gs-sp-area-sel">' + sel.length + ' picked</span>' : '')) + '</div>' +
+        '<div class="gs-sp-area-prev">' + its.length + (its.length === 1 ? ' service' : ' services') + (open ? '' : ': ' + escapeHtml(its.slice(0, 3).map(function (x) { return x.s.serviceName; }).join(', ')) + (its.length > 3 ? '\u2026' : '')) + '</div></div>' +
+        (ue && u.kind === 'usual' && open && !uEditing ? '<button type="button" class="gs-sp-pkg-edit" data-uedit-open="' + escapeAttr(key) + '">Edit</button>' : '') +
+        (u.kind === 'saved' ? '<span class="gs-sp-usual-tag saved">My package</span>' : u.kind === 'area' ? '<span class="gs-sp-area-count">' + its.length + '</span>' : '<span class="gs-sp-usual-tag">Most used</span>') + '</div>' + body + '</div>';
+  }
+
+  /* v1.64.0: con una tarjeta abierta se parte en dos -- la abierta a la
+     izquierda (2/3) y las demas cerradas a la derecha (1/3). v1.67.0: helper
+     para paquetes y para las areas de Recurring. */
+  function splitCardsHtml(html, id) {
+    var tmpBox = document.createElement('div'); tmpBox.innerHTML = html;
+    var openCard = Array.prototype.find.call(tmpBox.children, function (c) { return c.classList.contains('open'); });
+    if (!openCard) return '<div class="gs-sp-area-grid" id="' + id + '">' + html + '</div>';
+    var others = Array.prototype.filter.call(tmpBox.children, function (c) { return c !== openCard; }).map(function (c) { return c.outerHTML; }).join('');
+    return '<div class="gs-sp-pkgs-split" id="' + id + '"><div class="gs-sp-pkgs-main">' + openCard.outerHTML + '</div>' +
+      (others ? '<div class="gs-sp-pkgs-side">' + others + '</div>' : '') + '</div>';
+  }
+  /* Eventos de las tarjetas de set (usual / My package / areas). */
+  function bindSetCards(pickerId, inst, grid) {
+    Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-area-head[data-usual]'), function (h) {
+      h.addEventListener('click', function (e) {
+        if (e.target.closest('[data-uedit-open]')) return;
+        var k = String(h.dataset.usual); var willOpenU = !inst.openUsual[k];
+        if (willOpenU) {
+          inst.openPkgs = {}; inst.openUsual = {}; inst.pkgDraft = null;
+          if (inst.usualDraft && inst.usualDraft.key !== k) inst.usualDraft = null;
+        }
+        inst.openUsual[k] = willOpenU;
+        if (!inst.openUsual[k] && inst.usualDraft && inst.usualDraft.key === k) inst.usualDraft = null;
+        if (inst.openUsual[k]) {
+          var its = usualItems(inst, k);
+          if (its.length && !its.every(function (x) { return isSelected(inst, x.s); })) { setUsual(inst, its, null); renderGrid(pickerId); fireChange(pickerId); return; }
+        }
+        renderGrid(pickerId);
+      });
+    });
+    Array.prototype.forEach.call(grid.querySelectorAll('[data-usual-all]'), function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var its = usualItems(inst, String(b.dataset.usualAll));
+        if (b.classList.contains('active')) setUsual(inst, its, false);
+        else setUsual(inst, its, b.dataset.level || null);
+        renderGrid(pickerId); fireChange(pickerId);
+      });
+    });
   }
 
   /* v1.62.0: cuerpo del Edit (del usual y, en el portal, de cualquier
@@ -1186,6 +1199,30 @@
     inst.searchEl.addEventListener('input', function () { renderGrid(pickerId); });
 
     var workEl = document.getElementById('gs-sp-worktoggle-' + pickerId);
+    /* v1.67.0 (24/09/2026, el dueño: "si esta en Residential se desactiva
+       la opcion de mover el switch a Recurring; si esta en Commercial se mueve
+       normal"). Recurring = areas comunes (Commercial). Para que nunca quede
+       Recurring + Residential, mientras se esta en Recurring el switch de
+       Residential tambien queda apagado. Nada se esconde ni se cambia solo:
+       solo se desactiva el switch que no aplica. */
+    function syncModeUI() {
+      var rt = document.getElementById('gs-sp-restoggle-' + pickerId);
+      var lockRec = inst.propertyType === 'Residential';
+      /* Si por alguna razon arranca en Recurring + Residential, el switch de
+         Residential se deja libre para poder regresar a Commercial (si no, se
+         quedaria atorado con los dos apagados). */
+      var lockRes = inst.workMode === 'recurring' && !!inst.workToggle && inst.propertyType !== 'Residential';
+      if (workEl) {
+        workEl.disabled = lockRec;
+        var ww = workEl.closest('.gs-sp-res-wrap');
+        if (ww) { ww.classList.toggle('gs-sp-locked', lockRec); ww.title = lockRec ? 'Recurring is for common areas (Commercial). Switch to Commercial to use it.' : ''; }
+      }
+      if (rt) {
+        rt.disabled = lockRes;
+        var rw = rt.closest('.gs-sp-res-wrap');
+        if (rw) { rw.classList.toggle('gs-sp-locked', lockRes); rw.title = lockRes ? 'Recurring is Commercial only.' : ''; }
+      }
+    }
     if (workEl) {
       workEl.addEventListener('change', function () {
         var next = workEl.checked ? 'units' : 'recurring';
@@ -1211,6 +1248,7 @@
             inst.openPkgs = {}; inst.openUsual = {}; inst.pkgDraft = null; inst.usualDraft = null;
             inst.workMode = next;
             workEl.checked = next === 'units';
+            syncModeUI();
             renderGrid(pickerId);
             fireChange(pickerId);
             if (inst.onWorkModeChange) inst.onWorkModeChange(inst.workMode);
@@ -1218,6 +1256,7 @@
           return;
         }
         inst.workMode = next;
+        syncModeUI();
         renderGrid(pickerId);
         if (inst.onWorkModeChange) inst.onWorkModeChange(inst.workMode);
       });
@@ -1226,6 +1265,7 @@
     if (toggleEl) {
       toggleEl.addEventListener('change', function () {
         inst.propertyType = toggleEl.checked ? 'Residential' : 'Commercial';
+        syncModeUI();
         renderGrid(pickerId);
         fireChange(pickerId);
       });
@@ -1238,6 +1278,7 @@
       });
     }
 
+    syncModeUI();
     renderGrid(pickerId);
 
     return {
@@ -1269,11 +1310,12 @@
       },
       setDivision: function (division) { inst.division = division; renderGrid(pickerId); },
       setShowPrices: function (on) { inst.showPrices = !!on; renderGrid(pickerId); },
-      setWorkMode: function (m) { inst.workMode = m === 'recurring' ? 'recurring' : 'units'; if (workEl) workEl.checked = inst.workMode === 'units'; renderGrid(pickerId); },
+      setWorkMode: function (m) { inst.workMode = m === 'recurring' ? 'recurring' : 'units'; if (workEl) workEl.checked = inst.workMode === 'units'; syncModeUI(); renderGrid(pickerId); },
       setPlaceArea: function (a) { inst.placeArea = a || ''; inst.areasTouched = false; renderGrid(pickerId); },
       setPropertyType: function (type) {
         inst.propertyType = type;
         if (toggleEl) toggleEl.checked = type === 'Residential';
+        syncModeUI();
         renderGrid(pickerId);
       },
       setPackageEdit: function (pe) { inst.packageEdit = pe || null; renderGrid(pickerId); },
