@@ -2,7 +2,7 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
-## Sin tag todavía — 2026-09-25 (pendiente de "súbelo")
+## Sin tag — 2026-09-25 (en producción vía las copias de cada portal)
 
 - **lib/notify.js** (backend, nuevo): correos de notificación a clientes y a la oficina desde orders@gsocd.com por
   Graph `sendMail` (reemplaza los flows de Power Automate). Reglas de preferencias (orden > cuenta, Confirmations
