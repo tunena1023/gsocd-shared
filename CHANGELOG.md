@@ -2,6 +2,14 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.69.0 — 2026-09-25
+
+- **gallery-groups**: fotos con `stage: 'inspection'` (las que toma el supervisor durante una inspección, prefijo
+  `insp-` en el archivo). Si una orden trae de inspección y de trabajo, arriba de las fotos salen 2 pestañas
+  "Inspection · before" / "Work · after" con su conteo; arranca en Work. Solo de inspección: "Inspection photos ·
+  before". Sin `stage` todo sigue igual que antes.
+- **lib/notify.js**: plantilla de oficina `inspection-done`.
+
 ## Sin tag — 2026-09-25 (en producción vía las copias de cada portal)
 
 - **lib/notify.js** (backend, nuevo): correos de notificación a clientes y a la oficina desde orders@gsocd.com por

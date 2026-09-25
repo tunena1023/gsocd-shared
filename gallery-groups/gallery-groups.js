@@ -97,7 +97,11 @@
            level (string o ''), reason (string o ''),
            caption (texto ya formateado para mostrar, ej. la fecha),
            sortKey (opcional, string ISO -- para ordenar de verdad
-             por fecha; si falta, se ordena por caption como texto) }
+             por fecha; si falta, se ordena por caption como texto),
+           stage (opcional, 'inspection' | 'work' -- v1.69.0: si la
+             orden trae fotos de los dos, arriba de las fotos salen 2
+             pestañas "Inspection · before" / "Work · after"; sin stage
+             cuenta como 'work', igual que antes) }
      ] }
 
    Si se omite onPhotoClick, se usa GSLightbox.open(group.photos, i)
@@ -144,6 +148,11 @@
       '\n  .gs-gal-cap-level { color: #6B6B6B; font-weight: 400; }' +
       '\n  .gs-gal-cap-reason { display: block; color: #8C6F2A; font-style: italic; font-size: 10.5px; margin-top: 1px; }' +
       '\n  .gs-gal-cap-date { display: block; color: #6B6B6B; font-size: 10.5px; margin-top: 1px; }' +
+      '\n\n  .gs-gal-stages { display: inline-flex; gap: 4px; background: #F2EEE4; border-radius: 99px; padding: 3px; margin-bottom: 10px; }' +
+      '\n  .gs-gal-stage { all: unset; cursor: pointer; font-size: 11.5px; font-weight: 600; padding: 5px 12px; border-radius: 99px; color: #6B6B6B; }' +
+      '\n  .gs-gal-stage b { font-weight: 700; margin-left: 4px; color: #8C6F2A; }' +
+      '\n  .gs-gal-stage.on { background: #fff; color: #111; box-shadow: 0 1px 2px rgba(0,0,0,.08); }' +
+      '\n  .gs-gal-stage:focus-visible { outline: 2px solid #C9A227; outline-offset: 1px; }' +
       '\n\n  .gs-gal-thumb-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }' +
       '\n  .gs-gal-thumb-wrap { flex: 0 0 auto; width: 56px; }' +
       '\n  .gs-gal-thumb { position: relative; width: 56px; height: 56px; border-radius: 6px; overflow: hidden; cursor: pointer; background: #eee; }' +
@@ -228,15 +237,33 @@
        vez que se pinta cada grupo. Vive en closure de render(); se
        reinicia si se vuelve a llamar render() con datos nuevos. */
     var photoOrderState = {};
+    /* Antes / despues (v1.69.0): fotos de inspeccion (stage
+       'inspection') y de trabajo (el resto). Si una orden trae de los
+       dos, cada grupo recuerda que pestaña esta viendo; arranca en
+       Work (el resultado), o en Inspection si todavia no hay de
+       trabajo. */
+    var stageState = {};
+    function stageOf(p) { return p && p.stage === 'inspection' ? 'inspection' : 'work'; }
+    function stageCounts(gi) {
+      var c = { inspection: 0, work: 0 };
+      (groups[gi].photos || []).forEach(function (p) { c[stageOf(p)]++; });
+      return c;
+    }
+    function currentStage(gi) {
+      if (!stageState[gi]) stageState[gi] = stageCounts(gi).work ? 'work' : 'inspection';
+      return stageState[gi];
+    }
 
     function currentOrder(gi) {
-      if (!photoOrderState[gi]) {
+      var key = gi + ':' + currentStage(gi);
+      if (!photoOrderState[key]) {
         var photos = groups[gi].photos || [];
-        var idxs = photos.map(function (_, i) { return i; });
+        var st = currentStage(gi);
+        var idxs = photos.map(function (_, i) { return i; }).filter(function (i) { return stageOf(photos[i]) === st; });
         idxs.sort(function (a, b) { return dateSortKey(photos[b]).localeCompare(dateSortKey(photos[a])); });
-        photoOrderState[gi] = idxs;
+        photoOrderState[key] = idxs;
       }
-      return photoOrderState[gi];
+      return photoOrderState[key];
     }
 
     function bodyHtml(gi) {
@@ -263,7 +290,16 @@
         '</div>';
       }).join('');
 
-      var photosCol = '<div class="gs-gal-col-label">Photos</div>' + heroHtml +
+      var counts = stageCounts(gi);
+      var st = currentStage(gi);
+      var stageBar = (counts.inspection && counts.work)
+        ? '<div class="gs-gal-stages" role="tablist">' +
+            '<button type="button" role="tab" class="gs-gal-stage' + (st === 'inspection' ? ' on' : '') + '" aria-selected="' + (st === 'inspection') + '" data-stage="inspection">Inspection · before<b>' + counts.inspection + '</b></button>' +
+            '<button type="button" role="tab" class="gs-gal-stage' + (st === 'work' ? ' on' : '') + '" aria-selected="' + (st === 'work') + '" data-stage="work">Work · after<b>' + counts.work + '</b></button>' +
+          '</div>'
+        : '';
+      var label = stageBar ? '' : '<div class="gs-gal-col-label">' + (counts.inspection && !counts.work ? 'Inspection photos · before' : 'Photos') + '</div>';
+      var photosCol = label + stageBar + heroHtml +
         (thumbsHtml ? '<div class="gs-gal-thumb-strip">' + thumbsHtml + '</div>' : '');
 
       var svcHtml = servicesListHtml(g.services);
@@ -332,6 +368,15 @@
         });
       }
 
+      body.querySelectorAll('.gs-gal-stage').forEach(function (el) {
+        el.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          stageState[gi] = el.dataset.stage;
+          body.innerHTML = bodyHtml(gi);
+          wireBody(gi);
+        });
+      });
+
       body.querySelectorAll('.gs-gal-thumb').forEach(function (el) {
         el.addEventListener('click', function (ev) {
           ev.stopPropagation();
@@ -342,7 +387,7 @@
             /* ROTACION real: la miniatura que se pica se va al frente,
                y todas las demas se recorren en el mismo orden circular
                -- NO es un intercambio de solo 2 lugares. */
-            photoOrderState[gi] = ord.slice(pos).concat(ord.slice(0, pos));
+            photoOrderState[gi + ':' + currentStage(gi)] = ord.slice(pos).concat(ord.slice(0, pos));
           }
           body.innerHTML = bodyHtml(gi);
           wireBody(gi);
