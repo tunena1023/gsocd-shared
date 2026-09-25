@@ -904,6 +904,13 @@
     var inst = instances[pickerId];
     var grid = inst.gridEl;
     var list = visibleList(inst);
+    /* v1.66.0 (24/09/2026, el dueño: "los servicios de Common Areas que no se
+       muestren en Unit"): en Units (donde hay switch o paquetes) no salen
+       los de la categoria Common Areas -- ni en las tarjetas por cuarto ni
+       al buscar. Siguen en Recurring. */
+    if (inst.workMode === 'units' && (inst.workToggle || inst.showPackages)) {
+      list = list.filter(function (s) { return String(s.category || '') !== 'Common Areas'; });
+    }
 
     if (!list.length) {
       grid.className = '';
@@ -1042,6 +1049,54 @@
     fireChange(pickerId);
   }
 
+  /* v1.65.0 (24/09/2026, el dueño: "una notificacion bonita, del estilo
+     de la pagina, no esa cosa fea"): aviso propio en vez de confirm() del
+     navegador. Tarjeta blanca con titulo, texto y dos botones (dorado =
+     aceptar, blanco = quedarse). Esc o picar afuera = quedarse. Promesa
+     con true/false. */
+  function gsPickerConfirm(o) {
+    return new Promise(function (resolve) {
+      if (!document.getElementById('gs-sp-confirm-css')) {
+        var st = document.createElement('style'); st.id = 'gs-sp-confirm-css';
+        st.textContent =
+          '.gs-sp-cf-back{position:fixed;inset:0;z-index:100000;background:rgba(17,17,17,.45);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .18s}' +
+          '.gs-sp-cf-back.in{opacity:1}' +
+          '.gs-sp-cf{width:min(420px,100%);background:#fff;border-radius:14px;border-top:4px solid #C9A84C;box-shadow:0 18px 50px rgba(0,0,0,.25);padding:22px 22px 18px;font-family:Inter,-apple-system,sans-serif;transform:translateY(8px) scale(.98);transition:transform .2s}' +
+          '.gs-sp-cf-back.in .gs-sp-cf{transform:none}' +
+          '.gs-sp-cf-ic{width:38px;height:38px;border-radius:50%;background:#FBF3DC;color:#8C6F2A;display:flex;align-items:center;justify-content:center;margin-bottom:12px}' +
+          '.gs-sp-cf-ic svg{width:20px;height:20px}' +
+          '.gs-sp-cf h3{margin:0 0 6px;font-size:17px;font-weight:700;color:#111}' +
+          '.gs-sp-cf p{margin:0 0 18px;font-size:13.5px;line-height:1.5;color:#555}' +
+          '.gs-sp-cf-btns{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}' +
+          '.gs-sp-cf-btns button{font-family:Inter,sans-serif;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:7px;padding:12px 18px;cursor:pointer}' +
+          '.gs-sp-cf-no{background:#fff;border:1.5px solid #E0D9CC;color:#111}' +
+          '.gs-sp-cf-no:hover{border-color:#C9A84C}' +
+          '.gs-sp-cf-yes{border:none;color:#171310;background:linear-gradient(155deg,#EAD9A0 0%,#C9A84C 45%,#8C6F2A 100%);box-shadow:0 1px 2px rgba(0,0,0,.2),0 6px 14px rgba(140,111,42,.35),inset 0 1px 0 rgba(255,255,255,.45)}' +
+          '@media (max-width:480px){.gs-sp-cf-btns button{flex:1 1 100%}}';
+        document.head.appendChild(st);
+      }
+      var back = document.createElement('div'); back.className = 'gs-sp-cf-back';
+      back.innerHTML = '<div class="gs-sp-cf" role="dialog" aria-modal="true"><div class="gs-sp-cf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg></div>' +
+        '<h3>' + escapeHtml(o.title || 'Are you sure?') + '</h3><p>' + escapeHtml(o.text || '') + '</p>' +
+        '<div class="gs-sp-cf-btns"><button type="button" class="gs-sp-cf-no">' + escapeHtml(o.cancel || 'Cancel') + '</button><button type="button" class="gs-sp-cf-yes">' + escapeHtml(o.ok || 'OK') + '</button></div></div>';
+      document.body.appendChild(back);
+      requestAnimationFrame(function () { back.classList.add('in'); });
+      var done = false;
+      function close(v) {
+        if (done) return; done = true;
+        document.removeEventListener('keydown', onKey);
+        back.classList.remove('in'); setTimeout(function () { back.remove(); }, 180);
+        resolve(v);
+      }
+      function onKey(e) { if (e.key === 'Escape') close(false); if (e.key === 'Enter') close(true); }
+      document.addEventListener('keydown', onKey);
+      back.addEventListener('click', function (e) { if (e.target === back) close(false); });
+      back.querySelector('.gs-sp-cf-no').addEventListener('click', function () { close(false); });
+      back.querySelector('.gs-sp-cf-yes').addEventListener('click', function () { close(true); });
+      setTimeout(function () { var b = back.querySelector('.gs-sp-cf-yes'); if (b) b.focus(); }, 50);
+    });
+  }
+
   function mount(pickerId, container, options) {
     styleTag();
     if (typeof container === 'string') container = document.getElementById(container);
@@ -1144,16 +1199,22 @@
         var hasSel = Object.keys(inst.selected || {}).some(function (pt) { return Object.keys(inst.selected[pt] || {}).length; });
         if (hasSel && next !== inst.workMode) {
           var fromTxt = inst.workMode === 'units' ? 'Units' : 'Recurring', toTxt = next === 'units' ? 'Units' : 'Recurring';
-          if (!window.confirm('Switching to ' + toTxt + ' will remove the services you picked in ' + fromTxt + '. Recurring and Units can\'t be mixed in the same order.\n\nContinue?')) {
-            workEl.checked = inst.workMode === 'units';
-            return;
-          }
-          inst.selected = {}; inst.svcLevel = {}; inst.svcQty = {}; inst.pkgItemLevels = {};
-          inst.openPkgs = {}; inst.openUsual = {}; inst.pkgDraft = null; inst.usualDraft = null;
-          inst.workMode = next;
-          renderGrid(pickerId);
-          fireChange(pickerId);
-          if (inst.onWorkModeChange) inst.onWorkModeChange(inst.workMode);
+          /* Mientras se decide, el switch se queda donde estaba. */
+          workEl.checked = inst.workMode === 'units';
+          gsPickerConfirm({
+            title: 'Switch to ' + toTxt + '?',
+            text: 'The services you picked in ' + fromTxt + ' will be removed. Recurring and Units can\'t be mixed in the same order.',
+            ok: 'Switch & clear', cancel: 'Keep ' + fromTxt
+          }).then(function (yes) {
+            if (!yes) return;
+            inst.selected = {}; inst.svcLevel = {}; inst.svcQty = {}; inst.pkgItemLevels = {};
+            inst.openPkgs = {}; inst.openUsual = {}; inst.pkgDraft = null; inst.usualDraft = null;
+            inst.workMode = next;
+            workEl.checked = next === 'units';
+            renderGrid(pickerId);
+            fireChange(pickerId);
+            if (inst.onWorkModeChange) inst.onWorkModeChange(inst.workMode);
+          });
           return;
         }
         inst.workMode = next;

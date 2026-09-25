@@ -2,6 +2,14 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.66.0 — 2026-09-24
+
+- **service-picker**: (1) el aviso de Recurring ⇄ Units ya no es `confirm()` del navegador: tarjeta propia del estilo
+  de la pagina (blanca, linea dorada, "Keep X" blanco y "Switch & clear" dorado; Esc o picar afuera = quedarse;
+  en celular botones a todo lo ancho). (2) En Units (con switch o paquetes) no salen los servicios de la
+  categoria **Common Areas**, ni en las tarjetas por cuarto ni al buscar; siguen en Recurring.
+  Pedido y aprobado con mini por el dueño.
+
 ## v1.65.0 — 2026-09-24
 
 - **service-picker**: **Recurring y Units no se mezclan**. Cambiar el switch con servicios ya escogidos pregunta
