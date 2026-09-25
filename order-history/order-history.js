@@ -98,7 +98,12 @@
     'Service Needs Scheduling':   'Needs scheduling',
     'Service Order Changed':      'Service order changed',
     'Service Added':              'Service added to order',
-    'Service Removed':            'Service removed from order'
+    'Service Removed':            'Service removed from order',
+    /* Inspeccion (25/09/2026): la oficina manda "Inspection first", el
+       supervisor va a ver, y luego la orden sigue a Scheduling. */
+    'Inspection':                 'Inspection scheduled',
+    'Inspected':                  'Inspection done',
+    'Received':                   'Ready to schedule'
   };
   function labelFor(ct) { return LABELS[String(ct || '')] || String(ct || 'Update'); }
 
@@ -285,14 +290,35 @@
      lo que traiga OldValue/NewValue. Misma logica sin importar el
      modo -- si algo no debe verse del cliente, se filtra el EVENTO
      completo antes de llegar aqui, no el detalle a medias. --- */
-  function detailLinesFor(h, catalog) {
+  /* Inspeccion: NewValue trae JSON { inspectionBy, inspectionDate,
+     inspectionWindow, inspectionDoneAt, crew, services? }. Nunca se
+     imprime crudo. La gente propuesta (crew) es interna: no sale en
+     modo cliente. */
+  function isInspectionRow(h) {
+    var ct = String(h.ChangeType || ''), fc = String(h.FieldChanged || '');
+    return ct === 'Inspection' || ct === 'Inspected' || fc === 'Inspection' || fc === 'Inspection Update';
+  }
+  function inspectionLines(h, mode) {
+    var v = null;
+    try { v = JSON.parse(String(h.NewValue || '').replace(/^SERVICES:/, '') || 'null'); } catch (e) { v = null; }
+    var out = [];
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return out;
+    if (v.inspectionDate) out.push('📅 Inspection: ' + esc(fmtDate(v.inspectionDate)) + (v.inspectionWindow ? ' · ' + esc(v.inspectionWindow) : ''));
+    if (v.inspectionBy) out.push('👤 Supervisor: ' + esc(v.inspectionBy));
+    if (v.inspectionDoneAt) out.push('✅ Done: ' + esc(fmtDateTime(v.inspectionDoneAt)));
+    if (mode !== 'client' && Array.isArray(v.crew) && v.crew.length) out.push('👷 Suggested crew: ' + v.crew.map(esc).join(', '));
+    return out;
+  }
+
+  function detailLinesFor(h, catalog, mode) {
+    var inspRow = isInspectionRow(h);
     var oldPay = parseServicesPayload(h.OldValue);
     var newPay = parseServicesPayload(h.NewValue);
     var oldSvcs = oldPay ? oldPay.services : null;
     var newSvcs = newPay ? newPay.services : null;
     var oldDates = parseDatesPayload(h.OldValue);
     var newDates = parseDatesPayload(h.NewValue);
-    var lines = [];
+    var lines = inspRow ? inspectionLines(h, mode) : [];
 
     if (h.ChangeType === 'Created') {
       if (newPay) {
@@ -540,7 +566,7 @@
        criterio que 'Status' (excluido de esta linea generica porque
        el ChangeType/Notes ya lo cubren) -- 'TechMarkedComplete' se
        agrega a la misma exclusion. */
-    if (h.FieldChanged && h.FieldChanged !== 'Status' && h.FieldChanged !== 'TechMarkedComplete' && (h.OldValue || h.NewValue)) {
+    if (!inspRow && h.FieldChanged && h.FieldChanged !== 'Status' && h.FieldChanged !== 'TechMarkedComplete' && (h.OldValue || h.NewValue)) {
       lines.push(changeLine('🔄', h.FieldChanged, h.OldValue || '', h.NewValue || ''));
     }
     return lines;
@@ -678,7 +704,7 @@
 
     return groups.map(function (g, idx) {
       var h = g.rep;
-      var lines = g.rows.reduce(function (acc, row) { return acc.concat(detailLinesFor(row, catalog)); }, []);
+      var lines = g.rows.reduce(function (acc, row) { return acc.concat(detailLinesFor(row, catalog, mode)); }, []);
       /* No repetir la misma linea "antes -> despues" dos veces seguidas
          (la decision fusionada trae su propio detalle que puede calzar
          con el de la solicitud justo anterior). */

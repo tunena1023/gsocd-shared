@@ -2,6 +2,12 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag (commit en rama) — 2026-09-25
+
+- **order-history**: renglones de inspección con etiqueta e íconos ("Inspection scheduled" / "Inspection done" /
+  "Ready to schedule"): fecha y horario, supervisor, cuándo se terminó, cambios de servicios propuestos y gente
+  sugerida (esta última solo en modo staff). Antes el JSON de la inspección salía como texto plano.
+
 ## v1.69.0 — 2026-09-25
 
 - **gallery-groups**: fotos con `stage: 'inspection'` (las que toma el supervisor durante una inspección, prefijo
