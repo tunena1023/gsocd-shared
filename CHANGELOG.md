@@ -2,6 +2,14 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.64.0 — 2026-09-24
+
+- **service-picker**: en la seccion de paquetes (paquetes, usual y My package) **solo hay una tarjeta abierta**:
+  abrir una cierra las demas (y tira sus borradores de Edit). Con una abierta se parte en dos: la
+  abierta a la **izquierda** (2/3) y las demas cerradas en una columna a la **derecha** (1/3), en su
+  orden; en celular (<=760px) la abierta arriba y las demas abajo. Cerrarla regresa a la cuadricula.
+  Pedido y aprobado con mini por el dueño.
+
 ## v1.63.0 — 2026-09-24
 
 - **service-picker**: la barra de busqueda de los Edit de paquete (el del cliente en el portal y el de

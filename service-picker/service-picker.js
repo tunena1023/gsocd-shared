@@ -95,6 +95,10 @@
       '.gs-sp-otherdiv{font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:#E8F0FA;color:#2D5F8A;padding:2px 7px;border-radius:10px;white-space:nowrap}' +
       '.gs-sp-usebtn{padding:6px 14px;min-width:70px;text-align:center;white-space:nowrap}' +
       '.gs-sp-inchip{font-size:11.5px;padding:5px 12px;flex-shrink:0}' +
+      '.gs-sp-pkgs-split{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:12px;align-items:start}' +
+      '.gs-sp-pkgs-side{display:flex;flex-direction:column;gap:10px}' +
+      '.gs-sp-pkgs-main>.gs-sp-area-card,.gs-sp-pkgs-side>.gs-sp-area-card{grid-column:auto!important;margin:0}' +
+      '@media (max-width:760px){.gs-sp-pkgs-split{grid-template-columns:1fr}}' +
       '.gs-sp-usual-tag.saved{background:#E6F2EF;color:#2F6F62}' +
       '.gs-sp-usual-name{margin-top:12px}' +
       '.gs-sp-usual-name label{display:block;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin-bottom:6px}' +
@@ -587,12 +591,37 @@
     var rest = list.filter(function (s) { return !pkgSkus[String(s.sku)]; });
     grid.className = '';
     var hasTop = pkgs.length || usualCards;
-    grid.innerHTML = (hasTop ? '<p class="gs-sp-sec-title">Packages</p><div class="gs-sp-area-grid" id="gs-sp-pkgs-' + pickerId + '">' + usualCards + cards + '</div>' +
+    /* v1.64.0 (24/09/2026, el dueño: "que siempre nomas haya uno abierto y
+       los otros se cierren, y el abierto siempre a la izquierda y los otros
+       a la derecha"): con una tarjeta abierta (paquete, usual o My
+       package) se parte en dos -- la abierta a la izquierda (2/3) y las
+       demas cerradas en una columna a la derecha (1/3), en su mismo
+       orden. En celular la abierta arriba y las demas abajo. */
+    var topHtml = usualCards + cards;
+    var tmpBox = document.createElement('div'); tmpBox.innerHTML = topHtml;
+    var openCard = Array.prototype.find.call(tmpBox.children, function (c) { return c.classList.contains('open'); });
+    var pkgsInner;
+    if (openCard) {
+      var others = Array.prototype.filter.call(tmpBox.children, function (c) { return c !== openCard; }).map(function (c) { return c.outerHTML; }).join('');
+      pkgsInner = '<div class="gs-sp-pkgs-split" id="gs-sp-pkgs-' + pickerId + '"><div class="gs-sp-pkgs-main">' + openCard.outerHTML + '</div>' +
+        (others ? '<div class="gs-sp-pkgs-side">' + others + '</div>' : '') + '</div>';
+    } else {
+      pkgsInner = '<div class="gs-sp-area-grid" id="gs-sp-pkgs-' + pickerId + '">' + topHtml + '</div>';
+    }
+    grid.innerHTML = (hasTop ? '<p class="gs-sp-sec-title">Packages</p>' + pkgsInner +
       '<p class="gs-sp-sec-title">Or pick services by room</p>' : '') + '<div id="gs-sp-rooms-' + pickerId + '"></div>';
     Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-area-head[data-pkg]'), function (h) {
       h.addEventListener('click', function (e) {
         if (e.target.closest('[data-pedit-open],[data-pedit-reset],[data-pkg-cedit],[data-uedit-name],[data-uedit-q]')) return;
-        var k = h.dataset.pkg; inst.openPkgs[k] = !inst.openPkgs[k];
+        var k = h.dataset.pkg; var willOpen = !inst.openPkgs[k];
+        /* v1.64.0: solo UNA abierta -- abrir esta cierra todas las demas
+           (paquetes, usual y My package) y tira sus borradores de Edit. */
+        if (willOpen) {
+          inst.openPkgs = {}; inst.openUsual = {};
+          if (inst.pkgDraft && inst.pkgDraft.sku !== String(k)) inst.pkgDraft = null;
+          if (inst.usualDraft && inst.usualDraft.key !== 'pkg:' + k) inst.usualDraft = null;
+        }
+        inst.openPkgs[k] = willOpen;
         if (!inst.openPkgs[k] && inst.usualDraft && inst.usualDraft.key === 'pkg:' + k) inst.usualDraft = null;
         if (!inst.openPkgs[k] && inst.pkgDraft && inst.pkgDraft.sku === String(k)) inst.pkgDraft = null;
         /* v1.60.0 (24/09/2026, el dueño: "el paquete se debe seleccionar
@@ -623,7 +652,12 @@
     Array.prototype.forEach.call(grid.querySelectorAll('.gs-sp-area-head[data-usual]'), function (h) {
       h.addEventListener('click', function (e) {
         if (e.target.closest('[data-uedit-open]')) return;
-        var k = String(h.dataset.usual); inst.openUsual[k] = !inst.openUsual[k];
+        var k = String(h.dataset.usual); var willOpenU = !inst.openUsual[k];
+        if (willOpenU) {
+          inst.openPkgs = {}; inst.openUsual = {}; inst.pkgDraft = null;
+          if (inst.usualDraft && inst.usualDraft.key !== k) inst.usualDraft = null;
+        }
+        inst.openUsual[k] = willOpenU;
         if (!inst.openUsual[k] && inst.usualDraft && inst.usualDraft.key === k) inst.usualDraft = null;
         if (inst.openUsual[k]) {
           var its = usualItems(inst, k);
