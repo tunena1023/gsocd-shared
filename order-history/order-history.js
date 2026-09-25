@@ -441,6 +441,13 @@
     /* "Assign by service" -- mismo patron que el resto del archivo:
        NewValue trae el dato estructurado (JSON), aqui se convierte en
        lineas con icono para la caja de detalle expandible. */
+    if (h.ChangeType === 'Service Scheduled' && h._svcBatch) {
+      /* Varios servicios a la misma persona y fecha (juntados en
+         mergeServiceScheduled): un renglon por persona. */
+      lines.push('👤 ' + esc(h._svcBatch.assigned) + (h._svcBatch.date ? ' · 📅 ' + esc(fmtDate(h._svcBatch.date)) : ''));
+      h._svcBatch.services.forEach(function (n) { lines.push('• ' + esc(n)); });
+      return lines;
+    }
     if (h.ChangeType === 'Service Scheduled') {
       var ss = null; try { ss = JSON.parse(h.NewValue || 'null'); } catch (e) {}
       if (ss) {
@@ -574,6 +581,43 @@
 
   var GROUP_WINDOW_MS = 60000;
 
+  /* --- Pasada 0 (25/09/2026, pedido del dueño): "Assign by service"
+     guarda un renglon 'Service Scheduled' por servicio. Los que se
+     asignaron juntos (misma persona, misma fecha, mismo quien, pocos
+     minutos) se juntan en UN renglon por persona con todos sus
+     servicios. Los renglones internos que caen en medio ('Order Moved
+     To Active' etc.) se quedan, justo despues del renglon juntado. --- */
+  var SVC_BATCH_WINDOW_MS = 5 * 60000;
+  var SVC_BATCH_PASSTHRU = ['Order Moved To Active', 'Service Now Active', 'Service Needs Scheduling'];
+  function svcSchedOf(h) {
+    if (String(h.ChangeType || '') !== 'Service Scheduled') return null;
+    try { var v = JSON.parse(h.NewValue || 'null'); return v && v.serviceName ? v : null; } catch (e) { return null; }
+  }
+  function mergeServiceScheduled(rows) {
+    var out = [], used = {};
+    for (var i = 0; i < rows.length; i++) {
+      if (used[i]) continue;
+      var h = rows[i], v = svcSchedOf(h);
+      if (!v) { out.push(h); continue; }
+      var batch = [v.serviceName], after = [], t0 = new Date(h.ChangeDate).getTime();
+      for (var j = i + 1; j < rows.length; j++) {
+        var r = rows[j];
+        if (Math.abs(new Date(r.ChangeDate).getTime() - t0) > SVC_BATCH_WINDOW_MS) break;
+        var w = svcSchedOf(r);
+        if (w && String(w.assigned) === String(v.assigned) && String(w.date) === String(v.date) && String(r.ChangedBy || '') === String(h.ChangedBy || '')) {
+          batch.push(w.serviceName); used[j] = true; continue;
+        }
+        if (!w && SVC_BATCH_PASSTHRU.indexOf(String(r.ChangeType || '')) !== -1) { after.push(r); used[j] = true; continue; }
+        break;
+      }
+      if (batch.length > 1) {
+        out.push(Object.assign({}, h, { _svcBatch: { assigned: v.assigned, date: v.date, services: batch }, _label: 'Scheduled for ' + v.assigned + ' · ' + batch.length + ' services' }));
+      } else out.push(h);
+      after.forEach(function (r) { out.push(r); });
+    }
+    return out;
+  }
+
   /* --- Pasada 1: agrupar renglones consecutivos de 'Dates Confirmed'
      (mismo actor, cerca en tiempo) en una sola tanda. --- */
   function groupDatesConfirmed(rows) {
@@ -697,7 +741,7 @@
 
     if (!rows.length) return '<p class="empty-note">No history.</p>';
 
-    var groups = groupDatesConfirmed(rows);
+    var groups = groupDatesConfirmed(mergeServiceScheduled(rows));
     groups = mergeDecisionWithDetail(groups);
     groups = mergeRescheduleRequest(groups);
     groups = mergeMaterialsReadyWithDate(groups);
@@ -725,7 +769,7 @@
           '<div class="goh-head-main">' +
             '<span class="goh-date">' + esc(fmtDateTime(h.ChangeDate)) + '</span>' +
             '<span class="goh-rev">' + esc(orderId || '') + '</span> — ' +
-            '<span class="goh-type">' + esc(labelFor(h.ChangeType)) + '</span>' +
+            '<span class="goh-type">' + esc(h._label || labelFor(h.ChangeType)) + '</span>' +
             (h.ChangedBy ? '<span class="goh-by">by ' + esc(h.ChangedBy) + '</span>' : '') +
           '</div>' +
           (hasDetail ? '<span class="goh-toggle">&#9660; details</span>' : '') +
