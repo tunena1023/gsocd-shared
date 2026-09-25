@@ -1133,7 +1133,30 @@
     var workEl = document.getElementById('gs-sp-worktoggle-' + pickerId);
     if (workEl) {
       workEl.addEventListener('change', function () {
-        inst.workMode = workEl.checked ? 'units' : 'recurring';
+        var next = workEl.checked ? 'units' : 'recurring';
+        /* v1.65.0 (24/09/2026, el dueño: "los recurrentes y los units no se
+           deberian poder mezclar... hacer esa pregunta de que va a cambiar
+           y que los quite si se cambian"): si ya hay algo escogido, se
+           pregunta antes de cambiar; si dice que si, se quita TODO lo
+           escogido (servicios, niveles, cantidades, niveles de paquete,
+           tarjetas abiertas y borradores de Edit) y arranca limpio; si no,
+           el switch regresa y no cambia nada. */
+        var hasSel = Object.keys(inst.selected || {}).some(function (pt) { return Object.keys(inst.selected[pt] || {}).length; });
+        if (hasSel && next !== inst.workMode) {
+          var fromTxt = inst.workMode === 'units' ? 'Units' : 'Recurring', toTxt = next === 'units' ? 'Units' : 'Recurring';
+          if (!window.confirm('Switching to ' + toTxt + ' will remove the services you picked in ' + fromTxt + '. Recurring and Units can\'t be mixed in the same order.\n\nContinue?')) {
+            workEl.checked = inst.workMode === 'units';
+            return;
+          }
+          inst.selected = {}; inst.svcLevel = {}; inst.svcQty = {}; inst.pkgItemLevels = {};
+          inst.openPkgs = {}; inst.openUsual = {}; inst.pkgDraft = null; inst.usualDraft = null;
+          inst.workMode = next;
+          renderGrid(pickerId);
+          fireChange(pickerId);
+          if (inst.onWorkModeChange) inst.onWorkModeChange(inst.workMode);
+          return;
+        }
+        inst.workMode = next;
         renderGrid(pickerId);
         if (inst.onWorkModeChange) inst.onWorkModeChange(inst.workMode);
       });

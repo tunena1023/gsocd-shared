@@ -2,6 +2,13 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.65.0 — 2026-09-24
+
+- **service-picker**: **Recurring y Units no se mezclan**. Cambiar el switch con servicios ya escogidos pregunta
+  ("Switching to X will remove the services you picked in Y..."); si acepta se quita todo lo escogido
+  (servicios, niveles, cantidades, niveles de paquete, tarjetas abiertas, borradores) y avisa con onChange;
+  si cancela el switch regresa. Sin nada escogido cambia sin preguntar. setWorkMode() no pregunta.
+
 ## v1.64.0 — 2026-09-24
 
 - **service-picker**: en la seccion de paquetes (paquetes, usual y My package) **solo hay una tarjeta abierta**:
