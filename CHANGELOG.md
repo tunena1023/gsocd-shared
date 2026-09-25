@@ -2,6 +2,13 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.68.0 — 2026-09-24
+
+- **service-picker**: opcion `place` ('new-order' | 'template' | 'admin-order' ...): el Edit de paquetes lo decide
+  la pieza compartida segun el lugar. `place: 'template'` trae el Edit integrado (busqueda, niveles, quitar,
+  agregar) y "Apply to this template" cambia el paquete por sus servicios con los cambios, sin pedir nombre
+  y sin ir al servidor (se guarda con el Save Template de la pagina). New Order y Admin igual que antes.
+
 ## v1.67.0 — 2026-09-24
 
 - **service-picker**: (1) **Areas de Recurring seleccionables como paquetes**: cada area es un set (misma tarjeta que el

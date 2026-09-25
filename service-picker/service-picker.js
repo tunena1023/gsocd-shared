@@ -767,9 +767,14 @@
       '<div class="gs-sp-pkg-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>' +
       '<input type="text" data-uedit-q placeholder="Start your search here\u2026" autocomplete="off"></div>' +
       '<div class="gs-sp-pkg-results" data-uedit-results></div>' +
-      '<div class="gs-sp-usual-name"><label>Name your package</label><input type="text" data-uedit-name maxlength="60" placeholder="e.g. Weekly unit turnover" value="' + escapeAttr(inst.usualDraft.name || '') + '"></div>' +
+      /* v1.68.0: en un template (place 'template') no se pide nombre -- los
+         cambios se aplican a ESE template; en los demas lugares se guarda
+         con nombre como "My package". Lo decide la pieza compartida. */
+      (inst.usualEdit && inst.usualEdit.applyHere
+        ? '<p class="gs-sp-pkg-note">The package becomes separate services in this template, with your changes.</p>'
+        : '<div class="gs-sp-usual-name"><label>Name your package</label><input type="text" data-uedit-name maxlength="60" placeholder="e.g. Weekly unit turnover" value="' + escapeAttr(inst.usualDraft.name || '') + '"></div>') +
       '<div class="gs-sp-pkg-foot"><button type="button" class="gs-sp-pkg-cancel" data-uedit-cancel>Cancel</button>' +
-      '<button type="button" class="gs-sp-pkg-save" data-uedit-save' + (inst.usualSaving ? ' disabled' : '') + '>' + (inst.usualSaving ? 'Saving\u2026' : 'Save my package') + '</button></div>' +
+      '<button type="button" class="gs-sp-pkg-save" data-uedit-save' + (inst.usualSaving ? ' disabled' : '') + '>' + (inst.usualSaving ? 'Saving\u2026' : (inst.usualEdit && inst.usualEdit.applyHere ? 'Apply to this template' : 'Save my package')) + '</button></div>' +
       '<p class="gs-sp-pkg-note" data-uedit-err></p></div>';
   }
 
@@ -837,6 +842,33 @@
         e.stopPropagation();
         keepName();
         var d = inst.usualDraft, err = scope.querySelector('[data-uedit-err]');
+        if (ue.applyHere) {
+          /* v1.68.0 -- template: el paquete se cambia por SUS servicios
+             (con lo editado) como servicios sueltos del template. Nada va
+             al servidor aqui; se guarda con el "Save Template" de siempre. */
+          if (!d.items.length) { if (err) err.textContent = 'Add at least one service.'; return; }
+          var pt = inst.propertyType;
+          if (!inst.selected[pt]) inst.selected[pt] = {};
+          if (d.source === 'package') {
+            var pkSku = String(d.key).replace(/^pkg:/, '');
+            var pk = inst.catalog.find(function (c) { return String(c.sku) === pkSku; });
+            if (pk) { delete inst.selected[pt][pk.serviceName]; delete inst.svcLevel[svcKey(pt, pk.serviceName)]; }
+            delete inst.pkgItemLevels[pkSku];
+            inst.openPkgs = {};
+          }
+          d.items.forEach(function (x) {
+            var sv = inst.catalog.find(function (c) { return String(c.sku) === String(x.sku); });
+            if (!sv) return;
+            var k2 = svcKey(pt, sv.serviceName);
+            inst.selected[pt][sv.serviceName] = sv.sku;
+            if (isLeveledItem(sv)) inst.svcLevel[k2] = x.level || 'Level 1';
+            if (isQuantityItem(sv) && !inst.svcQty[k2]) inst.svcQty[k2] = 1;
+          });
+          inst.usualDraft = null;
+          renderGrid(pickerId);
+          fireChange(pickerId);
+          return;
+        }
         if (!d.name || !d.name.trim()) { if (err) err.textContent = 'Give your package a name.'; var n = scope.querySelector('[data-uedit-name]'); if (n) n.focus(); return; }
         if (!d.items.length) { if (err) err.textContent = 'Add at least one service.'; return; }
         if (!ue.onSave || inst.usualSaving) return;
@@ -1139,7 +1171,7 @@
       areasTouched: false,
       showOthers: false,
       onWorkModeChange: options.onWorkModeChange || null,
-      packageItemLevels: options.packageItemLevels !== false, usualSets: options.usualSets || [], savedSets: options.savedSets || [], usualEdit: options.usualEdit || null, onGoMixed: options.onGoMixed || null, pkgDivision: null, openUsual: {}, openPkgs: {}, pkgItemLevels: (function (m) { var o = {}; Object.keys(m || {}).forEach(function (k) { var x = {}; (m[k] || []).forEach(function (i) { if (i && i.sku && i.level) x[String(i.sku)] = i.level; }); o[String(k)] = x; }); return o; })(options.initialPackageLevels),
+      packageItemLevels: options.packageItemLevels !== false, usualSets: options.usualSets || [], savedSets: options.savedSets || [], usualEdit: options.usualEdit || (options.place === 'template' ? { applyHere: true } : null), place: options.place || '', onGoMixed: options.onGoMixed || null, pkgDivision: null, openUsual: {}, openPkgs: {}, pkgItemLevels: (function (m) { var o = {}; Object.keys(m || {}).forEach(function (k) { var x = {}; (m[k] || []).forEach(function (i) { if (i && i.sku && i.level) x[String(i.sku)] = i.level; }); o[String(k)] = x; }); return o; })(options.initialPackageLevels),
       /* v1.57.0: { clientId, customSkus: {sku:true}, onSave(sku, items), onReset(sku) } -- solo Admin */
       packageEdit: options.packageEdit || null,
       pkgDraft: null,
