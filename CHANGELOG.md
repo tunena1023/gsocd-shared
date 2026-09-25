@@ -2,6 +2,16 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.62.0 — 2026-09-24
+
+- **service-picker**: (1) el "usual" y los "My package" funcionan en **todas las divisiones**: servicios
+  con nivel (L1/L2/L3), sin nivel (boton "Add" / "✓ In order") y con cantidad (Qty, se trae la de la
+  ultima orden); sin servicios con nivel el selector de arriba es un solo boton "Use" / "✓ In use".
+  (2) Con `usualEdit` (portal) y sin `packageEdit` (Admin), **cualquier paquete trae Edit**: el
+  cliente lo ajusta (quitar, nivel, barra de busqueda) y lo guarda con nombre como "My package";
+  el paquete original no cambia. `usualEdit.onSave(name, items, source)` con source 'usual' o
+  'package'. Aprobado con mini por el dueño.
+
 ## v1.61.0 — 2026-09-24
 
 - **service-picker**: opciones nuevas `usualSets` y `savedSets` (`[{key, name, division, items:[{sku, level}]}]`)
