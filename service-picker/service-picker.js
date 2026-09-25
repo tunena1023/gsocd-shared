@@ -92,6 +92,7 @@
       '.gs-sp-sec-title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin:14px 0 8px}' +
       '.gs-sp-sec-title:first-child{margin-top:0}' +
       '.gs-sp-area-card.used{border-color:#3E7A4C;background:#F6FAF6}' +
+      '.gs-sp-otherdiv{font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:#E8F0FA;color:#2D5F8A;padding:2px 7px;border-radius:10px;white-space:nowrap}' +
       '.gs-sp-usebtn{padding:6px 14px;min-width:70px;text-align:center;white-space:nowrap}' +
       '.gs-sp-inchip{font-size:11.5px;padding:5px 12px;flex-shrink:0}' +
       '.gs-sp-usual-tag.saved{background:#E6F2EF;color:#2F6F62}' +
@@ -467,16 +468,18 @@
         body = setEditBodyHtml(inst, bySku, isPkg);
       } else if (open && editing) {
         var inPkg = {}; items.forEach(function (x) { inPkg[String(x.sku)] = true; });
+        /* v1.63.0: la busqueda del Edit de Admin tambien trae todas las
+           divisiones (el dueño: "tanto en el portal como en Admin"). */
         var pool = inst.catalog.filter(function (s) {
-          return !isPkg(s) && !inPkg[String(s.sku)] && s.propertyType === inst.propertyType &&
-            (inst.crossDivision || !inst.division || String(s.division || '').toLowerCase() === String(inst.division).toLowerCase());
+          return !isPkg(s) && !inPkg[String(s.sku)] && s.propertyType === inst.propertyType;
         }).sort(function (a, b) { return String(a.serviceName).localeCompare(String(b.serviceName)); });
         inst.pkgPool = pool;
         body = '<div class="gs-sp-area-body"><div class="gs-sp-pkg-lines">' + items.map(function (x, i) {
             var s = bySku[String(x.sku)]; if (!s) return '';
-            return '<div class="gs-sp-pkg-eline"><span>' + nameWithTip(s) + '</span><span class="gs-sp-pkg-eright"><span class="gs-sp-lvl-group">' +
-              LEVELS.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (x.level === l ? ' active' : '') + '" data-pedit-i="' + i + '" data-pedit-lv="' + l + '">L' + (k + 1) + '</div>'; }).join('') +
-              '</span><button type="button" class="gs-sp-pkg-rm" data-pedit-rm="' + i + '" title="Remove">\u2715</button></span></div>';
+            var odA = inst.pkgDivision && String(s.division || '').toLowerCase() !== String(inst.pkgDivision).toLowerCase();
+            return '<div class="gs-sp-pkg-eline"><span>' + nameWithTip(s) + (odA ? ' <span class="gs-sp-otherdiv">' + escapeHtml(s.division || '') + '</span>' : '') + '</span><span class="gs-sp-pkg-eright">' +
+              (isLeveledItem(s) ? '<span class="gs-sp-lvl-group">' + LEVELS.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (x.level === l ? ' active' : '') + '" data-pedit-i="' + i + '" data-pedit-lv="' + l + '">L' + (k + 1) + '</div>'; }).join('') + '</span>' : '') +
+              '<button type="button" class="gs-sp-pkg-rm" data-pedit-rm="' + i + '" title="Remove">\u2715</button></span></div>';
           }).join('') + (items.length ? '' : '<p class="gs-sp-pkg-note">No services in this package yet.</p>') + '</div>' +
           /* v1.60.0 (24/09/2026, pedido del dueño): en vez del <select>,
              una barra de busqueda con contorno dorado suave; escribir
@@ -675,20 +678,42 @@
     });
   }
 
+  /* v1.63.0 (24/09/2026, el dueño: "si el usuario selecciona un mix se va
+     a Mixed inmediatamente"): al agregar en un Edit un servicio de OTRA
+     division, el picker pasa en ese momento a Mixed (division 'Mixed',
+     cruza divisiones, modo con niveles) SIN perder lo escogido ni el
+     borrador, y avisa a quien lo monta (onGoMixed) para que cambie su
+     pestaña de division y su estado a Mixed. */
+  function goMixedIfNeeded(pickerId, inst, svc) {
+    if (!svc || !inst.division || String(inst.division) === 'Mixed') return;
+    if (String(svc.division || '').toLowerCase() === String(inst.division).toLowerCase()) return;
+    if (!inst.pkgDivision) inst.pkgDivision = inst.division;
+    inst.division = 'Mixed';
+    inst.crossDivision = true;
+    inst.mode = 'levels';
+    if (inst.onGoMixed) { try { inst.onGoMixed(); } catch (e) { /* nada */ } }
+  }
+
   /* v1.62.0: cuerpo del Edit (del usual y, en el portal, de cualquier
      paquete): quitar, nivel (solo servicios con nivel), agregar con la
      barra de busqueda, nombre y "Save my package". */
   function setEditBodyHtml(inst, bySku, isPkg) {
     var dItems = inst.usualDraft.items;
     var inDraft = {}; dItems.forEach(function (x) { inDraft[String(x.sku)] = true; });
+    /* v1.63.0 (24/09/2026, el dueño: "si estoy en Janitorial y a mi
+       recurrente le quiero meter un servicio de otra division... si, eso
+       quiero"): en el Edit del CLIENTE la busqueda trae servicios de
+       TODAS las divisiones; los de otra division salen con su division.
+       Quien monta el picker decide en onSave si el paquete queda Mixed. */
     inst.pkgPool = inst.catalog.filter(function (s) {
-      return !isPkg(s) && !inDraft[String(s.sku)] && s.propertyType === inst.propertyType &&
-        (inst.crossDivision || !inst.division || String(s.division || '').toLowerCase() === String(inst.division).toLowerCase());
+      return !isPkg(s) && !inDraft[String(s.sku)] && s.propertyType === inst.propertyType;
     }).sort(function (a, b) { return String(a.serviceName).localeCompare(String(b.serviceName)); });
     var LV = ['Level 1', 'Level 2', 'Level 3'];
     return '<div class="gs-sp-area-body"><div class="gs-sp-pkg-lines">' + dItems.map(function (x, i) {
         var s2 = bySku[String(x.sku)]; if (!s2) return '';
-        return '<div class="gs-sp-pkg-eline"><span>' + nameWithTip(s2) + '</span><span class="gs-sp-pkg-eright">' +
+        var baseDiv = inst.pkgDivision || inst.division;
+        var od = baseDiv && baseDiv !== 'Mixed' && String(s2.division || '').toLowerCase() !== String(baseDiv).toLowerCase();
+        return '<div class="gs-sp-pkg-eline"><span>' + nameWithTip(s2) + (od ? ' <span class="gs-sp-otherdiv">' + escapeHtml(s2.division || '') + '</span>' : '') + '</span><span class="gs-sp-pkg-eright">' +
           (isLeveledItem(s2) ? '<span class="gs-sp-lvl-group">' + LV.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (x.level === l ? ' active' : '') + '" data-uedit-i="' + i + '" data-uedit-lv="' + l + '">L' + (k + 1) + '</div>'; }).join('') + '</span>' : '') +
           '<button type="button" class="gs-sp-pkg-rm" data-uedit-rm="' + i + '" title="Remove">\u2715</button></span></div>';
       }).join('') + (dItems.length ? '' : '<p class="gs-sp-pkg-note">No services yet.</p>') + '</div>' +
@@ -736,7 +761,9 @@
         var hits = (inst.pkgPool || []).filter(function (s) { return String(s.serviceName).toLowerCase().indexOf(t) > -1 || String(s.category || '').toLowerCase().indexOf(t) > -1; }).slice(0, 8);
         box.style.display = 'block';
         box.innerHTML = hits.length ? hits.map(function (s) {
-          return '<div class="gs-sp-pkg-hit" data-uedit-hit="' + escapeAttr(s.sku) + '"><span>' + escapeHtml(s.serviceName) + '</span>' + (s.category ? '<span class="cat">' + escapeHtml(s.category) + '</span>' : '') + '<span class="add">+ Add</span></div>';
+          var other = inst.division && String(s.division || '').toLowerCase() !== String(inst.division).toLowerCase();
+          return '<div class="gs-sp-pkg-hit" data-uedit-hit="' + escapeAttr(s.sku) + '"><span>' + escapeHtml(s.serviceName) + '</span>' + (s.category ? '<span class="cat">' + escapeHtml(s.category) + '</span>' : '') +
+            (other ? '<span class="gs-sp-otherdiv">' + escapeHtml(s.division || '') + '</span>' : '') + '<span class="add">+ Add</span></div>';
         }).join('') : '<div class="gs-sp-pkg-nohit">No services match \u201c' + escapeHtml(input.value.trim()) + '\u201d.</div>';
       }
       input.addEventListener('input', show);
@@ -750,6 +777,7 @@
         keepName();
         var hs = inst.catalog.find(function (c) { return String(c.sku) === String(h.dataset.ueditHit); });
         inst.usualDraft.items.push({ sku: String(h.dataset.ueditHit), level: hs && isLeveledItem(hs) ? 'Level 1' : '' });
+        goMixedIfNeeded(pickerId, inst, hs);
         renderGrid(pickerId);
         var again = document.querySelector('#gs-sp-pkgs-' + pickerId + ' [data-uedit-q]'); if (again) again.focus();
       });
@@ -801,7 +829,9 @@
         var hits = (inst.pkgPool || []).filter(function (s) { return String(s.serviceName).toLowerCase().indexOf(t) > -1 || String(s.category || '').toLowerCase().indexOf(t) > -1 || String(s.sku).indexOf(t) > -1; }).slice(0, 8);
         box.style.display = 'block';
         box.innerHTML = hits.length ? hits.map(function (s) {
-          return '<div class="gs-sp-pkg-hit" data-pedit-hit="' + escapeAttr(s.sku) + '"><span>' + escapeHtml(s.serviceName) + '</span>' + (s.category ? '<span class="cat">' + escapeHtml(s.category) + '</span>' : '') + '<span class="add">+ Add</span></div>';
+          var other = inst.division && String(s.division || '').toLowerCase() !== String(inst.division).toLowerCase();
+          return '<div class="gs-sp-pkg-hit" data-pedit-hit="' + escapeAttr(s.sku) + '"><span>' + escapeHtml(s.serviceName) + '</span>' + (s.category ? '<span class="cat">' + escapeHtml(s.category) + '</span>' : '') +
+            (other ? '<span class="gs-sp-otherdiv">' + escapeHtml(s.division || '') + '</span>' : '') + '<span class="add">+ Add</span></div>';
         }).join('') : '<div class="gs-sp-pkg-nohit">No services match \u201c' + escapeHtml(input.value.trim()) + '\u201d.</div>';
       }
       input.addEventListener('input', show);
@@ -812,7 +842,9 @@
       box.addEventListener('mousedown', function (e) {
         var h = e.target.closest('[data-pedit-hit]'); if (!h) return;
         e.preventDefault();
-        inst.pkgDraft.items.push({ sku: String(h.dataset.peditHit), level: 'Level 1' });
+        var hsA = inst.catalog.find(function (c) { return String(c.sku) === String(h.dataset.peditHit); });
+        inst.pkgDraft.items.push({ sku: String(h.dataset.peditHit), level: hsA && isLeveledItem(hsA) ? 'Level 1' : '' });
+        goMixedIfNeeded(pickerId, inst, hsA);
         renderGrid(pickerId);
         var again = document.querySelector('#gs-sp-pkgs-' + pickerId + ' [data-pedit-q]'); if (again) again.focus();
       });
@@ -1005,7 +1037,7 @@
       areasTouched: false,
       showOthers: false,
       onWorkModeChange: options.onWorkModeChange || null,
-      packageItemLevels: options.packageItemLevels !== false, usualSets: options.usualSets || [], savedSets: options.savedSets || [], usualEdit: options.usualEdit || null, openUsual: {}, openPkgs: {}, pkgItemLevels: (function (m) { var o = {}; Object.keys(m || {}).forEach(function (k) { var x = {}; (m[k] || []).forEach(function (i) { if (i && i.sku && i.level) x[String(i.sku)] = i.level; }); o[String(k)] = x; }); return o; })(options.initialPackageLevels),
+      packageItemLevels: options.packageItemLevels !== false, usualSets: options.usualSets || [], savedSets: options.savedSets || [], usualEdit: options.usualEdit || null, onGoMixed: options.onGoMixed || null, pkgDivision: null, openUsual: {}, openPkgs: {}, pkgItemLevels: (function (m) { var o = {}; Object.keys(m || {}).forEach(function (k) { var x = {}; (m[k] || []).forEach(function (i) { if (i && i.sku && i.level) x[String(i.sku)] = i.level; }); o[String(k)] = x; }); return o; })(options.initialPackageLevels),
       /* v1.57.0: { clientId, customSkus: {sku:true}, onSave(sku, items), onReset(sku) } -- solo Admin */
       packageEdit: options.packageEdit || null,
       pkgDraft: null,

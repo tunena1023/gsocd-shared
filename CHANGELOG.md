@@ -2,6 +2,14 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.63.0 — 2026-09-24
+
+- **service-picker**: la barra de busqueda de los Edit de paquete (el del cliente en el portal y el de
+  Admin "Save for <cliente>") trae servicios de **todas las divisiones**; los de otra division salen
+  con una etiqueta azul con su division. Al agregar uno de otra division el picker **pasa a Mixed en
+  ese momento** (division, cruza divisiones, modo con niveles) sin perder lo escogido ni el borrador, y
+  avisa con la opcion nueva `onGoMixed()` para que la pagina cambie su pestaña/estado a Mixed.
+
 ## v1.62.0 — 2026-09-24
 
 - **service-picker**: (1) el "usual" y los "My package" funcionan en **todas las divisiones**: servicios
