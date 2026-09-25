@@ -2,6 +2,14 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag todavía — 2026-09-25 (pendiente de "súbelo")
+
+- **lib/notify.js** (backend, nuevo): correos de notificación a clientes y a la oficina desde orders@gsocd.com por
+  Graph `sendMail` (reemplaza los flows de Power Automate). Reglas de preferencias (orden > cuenta, Confirmations
+  siempre), a quién se manda (orden → edificio → contacto marcado → email principal), plantillas y modo
+  `NOTIFY_MODE` off/test/live. Pruebas en `lib/notify.test.js` (`node lib/notify.test.js`). Admin, Orders y Tech
+  traen una COPIA en su `lib/notify.js` (mismo criterio que division-rules): si cambia aquí, se copia a los 3.
+
 ## v1.68.0 — 2026-09-24
 
 - **service-picker**: opcion `place` ('new-order' | 'template' | 'admin-order' ...): el Edit de paquetes lo decide
