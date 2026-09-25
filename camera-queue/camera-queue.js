@@ -84,6 +84,27 @@
      para ese mismo id se ignora en vez de duplicar la subida. */
   var uploadingIds = {};
 
+  /* v1.70.0 (25/09/2026, el dueño: "cuando se toma una foto se
+     duplica"): el guard de arriba solo cuida la MISMA pagina. Si la
+     foto seguia subiendo al tocar Done, la pagina de regreso
+     (customer.html / employee.html / admin.html, que tambien leen esta
+     cola) la volvia a mandar, y el servidor le ponia OTRO nombre al
+     azar -> 2 copias. Ahora cada foto lleva su nombre fijo desde que se
+     toma (body.photoKey, "AAAA-MM-DD_HHMMSS-xxxxxx" en UTC) y se guarda
+     con ella en la cola: el servidor la usa como nombre del archivo, asi
+     que un segundo envio de la misma foto la reemplaza en vez de
+     duplicarla. */
+  function makePhotoKey() {
+    var d = new Date();
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    var chars = 'abcdefghijklmnopqrstuvwxyz0123456789', rnd = '';
+    var bytes = new Uint8Array(6);
+    (window.crypto || window.msCrypto).getRandomValues(bytes);
+    for (var i = 0; i < bytes.length; i++) rnd += chars[bytes[i] % chars.length];
+    return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate()) + '_' +
+      pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + '-' + rnd;
+  }
+
   function openDB() {
     if (dbPromise) return dbPromise;
     dbPromise = new Promise(function (resolve, reject) {
@@ -210,9 +231,11 @@
        esperando hasta que alguien llame release() con el dato que
        faltaba. */
     enqueue: function (opts) {
+      var body = Object.assign({}, opts.body);
+      if (!body.photoKey) body.photoKey = makePhotoKey();
       var item = {
         endpoint: opts.endpoint,
-        body: opts.body,
+        body: body,
         meta: opts.meta || {},
         attempts: 0,
         failed: false,
@@ -260,6 +283,8 @@
     },
 
     remove: function (id) { return dbDelete(id).then(function () { notifyChange(); }); },
+
+    makePhotoKey: makePhotoKey,
 
     onChange: function (fn) { changeListeners.push(fn); }
   };

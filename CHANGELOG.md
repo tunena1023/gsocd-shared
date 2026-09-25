@@ -8,6 +8,17 @@ Todas las versiones publicadas de este repo, más recientes primero.
   "Ready to schedule"): fecha y horario, supervisor, cuándo se terminó, cambios de servicios propuestos y gente
   sugerida (esta última solo en modo staff). Antes el JSON de la inspección salía como texto plano.
 
+## v1.70.0 — 2026-09-25
+
+- **Arreglado (camera-queue):** fotos duplicadas en Orders (y en cualquier portal). El
+  guard de v1.28.10 solo cuidaba la misma página; si la foto seguía subiendo al tocar
+  Done, la página de regreso (que también lee la cola) la volvía a mandar y el servidor
+  le ponía otro nombre al azar. Ahora `enqueue()` le pone a cada foto `body.photoKey`
+  (`AAAA-MM-DD_HHMMSS-xxxxxx`, UTC) y se guarda con ella en la cola; los endpoints de
+  subida de los 3 repos usan esa llave como nombre del archivo, así que un reenvío
+  reemplaza la misma foto en vez de duplicarla. `GSCameraQueue.makePhotoKey()` queda
+  expuesto para quien arme copias a mano.
+
 ## v1.69.0 — 2026-09-25
 
 - **gallery-groups**: fotos con `stage: 'inspection'` (las que toma el supervisor durante una inspección, prefijo
