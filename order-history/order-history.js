@@ -442,10 +442,12 @@
        NewValue trae el dato estructurado (JSON), aqui se convierte en
        lineas con icono para la caja de detalle expandible. */
     if (h.ChangeType === 'Service Scheduled' && h._svcBatch) {
-      /* Varios servicios a la misma persona y fecha (juntados en
-         mergeServiceScheduled): un renglon por persona. */
-      lines.push('👤 ' + esc(h._svcBatch.assigned) + (h._svcBatch.date ? ' · 📅 ' + esc(fmtDate(h._svcBatch.date)) : ''));
-      h._svcBatch.services.forEach(function (n) { lines.push('• ' + esc(n)); });
+      /* Toda la tanda de programacion (juntada en mergeServiceScheduled):
+         un bloque por persona y fecha, con sus servicios abajo. */
+      h._svcBatch.groups.forEach(function (g) {
+        lines.push('👤 ' + esc(g.assigned) + (g.date ? ' · 📅 ' + esc(fmtDate(g.date)) : ''));
+        g.services.forEach(function (n) { lines.push('• ' + esc(n)); });
+      });
       return lines;
     }
     if (h.ChangeType === 'Service Scheduled') {
@@ -582,37 +584,70 @@
   var GROUP_WINDOW_MS = 60000;
 
   /* --- Pasada 0 (25/09/2026, pedido del dueño): "Assign by service"
-     guarda un renglon 'Service Scheduled' por servicio. Los que se
-     asignaron juntos (misma persona, misma fecha, mismo quien, pocos
-     minutos) se juntan en UN renglon por persona con todos sus
-     servicios. Los renglones internos que caen en medio ('Order Moved
-     To Active' etc.) se quedan, justo despues del renglon juntado. --- */
-  var SVC_BATCH_WINDOW_MS = 5 * 60000;
-  var SVC_BATCH_PASSTHRU = ['Order Moved To Active', 'Service Now Active', 'Service Needs Scheduling'];
+     guarda un renglon 'Service Scheduled' por servicio, mas un
+     'Order Moved To Active' con el primero. Para el dueño programar
+     la orden es UN solo evento ("el primero es solo un evento"), aunque
+     se haya repartido entre varias personas y dias: todos los
+     'Service Scheduled' seguidos del mismo quien (sin mas de 30 min
+     entre uno y otro, sin otro evento en medio) se juntan en UN
+     renglon, con el detalle por persona y fecha adentro. El 'Order
+     Moved To Active' de esa misma tanda se absorbe (ya no sale aparte).
+     Los completados ('Service Completed') siguen saliendo cada uno por
+     su lado. --- */
+  var SVC_BATCH_GAP_MS = 30 * 60000;
+  var SVC_BATCH_ABSORB = ['Order Moved To Active'];
+  var SVC_BATCH_PASSTHRU = ['Service Now Active', 'Service Needs Scheduling'];
   function svcSchedOf(h) {
     if (String(h.ChangeType || '') !== 'Service Scheduled') return null;
     try { var v = JSON.parse(h.NewValue || 'null'); return v && v.serviceName ? v : null; } catch (e) { return null; }
   }
+  function tOf(h) { return new Date(h.ChangeDate).getTime(); }
   function mergeServiceScheduled(rows) {
     var out = [], used = {};
     for (var i = 0; i < rows.length; i++) {
       if (used[i]) continue;
       var h = rows[i], v = svcSchedOf(h);
-      if (!v) { out.push(h); continue; }
-      var batch = [v.serviceName], after = [], t0 = new Date(h.ChangeDate).getTime();
+      var absorbable = SVC_BATCH_ABSORB.indexOf(String(h.ChangeType || '')) !== -1;
+      if (!v && !absorbable) { out.push(h); continue; }
+      var by = String(h.ChangedBy || ''), tLast = tOf(h);
+      var sched = v ? [{ h: h, v: v }] : [], after = [], took = [];
       for (var j = i + 1; j < rows.length; j++) {
-        var r = rows[j];
-        if (Math.abs(new Date(r.ChangeDate).getTime() - t0) > SVC_BATCH_WINDOW_MS) break;
+        if (used[j]) continue;
+        var r = rows[j], type = String(r.ChangeType || '');
+        if (Math.abs(tOf(r) - tLast) > SVC_BATCH_GAP_MS) break;
         var w = svcSchedOf(r);
-        if (w && String(w.assigned) === String(v.assigned) && String(w.date) === String(v.date) && String(r.ChangedBy || '') === String(h.ChangedBy || '')) {
-          batch.push(w.serviceName); used[j] = true; continue;
-        }
-        if (!w && SVC_BATCH_PASSTHRU.indexOf(String(r.ChangeType || '')) !== -1) { after.push(r); used[j] = true; continue; }
+        if (w && String(r.ChangedBy || '') === by) { sched.push({ h: r, v: w }); took.push(j); tLast = tOf(r); continue; }
+        if (SVC_BATCH_ABSORB.indexOf(type) !== -1) { took.push(j); tLast = tOf(r); continue; }
+        if (!w && SVC_BATCH_PASSTHRU.indexOf(type) !== -1) { after.push(r); took.push(j); continue; }
         break;
       }
-      if (batch.length > 1) {
-        out.push(Object.assign({}, h, { _svcBatch: { assigned: v.assigned, date: v.date, services: batch }, _label: 'Scheduled for ' + v.assigned + ' · ' + batch.length + ' services' }));
-      } else out.push(h);
+      if (!sched.length) { out.push(h); continue; }
+      took.forEach(function (k) { used[k] = true; });
+      sched.sort(function (a, b) { return tOf(a.h) - tOf(b.h); });
+      /* Mismo servicio programado 2 veces en la misma tanda: vale el ultimo. */
+      var last = {};
+      sched.forEach(function (s) { last[s.v.serviceName] = s.v; });
+      var groups = [], byKey = {}, people = {}, total = 0;
+      sched.forEach(function (s) {
+        var fin = last[s.v.serviceName];
+        if (fin !== s.v) return;
+        var key = String(fin.assigned) + '|' + String(fin.date);
+        if (!byKey[key]) { byKey[key] = { assigned: fin.assigned, date: fin.date, services: [] }; groups.push(byKey[key]); }
+        byKey[key].services.push(fin.serviceName);
+        people[String(fin.assigned)] = true;
+        total++;
+      });
+      var first = sched[0].h, nPeople = Object.keys(people).length;
+      if (total === 1) {
+        out.push(sched.filter(function (s) { return last[s.v.serviceName] === s.v; })[0].h);
+      } else {
+        out.push(Object.assign({}, first, {
+          _svcBatch: { groups: groups },
+          _label: nPeople === 1
+            ? 'Scheduled for ' + groups[0].assigned + ' · ' + total + ' services'
+            : 'Services scheduled · ' + total + ' services · ' + nPeople + ' people'
+        }));
+      }
       after.forEach(function (r) { out.push(r); });
     }
     return out;
