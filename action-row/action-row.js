@@ -25,6 +25,9 @@
                      la fila.
        gs-act-full   ocupa el renglon completo en telefono (avisos, iconos,
                      links).
+       gs-act-cell   algo chico que no es boton (ej. iconos de documentos):
+                     en telefono toma un lugar de la fila como si fuera un
+                     boton, asi usa el hueco que quede en vez de otro renglon.
        gs-act-keep   boton que conserva su tamano (iconos, camara).
        gs-act-icon-first  fila de un icono + un boton (ej. camara + Mark
                      as Done): el icono chico y el boton con el resto.
@@ -48,7 +51,8 @@
       '.gs-act-row>*{min-width:0}' +
       '.gs-act-row button:not(.gs-act-keep){width:100%!important;margin:0!important;white-space:normal;padding-left:10px;padding-right:10px;flex:none}' +
       '.gs-act-row .gs-act-group,.gs-act-row .print-wrap{display:contents!important}' +
-      '.gs-act-row .gs-act-full,.gs-act-row .print-hint,.gs-act-row>:not(button):not(.gs-act-group):not(.print-wrap):not(a){grid-column:1/-1}' +
+      '.gs-act-row .gs-act-full,.gs-act-row .print-hint,.gs-act-row>:not(button):not(.gs-act-group):not(.print-wrap):not(a):not(.gs-act-cell){grid-column:1/-1}' +
+      '.gs-act-row>.gs-act-cell{display:flex!important;align-items:center;flex-wrap:wrap;gap:6px}' +
       '.gs-act-row>:only-child{grid-column:1/-1}' +
       '.gs-act-row .gs-act-full{order:99}' +
       '.gs-act-row.gs-act-icon-first{display:flex!important}' +
