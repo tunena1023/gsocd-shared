@@ -2,6 +2,13 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag (commit en rama) — 2026-09-26 (actualizacion automatica)
+
+- **app-update** (nuevo): la pagina abierta en el telefono se pone al dia sola cuando sale un deploy nuevo. Pregunta
+  `/api/app-version` al cargar, al regresar a la app y cada 10 min. Si hay version nueva y no se esta escribiendo
+  nada: se recarga al regresar a la app, o tras 2 min sin tocar nada. Si hay un campo a medio llenar, sale una barrita
+  "A new version is available · Update". `beforeReload()` para guardar donde estaba la persona.
+
 ## Sin tag (commit en rama) — 2026-09-26 (historial y fotos)
 
 - **order-history**: cada solicitud de cambio ahora dice QUÉ se cambió.
