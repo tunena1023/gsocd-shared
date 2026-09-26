@@ -23,8 +23,14 @@
 
      API PUBLICA:
        GSOrderHistory.html(orderId, history, opts) -> string HTML
-         opts.mode: 'staff' (todo, Admin/Tech) | 'client' (filtrado,
-           Orders) -- default 'staff'.
+         opts.mode: 'staff' (todo, Admin) | 'tech' (Tech: todo menos lo
+           interno de oficina) | 'client' (filtrado, Orders) -- default
+           'staff'. Cada portal ve SU version de la misma informacion
+           (pedido del dueño, 26/09/2026).
+         opts.clientId + opts.clientName: si ChangedBy es el ClientID
+           de la orden (lo que guarda Orders), se muestra el nombre.
+         opts.actorName(changedBy): igual, pero decide quien llama
+           (Admin tiene la lista de clientes). Devuelve '' para dejarlo.
        GSOrderHistory.toggleDetail(id) -- toggle del detalle expandible,
          referenciado desde el HTML generado via onclick.
   ================================================================ */
@@ -68,6 +74,10 @@
     'Document Failed':          'Order document failed',
     'Tech Marked Complete':     'Tech marked their work done',
     'Change Requested':         'Change requested',
+    'Services Change Requested':'Services change requested',
+    'Service Change Requested': 'Service change requested',
+    'Service Change Resolved':  'Service change resolved',
+    'Services Updated':         'Services updated',
     'Change Reassigned':        'Change approved',
     'Change Rejected':          'Change not approved',
     'Sent to Scheduling':       'Rescheduling in progress',
@@ -164,6 +174,17 @@
     var perServiceHiddenTypes = ['Order Moved To Active', 'Service Marked Done By Tech',
       'Service Now Active', 'Service Needs Scheduling', 'Service Order Changed'];
     if (perServiceHiddenTypes.indexOf(String(h.ChangeType || '')) !== -1) return true;
+    return false;
+  }
+
+  /* --- Modo 'tech' (26/09/2026, pedido del dueño: "a excepcion de
+     eventos internos, todo lo que tenga informacion debe ser visible"):
+     el tecnico ve todo lo del cliente y de campo, incluidas las
+     solicitudes pendientes, pero no los movimientos internos de
+     oficina (cambio interno y su decision, 'Marked as seen'). --- */
+  function isHiddenFromTech(h) {
+    if (String(h.FieldChanged || '') === 'Office Change (Internal)') return true;
+    if (String(h.ChangeType || '') === 'Order Approved') return true;
     return false;
   }
 
@@ -310,6 +331,55 @@
     return out;
   }
 
+  /* --- Cambio pedido por la oficina (admin-update-order.js, modo
+     solicitud): OldValue/NewValue traen, ademas de los servicios,
+     fields:{entryDate, dueDate, serviceWindow, dispatchDate,
+     inspectionDate, supervisor, notes, delayReasonType,
+     delayReasonNotes}. BUG REAL (26/09/2026, reportado por el dueño:
+     "se ve el cambio pero no se ve que cosa fue"): esto nunca se leia,
+     un cambio de fechas o notas salia como "Change requested" vacio.
+     Al cliente solo le llegan fechas y horario, mismo criterio que
+     admin-update-order.js usa para decidir si el cambio es interno. --- */
+  var REQUEST_FIELDS = [
+    ['entryDate', '📅', 'Entry', 'date', true],
+    ['dispatchDate', '📅', 'Scheduled', 'date', true],
+    ['dueDate', '📅', 'Due', 'date', true],
+    ['serviceWindow', '🕐', 'Window', 'text', true],
+    ['inspectionDate', '🔍', 'Inspection', 'date', false],
+    ['supervisor', '👤', 'Supervisor', 'text', false],
+    ['notes', '📝', 'Notes', 'text', false],
+    ['delayReasonType', '⏳', 'Delay reason', 'text', false],
+    ['delayReasonNotes', '⏳', 'Delay notes', 'text', false]
+  ];
+  function requestFieldLines(oldF, newF, mode) {
+    var out = [];
+    if (!oldF || !newF || typeof oldF !== 'object' || typeof newF !== 'object') return out;
+    REQUEST_FIELDS.forEach(function (d) {
+      if (mode === 'client' && !d[4]) return;
+      var o = oldF[d[0]] == null ? '' : String(oldF[d[0]]);
+      var n = newF[d[0]] == null ? '' : String(newF[d[0]]);
+      if (d[3] === 'date') { o = o ? fmtDate(o) : ''; n = n ? fmtDate(n) : ''; }
+      if (o !== n) out.push(changeLine(d[1], d[2], o, n));
+    });
+    return out;
+  }
+
+  /* 'Service Change Requested' (Orders, submit-order.js, cliente edita
+     una orden ya programada): un renglon por servicio, FieldChanged =
+     'Add' | 'Modify' | 'Remove', NewValue = {category, serviceName,
+     detail} (detail = el servicio, o {old, new} en Modify). Antes salia
+     "Add: (none) → {json crudo}". */
+  function serviceChangeRequestLines(h) {
+    var v = null; try { v = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+    if (!v || !v.serviceName) return [];
+    var sub = String(h.FieldChanged || ''), d = v.detail || {};
+    if (sub === 'Add') return [addedLine(v.serviceName, svcSubLabel(d))];
+    if (sub === 'Remove') return [removedLine(v.serviceName, svcSubLabel(d))];
+    var o = d.old || {}, n = d.new || {};
+    var ol = svcSubLabel(o) || o.Level || '', nl = svcSubLabel(n) || n.Level || '';
+    return [changeLine('🔄', v.serviceName, ol || '(none)', nl || '(none)')];
+  }
+
   function detailLinesFor(h, catalog, mode) {
     var inspRow = isInspectionRow(h);
     var oldPay = parseServicesPayload(h.OldValue);
@@ -319,6 +389,28 @@
     var oldDates = parseDatesPayload(h.OldValue);
     var newDates = parseDatesPayload(h.NewValue);
     var lines = inspRow ? inspectionLines(h, mode) : [];
+
+    if (h.ChangeType === 'Service Change Requested') return lines.concat(serviceChangeRequestLines(h));
+
+    /* Solo trae la lista nueva (sin antes contra que comparar):
+       - 'Services Updated' del cliente (submit-order.js): cambios de
+         nivel/cantidad aplicados directo, NewValue {services:[...]}.
+       - 'Services Change Requested' (request-change.js): OldValue es el
+         texto de Orders.Services, no una lista; NewValue {services,
+         removedNotes}. Antes salia el JSON crudo. */
+    if (Array.isArray(newSvcs) && !Array.isArray(oldSvcs) &&
+        (h.ChangeType === 'Services Updated' || h.ChangeType === 'Services Change Requested')) {
+      var isReq = h.ChangeType === 'Services Change Requested';
+      newSvcs.forEach(function (s) {
+        var lbl = svcSubLabel(s);
+        lines.push(isReq ? '• ' + esc(s.ServiceName || '') + (lbl ? ' — ' + esc(lbl) : '')
+                         : '🔄 ' + esc(s.ServiceName || '') + (lbl ? ': ' + esc(lbl) : ''));
+      });
+      (newPay.removedNotes || []).forEach(function (r) {
+        if (r && r.serviceName) lines.push(removedLine(r.serviceName, r.note || ''));
+      });
+      return lines;
+    }
 
     if (h.ChangeType === 'Created') {
       if (newPay) {
@@ -398,6 +490,7 @@
     }
 
     if (Array.isArray(oldSvcs) && Array.isArray(newSvcs)) {
+      lines = lines.concat(requestFieldLines(oldPay.fields, newPay.fields, mode));
       var isNC = function (s) { return s.NotCompleted === true || String(s.NotCompleted) === 'true'; };
       var keyOf = function (s) { return (s.Category || '') + '|' + (s.ServiceName || ''); };
       var oldMap = {}; oldSvcs.forEach(function (s) { oldMap[keyOf(s)] = s; });
@@ -406,15 +499,17 @@
         var k = keyOf(s), prev = oldMap[k], label = svcSubLabel(s);
         if (!prev) { lines.push(addedLine(s.ServiceName || '', label)); return; }
         var prevLabel = svcSubLabel(prev);
-        if (prevLabel !== label) lines.push(changeLine('🔄', s.ServiceName || '', prevLabel || '(none)', label || '(none)'));
+        var labelLine = prevLabel !== label ? changeLine('🔄', s.ServiceName || '', prevLabel || '(none)', label || '(none)') : '';
+        if (labelLine) lines.push(labelLine);
         /* svcSubLabel() no sirve para esto: en Janitorial el SubOption
            (sku) es siempre el mismo sin importar el nivel -- ese
            "||" tapaba cualquier cambio de Level, porque SubOption
            (con valor) siempre gana. Se compara Level aparte, igual de
            explicito que NotCompleted abajo. */
-        if ((prev.Level || '') !== (s.Level || '')) {
-          lines.push(changeLine('🔄', s.ServiceName || '', prev.Level || '(none)', s.Level || '(none)'));
-        }
+        /* Si el SKU ya dijo el cambio de nivel arriba (svcSubLabel
+           devuelve Level), no se repite -- salia 2 veces igual. */
+        var levelLine = (prev.Level || '') !== (s.Level || '') ? changeLine('🔄', s.ServiceName || '', prev.Level || '(none)', s.Level || '(none)') : '';
+        if (levelLine && levelLine !== labelLine) lines.push(levelLine);
         if (isNC(prev) !== isNC(s)) {
           lines.push(changeLine(isNC(s) ? '⚠️' : '✅', s.ServiceName || '', isNC(s) ? 'Completed' : 'Not completed', isNC(s) ? 'Not completed' : 'Completed'));
           if (isNC(s) && s.NotCompletedReason) lines.push('&nbsp;&nbsp;Reason: ' + esc(s.NotCompletedReason));
@@ -575,7 +670,15 @@
        criterio que 'Status' (excluido de esta linea generica porque
        el ChangeType/Notes ya lo cubren) -- 'TechMarkedComplete' se
        agrega a la misma exclusion. */
-    if (!inspRow && h.FieldChanged && h.FieldChanged !== 'Status' && h.FieldChanged !== 'TechMarkedComplete' && (h.OldValue || h.NewValue)) {
+    /* NewValue igual al ChangeType = solo repite el estatus nuevo (ej.
+       'Unit not ready' de Tech: FieldChanged 'Delay Reason', Old/New =
+       estatus). Salia "Delay Reason: Assigned → Change Requested"; el
+       motivo real ya va en Notes. 'Office Change (Internal)' es la
+       marca de la decision sobre un cambio interno (Old/New = estatus),
+       no un campo: salia "Office Change (Internal): Change Requested →
+       Assigned". */
+    if (!inspRow && h.FieldChanged && h.FieldChanged !== 'Status' && h.FieldChanged !== 'TechMarkedComplete' && h.FieldChanged !== 'Office Change (Internal)' && (h.OldValue || h.NewValue) &&
+        String(h.NewValue || '') !== String(h.ChangeType || '')) {
       lines.push(changeLine('🔄', h.FieldChanged, h.OldValue || '', h.NewValue || ''));
     }
     return lines;
@@ -697,17 +800,34 @@
      'Reschedule Requested' (mismo actor) es UNA sola accion -- se usa
      Reschedule Requested como representante, conservando la nota
      original. --- */
+  /* 26/09/2026: lo mismo para los renglones de servicios de la misma
+     solicitud del cliente ('Services Change Requested' de
+     request-change.js, y los 'Service Change Requested' de
+     submit-order.js, uno por servicio) -- todo sale en UNA burbuja
+     con fechas y servicios adentro. Si hubo servicios, la etiqueta es
+     "Change requested" (no solo "New dates requested"). */
+  var REQUEST_PARTS = ['Reschedule Requested', 'Services Change Requested', 'Service Change Requested'];
   function mergeRescheduleRequest(groups) {
     var out = [];
     groups.forEach(function (g) {
       var prev = out[out.length - 1];
-      var isReschedule = String(g.rep.ChangeType || '') === 'Reschedule Requested';
-      var prevIsChangeReq = prev && String(prev.rep.ChangeType || '') === 'Change Requested';
+      var type = String(g.rep.ChangeType || '');
+      var isPart = REQUEST_PARTS.indexOf(type) !== -1;
+      var prevType = prev ? String((prev._origType || prev.rep.ChangeType) || '') : '';
+      var prevIsReq = prev && (prevType === 'Change Requested' || REQUEST_PARTS.indexOf(prevType) !== -1);
       var sameActor = prev && String(prev.rep.ChangedBy || '') === String(g.rep.ChangedBy || '');
       var closeInTime = prev && Math.abs(new Date(g.rep.ChangeDate) - new Date(prev.rep.ChangeDate)) < GROUP_WINDOW_MS;
-      if (isReschedule && prevIsChangeReq && sameActor && closeInTime) {
-        var carried = noteFor(prev.rep);
-        prev.rep = Object.assign({}, g.rep, { MergedNotes: carried });
+      if (isPart && prevIsReq && sameActor && closeInTime) {
+        if (!prev._origType) prev._origType = prevType;
+        var carried = prev.rep.MergedNotes != null ? prev.rep.MergedNotes : noteFor(prev.rep);
+        var hasServices = prev._hasServices || type !== 'Reschedule Requested';
+        prev._hasServices = hasServices;
+        if (type === 'Reschedule Requested' && !hasServices) {
+          prev.rep = Object.assign({}, g.rep, { MergedNotes: carried });
+        } else {
+          prev.rep = Object.assign({}, prev.rep, { MergedNotes: carried,
+            _label: (prev._origType === 'Service Change Requested') ? labelFor('Service Change Requested') : 'Change requested' });
+        }
         prev.rows = prev.rows.concat(g.rows);
       } else {
         out.push(g);
@@ -759,7 +879,13 @@
   /* --- API PUBLICA --- */
   function historyHtml(orderId, history, opts) {
     opts = opts || {};
-    var mode = opts.mode === 'client' ? 'client' : 'staff';
+    var mode = (opts.mode === 'client' || opts.mode === 'tech') ? opts.mode : 'staff';
+    function actorLabel(by) {
+      by = String(by || '');
+      if (opts.clientId && opts.clientName && by === String(opts.clientId)) return String(opts.clientName);
+      if (typeof opts.actorName === 'function') { var n = opts.actorName(by); if (n) return String(n); }
+      return by;
+    }
     var catalog = opts.timesCatalog || null;
     /* Tipos de evento que representan un RETROCESO real (algo que se
        deshizo) -- si se pasa, esos renglones del historial se marcan
@@ -771,6 +897,7 @@
     var rows = (history || []).filter(function (h) {
       if (ALWAYS_HIDDEN_TYPES.indexOf(String(h.ChangeType || '')) !== -1) return false;
       if (mode === 'client' && isHiddenFromClient(h)) return false;
+      if (mode === 'tech' && isHiddenFromTech(h)) return false;
       return true;
     });
 
@@ -805,7 +932,7 @@
             '<span class="goh-date">' + esc(fmtDateTime(h.ChangeDate)) + '</span>' +
             '<span class="goh-rev">' + esc(orderId || '') + '</span> — ' +
             '<span class="goh-type">' + esc(h._label || labelFor(h.ChangeType)) + '</span>' +
-            (h.ChangedBy ? '<span class="goh-by">by ' + esc(h.ChangedBy) + '</span>' : '') +
+            (h.ChangedBy ? '<span class="goh-by">by ' + esc(actorLabel(h.ChangedBy)) + '</span>' : '') +
           '</div>' +
           (hasDetail ? '<span class="goh-toggle">&#9660; details</span>' : '') +
         '</div>' +

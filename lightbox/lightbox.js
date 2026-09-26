@@ -8,7 +8,7 @@
     '.gs-lightbox-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;align-items:center;justify-content:center}' +
     '.gs-lightbox-overlay.open{display:flex}' +
     '.gs-lightbox-img{max-width:90vw;max-height:82vh;object-fit:contain;border-radius:4px}' +
-    '.gs-lightbox-close{position:absolute;top:18px;right:22px;background:none;border:none;color:#fff;font-size:28px;line-height:1;cursor:pointer;padding:6px}' +
+    '.gs-lightbox-close{position:absolute;top:max(18px,env(safe-area-inset-top));right:max(22px,env(safe-area-inset-right));z-index:2;background:none;border:none;color:#fff;font-size:28px;line-height:1;cursor:pointer;padding:6px}' +
     '.gs-lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:none;color:#fff;font-size:28px;line-height:1;cursor:pointer;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center}' +
     '.gs-lightbox-nav:disabled{opacity:.25;cursor:default}' +
     '.gs-lightbox-prev{left:16px}' +
@@ -67,10 +67,15 @@
     render();
   }
 
+  /* A peticion del dueño (26/09/2026, en su celular): "con un tap se
+     deberia cerrar". Antes solo cerraba el fondo negro o la X -- en
+     telefono la foto llena casi toda la pantalla y el fondo casi no se
+     ve, asi que tocar la foto no hacia nada. Ahora tocar CUALQUIER
+     parte cierra, menos las flechas (siguen cambiando de foto). */
   overlay.addEventListener('click', function (e) {
-    if (e.target === overlay) close();
+    if (e.target.closest && e.target.closest('.gs-lightbox-nav')) return;
+    close();
   });
-  closeBtn.addEventListener('click', close);
   prevBtn.addEventListener('click', function () { nav(-1); });
   nextBtn.addEventListener('click', function () { nav(1); });
 

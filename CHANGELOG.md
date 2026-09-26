@@ -2,6 +2,23 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag (commit en rama) — 2026-09-26 (historial y fotos)
+
+- **order-history**: cada solicitud de cambio ahora dice QUÉ se cambió.
+  - Cambio pedido por la oficina: fechas, horario, supervisor, notas y motivo de retraso (antes salía vacío).
+    Al cliente solo le llegan fechas y horario.
+  - Cliente edita una orden ya programada (`Service Change Requested`): ➕/🔄/➖ por servicio, en una sola burbuja
+    (antes: "Add: (none) → {json}").
+  - `Services Change Requested` y `Services Updated` sin lista anterior: se lista lo pedido (antes JSON crudo o vacío).
+  - La solicitud del cliente con fechas y servicios sale como UN evento "Change requested".
+  - Ya no se repite el cambio de nivel 2 veces; ya no salen renglones basura ("Delay Reason: Assigned → Change
+    Requested", "Office Change (Internal): …").
+  - Modo nuevo `mode: 'tech'`: todo menos lo interno de oficina. `opts.clientId`/`opts.clientName`/`opts.actorName`
+    para mostrar el nombre del cliente en vez de su ClientID.
+- **lightbox**: un tap en cualquier parte cierra (menos las flechas). La X respeta el notch.
+- **photo-hover-preview**: solo con mouse de verdad. En celular el tap simulaba un hover y la vista previa salía
+  ENCIMA del lightbox, tapando la X: la foto "no se dejaba cerrar".
+
 ## Sin tag (commit en rama) — 2026-09-26
 
 - **action-row** (nuevo): acomodo único de las filas de botones de las tarjetas en los 3 portales. A la fila se le

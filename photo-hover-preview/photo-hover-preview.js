@@ -94,7 +94,20 @@
     if (wired) return;
     wired = true;
 
-    document.addEventListener('mouseover', function (e) {
+    /* BUG REAL (26/09/2026, reportado por el dueño en su celular: "al
+       abrir una foto no deja cerrar"): en telefono no hay mouse, pero el
+       navegador inventa un 'mouseover' con cada tap. El tap abria el
+       lightbox y, 1s despues, este preview salia ENCIMA (z-index mas
+       alto), con fondo negro tapando la X del lightbox; tocar la foto
+       solo quitaba el preview y el lightbox seguia abierto debajo.
+       Ahora el preview solo existe con un mouse de verdad (pointerType
+       'mouse'), y cualquier clic/tap lo quita al instante. */
+    function isRealMouse(e) { return e.pointerType === 'mouse'; }
+    document.addEventListener('pointerdown', hidePreview, true);
+    document.addEventListener('click', hidePreview, true);
+
+    document.addEventListener('pointerover', function (e) {
+      if (!isRealMouse(e)) return;
       var thumb = findThumb(e.target);
       if (!thumb) return;
       var src = srcOf(thumb);
@@ -106,7 +119,8 @@
       }, HOVER_DELAY_MS);
     });
 
-    document.addEventListener('mouseout', function (e) {
+    document.addEventListener('pointerout', function (e) {
+      if (!isRealMouse(e)) return;
       var thumb = findThumb(e.target);
       if (!thumb) return;
       if (thumb.contains(e.relatedTarget)) return;
