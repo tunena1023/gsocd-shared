@@ -77,6 +77,19 @@
       '.gs-doc-btn.del{color:#c0392b}' +
       '.gs-doc-btn:focus-visible{outline:2px solid #C9A227;outline-offset:1px}' +
       '@media(max-width:420px){.gs-doc-btn.view{display:none}}' +
+      /* tira chiquita para la fila de botones de una orden (26/09/2026) */
+      '.gs-doc-strip{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}' +
+      '.gs-doc-add,.gs-doc-mini{all:unset;box-sizing:border-box;cursor:pointer;width:28px;height:34px;border-radius:3px;display:inline-flex;justify-content:center;position:relative;flex:0 0 auto}' +
+      '.gs-doc-add{align-items:center;border:1.5px dashed #8C6F2A;color:#8C6F2A;background:#fff}' +
+      '.gs-doc-add svg{width:14px;height:14px}' +
+      '.gs-doc-add:hover{background:#F5EDD6}.gs-doc-add:disabled{opacity:.5;cursor:wait}' +
+      '.gs-doc-mini{align-items:flex-end;padding-bottom:4px;font:700 8px/1 Inter,sans-serif;letter-spacing:.04em;color:#fff;background:#6B6B6B}' +
+      '.gs-doc-mini::before{content:"";position:absolute;top:0;right:0;width:8px;height:8px;background:rgba(255,255,255,.45);border-bottom-left-radius:2px}' +
+      '.gs-doc-mini.pdf{background:#B23B2E}.gs-doc-mini.doc,.gs-doc-mini.docx{background:#2B5797}' +
+      '.gs-doc-mini:hover{filter:brightness(1.1)}' +
+      '.gs-doc-add:focus-visible,.gs-doc-mini:focus-visible,.gs-doc-strip-link:focus-visible{outline:2px solid #C9A227;outline-offset:2px}' +
+      '.gs-doc-strip-link{font-size:12px;font-weight:600;color:#8C6F2A;text-decoration:underline;cursor:pointer}' +
+      '.gs-doc-strip-msg{font-size:12px;color:#6B6B6B}.gs-doc-strip-msg:empty{display:none}.gs-doc-strip-msg.err{color:#c0392b}' +
       /* visor */
       '.gs-doc-modal{position:fixed;inset:0;z-index:10000;background:rgba(17,17,17,.82);display:flex;flex-direction:column}' +
       '.gs-doc-modal-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#111;color:#fff}' +
@@ -268,7 +281,33 @@
     });
   }
 
+  /* ---------- tira para la fila de botones de una orden ----------
+     26/09/2026 (dueño: "ahorrar espacio"): en vez de una caja
+     "Documents" dentro de la orden, una tira chiquita en la misma fila
+     de los botones: "+" para subir, un icono por documento y
+     "Gallery ->". Los iconos y el link abren la galeria de documentos
+     (cada portal decide como, con openJs). Lleva gs-act-keep para que
+     gsocd-shared/action-row no los estire en telefono.
+       addButtonHtml(onclickJs)    -> boton "+" (onclickJs recibe `this`)
+       iconsHtml(docs, openJs)     -> iconos + link, '' si no hay docs
+       stripMsgHtml()              -> <span> para "Uploading... 40%" */
+  function addButtonHtml(onclickJs) {
+    styleTag();
+    return '<button type="button" class="gs-doc-add gs-act-keep" title="Upload document (PDF, Word or text, up to 25 MB)" aria-label="Upload document" onclick="' + escAttr(onclickJs) + '">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>';
+  }
+  function iconsHtml(docs, openJs) {
+    styleTag();
+    if (!docs || !docs.length) return '';
+    return docs.map(function (d) {
+      var ext = extOf(d.name);
+      return '<button type="button" class="gs-doc-mini gs-act-keep ' + escAttr(ext) + '" title="' + escAttr(d.name) + '" aria-label="' + escAttr(d.name) + ' (open in Gallery)" onclick="' + escAttr(openJs) + '">' + esc(ext.toUpperCase()) + '</button>';
+    }).join('') + '<a class="gs-doc-strip-link" href="#" onclick="' + escAttr(openJs + ';return false') + '">Gallery \u2192</a>';
+  }
+  function stripMsgHtml() { return '<span class="gs-doc-strip-msg" role="status"></span>'; }
+
   window.GSDocViewer = {
+    addButtonHtml: addButtonHtml, iconsHtml: iconsHtml, stripMsgHtml: stripMsgHtml,
     renderGroups: renderGroups, renderList: renderList, searchHtml: searchHtml,
     open: open, close: close, upload: upload, pickFile: pickFile, allowed: allowed,
     ACCEPT: ACCEPT, MAX_BYTES: MAX_BYTES, fmtSize: fmtSize, styleTag: styleTag

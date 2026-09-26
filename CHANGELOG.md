@@ -6,7 +6,9 @@ Todas las versiones publicadas de este repo, más recientes primero.
 
 - **action-row** (nuevo): acomodo único de las filas de botones de las tarjetas en los 3 portales. A la fila se le
   agrega `gs-act-row`: en escritorio, una fila del tamaño de cada botón; en teléfono (≤768px), de dos en dos y del
-  mismo ancho. Apoyos: `gs-act-group`, `gs-act-full`, `gs-act-keep`, `gs-act-icon-first`. No cambia colores.
+  mismo ancho. Apoyos: `gs-act-group`, `gs-act-cell`, `gs-act-full`, `gs-act-keep`, `gs-act-icon-first`. No cambia colores.
+- **doc-viewer**: `addButtonHtml()`, `iconsHtml()` y `stripMsgHtml()`: tira chiquita ("+", un icono por documento y
+  "Gallery →") para la fila de botones de una orden, en vez de la caja "Documents" dentro de la tarjeta.
 
 ## Sin tag (commit en rama) — 2026-09-25
 
