@@ -2,6 +2,13 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag (commit en rama) — 2026-09-26 (filtros compartidos)
+
+- **order-filters** (nuevo): la barra de ordenar/filtrar de Admin (Sort: Most recent change / Order number / Due date /
+  Entry date / Client; filtros Division, Status con su numero, Service) pasa a ser compartida, para todos los tabs con
+  ordenes de los 3 portales. Mismos ids que tenia Admin (`<prefijo>-sort`, `-filter-division`, ...). Lo elegido se
+  guarda por tab. `statusOf`/`servicesOf`/`recentOf` para que cada portal diga su estatus y su "ultimo cambio".
+
 ## Sin tag (commit en rama) — 2026-09-26 (actualizacion automatica)
 
 - **app-update** (nuevo): la pagina abierta en el telefono se pone al dia sola cuando sale un deploy nuevo. Pregunta
