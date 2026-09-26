@@ -2,6 +2,12 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag (commit en rama) — 2026-09-26
+
+- **action-row** (nuevo): acomodo único de las filas de botones de las tarjetas en los 3 portales. A la fila se le
+  agrega `gs-act-row`: en escritorio, una fila del tamaño de cada botón; en teléfono (≤768px), de dos en dos y del
+  mismo ancho. Apoyos: `gs-act-group`, `gs-act-full`, `gs-act-keep`, `gs-act-icon-first`. No cambia colores.
+
 ## Sin tag (commit en rama) — 2026-09-25
 
 - **order-history**: renglones de inspección con etiqueta e íconos ("Inspection scheduled" / "Inspection done" /
