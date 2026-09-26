@@ -148,6 +148,15 @@
       '\n  .gs-gal-cap-level { color: #6B6B6B; font-weight: 400; }' +
       '\n  .gs-gal-cap-reason { display: block; color: #8C6F2A; font-style: italic; font-size: 10.5px; margin-top: 1px; }' +
       '\n  .gs-gal-cap-date { display: block; color: #6B6B6B; font-size: 10.5px; margin-top: 1px; }' +
+      '\n  .gs-gal-cap-by { display: block; color: #6B6B6B; font-size: 10.5px; margin-top: 1px; }' +
+      '\n  .gs-gal-person { border: 1px solid #F0EBDD; border-radius: 6px; margin-top: 8px; overflow: hidden; }' +
+      '\n  .gs-gal-person-h { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 12px; cursor: pointer; background: #F7F6F3; font-size: 12.5px; font-weight: 600; color: #111; }' +
+      '\n  .gs-gal-person-h:focus-visible { outline: 2px solid #C9A227; outline-offset: -2px; }' +
+      '\n  .gs-gal-person-h .n { margin-left: auto; font-size: 11px; font-weight: 700; color: #6B5A22; background: #E9DDBB; padding: 1px 7px; border-radius: 10px; }' +
+      '\n  .gs-gal-person-h .chev { color: #999; font-size: 11px; transition: transform .2s; }' +
+      '\n  .gs-gal-person.open .gs-gal-person-h .chev { transform: rotate(90deg); }' +
+      '\n  .gs-gal-person-body { display: none; padding: 10px 12px 12px; }' +
+      '\n  .gs-gal-person.open .gs-gal-person-body { display: block; }' +
       '\n\n  .gs-gal-stages { display: inline-flex; gap: 4px; background: #F2EEE4; border-radius: 99px; padding: 3px; margin-bottom: 10px; }' +
       '\n  .gs-gal-stage { all: unset; cursor: pointer; font-size: 11.5px; font-weight: 600; padding: 5px 12px; border-radius: 99px; color: #6B6B6B; }' +
       '\n  .gs-gal-stage b { font-weight: 700; margin-left: 4px; color: #8C6F2A; }' +
@@ -201,12 +210,19 @@
     return (p && (p.sortKey || p.caption)) || '';
   }
 
+  /* Quien tomo la foto (26/09/2026, pedido de los supervisores): viene
+     en p.takenBy (cada portal la manda desde lib/photo-log.js). */
+  function byLineHtml(p) {
+    return p && p.takenBy ? '<span class="gs-gal-cap-by">📷 ' + esc(p.takenBy) + '</span>' : '';
+  }
   function photoCapHtml(p) {
-    if (!p || !p.serviceName) return '';
+    if (!p) return '';
+    if (!p.serviceName) return byLineHtml(p);
     return '<b>' + esc(p.serviceName) + '</b>' +
       (p.level ? ' <span class="gs-gal-cap-level">— ' + esc(p.level) + '</span>' : '') +
       (p.reason ? '<span class="gs-gal-cap-reason">' + esc(p.reason) + '</span>' : '') +
-      (p.caption ? '<span class="gs-gal-cap-date">' + esc(p.caption) + '</span>' : '');
+      (p.caption ? '<span class="gs-gal-cap-date">' + esc(p.caption) + '</span>' : '') +
+      byLineHtml(p);
   }
 
   function servicesListHtml(services) {
@@ -243,6 +259,7 @@
        Work (el resultado), o en Inspection si todavia no hay de
        trabajo. */
     var stageState = {};
+    var personOpen = {}; /* que desplegable de persona esta abierto (sobrevive al repintar) */
     function stageOf(p) { return p && p.stage === 'inspection' ? 'inspection' : 'work'; }
     function stageCounts(gi) {
       var c = { inspection: 0, work: 0 };
@@ -280,7 +297,7 @@
         '<div class="gs-gal-hero-cap">' + photoCapHtml(hero) + '</div>'
       );
 
-      var thumbsHtml = ord.slice(1).map(function (pi) {
+      var thumbOf = function (pi) {
         var p = photos[pi];
         return '<div class="gs-gal-thumb-wrap">' +
           '<div class="gs-gal-thumb' + (p.isVideo ? ' video' : '') + ' gs-gal-ph" data-pi="' + pi + '">' +
@@ -288,7 +305,33 @@
           '</div>' +
           (p.serviceName ? '<div class="gs-gal-thumb-cap">' + esc(p.serviceName) + '</div>' : '') +
         '</div>';
-      }).join('');
+      };
+      /* Varias personas tomaron fotos (26/09/2026, pedido de los
+         supervisores): un desplegable por persona, cerrado hasta que se
+         abre, con todas sus fotos. Una sola persona: como siempre. */
+      var people = [], byPerson = {};
+      var knowsWho = ord.some(function (pi) { return photos[pi] && photos[pi].takenBy !== undefined; });
+      if (knowsWho) ord.forEach(function (pi) {
+        var who = (photos[pi] && photos[pi].takenBy) || 'Not recorded';
+        if (!byPerson[who]) { byPerson[who] = []; people.push(who); }
+        byPerson[who].push(pi);
+      });
+      var thumbsHtml;
+      if (people.length > 1) {
+        thumbsHtml = '';
+        var peopleHtml = people.map(function (who) {
+          var key = gi + ':' + currentStage(gi) + ':' + who;
+          var n = byPerson[who].length;
+          return '<div class="gs-gal-person' + (personOpen[key] ? ' open' : '') + '" data-person="' + escAttr(key) + '">' +
+            '<button type="button" class="gs-gal-person-h" aria-expanded="' + !!personOpen[key] + '">' +
+              '<span>👤 ' + esc(who) + '</span><span class="n">' + n + (n === 1 ? ' photo' : ' photos') + '</span><span class="chev">\u25B8</span>' +
+            '</button>' +
+            '<div class="gs-gal-person-body"><div class="gs-gal-thumb-strip">' + byPerson[who].map(thumbOf).join('') + '</div></div>' +
+          '</div>';
+        }).join('');
+      } else {
+        thumbsHtml = ord.slice(1).map(thumbOf).join('');
+      }
 
       var counts = stageCounts(gi);
       var st = currentStage(gi);
@@ -300,7 +343,8 @@
         : '';
       var label = stageBar ? '' : '<div class="gs-gal-col-label">' + (counts.inspection && !counts.work ? 'Inspection photos · before' : 'Photos') + '</div>';
       var photosCol = label + stageBar + heroHtml +
-        (thumbsHtml ? '<div class="gs-gal-thumb-strip">' + thumbsHtml + '</div>' : '');
+        (thumbsHtml ? '<div class="gs-gal-thumb-strip">' + thumbsHtml + '</div>' : '') +
+        (people.length > 1 ? '<div class="gs-gal-people">' + peopleHtml + '</div>' : '');
 
       var svcHtml = servicesListHtml(g.services);
 
@@ -374,6 +418,16 @@
           stageState[gi] = el.dataset.stage;
           body.innerHTML = bodyHtml(gi);
           wireBody(gi);
+        });
+      });
+
+      body.querySelectorAll('.gs-gal-person-h').forEach(function (el) {
+        el.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          var box = el.parentElement, key = box.getAttribute('data-person');
+          personOpen[key] = !box.classList.contains('open');
+          box.classList.toggle('open', personOpen[key]);
+          el.setAttribute('aria-expanded', personOpen[key] ? 'true' : 'false');
         });
       });
 
