@@ -87,7 +87,13 @@
       '.gs-trk-stage-name{font-family:\'Cormorant Garamond\',serif;font-size:18px;font-weight:600;color:var(--black,#111)}' +
       '.gs-trk-stage-sub{font-size:11.5px;color:var(--gray,#6B6B6B);margin-top:2px}' +
       '.gs-trk-detail-lines{margin-top:8px;padding:10px 12px;background:var(--bg,#F7F6F3);border-radius:6px;font-size:12.5px;color:var(--black,#111)}' +
-      '.gs-trk-detail-lines>div{padding:2px 0}';
+      '.gs-trk-detail-lines>div{padding:2px 0}' +
+      '.gs-trk-hist{display:flex;flex-direction:column;gap:10px;margin-top:6px}' +
+      '.gs-trk-hist-item{padding-left:10px;border-left:2px solid var(--gold,#C9A84C)}' +
+      '.gs-trk-hist-head{font-size:12.5px;color:var(--black,#111);line-height:1.4}' +
+      '.gs-trk-hist-head b{font-weight:600}' +
+      '.gs-trk-hist-head span{display:block;font-size:11px;color:var(--gray,#6B6B6B)}' +
+      '.gs-trk-hist-item .gs-trk-detail-lines{margin-top:5px;padding:7px 10px}';
     var tag = document.createElement('style');
     tag.id = STYLE_ID;
     tag.textContent = css;
@@ -147,6 +153,18 @@
        escapado por quien lo arma -- no se vuelve a escapar aqui, a
        diferencia de stage/detail (texto plano). */
     function detailLinesHtml(ev) {
+      /* historyItems (26/09/2026, pedido del dueño): los eventos que NO
+         avanzan la orden no dibujan su propio icono -- se meten al
+         historial del ultimo icono armado. Al tocarlo se ve cada uno en
+         orden: que fue, cuando, quien y su detalle. Viene ya escapado. */
+      if (ev.historyItems && ev.historyItems.length) {
+        return '<div class="gs-trk-hist">' + ev.historyItems.map(function (it) {
+          return '<div class="gs-trk-hist-item">' +
+            '<div class="gs-trk-hist-head"><b>' + esc(it.title || '') + '</b>' + (it.sub ? ' <span>' + esc(it.sub) + '</span>' : '') + '</div>' +
+            ((it.lines && it.lines.length) ? '<div class="gs-trk-detail-lines">' + it.lines.map(function (l) { return '<div>' + l + '</div>'; }).join('') + '</div>' : '') +
+          '</div>';
+        }).join('') + '</div>';
+      }
       return (ev.detailLines && ev.detailLines.length)
         ? '<div class="gs-trk-detail-lines">' + ev.detailLines.map(function (l) { return '<div>' + l + '</div>'; }).join('') + '</div>'
         : '';
@@ -155,11 +173,12 @@
     var stageHtml;
     if (viewIndex !== null) {
       var ev = steps[viewIndex];
-      stageHtml =
-        '<div class="gs-trk-viewing-tag">Viewing a past step</div>' +
-        '<div class="gs-trk-stage-name">' + esc(ev.stage) + '</div>' +
-        '<div class="gs-trk-stage-sub">' + esc(ev.detail || '') + '</div>' +
-        detailLinesHtml(ev);
+      stageHtml = (ev.historyItems && ev.historyItems.length)
+        ? '<div class="gs-trk-viewing-tag">' + esc(ev.label || 'Step') + ' · history</div>' + detailLinesHtml(ev)
+        : '<div class="gs-trk-viewing-tag">Viewing a past step</div>' +
+          '<div class="gs-trk-stage-name">' + esc(ev.stage) + '</div>' +
+          '<div class="gs-trk-stage-sub">' + esc(ev.detail || '') + '</div>' +
+          detailLinesHtml(ev);
     } else if (current === 0) {
       stageHtml =
         '<div class="gs-trk-stage-name">Not started yet</div>' +
@@ -213,7 +232,12 @@
         var b = Math.min(100, boundaryPct + FEATHER);
         return 'linear-gradient(100deg, #000 0%, #000 ' + a + '%, transparent ' + b + '%, transparent 100%)';
       }
-      var gMask = maskFor(0 + gFrac * 55);
+      /* 26/09/2026: el borde de la G en 50 con difuminado corto -- con 55 y
+         7 de difuminado se asomaban las primeras letras de "SOLUTIONS
+         INC." (se veia un "S" y un "II" chiquitos junto a la G). */
+      /* Ya completa (S puesta): la capa de la G sin recorte -- ahi viven
+         la "S" de SOLUTIONS y la "I" de INC., si no se veia "OLUTIONS NC.". */
+      var gMask = sFrac ? 'none' : (gFrac ? 'linear-gradient(100deg, #000 0%, #000 47%, transparent 51%, transparent 100%)' : maskFor(0));
       var sMask = maskFor(50 + sFrac * 50);
 
       return '<div class="' + cls.join(' ') + '" data-idx="' + i + '">' +
@@ -231,7 +255,7 @@
     }).join('');
 
     el.innerHTML =
-      '<div class="gs-trk-scroll"><div class="gs-trk-tracker">' + dotsHtml + '</div></div>' +
+      '<div class="gs-trk-scroll"><div class="gs-trk-tracker" style="min-width:' + Math.min(520, steps.length * 78) + 'px">' + dotsHtml + '</div></div>' +
       '<div class="gs-trk-stage-row">' + stageHtml + '</div>';
 
     Array.prototype.forEach.call(el.querySelectorAll('.gs-trk-step.clickable'), function (stepEl) {
