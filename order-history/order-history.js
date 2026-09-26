@@ -924,6 +924,16 @@
       var hasDetail = lines.length > 0;
       var isRegression = regressionTypes.indexOf(String(h.ChangeType || '')) !== -1;
       var noteTxt = h.MergedNotes || noteFor(h);
+      /* Un segundo Update Services de campo arrastra las notas del
+         primero (la oficina solo lee la solicitud mas reciente); aqui
+         no se repiten las partes que ya salieron en la burbuja de
+         justo antes. */
+      var prevNote = idx > 0 ? (groups[idx - 1]._renderedNote || '') : '';
+      g._renderedNote = noteTxt;
+      if (noteTxt && prevNote) {
+        var seen = {}; prevNote.split(' | ').forEach(function (x) { seen[x] = true; });
+        noteTxt = noteTxt.split(' | ').filter(function (x) { return !seen[x]; }).join(' | ');
+      }
       var detailId = idPrefix + '-' + idx;
       return '<div class="goh-item' + (hasDetail ? ' has-detail' : '') + (isRegression ? ' goh-regression' : '') + '"' +
         (hasDetail ? ' onclick="GSOrderHistory.toggleDetail(\'' + detailId + '\')"' : '') + '>' +
