@@ -961,6 +961,18 @@
        el dia o el horario, "Reassigned" si solo cambia la persona. */
     var seen = null, svcSeen = {};
     var notReadyByClient = false, pendingReq = null;
+    /* Inspeccion (dueño, 27/09): el cliente ve que se inspecciono (quien,
+       cuando). Lo que propuso el supervisor NO se ve hasta que la oficina
+       decide: si se lo manda a confirmar, si lo aprueba por el, o si la
+       oficina cambia los servicios, sale como cambio "after inspection"
+       con quien lo sugirio y su nota como motivo. Si sigue sin cambios,
+       no hay nada mas que ver. */
+    var insp = null;
+    function inspNote(extra) {
+      var who = insp && insp.by ? 'Suggested by ' + insp.by + ' after the inspection' : 'Found during the inspection';
+      var why = insp && insp.notes ? ': ' + insp.notes : '.';
+      return who + why + (extra ? ' ' + extra : '');
+    }
     function dropPending() { pendingReq = null; }
     all.forEach(function (h, i) {
       var ct = String(h.ChangeType || ''), fc = String(h.FieldChanged || '');
@@ -970,6 +982,24 @@
         else if (isHiddenFromClient(h)) pendingReq = { row: h, kind: 'internal' };
         else if (!pendingReq || pendingReq.kind !== 'client') pendingReq = { row: h, kind: 'client' };
       }
+      if (ct === 'Inspected') {
+        var iv = null; try { iv = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+        insp = { by: String(h.ChangedBy || ''), notes: String(h.Notes || '').split(' | ')[0].replace(/^Inspection done by .+\.$/, '') };
+        var clean = iv && typeof iv === 'object' ? Object.assign({}, iv) : null;
+        if (clean) { delete clean.services; delete clean.crew; }
+        reveal.push({ row: h, patch: { _label: 'Inspection done', OldValue: '', NewValue: clean ? JSON.stringify(clean) : '', Notes: '', MergedNotes: '' } });
+      } else if (insp && ct === 'Change Requested' && fc === 'Client Confirmation') {
+        var ov = null; try { ov = JSON.parse(String(h.OldValue || '').replace(/^SERVICES:/, '')); } catch (e) {}
+        if (ov && ov.status === 'Inspected') reveal.push({ row: h, patch: { _label: 'Changes after inspection', MergedNotes: inspNote('Please confirm.') } });
+      } else if (insp && fc === 'Services' && /^Inspection changes approved for the client/.test(String(h.Notes || ''))) {
+        var how = String(h.Notes).replace(/^Inspection changes approved for the client\s*—?\s*/, '');
+        reveal.push({ row: h, patch: { _label: 'Changes after inspection approved', MergedNotes: inspNote(how ? 'Approved: ' + how : '') } });
+        insp = null;
+      } else if (insp && ct === 'Services Updated') {
+        reveal.push({ row: h, patch: { _label: 'Services updated after inspection', MergedNotes: inspNote('') } });
+      }
+      if (ct === 'Order Assigned' || (fc === 'Status' && ct === 'Received')) insp = null;
+
       /* Solo cuando la oficina confirma le sale el completado. */
       if (ct === 'Tech Marked Complete') hidden.push(h);
       if (ct === 'Reopened by Tech' || ct === 'Division Changed' || ct === 'Extra Requested') hidden.push(h);
