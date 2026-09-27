@@ -128,6 +128,23 @@
     return '<p class="gs-notready-note"><b>Client says the site is not ready:</b> ' + esc(o.VisitConfirmNote) + '</p>';
   }
 
+  /* "📷 Check in" (27/09/2026, dueño, aprobado con mini): en las ordenes
+     del dia, en la tarjeta cerrada, sin tener que abrirla. La foto ya marca
+     "Crew on site" (Tech lib/on-site.js); despues sale "✓ On site · hora".
+     onclickJs = lo que abre la camara en esa pagina (ej. "takePhoto('GS-1')").
+     Dia y hora de Chicago. Solo ordenes vivas. */
+  const TZ = 'America/Chicago';
+  const chiDay = d => new Date(d).toLocaleDateString('en-CA', { timeZone: TZ });
+  function checkIn(o, onclickJs) {
+    if (!o || ['Completed', 'Cancelled', 'Inspection', 'Incomplete'].indexOf(o.Status || '') !== -1) return '';
+    const today = chiDay(new Date());
+    if (String(o.DispatchDate || '').slice(0, 10) !== today) return '';
+    const on = (o.History || []).find(h => h && h.ChangeType === 'Crew On Site' && chiDay(h.ChangeDate) === today);
+    if (on) return '<div class="gs-checkin-row"><span class="gs-checkin-done">\u2713 On site \u00b7 ' +
+      esc(new Date(on.ChangeDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: TZ })) + '</span></div>';
+    return '<div class="gs-checkin-row"><button type="button" class="gs-checkin-btn" onclick="event.stopPropagation();' + esc(onclickJs || '') + '">\ud83d\udcf7 Check in</button></div>';
+  }
+
   function styleTag() {
     if (document.getElementById('gs-badges-style')) return;
     const style = document.createElement('style');
@@ -153,11 +170,15 @@
       '.gs-ready-badge.gs-ready-now{background:#E4F3E8;color:#1F7A3F}.gs-ready-now .gs-ready-dot{background:#1F7A3F}' +
       '.gs-ready-badge.gs-ready-no{background:#FBEAEA;color:#A6362D}.gs-ready-no .gs-ready-dot{background:#A6362D}' +
       '.gs-notready-note{font-size:12px;margin:10px 0;padding:10px 12px;background:#FBEAEA;border-radius:4px;border-left:3px solid #A6362D}' +
-      '.gs-notready-note b{color:#A6362D}';
+      '.gs-notready-note b{color:#A6362D}' +
+      '.gs-checkin-row{margin-top:8px}' +
+      '.gs-checkin-btn{display:inline-flex;align-items:center;gap:6px;background:#C9A84C;color:#fff;border:0;border-radius:18px;' +
+      'padding:7px 14px;font:inherit;font-size:12px;font-weight:700;letter-spacing:.03em;cursor:pointer}' +
+      '.gs-checkin-done{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#2E7D4F;background:#E4F3E8;border-radius:18px;padding:6px 12px}';
     document.head.appendChild(style);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', styleTag);
   else styleTag();
 
-  window.GSOrderBadges = { occupied: occupied, officeNeed: officeNeed, officeNeedNote: officeNeedNote, nowOpen: nowOpen, ready: ready, readyNote: readyNote };
+  window.GSOrderBadges = { occupied: occupied, officeNeed: officeNeed, officeNeedNote: officeNeedNote, nowOpen: nowOpen, ready: ready, readyNote: readyNote, checkIn: checkIn };
 })();
