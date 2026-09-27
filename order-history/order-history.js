@@ -984,10 +984,14 @@
       }
       if (ct === 'Inspected') {
         var iv = null; try { iv = JSON.parse(h.NewValue || 'null'); } catch (e) {}
-        insp = { by: String(h.ChangedBy || ''), notes: String(h.Notes || '').split(' | ')[0].replace(/^Inspection done by .+\.$/, '') };
+        insp = { by: String(h.ChangedBy || ''), notes: String(h.Notes || '').split(' | ')[0].replace(/^Inspection done by .+\.$/, ''),
+          proposed: !!(iv && Array.isArray(iv.services)) };
         var clean = iv && typeof iv === 'object' ? Object.assign({}, iv) : null;
         if (clean) { delete clean.services; delete clean.crew; }
-        reveal.push({ row: h, patch: { _label: 'Inspection done', OldValue: '', NewValue: clean ? JSON.stringify(clean) : '', Notes: '', MergedNotes: '' } });
+        /* Sin cambios propuestos (dueño, 27/09): que sepa que su orden
+           estaba bien, sin decirselo asi. */
+        reveal.push({ row: h, patch: { _label: 'Inspection done', OldValue: '', NewValue: clean ? JSON.stringify(clean) : '', Notes: '',
+          MergedNotes: insp.proposed ? '' : 'Everything on site matches your order. Next, we\'ll schedule the work.' } });
       } else if (insp && ct === 'Change Requested' && fc === 'Client Confirmation') {
         var ov = null; try { ov = JSON.parse(String(h.OldValue || '').replace(/^SERVICES:/, '')); } catch (e) {}
         if (ov && ov.status === 'Inspected') reveal.push({ row: h, patch: { _label: 'Changes after inspection', MergedNotes: inspNote('Please confirm.') } });
@@ -997,6 +1001,12 @@
         insp = null;
       } else if (insp && ct === 'Services Updated') {
         reveal.push({ row: h, patch: { _label: 'Services updated after inspection', MergedNotes: inspNote('') } });
+        insp.applied = true;
+      }
+      /* Hubo propuesta pero la oficina siguio sin cambios: su orden se
+         queda como la mando. */
+      if (insp && insp.proposed && !insp.applied && fc === 'Status' && ct === 'Received') {
+        reveal.push({ row: h, patch: { _label: 'Inspection reviewed', MergedNotes: 'Your order stays as you submitted it. Next, we\'ll schedule the work.' } });
       }
       if (ct === 'Order Assigned' || (fc === 'Status' && ct === 'Received')) insp = null;
 
