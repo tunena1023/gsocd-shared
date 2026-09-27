@@ -2,6 +2,14 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.44.0 — 2026-09-27 (el PDF de ordenes, una sola pieza)
+
+- **lib/order-pdf.js** (backend, Node): ahora es EL generador completo del PDF de ordenes (documento de la orden,
+  Solicitud y Completacion), no solo las partes puras. Admin y Orders lo usan con
+  `require('gsocd-shared/lib/order-pdf')(require('./graph'))` -- antes cada uno tenia su copia de ~1,400 lineas y ya
+  imprimian distinto (eventos internos de "por servicio" en el historial de Admin; el PDF del cliente sin telefono
+  del tecnico). Fotos: antes (inspeccion) / despues (tecnico) / del cliente. Dueño: "para que impriman lo mismo".
+
 ## Sin tag (commit en rama) — 2026-09-27 (aviso de unidad lista)
 
 - **order-badges**: nueva funcion `ready(o)` -- badge dorado "Unit ready — Sep 28, 10:30 AM" (Janitorial) /
