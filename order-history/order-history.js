@@ -647,6 +647,14 @@
     }
     if (h.ChangeType === 'Service Completed') {
       var sc = null; try { sc = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+      /* Tanda juntada en mergeServiceCompleted: una seccion por persona. */
+      if (sc && Array.isArray(sc.people)) {
+        sc.people.forEach(function (pp, i) {
+          if (i > 0) lines.push('<span style="display:block;border-top:1px dashed #E0DDD6;margin:4px 0"></span>');
+          lines = lines.concat(workLines(pp.person, pp.items, i === 0 ? sc.finishedText : '', pp.confirmedNote));
+        });
+        return lines;
+      }
       if (sc && Array.isArray(sc.services) && sc.completedBy && !sc.serviceName.indexOf('All of ')) {
         return workLines(sc.completedBy, sc.services.map(function (t) {
           var parts = String(t).split(' · '); return parts.length > 1 ? { place: parts[0], service: parts.slice(1).join(' · ') } : { place: '', service: t };
@@ -806,6 +814,45 @@
         }));
       }
       after.forEach(function (r) { out.push(r); });
+    }
+    return out;
+  }
+
+  /* --- 27/09/2026 (dueño, captura: "marque el trabajo de esa señora como
+     terminado y mira todo como se ve"): el Done de una persona guarda un
+     'Service Completed' por servicio y salian 5 renglones para UN evento.
+     Los seguidos del mismo quien (sin mas de 30 min entre uno y otro, sin
+     otro evento en medio) se juntan en uno, con lo de cada persona
+     adentro. Un solo servicio sigue saliendo como siempre. --- */
+  function svcDoneOf(h) {
+    if (String(h.ChangeType || '') !== 'Service Completed') return null;
+    try { var v = JSON.parse(h.NewValue || 'null'); return v && v.serviceName && !Array.isArray(v.services) && !Array.isArray(v.people) ? v : null; } catch (e) { return null; }
+  }
+  function mergeServiceCompleted(rows) {
+    var out = [];
+    for (var i = 0; i < rows.length; i++) {
+      var h = rows[i], v = svcDoneOf(h);
+      if (!v) { out.push(h); continue; }
+      var by = String(h.ChangedBy || ''), tLast = tOf(h), batch = [{ h: h, v: v }], j = i + 1;
+      for (; j < rows.length; j++) {
+        var w = svcDoneOf(rows[j]);
+        if (!w || String(rows[j].ChangedBy || '') !== by || Math.abs(tOf(rows[j]) - tLast) > SVC_BATCH_GAP_MS) break;
+        batch.push({ h: rows[j], v: w }); tLast = tOf(rows[j]);
+      }
+      i = j - 1;
+      if (batch.length === 1) { out.push(h); continue; }
+      var people = [], idx = {};
+      batch.forEach(function (b) {
+        var who = String(b.v.completedBy || '') || by;
+        if (!(who in idx)) { idx[who] = people.length; people.push({ person: who, items: [], confirmedNote: b.v.confirmedNote || '' }); }
+        people[idx[who]].items.push({ place: '', service: b.v.serviceName });
+      });
+      out.push(Object.assign({}, h, {
+        NewValue: JSON.stringify({ people: people, finishedText: batch[batch.length - 1].v.finishedText || h.ChangeDate }),
+        _label: people.length === 1
+          ? 'Work completed · ' + people[0].person + ' · ' + batch.length + ' services'
+          : 'Work completed · ' + batch.length + ' services · ' + people.length + ' people'
+      }));
     }
     return out;
   }
@@ -1274,7 +1321,7 @@
 
     if (!rows.length) return [];
 
-    var groups = groupDatesConfirmed(mergeServiceScheduled(rows));
+    var groups = groupDatesConfirmed(mergeServiceCompleted(mergeServiceScheduled(rows)));
     groups = mergeDecisionWithDetail(groups);
     groups = mergeRescheduleRequest(groups);
     groups = mergeMaterialsReadyWithDate(groups);
