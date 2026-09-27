@@ -77,13 +77,55 @@
     if (!m) return '';
     return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][Number(m[2]) - 1] + ' ' + Number(m[3]);
   }
+  /* Que tan listo esta el lugar (27/09/2026, duenno: "cualquier cosa que
+     les ayude a saber que ya esta listo el lugar para ellos llegar"):
+       1. El cliente contesto "No" al correo del dia antes  -> rojo.
+       2. El cliente contesto "Yes"                         -> verde.
+       3. Switch "ready" con fecha/hora: si ya llego ese dia -> verde
+          "ready now"; si es despues -> dorado con el dia y la hora.
+     La respuesta del correo solo cuenta para una visita de hoy en
+     adelante (VisitConfirmDate). Esa respuesta aplica a cualquier
+     division; el switch solo existe en Janitorial y Renovations. */
+  function todayChicago() {
+    try { return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }); }
+    catch (e) { return new Date().toISOString().slice(0, 10); }
+  }
+  function nounOf(div) { return div === 'renovations' ? 'Materials' : div === 'janitorial' ? 'Unit' : 'Site'; }
+  function visitAnswer(o) {
+    const st = String((o && o.VisitConfirmStatus) || '');
+    const day = String((o && o.VisitConfirmDate) || '').slice(0, 10);
+    if ((st !== 'Yes' && st !== 'No') || !day || day < todayChicago()) return '';
+    return st;
+  }
   function ready(o) {
-    const div = String((o && o.Division) || '').toLowerCase();
+    if (!o) return '';
+    const div = String(o.Division || '').toLowerCase();
+    const noun = nounOf(div);
+    const ans = visitAnswer(o);
+    const visitDay = fmtDay(o.VisitConfirmDate);
+    if (ans === 'No') {
+      return '<span class="gs-ready-badge gs-ready-no"><span class="gs-ready-dot"></span>Not ready \u2014 client said' +
+        (visitDay ? ' for ' + esc(visitDay) : '') + '</span>';
+    }
+    if (ans === 'Yes') {
+      return '<span class="gs-ready-badge gs-ready-now"><span class="gs-ready-dot"></span>Ready \u2014 confirmed' +
+        (visitDay ? ' for ' + esc(visitDay) : '') + '</span>';
+    }
     if (div !== 'renovations' && div !== 'janitorial') return '';
     if (!o.MaterialsReady || !o.ExpectedReadyDate || !o.EntryTime) return '';
+    const readyDay = String(o.ExpectedReadyDate).slice(0, 10);
+    if (readyDay && readyDay <= todayChicago()) {
+      return '<span class="gs-ready-badge gs-ready-now"><span class="gs-ready-dot"></span>' + noun + ' ready now' +
+        ' \u2014 since ' + esc([fmtDay(o.ExpectedReadyDate), fmtTime(o.EntryTime)].filter(Boolean).join(', ')) + '</span>';
+    }
     const when = [fmtDay(o.ExpectedReadyDate), fmtTime(o.EntryTime)].filter(Boolean).join(', ');
-    return '<span class="gs-ready-badge"><span class="gs-ready-dot"></span>' + (div === 'janitorial' ? 'Unit ready' : 'Materials ready') +
+    return '<span class="gs-ready-badge"><span class="gs-ready-dot"></span>' + noun + ' ready' +
       (when ? ' \u2014 ' + esc(when) : '') + '</span>';
+  }
+  /* Lo que escribio el cliente al contestar "No" (el badge solo avisa). */
+  function readyNote(o) {
+    if (visitAnswer(o) !== 'No' || !o.VisitConfirmNote) return '';
+    return '<p class="gs-notready-note"><b>Client says the site is not ready:</b> ' + esc(o.VisitConfirmNote) + '</p>';
   }
 
   function styleTag() {
@@ -107,11 +149,15 @@
       '.gs-now-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}' +
       '.gs-ready-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;' +
       'letter-spacing:.03em;text-transform:uppercase;background:#FDF3E0;color:#8C6F2A;padding:3px 9px;border-radius:20px}' +
-      '.gs-ready-dot{width:6px;height:6px;border-radius:50%;background:#8C6F2A}';
+      '.gs-ready-dot{width:6px;height:6px;border-radius:50%;background:#8C6F2A}' +
+      '.gs-ready-badge.gs-ready-now{background:#E4F3E8;color:#1F7A3F}.gs-ready-now .gs-ready-dot{background:#1F7A3F}' +
+      '.gs-ready-badge.gs-ready-no{background:#FBEAEA;color:#A6362D}.gs-ready-no .gs-ready-dot{background:#A6362D}' +
+      '.gs-notready-note{font-size:12px;margin:10px 0;padding:10px 12px;background:#FBEAEA;border-radius:4px;border-left:3px solid #A6362D}' +
+      '.gs-notready-note b{color:#A6362D}';
     document.head.appendChild(style);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', styleTag);
   else styleTag();
 
-  window.GSOrderBadges = { occupied: occupied, officeNeed: officeNeed, officeNeedNote: officeNeedNote, nowOpen: nowOpen, ready: ready };
+  window.GSOrderBadges = { occupied: occupied, officeNeed: officeNeed, officeNeedNote: officeNeedNote, nowOpen: nowOpen, ready: ready, readyNote: readyNote };
 })();
