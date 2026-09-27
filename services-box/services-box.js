@@ -42,11 +42,11 @@
     '.gs-svb-body{display:none;margin:0;border-radius:0;border-left:none;padding:0 14px;background:var(--bg,var(--off,#F8F7F4))}' +
     '.gs-svb-body.open{display:block}' +
     /* editor */
-    '.gs-svb .gs-sp-lvl-group{display:flex;border:1px solid var(--border,#E0D9CC);border-radius:20px;overflow:hidden;flex-shrink:0}' +
-    '.gs-svb .gs-sp-lvl-btn{width:34px;height:26px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:4px 8px;font-size:10.5px;font-weight:700;cursor:pointer;background:var(--white,#fff);color:var(--gray,#6B6B6B);border-right:1px solid var(--border,#E0D9CC)}' +
-    '.gs-svb .gs-sp-lvl-btn:last-child{border-right:none}' +
-    '.gs-svb .gs-sp-lvl-btn.active{background:var(--gold,#C9A84C);color:var(--black,#111)}' +
-    '.gs-svb .gs-sp-lvl-btn:focus-visible{outline:2px solid var(--gold,#C9A84C);outline-offset:-2px}' +
+    '.gs-svb .gs-sp-lvl-group,.gs-svb-ed .gs-sp-lvl-group{display:flex;border:1px solid var(--border,#E0D9CC);border-radius:20px;overflow:hidden;flex-shrink:0}' +
+    '.gs-svb .gs-sp-lvl-btn,.gs-svb-ed .gs-sp-lvl-btn{width:34px;height:26px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:4px 8px;font-size:10.5px;font-weight:700;cursor:pointer;background:var(--white,#fff);color:var(--gray,#6B6B6B);border-right:1px solid var(--border,#E0D9CC)}' +
+    '.gs-svb .gs-sp-lvl-btn:last-child,.gs-svb-ed .gs-sp-lvl-btn:last-child{border-right:none}' +
+    '.gs-svb .gs-sp-lvl-btn.active,.gs-svb-ed .gs-sp-lvl-btn.active{background:var(--gold,#C9A84C);color:var(--black,#111)}' +
+    '.gs-svb .gs-sp-lvl-btn:focus-visible,.gs-svb-ed .gs-sp-lvl-btn:focus-visible{outline:2px solid var(--gold,#C9A84C);outline-offset:-2px}' +
     '.svc-remove-btn{background:none;border:none;color:var(--red,#c0392b);font-size:12px;cursor:pointer;padding:3px 6px}' + /* = admin.html */
     '.gs-svb-ed-tag{font-size:10.5px;color:var(--red,#c0392b);font-weight:700;text-transform:uppercase;letter-spacing:.04em}' +
     '.gs-svb-ed-row{border-bottom:1px solid var(--border,#E0DDD6)}' +
@@ -207,11 +207,14 @@
          minutesOf: function (sku, level, qty) { return n|null }, // opcional
          estimateHtml: function (rows) { return html },           // opcional
          diffHtml: function (baseNames, nowNames) { return html }, // opcional
-         reasonRequired: true, onChange })
+         reasonRequired: true, onChange,
+         pencil: false,                 // opcional: sin lapiz, la X directa
+         rowExtraHtml: function (row, i) { return html } })  // opcional: p.ej. camarita
        ed.collect() -> { ok, added:[{serviceName, level, qty}],
                          removed:[{serviceName, note}], levels:[{serviceName, from, to}],
                          notes:[{serviceName, note}] }  // notas del lapiz
-       ed.changed() */
+       ed.changed()
+       ed.rows() -> [{name, sku, level, qty, existing, removed, reason}] */
   function fmtMin(m) { if (m == null) return ''; var h = Math.floor(m / 60), r = Math.round(m % 60); return h && r ? h + 'h ' + r + 'min' : h ? h + 'h' : r + 'min'; }
   function editor(o) {
     styleTag();
@@ -219,7 +222,10 @@
     var el = typeof o.el === 'string' ? document.getElementById(o.el) : o.el;
     if (!el) return null;
     var rows = (o.services || []).map(function (sv) {
-      return { name: sv.ServiceName || '', cat: sv.Category || '', sku: sv.SubOption || '', level: sv.Level || '', level0: sv.Level || '', qty: sv.Quantity || '', existing: true, removed: false, reason: '' };
+      /* removed/note/added/Level0: para reabrir un cambio a medias
+         (p.ej. al regresar de la camara en Tech). */
+      return { name: sv.ServiceName || '', cat: sv.Category || '', sku: sv.SubOption || '', level: sv.Level || '', level0: sv.Level0 != null ? sv.Level0 : (sv.Level || ''), qty: sv.Quantity || '',
+        existing: !sv.added, removed: !!sv.removed, reason: sv.note || '', open: !!sv.removed };
     });
     var query = '';
     var catalog = (o.catalog || []).filter(function (c) { return c && c.serviceName && (!o.catalogFilter || o.catalogFilter(c)); });
@@ -243,21 +249,21 @@
       var lv = isJan(r) && !r.removed ? '<div class="gs-sp-lvl-group" style="margin-right:14px">' + ['Level 1', 'Level 2', 'Level 3'].map(function (l, k) {
         return '<div class="gs-sp-lvl-btn' + (r.level === l ? ' active' : '') + '" role="button" tabindex="0" data-act="lv" data-i="' + i + '" data-v="' + l + '">L' + (k + 1) + '</div>';
       }).join('') + '</div>' : '';
-      var qty = needsQty(r) && !r.removed ? '<span style="margin-right:14px"><span style="font-size:10px;color:var(--gray,#6B6B6B);text-transform:uppercase;margin-right:4px">Qty</span>' +
-        '<input type="number" min="1" step="1" inputmode="numeric" data-act="qty" data-i="' + i + '" value="' + esc(r.qty) + '" style="width:48px;padding:5px 6px;border:1px solid var(--border,#E0DDD6);border-radius:4px;font-size:12px;text-align:center;font-family:inherit"></span>' : '';
+      var qty = needsQty(r) && !r.removed ? '<span style="margin-right:14px;display:inline-flex;align-items:center;white-space:nowrap"><span style="font-size:10px;color:var(--gray,#6B6B6B);text-transform:uppercase;margin-right:4px">Qty</span>' +
+        '<input type="number" min="1" step="1" inputmode="numeric" data-act="qty" data-i="' + i + '" value="' + esc(r.qty) + '" style="display:inline-block;width:48px;padding:5px 6px;border:1px solid var(--border,#E0DDD6);border-radius:4px;font-size:12px;text-align:center;font-family:inherit"></span>' : '';
       var m = r.removed ? null : mins(r);
       var needNote = r.removed && o.reasonRequired !== false;
       var time = m != null ? '<span style="color:var(--gold-dk,#8C6F2A);font-weight:600;margin-right:14px">' + esc(fmtMin(m)) + '</span>' : '';
       var btn = r.removed
         ? '<button type="button" class="svc-remove-btn gs-svb-ed-undo" data-act="x" data-i="' + i + '" title="Undo" aria-label="Undo remove ' + esc(r.name) + '">&#8635;</button>'
-        : r.open
+        : r.open || o.pencil === false
           ? '<button type="button" class="svc-remove-btn" data-act="x" data-i="' + i + '" title="Remove" aria-label="Remove ' + esc(r.name) + '">&#10005;</button>'
           : '<button type="button" class="svc-remove-btn gs-svb-ed-pen" data-act="pen" data-i="' + i + '" title="Add a note" aria-label="Add a note for ' + esc(r.name) + '">&#9998;</button>';
-      var nameHtml = '<span' + (r.open && !r.removed ? ' class="gs-svb-ed-name" data-act="name" data-i="' + i + '" role="button" tabindex="0" title="Close the note"' : '') + '>' +
+      var nameHtml = '<span' + (r.open && !r.removed && o.pencil !== false ? ' class="gs-svb-ed-name" data-act="name" data-i="' + i + '" role="button" tabindex="0" title="Close the note"' : '') + '>' +
         '<span' + (r.removed ? ' style="text-decoration:line-through"' : '') + '>' + esc(r.name) + '</span>' +
         (r.removed ? '<br><span class="gs-svb-ed-tag">' + (needNote ? 'removed \u2014 note required' : 'removed') + '</span>' : '') + '</span>';
       var line = '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:13px">' + nameHtml +
-        '<span style="display:flex;align-items:center">' + lv + qty + time + btn + '</span></div>';
+        '<span style="display:flex;align-items:center">' + lv + qty + time + (o.rowExtraHtml ? o.rowExtraHtml(r, i) || '' : '') + btn + '</span></div>';
       var why = r.open || r.removed
         ? '<div class="gs-svb-ed-why"><textarea rows="2" class="gs-svb-note' + (needNote && !String(r.reason || '').trim() ? ' warn' : '') + '" data-act="why" data-i="' + i + '" placeholder="' +
             (needNote ? 'Required \u2014 explain why you want to remove it' : 'Note for the office \u2014 optional') + '" aria-label="Note for ' + esc(r.name) + '">' + esc(r.reason) + '</textarea></div>' : '';
@@ -293,7 +299,7 @@
           '<div class="gs-svb-ed-results" style="margin-top:8px">' + resultsHtml() + '</div></div>';
     }
     function render() {
-      el.innerHTML = '<div class="sv-sec open">' +
+      el.innerHTML = '<div class="sv-sec open gs-svb-ed">' +
         '<button type="button" class="sv-sec-head" aria-expanded="true" tabindex="-1"><span class="sv-sec-bar"></span><span class="sv-sec-txt"><span class="sv-sec-name">' + esc(o.division || 'Services') + '</span>' +
           '<span class="sv-sec-meta" data-part="meta">' + esc(metaText()) + '</span><span class="sv-sec-editing">Editing</span></span><span class="sv-sec-chev">' + chev + '</span></button>' +
         '<div class="sv-sec-wrap"><div><div class="sv-sec-body editing">' +
@@ -320,6 +326,7 @@
         var r = rows[i]; if (!r) return;
         if (r.existing) { r.removed = !r.removed; r.err = false; if (!r.removed) { r.open = false; r.reason = ''; } else r.open = true; } else rows.splice(i, 1);
         refresh(); fire();
+        if (r.removed) { var w = el.querySelector('[data-act="why"][data-i="' + i + '"]'); if (w) w.focus(); }
       } else if (a === 'pen') {
         rows[i].open = true; refresh(); fire();
         var t = el.querySelector('[data-act="why"][data-i="' + i + '"]'); if (t) t.focus();
@@ -344,6 +351,9 @@
 
     var ctrl = {
       changed: changedFn,
+      /* Estado de cada renglon; los que ya venian quedan primero y en el
+         mismo orden que services (los agregados van al final). */
+      rows: function () { return rows.map(function (r) { return { name: r.name, sku: skuOf(r), level: r.level, qty: r.qty, existing: r.existing, removed: r.removed, reason: String(r.reason || '').trim() }; }); },
       collect: function () {
         var ok = true;
         rows.forEach(function (r) { r.err = r.removed && o.reasonRequired !== false && !String(r.reason || '').trim(); if (r.err) ok = false; });
