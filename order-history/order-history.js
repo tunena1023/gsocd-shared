@@ -1296,7 +1296,7 @@
       g._renderedLines = lines;
       var hasDetail = lines.length > 0;
       var isRegression = regressionTypes.indexOf(String(h.ChangeType || '')) !== -1;
-      var noteTxt = h.MergedNotes || noteFor(h);
+      var noteTxt = h.MergedNotes != null ? h.MergedNotes : noteFor(h);
       /* Al cliente solo le sale ya completada: la frase de "la oficina
          todavia tiene que confirmar" ya no aplica. */
       if (mode === 'client' && String(h.ChangeType || '') === 'Tech Marked Complete') {
