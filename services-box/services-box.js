@@ -215,7 +215,9 @@
          otherDivisions: true,          // opcional: buscar tambien en otras divisiones
          onRemove(i,row), onLevel(i,level,row), onQty(i,qty,row), onAdd(entry)
                                         // opcional: modo controlado (quien lo usa guarda y re-monta)
-         rowExtraHtml: function (row, i) { return html } })  // opcional: p.ej. camarita
+         rowExtraHtml: function (row, i) { return html },  // opcional: p.ej. camarita
+         reasonPlaceholder: 'Required — ...',  // opcional: texto de la nota del quitado
+         removedLabel: function (needNote) { return 'not completed' } })  // opcional
        ed.collect() -> { ok, added:[{serviceName, level, qty}],
                          removed:[{serviceName, note}], levels:[{serviceName, from, to}],
                          notes:[{serviceName, note}] }  // notas del lapiz
@@ -267,12 +269,12 @@
           : '<button type="button" class="svc-remove-btn gs-svb-ed-pen" data-act="pen" data-i="' + i + '" title="Add a note" aria-label="Add a note for ' + esc(r.name) + '">&#9998;</button>';
       var nameHtml = '<span' + (r.open && !r.removed && o.pencil !== false ? ' class="gs-svb-ed-name" data-act="name" data-i="' + i + '" role="button" tabindex="0" title="Close the note"' : '') + '>' +
         '<span' + (r.removed ? ' style="text-decoration:line-through"' : '') + '>' + esc(r.name) + '</span>' +
-        (r.removed ? '<br><span class="gs-svb-ed-tag">' + (needNote ? 'removed \u2014 note required' : 'removed') + '</span>' : '') + '</span>';
+        (r.removed ? '<br><span class="gs-svb-ed-tag">' + esc(o.removedLabel ? o.removedLabel(needNote) : (needNote ? 'removed \u2014 note required' : 'removed')) + '</span>' : '') + '</span>';
       var line = '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:13px">' + nameHtml +
         '<span style="display:flex;align-items:center">' + lv + qty + time + (o.rowExtraHtml ? o.rowExtraHtml(r, i) || '' : '') + btn + '</span></div>';
       var why = (r.open || r.removed) && o.reasonInline !== false
         ? '<div class="gs-svb-ed-why"><textarea rows="2" class="gs-svb-note' + (needNote && !String(r.reason || '').trim() ? ' warn' : '') + '" data-act="why" data-i="' + i + '" placeholder="' +
-            (needNote ? 'Required \u2014 explain why you want to remove it' : 'Note for the office \u2014 optional') + '" aria-label="Note for ' + esc(r.name) + '">' + esc(r.reason) + '</textarea></div>' : '';
+            esc(needNote ? (o.reasonPlaceholder || 'Required \u2014 explain why you want to remove it') : 'Note for the office \u2014 optional') + '" aria-label="Note for ' + esc(r.name) + '">' + esc(r.reason) + '</textarea></div>' : '';
       return '<div class="gs-svb-ed-row' + (needNote ? ' gs-svb-ed-removed' : '') + '">' + line + why + '</div>';
     }
 
