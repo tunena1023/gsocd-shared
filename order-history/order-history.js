@@ -197,6 +197,11 @@
     return false;
   }
 
+  /* --- Solo oficina (27/09/2026, dueño: "si teniamos una persona
+     trabajando y no se presento y lo cambiamos, eso al cliente no le
+     dice nada"). Ni cliente ni Tech. --- */
+  var OFFICE_ONLY_TYPES = ['Order Approved', 'Technician Unavailable', 'Materials Ready Seen'];
+
   /* --- Modo 'tech' (26/09/2026, pedido del dueño: "a excepcion de
      eventos internos, todo lo que tenga informacion debe ser visible"):
      el tecnico ve todo lo del cliente y de campo, incluidas las
@@ -204,7 +209,7 @@
      oficina (cambio interno y su decision, 'Marked as seen'). --- */
   function isHiddenFromTech(h) {
     if (String(h.FieldChanged || '') === 'Office Change (Internal)') return true;
-    if (String(h.ChangeType || '') === 'Order Approved') return true;
+    if (OFFICE_ONLY_TYPES.indexOf(String(h.ChangeType || '')) !== -1) return true;
     return false;
   }
 
@@ -919,8 +924,32 @@
      la regla 2 necesita ver la solicitud aunque el cliente no la vea. --- */
   var RESOLVE_TYPES = ['Change Reassigned', 'Change Rejected', 'Change Request Cancelled'];
   var CLIENT_NOT_READY = ['Occupied Unit Reported', 'Materials Ready Cancelled', 'Site Not Ready Reported'];
+  /* Estatus que la oficina mueve por dentro (regresar a programar,
+     etc.): el cliente ve la asignacion, el completado o la cancelacion,
+     no el movimiento. */
+  var CLIENT_HIDDEN_STATUS = ['Received', 'Assigned', 'Pending', 'In Progress'];
+  function schedOf(h) {
+    var ct = String(h.ChangeType || '');
+    if (ct === 'Order Assigned') {
+      var a = null; try { a = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+      return a ? { date: a.dispatchDate ? fmtDate(a.dispatchDate) : '', window: a.serviceWindow || '' } : null;
+    }
+    if (ct === 'Order Details Set') {
+      var out = {}, any = false;
+      detailParts(h.Notes).forEach(function (p) {
+        if (p.label === 'Dispatch Date') { out.date = p.value && p.value !== '(empty)' ? fmtDate(p.value) : ''; any = true; }
+        if (p.label === 'Service Window') { out.window = p.value && p.value !== '(empty)' ? p.value : ''; any = true; }
+      });
+      return any ? out : null;
+    }
+    return null;
+  }
   function clientHiddenByContext(all) {
-    var hidden = [], lastCompleted = -1;
+    var hidden = [], relabel = [], lastCompleted = -1;
+    /* Lo que el cliente ya vio de la visita: si una reasignacion no
+       cambia fecha ni horario (solo la persona), no la ve. Si cambia,
+       la ve como "Schedule updated". Igual por servicio. */
+    var seen = null, svcSeen = {};
     all.forEach(function (h, i) {
       if (String(h.ChangeType || '') === 'Completed' && String(h.FieldChanged || '') === 'Status') lastCompleted = i;
     });
@@ -932,7 +961,28 @@
         if (fc === 'Supervisor Update') hidden.push(h);
       }
       if (ct === 'Tech Marked Complete' && lastCompleted < i) hidden.push(h);
-      if (ct === 'Reopened by Tech' || ct === 'Division Changed') hidden.push(h);
+      if (ct === 'Reopened by Tech' || ct === 'Division Changed' || ct === 'Extra Requested') hidden.push(h);
+      if (OFFICE_ONLY_TYPES.indexOf(ct) !== -1) hidden.push(h);
+      if (fc === 'Status' && CLIENT_HIDDEN_STATUS.indexOf(ct) !== -1) hidden.push(h);
+      if (ct === 'Order Assigned') {
+        var sc = schedOf(h) || { date: '', window: '' };
+        if (seen && sc.date === seen.date && sc.window === seen.window) hidden.push(h);
+        else if (seen) relabel.push(h);
+        seen = sc;
+      }
+      if (ct === 'Order Details Set') {
+        var sd = schedOf(h);
+        if (sd && seen) seen = { date: sd.date != null ? sd.date : seen.date, window: sd.window != null ? sd.window : seen.window };
+      }
+      if (ct === 'Service Scheduled') {
+        var sv = null; try { sv = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+        if (sv && sv.serviceName) {
+          var d = sv.date ? fmtDate(sv.date) : '';
+          if (svcSeen[sv.serviceName] != null && svcSeen[sv.serviceName] === d) hidden.push(h);
+          else if (svcSeen[sv.serviceName] != null) relabel.push(h);
+          svcSeen[sv.serviceName] = d;
+        }
+      }
       /* Reabierto: el "Service completed" de antes de ese servicio ya no
          vale; si no, el cliente lo veia completado dos veces. */
       if (ct === 'Reopened by Tech') {
@@ -955,7 +1005,7 @@
         pendingHidden = false;
       }
     });
-    return hidden;
+    return { hidden: hidden, relabel: relabel };
   }
 
   /* 'Order Details Set' (Admin > Edit) junta varios campos en un solo
@@ -1075,7 +1125,8 @@
     var regressionTypes = opts.regressionTypes || [];
     var idPrefix = 'goh-' + String(orderId || '').replace(/[^a-z0-9]/gi, '_') + '-' + mode;
 
-    var ctxHidden = mode === 'client' ? clientHiddenByContext(history || []) : [];
+    var ctx = mode === 'client' ? clientHiddenByContext(history || []) : { hidden: [], relabel: [] };
+    var ctxHidden = ctx.hidden;
     var rows = (history || []).filter(function (h) {
       if (ALWAYS_HIDDEN_TYPES.indexOf(String(h.ChangeType || '')) !== -1) return false;
       if (mode === 'client' && isHiddenFromClient(h)) return false;
@@ -1085,8 +1136,11 @@
     });
     if (mode === 'client') {
       rows = rows.map(function (h) {
+        if (ctx.relabel.indexOf(h) !== -1) return Object.assign({}, h, { _label: 'Schedule updated' });
         if (String(h.ChangeType || '') !== 'Order Details Set') return h;
-        return Object.assign({}, h, { Notes: clientDetailsNote(h.Notes) });
+        var cn = clientDetailsNote(h.Notes);
+        var onlySched = cn && detailParts(cn).every(function (p) { return ['Dispatch Date', 'Service Window', 'Entry Date', 'Due Date'].indexOf(p.label) !== -1; });
+        return Object.assign({}, h, { Notes: cn.replace(/(^|  ·  )Dispatch Date: /g, '$1Visit date: '), _label: onlySched ? 'Schedule updated' : undefined });
       }).filter(function (h) { return String(h.ChangeType || '') !== 'Order Details Set' || h.Notes; });
     }
     rows = rows.map(function (h) {
