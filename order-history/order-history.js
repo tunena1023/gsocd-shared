@@ -92,6 +92,7 @@
     'Reschedule Requested':     'New dates requested',
     'Expected Ready Date':      'Ready Date & Time',
     'Archived':                 'Archived',
+    'Batch Created':            'Created in a batch',
     /* "Assign by service" (Admin > Scheduling/Active, 21/09/2026) --
        una orden puede asignarse servicio por servicio en vez de como
        un solo bloque. El evento generico de categoria va aqui; el
@@ -147,8 +148,9 @@
     'Cancellation Approved', 'Cancellation Rejected', 'Order Reactivated'
   ];
 
-  /* --- Ruido puramente operativo -- nunca aporta nada a "que paso
-     con la orden", en ningun modo. --- */
+  /* --- Renglones operativos (documentos, archivado, lote): 27/09/2026
+     el dueño pidio que Admin vea TODO; solo se le quitan a Tech y al
+     cliente. Admin los ve con etiqueta y detalle propios. --- */
   var ALWAYS_HIDDEN_TYPES = ['Document Generated', 'Document Failed', 'Archived',
     /* Fila resumen de lote (submit-order.js, Flujo D) -- nunca tuvo
        etiqueta ni detalle propio en este archivo, se veia vacia/
@@ -682,6 +684,14 @@
       if (sr) lines.push(removedLine(sr.serviceName, 'approved by office, was not completed'));
       return lines;
     }
+    /* Admin (27/09): los renglones de lote y archivado ya se ven ahi. */
+    if (h.ChangeType === 'Batch Created') {
+      if (h.OldValue) lines.push('🏷️ PO: ' + esc(h.OldValue));
+      var ids = null; try { ids = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+      if (Array.isArray(ids) && ids.length) lines.push('📦 Orders in this batch: ' + ids.map(esc).join(', '));
+      return lines;
+    }
+    if (h.ChangeType === 'Archived') return lines;
     if (h.ChangeType === 'Service Change Resolved') {
       var scr = svcNameOf(h);
       if (scr) lines.push('✅ ' + esc(scr));
@@ -1222,7 +1232,8 @@
       return rv ? Object.assign({}, h, rv.patch, { _revealed: true }) : h;
     }).filter(function (h) {
       if (h._revealed) return true;
-      if (ALWAYS_HIDDEN_TYPES.indexOf(String(h.ChangeType || '')) !== -1) return false;
+      /* Admin ve todo (dueño, 27/09): esto solo se le quita a Tech y al cliente. */
+      if (mode !== 'staff' && ALWAYS_HIDDEN_TYPES.indexOf(String(h.ChangeType || '')) !== -1) return false;
       if (mode === 'client' && isHiddenFromClient(h)) return false;
       if (mode === 'client' && ctxHidden.indexOf(h) !== -1) return false;
       if (mode === 'tech' && isHiddenFromTech(h)) return false;
