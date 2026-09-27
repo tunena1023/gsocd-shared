@@ -28,7 +28,14 @@
   var REVIEW_STATUSES = ['Change Requested', 'Cancellation Requested'];
   var ACTIVE_STATUSES = ['Assigned', 'Updated'];
 
+  /* Mismas reglas que admin.html: una recurrente se queda en Approvals;
+     una orden ya aprobada que regreso a Scheduling (WasApproved, de
+     admin-get-orders) cuenta en Active, nunca en Approvals (27/09/2026). */
+  function backInScheduling(o) {
+    return !o.RecurringServiceID && !!o.WasApproved && NEW_ORDER_STATUSES.indexOf(o.Status) !== -1;
+  }
   function isFullyScheduled(o) {
+    if (o.RecurringServiceID) return false;
     return !!(o.Supervisor && String(o.Supervisor).trim()
       && o.ServiceWindow && String(o.ServiceWindow).trim()
       && o.DispatchDate && String(o.DispatchDate).trim());
@@ -37,14 +44,14 @@
   function compute(orders) {
     orders = orders || [];
     var approvals = orders.filter(function (o) {
-      return NEW_ORDER_STATUSES.indexOf(o.Status) !== -1 && !isFullyScheduled(o);
+      return NEW_ORDER_STATUSES.indexOf(o.Status) !== -1 && !isFullyScheduled(o) && !backInScheduling(o);
     }).length;
     var review = orders.filter(function (o) {
       return REVIEW_STATUSES.indexOf(o.Status) !== -1 || (o.Status === 'Cancelled' && !o.Archived);
     }).length;
     var active = orders.filter(function (o) {
       return ACTIVE_STATUSES.indexOf(o.Status) !== -1 ||
-        (NEW_ORDER_STATUSES.indexOf(o.Status) !== -1 && isFullyScheduled(o));
+        (NEW_ORDER_STATUSES.indexOf(o.Status) !== -1 && (isFullyScheduled(o) || backInScheduling(o)));
     }).length;
     return { approvals: approvals, review: review, active: active };
   }
