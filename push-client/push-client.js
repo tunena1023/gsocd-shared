@@ -47,7 +47,13 @@
     }
     const reg = await registration();
     let sub = await reg.pushManager.getSubscription();
-    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(vapidPublicKey) });
+    const want = keyBytes(vapidPublicKey);
+    /* Si se cambiaron las llaves, la suscripcion vieja no sirve: se rehace. */
+    if (sub && sub.options && sub.options.applicationServerKey) {
+      const old = new Uint8Array(sub.options.applicationServerKey);
+      if (old.length !== want.length || old.some((b, i) => b !== want[i])) { await sub.unsubscribe().catch(function () {}); sub = null; }
+    }
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: want });
     return sub.toJSON();
   }
   async function current() {
