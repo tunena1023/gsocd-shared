@@ -133,7 +133,9 @@
     'Request Cancelled by Client':'Request cancelled by client',
     'Requested Dates Withdrawn':  'Requested dates withdrawn',
     'Requested Dates Rejected':   'Requested dates not approved',
-    'Cancellation Reversed':      'Cancellation reversed'
+    'Cancellation Reversed':      'Cancellation reversed',
+    /* Tech, primera foto del dia (tech lib/on-site.js). */
+    'Crew On Site':               'Crew on site'
   };
   function labelFor(ct) { return LABELS[String(ct || '')] || String(ct || 'Update'); }
 
@@ -945,7 +947,7 @@
     return null;
   }
   function clientHiddenByContext(all) {
-    var hidden = [], relabel = [], lastCompleted = -1;
+    var hidden = [], relabel = [], reveal = [], lastCompleted = -1;
     /* Lo que el cliente ya vio de la visita: si una reasignacion no
        cambia fecha ni horario (solo la persona), no la ve. Si cambia,
        la ve como "Schedule updated". Igual por servicio. */
@@ -953,12 +955,14 @@
     all.forEach(function (h, i) {
       if (String(h.ChangeType || '') === 'Completed' && String(h.FieldChanged || '') === 'Status') lastCompleted = i;
     });
-    var pendingHidden = false, notReadyByClient = false;
+    var pendingHidden = false, notReadyByClient = false, pendingReq = null;
     all.forEach(function (h, i) {
       var ct = String(h.ChangeType || ''), fc = String(h.FieldChanged || '');
       if (ct === 'Change Requested' || ct === 'Services Change Requested' || ct === 'Service Change Requested') {
         pendingHidden = fc === 'Supervisor Update' || isHiddenFromClient(h);
         if (fc === 'Supervisor Update') hidden.push(h);
+        pendingReq = fc === 'Supervisor Update' ? { row: h, kind: 'services' }
+          : fc === 'Delay Reason' ? { row: h, kind: 'notready' } : null;
       }
       if (ct === 'Tech Marked Complete' && lastCompleted < i) hidden.push(h);
       if (ct === 'Reopened by Tech' || ct === 'Division Changed' || ct === 'Extra Requested') hidden.push(h);
@@ -996,16 +1000,31 @@
       }
       if (CLIENT_NOT_READY.indexOf(ct) !== -1) notReadyByClient = true;
       if (ct === 'Order Assigned' || ct === 'Materials Ready' || ct === 'Site Ready Confirmed') notReadyByClient = false;
+      /* Lo que la cuadrilla encontro y SI le cambia algo al cliente
+         (dueño, 27/09): sin el nombre del supervisor ni la decision de
+         la oficina.
+           - "no estaba listo" que termino en reprogramar -> "Site not
+             ready at our visit" con el motivo (luego sale "Schedule
+             updated" con la fecha nueva).
+           - cambio de servicios del supervisor que la oficina aprobo ->
+             "Services updated" con lo que cambio y el motivo. */
       if (ct === 'Scheduling' || ct === 'Sent to Scheduling') {
         if (!notReadyByClient) hidden.push(h);
-        pendingHidden = false;
+        if (pendingReq && pendingReq.kind === 'notready' && !notReadyByClient) {
+          var reason = String(pendingReq.row.Notes || '').replace(/^Reported by .+?:\s*/, '');
+          reveal.push({ row: pendingReq.row, patch: { _label: 'Site not ready at our visit', ChangedBy: '', MergedNotes: reason } });
+        }
+        pendingHidden = false; pendingReq = null;
       }
-      if (RESOLVE_TYPES.indexOf(ct) !== -1) {
+      if (RESOLVE_TYPES.indexOf(ct) !== -1 || ct === 'Change Approved') {
         if (pendingHidden) hidden.push(h);
-        pendingHidden = false;
+        if (pendingReq && pendingReq.kind === 'services' && (ct === 'Change Reassigned' || ct === 'Change Approved')) {
+          reveal.push({ row: pendingReq.row, patch: { _label: 'Services updated', ChangedBy: '', ChangeDate: h.ChangeDate } });
+        }
+        pendingHidden = false; pendingReq = null;
       }
     });
-    return { hidden: hidden, relabel: relabel };
+    return { hidden: hidden, relabel: relabel, reveal: reveal };
   }
 
   /* 'Order Details Set' (Admin > Edit) junta varios campos en un solo
@@ -1125,9 +1144,14 @@
     var regressionTypes = opts.regressionTypes || [];
     var idPrefix = 'goh-' + String(orderId || '').replace(/[^a-z0-9]/gi, '_') + '-' + mode;
 
-    var ctx = mode === 'client' ? clientHiddenByContext(history || []) : { hidden: [], relabel: [] };
+    var ctx = mode === 'client' ? clientHiddenByContext(history || []) : { hidden: [], relabel: [], reveal: [] };
     var ctxHidden = ctx.hidden;
-    var rows = (history || []).filter(function (h) {
+    var revealOf = function (h) { for (var r = 0; r < ctx.reveal.length; r++) if (ctx.reveal[r].row === h) return ctx.reveal[r]; return null; };
+    var rows = (history || []).map(function (h) {
+      var rv = mode === 'client' ? revealOf(h) : null;
+      return rv ? Object.assign({}, h, rv.patch, { _revealed: true }) : h;
+    }).filter(function (h) {
+      if (h._revealed) return true;
       if (ALWAYS_HIDDEN_TYPES.indexOf(String(h.ChangeType || '')) !== -1) return false;
       if (mode === 'client' && isHiddenFromClient(h)) return false;
       if (mode === 'client' && ctxHidden.indexOf(h) !== -1) return false;
