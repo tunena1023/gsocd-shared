@@ -113,7 +113,27 @@
        supervisor va a ver, y luego la orden sigue a Scheduling. */
     'Inspection':                 'Inspection scheduled',
     'Inspected':                  'Inspection done',
-    'Received':                   'Ready to schedule'
+    'Received':                   'Ready to schedule',
+    /* 27/09/2026 (dueño): salian con el nombre interno tal cual. */
+    'Order Details Set':          'Order updated',
+    'Division Changed':           'Division changed',
+    'Scheduling':                 'Sent back to Scheduling',
+    'Occupied Unit Reported':     'Occupied unit reported',
+    'Materials Ready':            'Marked as ready',
+    'Materials Ready Cancelled':  'Ready cancelled',
+    'Materials Ready Seen':       'Ready seen by office',
+    'Reopened by Tech':           'Reopened by tech',
+    'Change Approved':            'Change approved',
+    'Site Ready Confirmed':       'Site ready confirmed',
+    'Site Not Ready Reported':    'Site not ready reported',
+    'Readiness Alert Resolved':   'Readiness alert resolved',
+    'Client Data Updated':        'Client info updated',
+    'Technician Unavailable':     'Technician unavailable',
+    'Extra Requested':            'Extra requested',
+    'Request Cancelled by Client':'Request cancelled by client',
+    'Requested Dates Withdrawn':  'Requested dates withdrawn',
+    'Requested Dates Rejected':   'Requested dates not approved',
+    'Cancellation Reversed':      'Cancellation reversed'
   };
   function labelFor(ct) { return LABELS[String(ct || '')] || String(ct || 'Update'); }
 
@@ -655,6 +675,11 @@
       if (sr) lines.push(removedLine(sr.serviceName, 'approved by office, was not completed'));
       return lines;
     }
+    if (h.ChangeType === 'Service Change Resolved') {
+      var scr = svcNameOf(h);
+      if (scr) lines.push('✅ ' + esc(scr));
+      return lines;
+    }
     if (h.ChangeType === 'Completed' && h.FieldChanged === 'PerServiceRecap') {
       var rc = null; try { rc = JSON.parse(h.NewValue || 'null'); } catch (e) {}
       (rc && rc.recap || []).forEach(function (r) { lines.push('✅ ' + esc(r.serviceName) + ' — ' + esc(r.completedBy)); });
@@ -876,6 +901,162 @@
     return out;
   }
 
+  /* --- Reglas del cliente que dependen de lo que paso antes/despues
+     (27/09/2026, dueño, punto por punto):
+       1. Sugerencia del supervisor ('Supervisor Update'): oculta.
+       2. La decision de la oficina sobre algo que el cliente no vio
+          (sugerencia del supervisor, "no esta listo" de la cuadrilla,
+          cambio interno): oculta. Si no, veia "Change approved" de
+          algo que nunca le salio.
+       3. 'Tech Marked Complete': oculta hasta que la oficina marca la
+          orden Completed.
+       4. 'Reopened by Tech': interno.
+       5. 'Division Changed': interno.
+       6. Mandar a Scheduling (Reschedule): solo si lo empezo el
+          cliente porque algo no estaba listo (ocupado, apago el switch,
+          contesto "No" al correo del dia antes).
+     Se calcula sobre el historial COMPLETO (antes de filtrar), porque
+     la regla 2 necesita ver la solicitud aunque el cliente no la vea. --- */
+  var RESOLVE_TYPES = ['Change Reassigned', 'Change Rejected', 'Change Request Cancelled'];
+  var CLIENT_NOT_READY = ['Occupied Unit Reported', 'Materials Ready Cancelled', 'Site Not Ready Reported'];
+  function clientHiddenByContext(all) {
+    var hidden = [], lastCompleted = -1;
+    all.forEach(function (h, i) {
+      if (String(h.ChangeType || '') === 'Completed' && String(h.FieldChanged || '') === 'Status') lastCompleted = i;
+    });
+    var pendingHidden = false, notReadyByClient = false;
+    all.forEach(function (h, i) {
+      var ct = String(h.ChangeType || ''), fc = String(h.FieldChanged || '');
+      if (ct === 'Change Requested' || ct === 'Services Change Requested' || ct === 'Service Change Requested') {
+        pendingHidden = fc === 'Supervisor Update' || isHiddenFromClient(h);
+        if (fc === 'Supervisor Update') hidden.push(h);
+      }
+      if (ct === 'Tech Marked Complete' && lastCompleted < i) hidden.push(h);
+      if (ct === 'Reopened by Tech' || ct === 'Division Changed') hidden.push(h);
+      /* Reabierto: el "Service completed" de antes de ese servicio ya no
+         vale; si no, el cliente lo veia completado dos veces. */
+      if (ct === 'Reopened by Tech') {
+        var ro = null; try { ro = JSON.parse(h.NewValue || 'null'); } catch (e) {}
+        var names = ro ? (Array.isArray(ro.services) && ro.services.length ? ro.services : [ro.serviceName]) : [];
+        names.forEach(function (n) {
+          for (var j = i - 1; j >= 0; j--) {
+            if (String(all[j].ChangeType || '') === 'Service Completed' && svcNameOf(all[j]) === String(n)) { hidden.push(all[j]); break; }
+          }
+        });
+      }
+      if (CLIENT_NOT_READY.indexOf(ct) !== -1) notReadyByClient = true;
+      if (ct === 'Order Assigned' || ct === 'Materials Ready' || ct === 'Site Ready Confirmed') notReadyByClient = false;
+      if (ct === 'Scheduling' || ct === 'Sent to Scheduling') {
+        if (!notReadyByClient) hidden.push(h);
+        pendingHidden = false;
+      }
+      if (RESOLVE_TYPES.indexOf(ct) !== -1) {
+        if (pendingHidden) hidden.push(h);
+        pendingHidden = false;
+      }
+    });
+    return hidden;
+  }
+
+  /* 'Order Details Set' (Admin > Edit) junta varios campos en un solo
+     texto "Campo: valor  ·  Campo: valor". Al cliente se le colaban
+     las notas internas (Delay Reason, Delay Reason Notes, Scheduling,
+     Supervisor...) porque el filtro por campo solo ve renglones
+     sueltos. Al cliente solo le quedan estos; si no queda nada, el
+     renglon no sale. */
+  var CLIENT_DETAIL_FIELDS = ['Entry Date', 'Due Date', 'Service Window', 'Dispatch Date', 'Completed Date', 'Technician', 'Services'];
+  function detailParts(notes) {
+    return String(notes || '').split('  ·  ').map(function (seg) {
+      var k = seg.indexOf(': ');
+      return k === -1 ? { label: '', value: seg } : { label: seg.slice(0, k), value: seg.slice(k + 2) };
+    });
+  }
+  function clientDetailsNote(notes) {
+    return detailParts(notes).filter(function (p) { return CLIENT_DETAIL_FIELDS.indexOf(p.label) !== -1; })
+      .map(function (p) { return p.label + ': ' + p.value; }).join('  ·  ');
+  }
+  /* Las fechas de solo dia llegan crudas ("2026-10-08"). */
+  function prettyDetailsNote(notes) {
+    return String(notes || '').replace(/(^|: )(\d{4}-\d{2}-\d{2})(?=$|\s)/g, function (m, pre, d) { return pre + fmtDate(d); });
+  }
+
+  /* 'Service Change Resolved' justo al lado de 'Service Added'/'Service
+     Removed' del mismo servicio dice lo mismo dos veces: se queda el
+     de Added/Removed. Los demas (cambio de nivel) dicen de que servicio. */
+  function svcNameOf(h) { try { var v = JSON.parse(h.NewValue || 'null'); return v && v.serviceName ? String(v.serviceName) : ''; } catch (e) { return ''; } }
+  function dropRedundantResolved(rows) {
+    return rows.filter(function (h, i) {
+      if (String(h.ChangeType || '') !== 'Service Change Resolved') return true;
+      var name = svcNameOf(h);
+      var near = [rows[i - 1], rows[i + 1]].filter(Boolean);
+      return !near.some(function (r) {
+        var t = String(r.ChangeType || '');
+        return (t === 'Service Added' || t === 'Service Removed') && svcNameOf(r) === name && name;
+      });
+    });
+  }
+
+  function sameMoment(a, b) {
+    return String(a.ChangedBy || '') === String(b.ChangedBy || '') &&
+      Math.abs(new Date(a.ChangeDate) - new Date(b.ChangeDate)) < GROUP_WINDOW_MS;
+  }
+
+  /* Reschedule guardaba 2 renglones ('Scheduling' + la decision 'Sent
+     to Scheduling'): uno solo. Se queda una nota escrita a mano, no la
+     automatica "Sent back to Scheduling by X." */
+  function mergeSchedulingPair(groups) {
+    var out = [];
+    groups.forEach(function (g) {
+      var prev = out[out.length - 1];
+      var t = String(g.rep.ChangeType || ''), pt = prev ? String(prev.rep.ChangeType || '') : '';
+      var pair = (t === 'Sent to Scheduling' && pt === 'Scheduling') || (t === 'Scheduling' && pt === 'Sent to Scheduling');
+      if (pair && sameMoment(prev.rep, g.rep)) {
+        var decision = t === 'Sent to Scheduling' ? g.rep : prev.rep;
+        var notes = [noteFor(prev.rep), noteFor(g.rep)].filter(function (n) { return n && !/^Sent back to Scheduling by .+\.$/.test(n); });
+        prev.rep = Object.assign({}, decision, { MergedNotes: notes.filter(function (n, i) { return notes.indexOf(n) === i; }).join(' ') });
+        prev.rows = prev.rows.concat(g.rows);
+      } else {
+        out.push(g);
+      }
+    });
+    return out;
+  }
+
+  /* Completar guardaba hasta 3 renglones: 'Completed' (lista por
+     servicio), 'Order Details Set' (Completed Date / Technician) y
+     'Completed' (estatus). Uno solo: 'Completed' con la fecha, quien y
+     la lista adentro. Si 'Order Details Set' trae otros campos, se
+     queda aparte. */
+  function completionOnly(h) {
+    if (String(h.ChangeType || '') !== 'Order Details Set') return false;
+    var parts = detailParts(h.Notes);
+    return parts.length > 0 && parts.every(function (p) { return p.label === 'Completed Date' || p.label === 'Technician'; });
+  }
+  function mergeCompletion(groups) {
+    var out = [];
+    groups.forEach(function (g) {
+      var isDone = String(g.rep.ChangeType || '') === 'Completed' && String(g.rep.FieldChanged || '') === 'Status';
+      if (!isDone) { out.push(g); return; }
+      var extra = [], rows = g.rows;
+      for (var k = 0; k < 2; k++) {
+        var prev = out[out.length - 1];
+        if (!prev || !sameMoment(prev.rep, g.rep)) break;
+        var pr = prev.rep;
+        var recap = String(pr.ChangeType || '') === 'Completed' && String(pr.FieldChanged || '') === 'PerServiceRecap';
+        if (completionOnly(pr)) {
+          detailParts(pr.Notes).forEach(function (p) {
+            if (!p.value || p.value === '(empty)') return;
+            extra.unshift(p.label === 'Completed Date' ? '📅 Completed: ' + esc(p.value) : '👤 Technician: ' + esc(p.value));
+          });
+        } else if (!recap) break;
+        rows = prev.rows.concat(rows);
+        out.pop();
+      }
+      out.push({ rep: Object.assign({}, g.rep, { _extraLines: extra }), rows: rows });
+    });
+    return out;
+  }
+
   /* --- API PUBLICA --- */
   function historyHtml(orderId, history, opts) {
     opts = opts || {};
@@ -894,12 +1075,24 @@
     var regressionTypes = opts.regressionTypes || [];
     var idPrefix = 'goh-' + String(orderId || '').replace(/[^a-z0-9]/gi, '_') + '-' + mode;
 
+    var ctxHidden = mode === 'client' ? clientHiddenByContext(history || []) : [];
     var rows = (history || []).filter(function (h) {
       if (ALWAYS_HIDDEN_TYPES.indexOf(String(h.ChangeType || '')) !== -1) return false;
       if (mode === 'client' && isHiddenFromClient(h)) return false;
+      if (mode === 'client' && ctxHidden.indexOf(h) !== -1) return false;
       if (mode === 'tech' && isHiddenFromTech(h)) return false;
       return true;
     });
+    if (mode === 'client') {
+      rows = rows.map(function (h) {
+        if (String(h.ChangeType || '') !== 'Order Details Set') return h;
+        return Object.assign({}, h, { Notes: clientDetailsNote(h.Notes) });
+      }).filter(function (h) { return String(h.ChangeType || '') !== 'Order Details Set' || h.Notes; });
+    }
+    rows = rows.map(function (h) {
+      return String(h.ChangeType || '') === 'Order Details Set' ? Object.assign({}, h, { Notes: prettyDetailsNote(h.Notes) }) : h;
+    });
+    rows = dropRedundantResolved(rows);
 
     if (!rows.length) return '<p class="empty-note">No history.</p>';
 
@@ -907,10 +1100,12 @@
     groups = mergeDecisionWithDetail(groups);
     groups = mergeRescheduleRequest(groups);
     groups = mergeMaterialsReadyWithDate(groups);
+    groups = mergeSchedulingPair(groups);
+    groups = mergeCompletion(groups);
 
     return groups.map(function (g, idx) {
       var h = g.rep;
-      var lines = g.rows.reduce(function (acc, row) { return acc.concat(detailLinesFor(row, catalog, mode)); }, []);
+      var lines = (h._extraLines || []).concat(g.rows.reduce(function (acc, row) { return acc.concat(detailLinesFor(row, catalog, mode)); }, []));
       /* No repetir la misma linea "antes -> despues" dos veces seguidas
          (la decision fusionada trae su propio detalle que puede calzar
          con el de la solicitud justo anterior). */
@@ -924,6 +1119,11 @@
       var hasDetail = lines.length > 0;
       var isRegression = regressionTypes.indexOf(String(h.ChangeType || '')) !== -1;
       var noteTxt = h.MergedNotes || noteFor(h);
+      /* Al cliente solo le sale ya completada: la frase de "la oficina
+         todavia tiene que confirmar" ya no aplica. */
+      if (mode === 'client' && String(h.ChangeType || '') === 'Tech Marked Complete') {
+        noteTxt = String(noteTxt || '').replace(/\s*The office still needs to confirm and close the order\.?/, '');
+      }
       /* Un segundo Update Services de campo arrastra las notas del
          primero (la oficina solo lee la solicitud mas reciente); aqui
          no se repiten las partes que ya salieron en la burbuja de
