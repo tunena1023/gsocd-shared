@@ -1,7 +1,9 @@
 (function () {
   'use strict';
 
-  if (window.GSOrderHistory) return;
+  /* Navegador (window) o Node (lib/order-pdf.js lo usa para el PDF). */
+  var root = typeof window !== 'undefined' ? window : {};
+  if (root.GSOrderHistory) return;
 
   /* ================================================================
      GSOrderHistory -- UNA SOLA pieza para armar el historial de una
@@ -39,19 +41,25 @@
     return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  /* En el navegador, la hora del equipo. En el servidor (PDF) se pasa
+     opts.timeZone ('America/Chicago'), si no saldria en UTC. */
+  var TZ_OPT;
+  function tzo(o) { if (TZ_OPT) o.timeZone = TZ_OPT; return o; }
   function fmtDateTime(iso) {
     if (!iso) return '';
     var d = new Date(iso);
     if (isNaN(d.getTime())) return '';
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ', ' +
-      d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    return d.toLocaleDateString('en-US', tzo({ month: 'short', day: 'numeric' })) + ', ' +
+      d.toLocaleTimeString('en-US', tzo({ hour: 'numeric', minute: '2-digit' }));
   }
 
   function fmtDate(iso) {
     if (!iso) return '';
-    var d = new Date(String(iso).length <= 10 ? iso + 'T12:00:00' : iso);
+    var dateOnly = String(iso).length <= 10;
+    var d = new Date(dateOnly ? iso + 'T12:00:00' + (TZ_OPT ? 'Z' : '') : iso);
     if (isNaN(d.getTime())) return String(iso);
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return d.toLocaleDateString('en-US', dateOnly && TZ_OPT ? { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }
+      : tzo({ month: 'short', day: 'numeric', year: 'numeric' }));
   }
   /* '06:00' (24h, como lo guarda EntryTime) -> '6:00 AM'. */
   function fmtTime24(t) {
@@ -1207,8 +1215,16 @@
   }
 
   /* --- API PUBLICA --- */
-  function historyHtml(orderId, history, opts) {
+  /* Los renglones ya agrupados, con su etiqueta, quien, nota y detalle,
+     segun el modo. historyHtml los pinta; el PDF (lib/order-pdf.js) los
+     imprime -- asi la app y el PDF dicen lo mismo a cada quien. */
+  function historyEntries(orderId, history, opts) {
     opts = opts || {};
+    var prevTz = TZ_OPT;
+    TZ_OPT = opts.timeZone || undefined;
+    try { return buildEntries(orderId, history, opts); } finally { TZ_OPT = prevTz; }
+  }
+  function buildEntries(orderId, history, opts) {
     var mode = (opts.mode === 'client' || opts.mode === 'tech') ? opts.mode : 'staff';
     function actorLabel(by) {
       by = String(by || '');
@@ -1222,7 +1238,6 @@
        con un brillo distinto, para que salte a la vista que ahi paso
        algo que vale la pena abrir y leer (no un avance normal mas). */
     var regressionTypes = opts.regressionTypes || [];
-    var idPrefix = 'goh-' + String(orderId || '').replace(/[^a-z0-9]/gi, '_') + '-' + mode;
 
     var ctx = mode === 'client' ? clientHiddenByContext(history || []) : { hidden: [], relabel: [], reveal: [] };
     var ctxHidden = ctx.hidden;
@@ -1257,7 +1272,7 @@
     /* Admin ve todos los renglones; esto solo limpia cliente y Tech. */
     if (mode !== 'staff') rows = dropRedundantResolved(rows);
 
-    if (!rows.length) return '<p class="empty-note">No history.</p>';
+    if (!rows.length) return [];
 
     var groups = groupDatesConfirmed(mergeServiceScheduled(rows));
     groups = mergeDecisionWithDetail(groups);
@@ -1297,25 +1312,58 @@
         var seen = {}; prevNote.split(' | ').forEach(function (x) { seen[x] = true; });
         noteTxt = noteTxt.split(' | ').filter(function (x) { return !seen[x]; }).join(' | ');
       }
+      return {
+        date: h.ChangeDate, dateText: fmtDateTime(h.ChangeDate),
+        type: String(h.ChangeType || ''), label: h._label || labelFor(h.ChangeType),
+        by: h.ChangedBy ? actorLabel(h.ChangedBy) : '',
+        note: noteTxt || '', lines: lines, regression: isRegression
+      };
+    });
+  }
+
+  function historyHtml(orderId, history, opts) {
+    opts = opts || {};
+    var mode = (opts.mode === 'client' || opts.mode === 'tech') ? opts.mode : 'staff';
+    var idPrefix = 'goh-' + String(orderId || '').replace(/[^a-z0-9]/gi, '_') + '-' + mode;
+    var list = historyEntries(orderId, history, opts);
+    if (!list.length) return '<p class="empty-note">No history.</p>';
+    return list.map(function (e, idx) {
+      var hasDetail = e.lines.length > 0;
       var detailId = idPrefix + '-' + idx;
-      return '<div class="goh-item' + (hasDetail ? ' has-detail' : '') + (isRegression ? ' goh-regression' : '') + '"' +
+      return '<div class="goh-item' + (hasDetail ? ' has-detail' : '') + (e.regression ? ' goh-regression' : '') + '"' +
         (hasDetail ? ' onclick="GSOrderHistory.toggleDetail(\'' + detailId + '\')"' : '') + '>' +
         '<div class="goh-head">' +
           '<div class="goh-head-main">' +
-            '<span class="goh-date">' + esc(fmtDateTime(h.ChangeDate)) + '</span>' +
+            '<span class="goh-date">' + esc(e.dateText) + '</span>' +
             '<span class="goh-rev">' + esc(orderId || '') + '</span> — ' +
-            '<span class="goh-type">' + esc(h._label || labelFor(h.ChangeType)) + '</span>' +
-            (h.ChangedBy ? '<span class="goh-by">by ' + esc(actorLabel(h.ChangedBy)) + '</span>' : '') +
+            '<span class="goh-type">' + esc(e.label) + '</span>' +
+            (e.by ? '<span class="goh-by">by ' + esc(e.by) + '</span>' : '') +
           '</div>' +
           (hasDetail ? '<span class="goh-toggle">&#9660; details</span>' : '') +
         '</div>' +
-        (noteTxt ? '<div class="goh-note">' + esc(noteTxt) + '</div>' : '') +
-        (hasDetail ? '<div id="' + detailId + '" class="goh-detail">' + lines.map(function (l) { return '<div class="goh-detail-line">' + l + '</div>'; }).join('') + '</div>' : '') +
+        (e.note ? '<div class="goh-note">' + esc(e.note) + '</div>' : '') +
+        (hasDetail ? '<div id="' + detailId + '" class="goh-detail">' + e.lines.map(function (l) { return '<div class="goh-detail-line">' + l + '</div>'; }).join('') + '</div>' : '') +
       '</div>';
     }).join('');
   }
 
+  /* Para el PDF: lo mismo, con el detalle en texto plano (sin HTML ni
+     iconos). */
+  function plainLine(l) {
+    return String(l || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+      .replace(/[\u2190-\u21FF\u2300-\u27BF\u2B00-\u2BFF\uFE0F]|[\uD83C-\uDBFF][\uDC00-\uDFFF]/g, function (ch) {
+        return ch === '\u2192' ? '->' : ch === '\u2795' ? '+' : ch === '\u2796' ? '-' : '';
+      }).replace(/\s+/g, ' ').trim();
+  }
+  function historyEntriesPlain(orderId, history, opts) {
+    return historyEntries(orderId, history, opts).map(function (e) {
+      return Object.assign({}, e, { lines: e.lines.map(plainLine).filter(Boolean) });
+    });
+  }
+
   function toggleDetail(id) {
+    if (typeof document === 'undefined') return;
     var el = document.getElementById(id);
     if (el) el.classList.toggle('open');
   }
@@ -1344,11 +1392,16 @@
       '.goh-detail-line{font-size:12px;margin:5px 0;line-height:1.5}';
     document.head.appendChild(style);
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', styleTag);
-  else styleTag();
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', styleTag);
+    else styleTag();
+  }
 
-  window.GSOrderHistory = {
+  var api = root.GSOrderHistory = {
     html: historyHtml,
+    /* 27/09/2026: los mismos renglones como datos (el PDF los imprime). */
+    entries: historyEntries,
+    entriesPlain: historyEntriesPlain,
     toggleDetail: toggleDetail,
     /* Publicos desde v1.33.0 -- antes eran privados de este modulo,
        cada portal que necesitaba leer un snapshot de servicios
@@ -1372,4 +1425,5 @@
        historial -- Admin lo usa para el "ultimo cambio" de la tarjeta. */
     label: labelFor
   };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })();
