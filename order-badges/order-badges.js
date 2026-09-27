@@ -61,6 +61,31 @@
     return '<span class="gs-now-badge ' + cls + '"><span class="gs-now-dot"></span>' + esc(st.text) + '</span>';
   }
 
+  /* "Unit ready" / "Materials ready" (27/09/2026, duenno: "que el tech
+     tambien vea"): el switch que prende el cliente en Orders, con el dia
+     y la hora a la que ya se puede entrar. Mismo criterio que Orders:
+     solo cuenta como listo con MaterialsReady + fecha + hora. Solo
+     Janitorial y Renovations. */
+  function fmtTime(t) {
+    const m = String(t || '').match(/^(\d{1,2}):(\d{2})/);
+    if (!m) return '';
+    const h = Number(m[1]);
+    return (h % 12 || 12) + ':' + m[2] + ' ' + (h < 12 ? 'AM' : 'PM');
+  }
+  function fmtDay(d) {
+    const m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) return '';
+    return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][Number(m[2]) - 1] + ' ' + Number(m[3]);
+  }
+  function ready(o) {
+    const div = String((o && o.Division) || '').toLowerCase();
+    if (div !== 'renovations' && div !== 'janitorial') return '';
+    if (!o.MaterialsReady || !o.ExpectedReadyDate || !o.EntryTime) return '';
+    const when = [fmtDay(o.ExpectedReadyDate), fmtTime(o.EntryTime)].filter(Boolean).join(', ');
+    return '<span class="gs-ready-badge"><span class="gs-ready-dot"></span>' + (div === 'janitorial' ? 'Unit ready' : 'Materials ready') +
+      (when ? ' \u2014 ' + esc(when) : '') + '</span>';
+  }
+
   function styleTag() {
     if (document.getElementById('gs-badges-style')) return;
     const style = document.createElement('style');
@@ -79,11 +104,14 @@
       'padding:3px 10px;border-radius:20px;white-space:nowrap}' +
       '.gs-now-open{background:#E4F3E8;color:#1F7A3F}' +
       '.gs-now-closed{background:#FBEAEA;color:#A6362D}' +
-      '.gs-now-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}';
+      '.gs-now-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}' +
+      '.gs-ready-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;' +
+      'letter-spacing:.03em;text-transform:uppercase;background:#FDF3E0;color:#8C6F2A;padding:3px 9px;border-radius:20px}' +
+      '.gs-ready-dot{width:6px;height:6px;border-radius:50%;background:#8C6F2A}';
     document.head.appendChild(style);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', styleTag);
   else styleTag();
 
-  window.GSOrderBadges = { occupied: occupied, officeNeed: officeNeed, officeNeedNote: officeNeedNote, nowOpen: nowOpen };
+  window.GSOrderBadges = { occupied: occupied, officeNeed: officeNeed, officeNeedNote: officeNeedNote, nowOpen: nowOpen, ready: ready };
 })();

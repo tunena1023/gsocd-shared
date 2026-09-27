@@ -2,6 +2,12 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag (commit en rama) — 2026-09-27 (aviso de unidad lista)
+
+- **order-badges**: nueva funcion `ready(o)` -- badge dorado "Unit ready — Sep 28, 10:30 AM" (Janitorial) /
+  "Materials ready — ..." (Renovations) con el switch que prende el cliente en Orders. Solo si MaterialsReady +
+  ExpectedReadyDate + EntryTime (mismo criterio que Orders). Pedido del dueño: "que el tech también vea".
+
 ## Sin tag (commit en rama) — 2026-09-26 (filtros compartidos)
 
 - **order-filters** (nuevo): la barra de ordenar/filtrar de Admin (Sort: Most recent change / Order number / Due date /
