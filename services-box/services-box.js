@@ -43,9 +43,11 @@
     '.gs-svb-body.open{display:block}' +
     /* editor */
     '.gs-svb .gs-sp-lvl-group,.gs-svb-ed .gs-sp-lvl-group{display:flex;border:1px solid var(--border,#E0D9CC);border-radius:20px;overflow:hidden;flex-shrink:0}' +
-    '.gs-svb .gs-sp-lvl-btn,.gs-svb-ed .gs-sp-lvl-btn{width:34px;height:26px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:4px 8px;font-size:10.5px;font-weight:700;cursor:pointer;background:var(--white,#fff);color:var(--gray,#6B6B6B);border-right:1px solid var(--border,#E0D9CC)}' +
+    '.gs-svb .gs-sp-lvl-btn,.gs-svb-ed .gs-sp-lvl-btn{width:34px;height:26px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:0;font-size:11px;font-weight:700;cursor:pointer;background:var(--white,#fff);color:var(--gray,#6B6B6B);border-right:1px solid var(--border,#E0D9CC)}' +
     '.gs-svb .gs-sp-lvl-btn:last-child,.gs-svb-ed .gs-sp-lvl-btn:last-child{border-right:none}' +
     '.gs-svb .gs-sp-lvl-btn.active,.gs-svb-ed .gs-sp-lvl-btn.active{background:var(--gold,#C9A84C);color:var(--black,#111)}' +
+    /* Mismos valores que admin.html (el diseno original de los pills). */
+    '.gs-svb .gs-sp-lvl-btn:hover:not(.active),.gs-svb-ed .gs-sp-lvl-btn:hover:not(.active){background:#F7F6F3}' +
     '.gs-svb .gs-sp-lvl-btn:focus-visible,.gs-svb-ed .gs-sp-lvl-btn:focus-visible{outline:2px solid var(--gold,#C9A84C);outline-offset:-2px}' +
     '.svc-remove-btn{background:none;border:none;color:var(--red,#c0392b);font-size:12px;cursor:pointer;padding:3px 6px}' + /* = admin.html */
     '.gs-svb-ed-tag{font-size:10.5px;color:var(--red,#c0392b);font-weight:700;text-transform:uppercase;letter-spacing:.04em}' +
@@ -209,6 +211,10 @@
          diffHtml: function (baseNames, nowNames) { return html }, // opcional
          reasonRequired: true, onChange,
          pencil: false,                 // opcional: sin lapiz, la X directa
+         reasonInline: false,           // opcional: la nota del quitado va en otro lado
+         otherDivisions: true,          // opcional: buscar tambien en otras divisiones
+         onRemove(i,row), onLevel(i,level,row), onQty(i,qty,row), onAdd(entry)
+                                        // opcional: modo controlado (quien lo usa guarda y re-monta)
          rowExtraHtml: function (row, i) { return html } })  // opcional: p.ej. camarita
        ed.collect() -> { ok, added:[{serviceName, level, qty}],
                          removed:[{serviceName, note}], levels:[{serviceName, from, to}],
@@ -252,7 +258,7 @@
       var qty = needsQty(r) && !r.removed ? '<span style="margin-right:14px;display:inline-flex;align-items:center;white-space:nowrap"><span style="font-size:10px;color:var(--gray,#6B6B6B);text-transform:uppercase;margin-right:4px">Qty</span>' +
         '<input type="number" min="1" step="1" inputmode="numeric" data-act="qty" data-i="' + i + '" value="' + esc(r.qty) + '" style="display:inline-block;width:48px;padding:5px 6px;border:1px solid var(--border,#E0DDD6);border-radius:4px;font-size:12px;text-align:center;font-family:inherit"></span>' : '';
       var m = r.removed ? null : mins(r);
-      var needNote = r.removed && o.reasonRequired !== false;
+      var needNote = r.removed && o.reasonRequired !== false && o.reasonInline !== false;
       var time = m != null ? '<span style="color:var(--gold-dk,#8C6F2A);font-weight:600;margin-right:14px">' + esc(fmtMin(m)) + '</span>' : '';
       var btn = r.removed
         ? '<button type="button" class="svc-remove-btn gs-svb-ed-undo" data-act="x" data-i="' + i + '" title="Undo" aria-label="Undo remove ' + esc(r.name) + '">&#8635;</button>'
@@ -264,7 +270,7 @@
         (r.removed ? '<br><span class="gs-svb-ed-tag">' + (needNote ? 'removed \u2014 note required' : 'removed') + '</span>' : '') + '</span>';
       var line = '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:13px">' + nameHtml +
         '<span style="display:flex;align-items:center">' + lv + qty + time + (o.rowExtraHtml ? o.rowExtraHtml(r, i) || '' : '') + btn + '</span></div>';
-      var why = r.open || r.removed
+      var why = (r.open || r.removed) && o.reasonInline !== false
         ? '<div class="gs-svb-ed-why"><textarea rows="2" class="gs-svb-note' + (needNote && !String(r.reason || '').trim() ? ' warn' : '') + '" data-act="why" data-i="' + i + '" placeholder="' +
             (needNote ? 'Required \u2014 explain why you want to remove it' : 'Note for the office \u2014 optional') + '" aria-label="Note for ' + esc(r.name) + '">' + esc(r.reason) + '</textarea></div>' : '';
       return '<div class="gs-svb-ed-row' + (needNote ? ' gs-svb-ed-removed' : '') + '">' + line + why + '</div>';
@@ -274,10 +280,17 @@
       var q = query.trim().toLowerCase();
       if (!q) return '';
       var have = {}; rows.forEach(function (r) { have[r.name] = true; });
-      var hits = catalog.filter(function (c) { return c.serviceName.toLowerCase().indexOf(q) !== -1 && !have[c.serviceName]; }).slice(0, 15);
+      var hits = catalog.filter(function (c) { return c.serviceName.toLowerCase().indexOf(q) !== -1 && !have[c.serviceName]; });
+      /* otherDivisions: tambien salen servicios de otras divisiones,
+         despues de los de la division que se edita y con su etiqueta
+         (Approvals de Admin, 25/09/2026). */
+      var div = String(o.division || '');
+      if (o.otherDivisions && div) hits.sort(function (x, y) { return (x.division === div ? 0 : 1) - (y.division === div ? 0 : 1); });
+      hits = hits.slice(0, 15);
       if (!hits.length) return '<div style="font-size:12px;color:#C9C5BA;font-style:italic;padding:4px 10px">No matches.</div>';
       return hits.map(function (c) {
-        return '<button type="button" class="gs-svb-ed-hit" data-act="add" data-name="' + esc(c.serviceName) + '"><span>' + esc(c.serviceName) + '</span><b>+ add</b></button>';
+        var tag = o.otherDivisions && div && c.division && c.division !== div ? ' <span class="sv-other-div">' + esc(c.division) + '</span>' : '';
+        return '<button type="button" class="gs-svb-ed-hit" data-act="add" data-name="' + esc(c.serviceName) + '"><span>' + esc(c.serviceName) + tag + '</span><b>+ add</b></button>';
       }).join('');
     }
     function names(list) { return list.map(function (r) { return r.name; }); }
@@ -322,6 +335,14 @@
 
     function act(b) {
       var a = b.getAttribute('data-act'), i = Number(b.getAttribute('data-i'));
+      /* Modo controlado (Admin): si trae onRemove/onLevel/onAdd, el
+         editor solo avisa; quien lo usa guarda en su propio estado y lo
+         vuelve a montar (asi Admin conserva sus reglas: Not Completed
+         con la nota a la derecha en Active, quitar directo en Approvals,
+         cambiar de division al agregar). */
+      if (a === 'x' && o.onRemove) { if (rows[i]) o.onRemove(i, rows[i]); return; }
+      if (a === 'lv' && o.onLevel) { if (rows[i]) o.onLevel(i, b.getAttribute('data-v'), rows[i]); return; }
+      if (a === 'add' && o.onAdd) { var ce = entry(b.getAttribute('data-name')); if (ce) o.onAdd(ce); return; }
       if (a === 'x') {
         var r = rows[i]; if (!r) return;
         if (r.existing) { r.removed = !r.removed; r.err = false; if (!r.removed) { r.open = false; r.reason = ''; } else r.open = true; } else rows.splice(i, 1);
@@ -341,12 +362,18 @@
       }
     }
     el.addEventListener('click', function (e) { var b = e.target.closest('[data-act]'); if (b && el.contains(b) && ['x', 'lv', 'add', 'pen', 'name'].indexOf(b.getAttribute('data-act')) !== -1) act(b); });
+    /* Cantidad en modo controlado: al terminar de escribir (change), no
+       en cada tecla, para no re-montar mientras se escribe. */
+    el.addEventListener('change', function (e) {
+      var t = e.target;
+      if (o.onQty && t.getAttribute && t.getAttribute('data-act') === 'qty') { var i = Number(t.getAttribute('data-i')); if (rows[i]) o.onQty(i, t.value, rows[i]); }
+    });
     el.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && /^(lv|name)$/.test(e.target.getAttribute('data-act') || '')) { e.preventDefault(); act(e.target); } });
     el.addEventListener('input', function (e) {
       var t = e.target, a = t.getAttribute && t.getAttribute('data-act'), i = Number(t.getAttribute('data-i'));
       if (a === 'q') { query = t.value; var box = el.querySelector('.gs-svb-ed-results'); if (box) box.innerHTML = resultsHtml(); }
       else if (a === 'why' && rows[i]) { rows[i].reason = t.value; if (rows[i].removed && o.reasonRequired !== false) t.classList.toggle('warn', !t.value.trim()); fire(); }
-      else if (a === 'qty' && rows[i]) { var n = parseInt(t.value, 10); rows[i].qty = n > 0 ? n : ''; el.querySelector('[data-part="est"]').innerHTML = estPart(); el.querySelector('[data-part="meta"]').textContent = metaText(); fire(); }
+      else if (a === 'qty' && rows[i] && !o.onQty) { var n = parseInt(t.value, 10); rows[i].qty = n > 0 ? n : ''; el.querySelector('[data-part="est"]').innerHTML = estPart(); el.querySelector('[data-part="meta"]').textContent = metaText(); fire(); }
     });
 
     var ctrl = {
