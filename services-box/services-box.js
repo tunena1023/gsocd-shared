@@ -231,7 +231,7 @@
       /* removed/note/added/Level0: para reabrir un cambio a medias
          (p.ej. al regresar de la camara en Tech). */
       return { name: sv.ServiceName || '', cat: sv.Category || '', sku: sv.SubOption || '', level: sv.Level || '', level0: sv.Level0 != null ? sv.Level0 : (sv.Level || ''), qty: sv.Quantity || '',
-        existing: !sv.added, removed: !!sv.removed, reason: sv.note || '', open: !!sv.removed };
+        existing: !sv.added, removed: !!sv.removed, reason: sv.note || '', open: !!sv.removed || !!String(sv.note || '').trim() };
     });
     var query = '';
     var catalog = (o.catalog || []).filter(function (c) { return c && c.serviceName && (!o.catalogFilter || o.catalogFilter(c)); });
