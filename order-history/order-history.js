@@ -1095,9 +1095,24 @@
       return k === -1 ? { label: '', value: seg } : { label: seg.slice(0, k), value: seg.slice(k + 2) };
     });
   }
+  /* Motivo de retraso (Admin > Edit): el cliente ya lo ve en el aviso de
+     Orders y en el PDF, y es el "por que no fuimos". Ve el motivo; la
+     nota solo cuando la causa es de su lado (misma lista que el cargo
+     del PDF) -- en "Rescheduled by us" la nota puede traer el motivo
+     interno. Borrarlo ("(cleared ...)") no se le dice. */
+  var CLIENT_CAUSE_DELAYS = ['Site not ready', 'Rescheduled by client'];
   function clientDetailsNote(notes) {
-    return detailParts(notes).filter(function (p) { return CLIENT_DETAIL_FIELDS.indexOf(p.label) !== -1; })
-      .map(function (p) { return p.label + ': ' + p.value; }).join('  ·  ');
+    var parts = detailParts(notes);
+    var delay = (parts.filter(function (p) { return p.label === 'Delay Reason'; })[0] || {}).value || '';
+    var delayShown = delay && delay.charAt(0) !== '(' && delay !== '(empty)';
+    return parts.filter(function (p) {
+      if (p.label === 'Delay Reason') return delayShown;
+      if (p.label === 'Delay Reason Notes') return delayShown && CLIENT_CAUSE_DELAYS.indexOf(delay) !== -1 && p.value !== '(empty)';
+      return CLIENT_DETAIL_FIELDS.indexOf(p.label) !== -1;
+    }).map(function (p) {
+      var l = p.label === 'Delay Reason' ? 'Delay' : p.label === 'Delay Reason Notes' ? 'Note' : p.label;
+      return l + ': ' + p.value;
+    }).join('  ·  ');
   }
   /* Las fechas de solo dia llegan crudas ("2026-10-08"). */
   function prettyDetailsNote(notes) {
@@ -1220,7 +1235,7 @@
         var cn = clientDetailsNote(h.Notes);
         var labels = cn ? detailParts(cn).map(function (p) { return p.label; }) : [];
         var onlyWho = labels.length && labels.every(function (l) { return l === 'Supervisor'; });
-        var onlySched = labels.length && labels.every(function (l) { return ['Dispatch Date', 'Service Window', 'Entry Date', 'Due Date', 'Supervisor'].indexOf(l) !== -1; });
+        var onlySched = labels.length && labels.every(function (l) { return ['Dispatch Date', 'Service Window', 'Entry Date', 'Due Date', 'Supervisor', 'Delay', 'Note'].indexOf(l) !== -1; });
         return Object.assign({}, h, { Notes: cn.replace(/(^|  ·  )Dispatch Date: /g, '$1Visit date: ').replace(/(^|  ·  )Supervisor: /g, '$1Assigned to: '),
           _label: onlyWho ? 'Reassigned' : onlySched ? 'Schedule updated' : undefined });
       }).filter(function (h) { return String(h.ChangeType || '') !== 'Order Details Set' || h.Notes; });
@@ -1228,7 +1243,8 @@
     rows = rows.map(function (h) {
       return String(h.ChangeType || '') === 'Order Details Set' ? Object.assign({}, h, { Notes: prettyDetailsNote(h.Notes) }) : h;
     });
-    rows = dropRedundantResolved(rows);
+    /* Admin ve todos los renglones; esto solo limpia cliente y Tech. */
+    if (mode !== 'staff') rows = dropRedundantResolved(rows);
 
     if (!rows.length) return '<p class="empty-note">No history.</p>';
 
