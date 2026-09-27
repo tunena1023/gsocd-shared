@@ -778,7 +778,11 @@
       } else {
         out.push(Object.assign({}, first, {
           _svcBatch: { groups: groups },
-          _label: nPeople === 1
+          /* Cliente: si la tanda cambia algo ya programado (ver
+             clientHiddenByContext), se llama como tal. */
+          _label: sched.some(function (x) { return x.h._label; })
+            ? 'Schedule updated · ' + total + ' services'
+            : nPeople === 1
             ? 'Scheduled for ' + groups[0].assigned + ' · ' + total + ' services'
             : 'Services scheduled · ' + total + ' services · ' + nPeople + ' people'
         }));
@@ -909,21 +913,23 @@
   }
 
   /* --- Reglas del cliente que dependen de lo que paso antes/despues
-     (27/09/2026, dueño, punto por punto):
-       1. Sugerencia del supervisor ('Supervisor Update'): oculta.
-       2. La decision de la oficina sobre algo que el cliente no vio
-          (sugerencia del supervisor, "no esta listo" de la cuadrilla,
-          cambio interno): oculta. Si no, veia "Change approved" de
-          algo que nunca le salio.
-       3. 'Tech Marked Complete': oculta hasta que la oficina marca la
-          orden Completed.
-       4. 'Reopened by Tech': interno.
-       5. 'Division Changed': interno.
-       6. Mandar a Scheduling (Reschedule): solo si lo empezo el
-          cliente porque algo no estaba listo (ocupado, apago el switch,
-          contesto "No" al correo del dia antes).
+     (27/09/2026, dueño, recorriendo una orden completa): el cliente ve
+     lo que el hizo, lo que le pedimos o contestamos, cuando vamos, a
+     quien mandamos, que vamos a hacer y por que fuimos o no fuimos. El
+     motivo interno no (alguien no llego, se dio de baja, revision de
+     oficina); lo que resulta si (la nueva asignacion, el cambio
+     aprobado).
+       - Cada asignacion, aunque sea la misma persona.
+       - "Tech marked their work done": nunca; le sale el completado
+         cuando la oficina confirma.
+       - "No estaba listo" de la cuadrilla: cuando la oficina lo acepta.
+       - Sugerencia del supervisor: cuando la oficina la aprueba, con su
+         nombre y la aprobacion. Descartada o rechazada: nada.
+       - Mandar a programar otra vez: si fue por algo de su lado.
+       - 'Reopened by Tech', 'Division Changed', 'Extra Requested' y los
+         movimientos de estatus internos: no.
      Se calcula sobre el historial COMPLETO (antes de filtrar), porque
-     la regla 2 necesita ver la solicitud aunque el cliente no la vea. --- */
+     hace falta ver la solicitud aunque el cliente no la vea. --- */
   var RESOLVE_TYPES = ['Change Reassigned', 'Change Rejected', 'Change Request Cancelled'];
   var CLIENT_NOT_READY = ['Occupied Unit Reported', 'Materials Ready Cancelled', 'Site Not Ready Reported'];
   /* Estatus que la oficina mueve por dentro (regresar a programar,
@@ -947,31 +953,31 @@
     return null;
   }
   function clientHiddenByContext(all) {
-    var hidden = [], relabel = [], reveal = [], lastCompleted = -1;
-    /* Lo que el cliente ya vio de la visita: si una reasignacion no
-       cambia fecha ni horario (solo la persona), no la ve. Si cambia,
-       la ve como "Schedule updated". Igual por servicio. */
+    var hidden = [], relabel = [], reveal = [];
+    /* Cada asignacion la ve (dueño: "el cliente necesita saber cuando
+       vamos, a quien planeamos meter"), aunque sea la misma persona; lo
+       que no ve es el motivo interno (Technician Unavailable, etc.).
+       Las que siguen a la primera se llaman "Schedule updated" si cambia
+       el dia o el horario, "Reassigned" si solo cambia la persona. */
     var seen = null, svcSeen = {};
-    all.forEach(function (h, i) {
-      if (String(h.ChangeType || '') === 'Completed' && String(h.FieldChanged || '') === 'Status') lastCompleted = i;
-    });
-    var pendingHidden = false, notReadyByClient = false, pendingReq = null;
+    var notReadyByClient = false, pendingReq = null;
+    function dropPending() { pendingReq = null; }
     all.forEach(function (h, i) {
       var ct = String(h.ChangeType || ''), fc = String(h.FieldChanged || '');
-      if (ct === 'Change Requested' || ct === 'Services Change Requested' || ct === 'Service Change Requested') {
-        pendingHidden = fc === 'Supervisor Update' || isHiddenFromClient(h);
-        if (fc === 'Supervisor Update') hidden.push(h);
-        pendingReq = fc === 'Supervisor Update' ? { row: h, kind: 'services' }
-          : fc === 'Delay Reason' ? { row: h, kind: 'notready' } : null;
+      if (ct === 'Change Requested' || ct === 'Services Change Requested' || ct === 'Service Change Requested' || ct === 'Reschedule Requested') {
+        if (fc === 'Supervisor Update') { hidden.push(h); pendingReq = { row: h, kind: 'services' }; }
+        else if (fc === 'Delay Reason') pendingReq = { row: h, kind: 'notready' };
+        else if (isHiddenFromClient(h)) pendingReq = { row: h, kind: 'internal' };
+        else if (!pendingReq || pendingReq.kind !== 'client') pendingReq = { row: h, kind: 'client' };
       }
-      if (ct === 'Tech Marked Complete' && lastCompleted < i) hidden.push(h);
+      /* Solo cuando la oficina confirma le sale el completado. */
+      if (ct === 'Tech Marked Complete') hidden.push(h);
       if (ct === 'Reopened by Tech' || ct === 'Division Changed' || ct === 'Extra Requested') hidden.push(h);
       if (OFFICE_ONLY_TYPES.indexOf(ct) !== -1) hidden.push(h);
       if (fc === 'Status' && CLIENT_HIDDEN_STATUS.indexOf(ct) !== -1) hidden.push(h);
       if (ct === 'Order Assigned') {
         var sc = schedOf(h) || { date: '', window: '' };
-        if (seen && sc.date === seen.date && sc.window === seen.window) hidden.push(h);
-        else if (seen) relabel.push(h);
+        if (seen) relabel.push({ row: h, label: (sc.date !== seen.date || sc.window !== seen.window) ? 'Schedule updated' : 'Reassigned' });
         seen = sc;
       }
       if (ct === 'Order Details Set') {
@@ -982,8 +988,7 @@
         var sv = null; try { sv = JSON.parse(h.NewValue || 'null'); } catch (e) {}
         if (sv && sv.serviceName) {
           var d = sv.date ? fmtDate(sv.date) : '';
-          if (svcSeen[sv.serviceName] != null && svcSeen[sv.serviceName] === d) hidden.push(h);
-          else if (svcSeen[sv.serviceName] != null) relabel.push(h);
+          if (svcSeen[sv.serviceName] != null) relabel.push({ row: h, label: svcSeen[sv.serviceName] !== d ? 'Schedule updated' : 'Reassigned' });
           svcSeen[sv.serviceName] = d;
         }
       }
@@ -1000,40 +1005,50 @@
       }
       if (CLIENT_NOT_READY.indexOf(ct) !== -1) notReadyByClient = true;
       if (ct === 'Order Assigned' || ct === 'Materials Ready' || ct === 'Site Ready Confirmed') notReadyByClient = false;
-      /* Lo que la cuadrilla encontro y SI le cambia algo al cliente
-         (dueño, 27/09): sin el nombre del supervisor ni la decision de
-         la oficina.
-           - "no estaba listo" que termino en reprogramar -> "Site not
-             ready at our visit" con el motivo (luego sale "Schedule
-             updated" con la fecha nueva).
-           - cambio de servicios del supervisor que la oficina aprobo ->
-             "Services updated" con lo que cambio y el motivo. */
-      if (ct === 'Scheduling' || ct === 'Sent to Scheduling') {
-        if (!notReadyByClient) hidden.push(h);
-        if (pendingReq && pendingReq.kind === 'notready' && !notReadyByClient) {
-          var reason = String(pendingReq.row.Notes || '').replace(/^Reported by .+?:\s*/, '');
-          reveal.push({ row: pendingReq.row, patch: { _label: 'Site not ready at our visit', ChangedBy: '', MergedNotes: reason } });
-        }
-        pendingHidden = false; pendingReq = null;
+
+      /* Lo que reporta la cuadrilla (dueño, 27/09):
+           - "no estaba listo": lo ve cuando la oficina lo acepta
+             (reprograma o mantiene la visita), con quien y el motivo --
+             tiene que saber por que fuimos y no trabajamos. Si la
+             oficina lo descarta, no ve nada.
+           - sugerencia del supervisor: cuando la oficina la aprueba, ve
+             "Change suggested" (quien, que cambia, el motivo) y "Change
+             approved" con la nota de la oficina. Si no se aprueba, nada. */
+      var accepted = pendingReq && pendingReq.kind === 'notready' &&
+        (ct === 'Scheduling' || ct === 'Sent to Scheduling' || ct === 'Change Reassigned');
+      if (accepted && !notReadyByClient) {
+        var reason = String(pendingReq.row.Notes || '').replace(/^Reported by .+?:\s*/, '');
+        reveal.push({ row: pendingReq.row, patch: { _label: 'Site not ready at our visit', MergedNotes: reason } });
       }
-      if (RESOLVE_TYPES.indexOf(ct) !== -1 || ct === 'Change Approved') {
-        if (pendingHidden) hidden.push(h);
-        if (pendingReq && pendingReq.kind === 'services' && (ct === 'Change Reassigned' || ct === 'Change Approved')) {
-          reveal.push({ row: pendingReq.row, patch: { _label: 'Services updated', ChangedBy: '', ChangeDate: h.ChangeDate } });
+      if (ct === 'Scheduling' || ct === 'Sent to Scheduling') {
+        /* Mandar a programar otra vez: lo ve si fue por algo de su lado
+           (el lo pidio, o no estaba listo); por algo interno, no -- vera
+           la nueva asignacion. */
+        var why = pendingReq ? pendingReq.kind : '';
+        if (!(notReadyByClient || why === 'client' || why === 'notready')) hidden.push(h);
+        if (ct === 'Sent to Scheduling') dropPending();
+      } else if (RESOLVE_TYPES.indexOf(ct) !== -1 || ct === 'Change Approved') {
+        var kind = pendingReq ? pendingReq.kind : '';
+        var approved = ct === 'Change Reassigned' || ct === 'Change Approved';
+        if (kind === 'services' && approved) {
+          reveal.push({ row: pendingReq.row, patch: { _label: 'Change suggested' } });
+        } else if (kind === 'services' || kind === 'notready' || kind === 'internal') {
+          hidden.push(h);
         }
-        pendingHidden = false; pendingReq = null;
+        dropPending();
       }
     });
     return { hidden: hidden, relabel: relabel, reveal: reveal };
   }
 
+
   /* 'Order Details Set' (Admin > Edit) junta varios campos en un solo
      texto "Campo: valor  ·  Campo: valor". Al cliente se le colaban
      las notas internas (Delay Reason, Delay Reason Notes, Scheduling,
-     Supervisor...) porque el filtro por campo solo ve renglones
+     Notes...) porque el filtro por campo solo ve renglones
      sueltos. Al cliente solo le quedan estos; si no queda nada, el
      renglon no sale. */
-  var CLIENT_DETAIL_FIELDS = ['Entry Date', 'Due Date', 'Service Window', 'Dispatch Date', 'Completed Date', 'Technician', 'Services'];
+  var CLIENT_DETAIL_FIELDS = ['Entry Date', 'Due Date', 'Service Window', 'Dispatch Date', 'Supervisor', 'Completed Date', 'Technician', 'Services'];
   function detailParts(notes) {
     return String(notes || '').split('  ·  ').map(function (seg) {
       var k = seg.indexOf(': ');
@@ -1160,11 +1175,14 @@
     });
     if (mode === 'client') {
       rows = rows.map(function (h) {
-        if (ctx.relabel.indexOf(h) !== -1) return Object.assign({}, h, { _label: 'Schedule updated' });
+        for (var q = 0; q < ctx.relabel.length; q++) if (ctx.relabel[q].row === h) return Object.assign({}, h, { _label: ctx.relabel[q].label });
         if (String(h.ChangeType || '') !== 'Order Details Set') return h;
         var cn = clientDetailsNote(h.Notes);
-        var onlySched = cn && detailParts(cn).every(function (p) { return ['Dispatch Date', 'Service Window', 'Entry Date', 'Due Date'].indexOf(p.label) !== -1; });
-        return Object.assign({}, h, { Notes: cn.replace(/(^|  ·  )Dispatch Date: /g, '$1Visit date: '), _label: onlySched ? 'Schedule updated' : undefined });
+        var labels = cn ? detailParts(cn).map(function (p) { return p.label; }) : [];
+        var onlyWho = labels.length && labels.every(function (l) { return l === 'Supervisor'; });
+        var onlySched = labels.length && labels.every(function (l) { return ['Dispatch Date', 'Service Window', 'Entry Date', 'Due Date', 'Supervisor'].indexOf(l) !== -1; });
+        return Object.assign({}, h, { Notes: cn.replace(/(^|  ·  )Dispatch Date: /g, '$1Visit date: ').replace(/(^|  ·  )Supervisor: /g, '$1Assigned to: '),
+          _label: onlyWho ? 'Reassigned' : onlySched ? 'Schedule updated' : undefined });
       }).filter(function (h) { return String(h.ChangeType || '') !== 'Order Details Set' || h.Notes; });
     }
     rows = rows.map(function (h) {
