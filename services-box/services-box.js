@@ -47,10 +47,15 @@
     '.gs-svb .gs-sp-lvl-btn:last-child{border-right:none}' +
     '.gs-svb .gs-sp-lvl-btn.active{background:var(--gold,#C9A84C);color:var(--black,#111)}' +
     '.gs-svb .gs-sp-lvl-btn:focus-visible{outline:2px solid var(--gold,#C9A84C);outline-offset:-2px}' +
-    '.gs-svb-x{background:none;border:none;color:var(--red,#c0392b);font-size:12px;cursor:pointer;padding:3px 6px}' +
+    '.svc-remove-btn{background:none;border:none;color:var(--red,#c0392b);font-size:12px;cursor:pointer;padding:3px 6px}' + /* = admin.html */
     '.gs-svb-ed-tag{font-size:10.5px;color:var(--red,#c0392b);font-weight:700;text-transform:uppercase;letter-spacing:.04em}' +
-    '.gs-svb-ed-removed{background:#FBEAEA;margin:0 -10px;padding:0 10px;border-bottom:1px solid var(--border,#E0DDD6)}' +
+    '.gs-svb-ed-row{border-bottom:1px solid var(--border,#E0DDD6)}' +
+    '.gs-svb-ed-name[data-act]{cursor:pointer}' +
+    '.svc-remove-btn.gs-svb-ed-pen{color:var(--gold-dk,#8C6F2A)}' +
+    '.svc-remove-btn.gs-svb-ed-undo{color:var(--gray,#6B6B6B)}' +
+    '.gs-svb-ed-removed{background:#FBEAEA;margin:0 -10px;padding:0 10px}' +
     '.gs-svb-ed-why{padding:0 0 10px}' +
+    '.gs-svb-ed-why textarea{display:block;resize:vertical;min-height:40px}' +
     '.gs-svb-note{width:100%;box-sizing:border-box;border:1.5px solid var(--border,#E0DDD6);border-radius:5px;padding:7px 10px;font-size:12.5px;font-family:inherit;color:var(--black,#111);background:var(--bg,var(--off,#F8F7F4));outline:none}' +
     '.gs-svb-note:focus{border-color:var(--gold,#C9A84C);background:var(--white,#fff)}' +
     '.gs-svb-note::placeholder{color:#A9A49A}' +
@@ -204,7 +209,8 @@
          diffHtml: function (baseNames, nowNames) { return html }, // opcional
          reasonRequired: true, onChange })
        ed.collect() -> { ok, added:[{serviceName, level, qty}],
-                         removed:[{serviceName, note}], levels:[{serviceName, from, to}] }
+                         removed:[{serviceName, note}], levels:[{serviceName, from, to}],
+                         notes:[{serviceName, note}] }  // notas del lapiz
        ed.changed() */
   function fmtMin(m) { if (m == null) return ''; var h = Math.floor(m / 60), r = Math.round(m % 60); return h && r ? h + 'h ' + r + 'min' : h ? h + 'h' : r + 'min'; }
   function editor(o) {
@@ -224,24 +230,38 @@
     function mins(r) { return o.minutesOf ? o.minutesOf(skuOf(r), r.level, r.qty) : null; }
     function live() { return rows.filter(function (r) { return !r.removed; }); }
 
+    /* 27/09/2026 (dueno): renglon parejo -- nombre a la izquierda (si
+       es largo se parte en dos lineas) y niveles/tiempo/boton siempre a
+       la derecha en la misma linea, alineados en todos los renglones.
+       Lapiz: abre la nota abajo del servicio (opcional) y en su lugar
+       sale la X; la X lo quita (rosa, nota obligatoria, como "Selected
+       for this order" de Admin). Tap en el nombre cierra la caja, borra
+       la nota y regresa el lapiz. */
     function rowHtml(r, i) {
-      var lv = isJan(r) && !r.removed ? '<div class="gs-sp-lvl-group gs-svb-lv" style="margin-right:14px">' + ['Level 1', 'Level 2', 'Level 3'].map(function (l, k) {
+      /* Mismo renglon que renderApprSvcEditable de Admin: flex, nombre a
+         la izquierda, controles a la derecha, sin anchos fijos. */
+      var lv = isJan(r) && !r.removed ? '<div class="gs-sp-lvl-group" style="margin-right:14px">' + ['Level 1', 'Level 2', 'Level 3'].map(function (l, k) {
         return '<div class="gs-sp-lvl-btn' + (r.level === l ? ' active' : '') + '" role="button" tabindex="0" data-act="lv" data-i="' + i + '" data-v="' + l + '">L' + (k + 1) + '</div>';
       }).join('') + '</div>' : '';
       var qty = needsQty(r) && !r.removed ? '<span style="margin-right:14px"><span style="font-size:10px;color:var(--gray,#6B6B6B);text-transform:uppercase;margin-right:4px">Qty</span>' +
         '<input type="number" min="1" step="1" inputmode="numeric" data-act="qty" data-i="' + i + '" value="' + esc(r.qty) + '" style="width:48px;padding:5px 6px;border:1px solid var(--border,#E0DDD6);border-radius:4px;font-size:12px;text-align:center;font-family:inherit"></span>' : '';
       var m = r.removed ? null : mins(r);
       var needNote = r.removed && o.reasonRequired !== false;
-      var tag = r.removed ? '<span class="gs-svb-ed-tag" style="margin-right:14px">' + (needNote ? 'removed \u2014 note required' : 'removed') + '</span>' : (m != null ? '<span style="color:var(--gold-dk,#8C6F2A);font-weight:600;margin-right:14px">' + esc(fmtMin(m)) + '</span>' : '');
-      var x = '<button type="button" class="svc-remove-btn gs-svb-x" data-act="x" data-i="' + i + '" title="' + (r.removed ? 'Undo' : 'Remove') + '" aria-label="' + (r.removed ? 'Undo remove ' : 'Remove ') + esc(r.name) + '">' + (r.removed ? '&#8635;' : '&#10005;') + '</button>';
-      /* Quitado: como "Selected for this order" de Admin -- renglon rosa,
-         "removed -- note required" y la nota obligatoria con borde rojo. */
-      var why = needNote
-        ? '<div class="gs-svb-ed-why"><input type="text" class="gs-svb-note' + (String(r.reason || '').trim() ? '' : ' warn') + '" data-act="why" data-i="' + i + '" placeholder="Required \u2014 explain why you want to remove it" aria-label="Why remove ' + esc(r.name) + '" value="' + esc(r.reason) + '"></div>' : '';
-      var line = '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;font-size:13px;flex-wrap:wrap' + (needNote ? '' : ';border-bottom:1px solid var(--border,#E0DDD6)') + (r.removed && !needNote ? ';opacity:.6' : '') + '">' +
+      var time = m != null ? '<span style="color:var(--gold-dk,#8C6F2A);font-weight:600;margin-right:14px">' + esc(fmtMin(m)) + '</span>' : '';
+      var btn = r.removed
+        ? '<button type="button" class="svc-remove-btn gs-svb-ed-undo" data-act="x" data-i="' + i + '" title="Undo" aria-label="Undo remove ' + esc(r.name) + '">&#8635;</button>'
+        : r.open
+          ? '<button type="button" class="svc-remove-btn" data-act="x" data-i="' + i + '" title="Remove" aria-label="Remove ' + esc(r.name) + '">&#10005;</button>'
+          : '<button type="button" class="svc-remove-btn gs-svb-ed-pen" data-act="pen" data-i="' + i + '" title="Add a note" aria-label="Add a note for ' + esc(r.name) + '">&#9998;</button>';
+      var nameHtml = '<span' + (r.open && !r.removed ? ' class="gs-svb-ed-name" data-act="name" data-i="' + i + '" role="button" tabindex="0" title="Close the note"' : '') + '>' +
         '<span' + (r.removed ? ' style="text-decoration:line-through"' : '') + '>' + esc(r.name) + '</span>' +
-        '<span style="display:flex;align-items:center;flex-wrap:wrap;justify-content:flex-end">' + lv + qty + tag + x + '</span></div>';
-      return needNote ? '<div class="gs-svb-ed-removed">' + line + why + '</div>' : line;
+        (r.removed ? '<br><span class="gs-svb-ed-tag">' + (needNote ? 'removed \u2014 note required' : 'removed') + '</span>' : '') + '</span>';
+      var line = '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:13px">' + nameHtml +
+        '<span style="display:flex;align-items:center">' + lv + qty + time + btn + '</span></div>';
+      var why = r.open || r.removed
+        ? '<div class="gs-svb-ed-why"><textarea rows="2" class="gs-svb-note' + (needNote && !String(r.reason || '').trim() ? ' warn' : '') + '" data-act="why" data-i="' + i + '" placeholder="' +
+            (needNote ? 'Required \u2014 explain why you want to remove it' : 'Note for the office \u2014 optional') + '" aria-label="Note for ' + esc(r.name) + '">' + esc(r.reason) + '</textarea></div>' : '';
+      return '<div class="gs-svb-ed-row' + (needNote ? ' gs-svb-ed-removed' : '') + '">' + line + why + '</div>';
     }
 
     function resultsHtml() {
@@ -291,15 +311,20 @@
       el.querySelector('[data-part="meta"]').textContent = metaText();
       if (keepSearchFocus) { var qi = el.querySelector('[data-act="q"]'); if (qi) qi.focus(); }
     }
-    function changedFn() { return rows.some(function (r) { return !r.existing || r.removed || (r.existing && r.level !== r.level0); }); }
+    function changedFn() { return rows.some(function (r) { return !r.existing || r.removed || (r.existing && r.level !== r.level0) || !!String(r.reason || '').trim(); }); }
     function fire() { if (typeof o.onChange === 'function') o.onChange(ctrl); }
 
     function act(b) {
       var a = b.getAttribute('data-act'), i = Number(b.getAttribute('data-i'));
       if (a === 'x') {
         var r = rows[i]; if (!r) return;
-        if (r.existing) { r.removed = !r.removed; r.err = false; } else rows.splice(i, 1);
+        if (r.existing) { r.removed = !r.removed; r.err = false; if (!r.removed) { r.open = false; r.reason = ''; } else r.open = true; } else rows.splice(i, 1);
         refresh(); fire();
+      } else if (a === 'pen') {
+        rows[i].open = true; refresh(); fire();
+        var t = el.querySelector('[data-act="why"][data-i="' + i + '"]'); if (t) t.focus();
+      } else if (a === 'name') {
+        rows[i].open = false; rows[i].reason = ''; refresh(); fire();
       } else if (a === 'lv') {
         rows[i].level = b.getAttribute('data-v'); refresh(); fire();
       } else if (a === 'add') {
@@ -308,12 +333,12 @@
         query = ''; refresh(true); fire();
       }
     }
-    el.addEventListener('click', function (e) { var b = e.target.closest('[data-act]'); if (b && el.contains(b) && ['x', 'lv', 'add'].indexOf(b.getAttribute('data-act')) !== -1) act(b); });
-    el.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && e.target.getAttribute('data-act') === 'lv') { e.preventDefault(); act(e.target); } });
+    el.addEventListener('click', function (e) { var b = e.target.closest('[data-act]'); if (b && el.contains(b) && ['x', 'lv', 'add', 'pen', 'name'].indexOf(b.getAttribute('data-act')) !== -1) act(b); });
+    el.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && /^(lv|name)$/.test(e.target.getAttribute('data-act') || '')) { e.preventDefault(); act(e.target); } });
     el.addEventListener('input', function (e) {
       var t = e.target, a = t.getAttribute && t.getAttribute('data-act'), i = Number(t.getAttribute('data-i'));
       if (a === 'q') { query = t.value; var box = el.querySelector('.gs-svb-ed-results'); if (box) box.innerHTML = resultsHtml(); }
-      else if (a === 'why' && rows[i]) { rows[i].reason = t.value; t.classList.toggle('warn', !t.value.trim()); }
+      else if (a === 'why' && rows[i]) { rows[i].reason = t.value; if (rows[i].removed && o.reasonRequired !== false) t.classList.toggle('warn', !t.value.trim()); fire(); }
       else if (a === 'qty' && rows[i]) { var n = parseInt(t.value, 10); rows[i].qty = n > 0 ? n : ''; el.querySelector('[data-part="est"]').innerHTML = estPart(); el.querySelector('[data-part="meta"]').textContent = metaText(); fire(); }
     });
 
@@ -327,7 +352,8 @@
           ok: ok,
           added: rows.filter(function (r) { return !r.existing; }).map(function (r) { return { serviceName: r.name, level: r.level || '', qty: r.qty || '' }; }),
           removed: rows.filter(function (r) { return r.removed; }).map(function (r) { return { serviceName: r.name, note: String(r.reason || '').trim() }; }),
-          levels: rows.filter(function (r) { return r.existing && !r.removed && r.level !== r.level0; }).map(function (r) { return { serviceName: r.name, from: r.level0, to: r.level }; })
+          levels: rows.filter(function (r) { return r.existing && !r.removed && r.level !== r.level0; }).map(function (r) { return { serviceName: r.name, from: r.level0, to: r.level }; }),
+          notes: rows.filter(function (r) { return !r.removed && String(r.reason || '').trim(); }).map(function (r) { return { serviceName: r.name, note: String(r.reason).trim() }; })
         };
       }
     };
