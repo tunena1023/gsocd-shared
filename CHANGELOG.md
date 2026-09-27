@@ -2,6 +2,17 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## v1.45.0 — 2026-09-27 (el sitio está listo: avisos a la oficina y confirmación un día antes)
+
+- **lib/site-readiness.js** (nuevo, backend): `require('gsocd-shared/lib/site-readiness')(graph, notify)`. Reglas del
+  dueño: correo a la oficina cada vez que el cliente marca listo; apagar el switch dentro de 24 h = error (sin
+  alerta); después de 24 h con técnico programado = alerta en Review + correo; fecha de listo después de la visita =
+  alerta + correo. `morning()`: un día hábil antes de la visita (viernes pregunta sáb/dom/lun) le manda al cliente
+  "Is the site ready?" -- no si ya marcó listo antes de la visita; sin recurrentes (dueño sin decidir). `noon()`:
+  sin respuesta a mediodía = alerta "No answer" + correo. `answerVisit()`: Yes / No (con nota) desde el portal.
+- **lib/notify.js**: plantilla de cliente `visit-check` (categoría confirmations) y de oficina `site-readiness`
+  (ready / not-ready / late-ready / visit-no / no-answer). Trae también el tipo `declined` que solo tenía Orders.
+
 ## v1.44.0 — 2026-09-27 (el PDF de ordenes, una sola pieza)
 
 - **lib/order-pdf.js** (backend, Node): ahora es EL generador completo del PDF de ordenes (documento de la orden,
