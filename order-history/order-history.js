@@ -1004,6 +1004,9 @@
        de historial por llamada (h), igual que ya usa este archivo
        internamente -- el llamador decide como agrupar/deduplicar si
        hace falta, esta funcion no lo hace por su cuenta. */
-    detailLines: detailLinesFor
+    detailLines: detailLinesFor,
+    /* 27/09/2026: el nombre de cada evento, el mismo que sale en el
+       historial -- Admin lo usa para el "ultimo cambio" de la tarjeta. */
+    label: labelFor
   };
 })();
