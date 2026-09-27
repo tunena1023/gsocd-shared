@@ -23,6 +23,7 @@
                               rightHtml, inclHtml, done })
      GSServicesBox.listHtml(cardsHtmlArray, emptyText)
      GSServicesBox.toggle(bodyId)
+     GSServicesBox.editor({...})  -- el Update de Admin (ver abajo)
 ============================================================ */
 (function () {
   'use strict';
@@ -40,6 +41,25 @@
     '.gs-svb-count{font-size:10px;color:var(--gold,#C9A84C);white-space:nowrap;flex-shrink:0}' +
     '.gs-svb-body{display:none;margin:0;border-radius:0;border-left:none;padding:0 14px;background:var(--bg,var(--off,#F8F7F4))}' +
     '.gs-svb-body.open{display:block}' +
+    /* editor */
+    '.gs-svb .gs-sp-lvl-group{display:flex;border:1px solid var(--border,#E0D9CC);border-radius:20px;overflow:hidden;flex-shrink:0}' +
+    '.gs-svb .gs-sp-lvl-btn{width:34px;height:26px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:4px 8px;font-size:10.5px;font-weight:700;cursor:pointer;background:var(--white,#fff);color:var(--gray,#6B6B6B);border-right:1px solid var(--border,#E0D9CC)}' +
+    '.gs-svb .gs-sp-lvl-btn:last-child{border-right:none}' +
+    '.gs-svb .gs-sp-lvl-btn.active{background:var(--gold,#C9A84C);color:var(--black,#111)}' +
+    '.gs-svb .gs-sp-lvl-btn:focus-visible{outline:2px solid var(--gold,#C9A84C);outline-offset:-2px}' +
+    '.gs-svb-x{background:none;border:none;color:var(--red,#c0392b);font-size:12px;cursor:pointer;padding:3px 6px}' +
+    '.gs-svb-ed-tag{font-size:10.5px;color:var(--red,#c0392b);font-weight:700;text-transform:uppercase;letter-spacing:.04em}' +
+    '.gs-svb-ed-removed{background:#FBEAEA;margin:0 -10px;padding:0 10px;border-bottom:1px solid var(--border,#E0DDD6)}' +
+    '.gs-svb-ed-why{padding:0 0 10px}' +
+    '.gs-svb-note{width:100%;box-sizing:border-box;border:1.5px solid var(--border,#E0DDD6);border-radius:5px;padding:7px 10px;font-size:12.5px;font-family:inherit;color:var(--black,#111);background:var(--bg,var(--off,#F8F7F4));outline:none}' +
+    '.gs-svb-note:focus{border-color:var(--gold,#C9A84C);background:var(--white,#fff)}' +
+    '.gs-svb-note::placeholder{color:#A9A49A}' +
+    '.gs-svb-note.warn{border-color:var(--red,#c0392b)}' +
+    '.gs-svb-ed-hit{all:unset;box-sizing:border-box;width:100%;padding:7px 10px;font-size:12.5px;border-radius:4px;cursor:pointer;display:flex;justify-content:space-between;gap:10px}' +
+    '.gs-svb-ed-hit:hover,.gs-svb-ed-hit:focus-visible{background:var(--bg,var(--off,#F8F7F4))}' +
+    '.gs-svb-ed-hit b{color:#27ae60;font-weight:700;font-size:11px;white-space:nowrap}' +
+    '.gs-svb-editing .gs-svb-head{cursor:default}' +
+    '.gs-svb-editing .gs-svb-body{padding:12px 14px}' +
     '.sv-list { display: flex; flex-direction: column; gap: 10px; padding: 12px 0; }' +
     '.sv-sec { border: 1px solid var(--border,#E0DDD6); border-radius: 10px; background: var(--white,#FFFFFF); overflow: hidden; }' +
     '.sv-sec + .sv-sec { margin-top: 8px; }' +
@@ -165,6 +185,156 @@
     if (el) el.classList.toggle('open');
   }
 
+
+  /* ---------- editor (27/09/2026) ----------
+     El editor de servicios de Admin (Approvals / Active): una tarjeta
+     por division con "Editing", cada servicio con L1-L3 (Janitorial),
+     su tiempo y la X; abajo "Search the catalog to add a service...",
+     la caja de cambios ("No changes to services yet.") y "Estimated
+     time". Mismo markup y clases que Admin (sv-sec, gs-sp-lvl-*,
+     svc-remove-btn, est-time-box). Orders lo usa para pedir cambios de
+     un contrato: quitar pide el por que y todo va a revision.
+       var ed = GSServicesBox.editor({
+         el, division: 'Janitorial',
+         services: [{ServiceName, Category, SubOption, Level, Quantity}],
+         catalog: [{serviceName, sku, category, division, requiresQuantity}],
+         catalogFilter: function (c) { return true; },      // opcional
+         minutesOf: function (sku, level, qty) { return n|null }, // opcional
+         estimateHtml: function (rows) { return html },           // opcional
+         diffHtml: function (baseNames, nowNames) { return html }, // opcional
+         reasonRequired: true, onChange })
+       ed.collect() -> { ok, added:[{serviceName, level, qty}],
+                         removed:[{serviceName, note}], levels:[{serviceName, from, to}] }
+       ed.changed() */
+  function fmtMin(m) { if (m == null) return ''; var h = Math.floor(m / 60), r = Math.round(m % 60); return h && r ? h + 'h ' + r + 'min' : h ? h + 'h' : r + 'min'; }
+  function editor(o) {
+    styleTag();
+    o = o || {};
+    var el = typeof o.el === 'string' ? document.getElementById(o.el) : o.el;
+    if (!el) return null;
+    var rows = (o.services || []).map(function (sv) {
+      return { name: sv.ServiceName || '', cat: sv.Category || '', sku: sv.SubOption || '', level: sv.Level || '', level0: sv.Level || '', qty: sv.Quantity || '', existing: true, removed: false, reason: '' };
+    });
+    var query = '';
+    var catalog = (o.catalog || []).filter(function (c) { return c && c.serviceName && (!o.catalogFilter || o.catalogFilter(c)); });
+    function entry(name) { for (var i = 0; i < catalog.length; i++) if (catalog[i].serviceName === name) return catalog[i]; return null; }
+    function skuOf(r) { var c = entry(r.name); return r.sku || (c && c.sku) || ''; }
+    function isJan(r) { var c = entry(r.name); return String((c && c.division) || o.division || '').toLowerCase() === 'janitorial'; }
+    function needsQty(r) { var c = entry(r.name); return !!(c && c.requiresQuantity); }
+    function mins(r) { return o.minutesOf ? o.minutesOf(skuOf(r), r.level, r.qty) : null; }
+    function live() { return rows.filter(function (r) { return !r.removed; }); }
+
+    function rowHtml(r, i) {
+      var lv = isJan(r) && !r.removed ? '<div class="gs-sp-lvl-group gs-svb-lv" style="margin-right:14px">' + ['Level 1', 'Level 2', 'Level 3'].map(function (l, k) {
+        return '<div class="gs-sp-lvl-btn' + (r.level === l ? ' active' : '') + '" role="button" tabindex="0" data-act="lv" data-i="' + i + '" data-v="' + l + '">L' + (k + 1) + '</div>';
+      }).join('') + '</div>' : '';
+      var qty = needsQty(r) && !r.removed ? '<span style="margin-right:14px"><span style="font-size:10px;color:var(--gray,#6B6B6B);text-transform:uppercase;margin-right:4px">Qty</span>' +
+        '<input type="number" min="1" step="1" inputmode="numeric" data-act="qty" data-i="' + i + '" value="' + esc(r.qty) + '" style="width:48px;padding:5px 6px;border:1px solid var(--border,#E0DDD6);border-radius:4px;font-size:12px;text-align:center;font-family:inherit"></span>' : '';
+      var m = r.removed ? null : mins(r);
+      var needNote = r.removed && o.reasonRequired !== false;
+      var tag = r.removed ? '<span class="gs-svb-ed-tag" style="margin-right:14px">' + (needNote ? 'removed \u2014 note required' : 'removed') + '</span>' : (m != null ? '<span style="color:var(--gold-dk,#8C6F2A);font-weight:600;margin-right:14px">' + esc(fmtMin(m)) + '</span>' : '');
+      var x = '<button type="button" class="svc-remove-btn gs-svb-x" data-act="x" data-i="' + i + '" title="' + (r.removed ? 'Undo' : 'Remove') + '" aria-label="' + (r.removed ? 'Undo remove ' : 'Remove ') + esc(r.name) + '">' + (r.removed ? '&#8635;' : '&#10005;') + '</button>';
+      /* Quitado: como "Selected for this order" de Admin -- renglon rosa,
+         "removed -- note required" y la nota obligatoria con borde rojo. */
+      var why = needNote
+        ? '<div class="gs-svb-ed-why"><input type="text" class="gs-svb-note' + (String(r.reason || '').trim() ? '' : ' warn') + '" data-act="why" data-i="' + i + '" placeholder="Required \u2014 explain why you want to remove it" aria-label="Why remove ' + esc(r.name) + '" value="' + esc(r.reason) + '"></div>' : '';
+      var line = '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;font-size:13px;flex-wrap:wrap' + (needNote ? '' : ';border-bottom:1px solid var(--border,#E0DDD6)') + (r.removed && !needNote ? ';opacity:.6' : '') + '">' +
+        '<span' + (r.removed ? ' style="text-decoration:line-through"' : '') + '>' + esc(r.name) + '</span>' +
+        '<span style="display:flex;align-items:center;flex-wrap:wrap;justify-content:flex-end">' + lv + qty + tag + x + '</span></div>';
+      return needNote ? '<div class="gs-svb-ed-removed">' + line + why + '</div>' : line;
+    }
+
+    function resultsHtml() {
+      var q = query.trim().toLowerCase();
+      if (!q) return '';
+      var have = {}; rows.forEach(function (r) { have[r.name] = true; });
+      var hits = catalog.filter(function (c) { return c.serviceName.toLowerCase().indexOf(q) !== -1 && !have[c.serviceName]; }).slice(0, 15);
+      if (!hits.length) return '<div style="font-size:12px;color:#C9C5BA;font-style:italic;padding:4px 10px">No matches.</div>';
+      return hits.map(function (c) {
+        return '<button type="button" class="gs-svb-ed-hit" data-act="add" data-name="' + esc(c.serviceName) + '"><span>' + esc(c.serviceName) + '</span><b>+ add</b></button>';
+      }).join('');
+    }
+    function names(list) { return list.map(function (r) { return r.name; }); }
+    function diffPart() {
+      var base = names(rows.filter(function (r) { return r.existing; }));
+      return o.diffHtml ? o.diffHtml(base, names(live())) : '';
+    }
+    function estPart() { return o.estimateHtml ? o.estimateHtml(live().map(function (r) { return { SubOption: skuOf(r), Level: r.level, Quantity: r.qty, ServiceName: r.name }; })) : ''; }
+    function metaText() {
+      var l = live(), total = 0, any = false;
+      l.forEach(function (r) { var m = mins(r); if (m != null) { total += m; any = true; } });
+      return l.length + (l.length === 1 ? ' service' : ' services') + (any ? ' · ' + fmtMin(total) : '');
+    }
+    var chev = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.5 6 8.5 10 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    function listPart() {
+      return (rows.length ? rows.map(rowHtml).join('') : '<p class="empty-note" style="padding:12px 0">No services.</p>') +
+        '<div style="padding:12px 0 4px"><input type="text" data-act="q" placeholder="Search the catalog to add a service…" aria-label="Search the catalog to add a service" value="' + esc(query) + '" ' +
+          'style="width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid var(--border,#E0DDD6);border-radius:4px;font-size:13px;font-family:Inter,sans-serif;background:var(--white,#fff)">' +
+          '<div class="gs-svb-ed-results" style="margin-top:8px">' + resultsHtml() + '</div></div>';
+    }
+    function render() {
+      el.innerHTML = '<div class="sv-sec open">' +
+        '<button type="button" class="sv-sec-head" aria-expanded="true" tabindex="-1"><span class="sv-sec-bar"></span><span class="sv-sec-txt"><span class="sv-sec-name">' + esc(o.division || 'Services') + '</span>' +
+          '<span class="sv-sec-meta" data-part="meta">' + esc(metaText()) + '</span><span class="sv-sec-editing">Editing</span></span><span class="sv-sec-chev">' + chev + '</span></button>' +
+        '<div class="sv-sec-wrap"><div><div class="sv-sec-body editing">' +
+          '<div data-part="list">' + listPart() + '</div>' +
+          '<div data-part="diff">' + diffPart() + '</div>' +
+          '<div data-part="est">' + estPart() + '</div>' +
+        '</div></div></div></div>';
+    }
+    function refresh(keepSearchFocus) {
+      var list = el.querySelector('[data-part="list"]');
+      if (!list) return render();
+      list.innerHTML = listPart();
+      el.querySelector('[data-part="diff"]').innerHTML = diffPart();
+      el.querySelector('[data-part="est"]').innerHTML = estPart();
+      el.querySelector('[data-part="meta"]').textContent = metaText();
+      if (keepSearchFocus) { var qi = el.querySelector('[data-act="q"]'); if (qi) qi.focus(); }
+    }
+    function changedFn() { return rows.some(function (r) { return !r.existing || r.removed || (r.existing && r.level !== r.level0); }); }
+    function fire() { if (typeof o.onChange === 'function') o.onChange(ctrl); }
+
+    function act(b) {
+      var a = b.getAttribute('data-act'), i = Number(b.getAttribute('data-i'));
+      if (a === 'x') {
+        var r = rows[i]; if (!r) return;
+        if (r.existing) { r.removed = !r.removed; r.err = false; } else rows.splice(i, 1);
+        refresh(); fire();
+      } else if (a === 'lv') {
+        rows[i].level = b.getAttribute('data-v'); refresh(); fire();
+      } else if (a === 'add') {
+        var c = entry(b.getAttribute('data-name')); if (!c) return;
+        rows.push({ name: c.serviceName, cat: c.category || '', sku: c.sku || '', level: String(c.division || '').toLowerCase() === 'janitorial' ? 'Level 1' : '', level0: '', qty: c.requiresQuantity ? 1 : '', existing: false, removed: false, reason: '' });
+        query = ''; refresh(true); fire();
+      }
+    }
+    el.addEventListener('click', function (e) { var b = e.target.closest('[data-act]'); if (b && el.contains(b) && ['x', 'lv', 'add'].indexOf(b.getAttribute('data-act')) !== -1) act(b); });
+    el.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && e.target.getAttribute('data-act') === 'lv') { e.preventDefault(); act(e.target); } });
+    el.addEventListener('input', function (e) {
+      var t = e.target, a = t.getAttribute && t.getAttribute('data-act'), i = Number(t.getAttribute('data-i'));
+      if (a === 'q') { query = t.value; var box = el.querySelector('.gs-svb-ed-results'); if (box) box.innerHTML = resultsHtml(); }
+      else if (a === 'why' && rows[i]) { rows[i].reason = t.value; t.classList.toggle('warn', !t.value.trim()); }
+      else if (a === 'qty' && rows[i]) { var n = parseInt(t.value, 10); rows[i].qty = n > 0 ? n : ''; el.querySelector('[data-part="est"]').innerHTML = estPart(); el.querySelector('[data-part="meta"]').textContent = metaText(); fire(); }
+    });
+
+    var ctrl = {
+      changed: changedFn,
+      collect: function () {
+        var ok = true;
+        rows.forEach(function (r) { r.err = r.removed && o.reasonRequired !== false && !String(r.reason || '').trim(); if (r.err) ok = false; });
+        if (!ok) refresh();
+        return {
+          ok: ok,
+          added: rows.filter(function (r) { return !r.existing; }).map(function (r) { return { serviceName: r.name, level: r.level || '', qty: r.qty || '' }; }),
+          removed: rows.filter(function (r) { return r.removed; }).map(function (r) { return { serviceName: r.name, note: String(r.reason || '').trim() }; }),
+          levels: rows.filter(function (r) { return r.existing && !r.removed && r.level !== r.level0; }).map(function (r) { return { serviceName: r.name, from: r.level0, to: r.level }; })
+        };
+      }
+    };
+    render();
+    return ctrl;
+  }
+
   styleTag();
-  window.GSServicesBox = { html: html, buttonsHtml: buttonsHtml, cardHtml: cardHtml, listHtml: listHtml, toggle: toggle, styleTag: styleTag };
+  window.GSServicesBox = { html: html, buttonsHtml: buttonsHtml, cardHtml: cardHtml, listHtml: listHtml, toggle: toggle, editor: editor, styleTag: styleTag };
 })();
