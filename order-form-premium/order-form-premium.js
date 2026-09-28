@@ -449,6 +449,29 @@ const ICONS = {
     label: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m20.6 13.4-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1"/></svg>',
     building: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v16"/><path d="M12 21V9a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v12"/><path d="M8 8h1M8 12h1M8 16h1M16 12h1M16 16h1"/></svg>'
   };
+  /* Customer PO (28/09/2026, dueño: "pensé que teníamos un shared y que en
+     todos los repos donde se hacen órdenes se iba actualizando"). El PO
+     propio del cliente, opcional, en el paso 1 de Orders y de Admin Create
+     Order: la MISMA pieza en los dos. En Multi es uno solo para todo el
+     pedido: moveCustomerPo lo pasa arriba de las unidades. El campo se
+     llama <inputId>-field. */
+  function customerPoFieldHtml(inputId, opts) {
+    opts = opts || {};
+    var icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h7M9 17h5"/></svg>';
+    return '<div class="gs-ofp-unitfield" id="' + _escAttr(inputId) + '-field">' +
+      '<div class="gs-ofp-unitfield-label">' + icon + ' Customer PO (optional)</div>' +
+      '<input type="text" id="' + _escAttr(inputId) + '" maxlength="100" placeholder="' + _escAttr(opts.placeholder || 'PO #') + '" autocomplete="off"' +
+        (opts.value ? ' value="' + _escAttr(opts.value) + '"' : '') + ' />' +
+    '</div>';
+  }
+  function moveCustomerPo(inputId, multi, singleRowId, multiRowId) {
+    var f = document.getElementById(inputId + '-field');
+    var to = document.getElementById(multi ? multiRowId : singleRowId);
+    if (!f || !to) return;
+    f.style.flex = multi ? '0 1 260px' : '';
+    to.appendChild(f);
+  }
+
   function textFieldHtml(id, value, icon, label, opts) {
     styleTag();
     opts = opts || {};
@@ -591,6 +614,8 @@ const ICONS = {
     notifCardHtml: notifCardHtml,
     cycleNotifToggle: cycleNotifToggle,
     textFieldHtml: textFieldHtml,
+    customerPoFieldHtml: customerPoFieldHtml,
+    moveCustomerPo: moveCustomerPo,
     officeHoursHtml: officeHoursHtml
   };
 })();
