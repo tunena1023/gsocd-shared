@@ -1,10 +1,8 @@
 # HANDOFF — léelo primero
 
-El handoff completo vive en **tunena1023/Admingsocd.com → `HANDOFF.md`**, en la
-rama `claude/vibrant-maxwell-l7r3ye` mientras ese trabajo no pase a `main`.
-Léelo antes de tocar este repo: trae las reglas del dueño, qué está en
-producción, qué está solo en esta rama y qué sigue.
+El estado completo (qué está en producción, qué está en `preview`, la lista de pendientes y lo que falta que
+decida el dueño) está en **tunena1023/Admingsocd.com → `HANDOFF.md` de la rama `preview`**, sección 4 (A–D).
+Léelo antes de tocar este repo y, si tocas algo de esa lista, actualízalo AHÍ (no aquí).
 
-Estado de este repo (27/09/2026): la rama `claude/vibrant-maxwell-l7r3ye` trae
-trabajo terminado y probado que **NO** está en `main` (producción). Pasa a
-`main` solo con el "súbelo" del dueño, en orden shared → Admin → Orders → Tech.
+Ramas de este repo: solo `main`. No crear ramas nuevas; nunca `--force`. Reglas completas en `CLAUDE.md`
+(dueño, 28/09/2026). A producción (`main`) solo el sábado a media noche con el OK del dueño.
