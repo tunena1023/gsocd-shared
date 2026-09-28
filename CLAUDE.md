@@ -18,6 +18,10 @@ Esto lo carga cualquier sesión al empezar. Es instrucción del dueño y manda s
 - Nada se sube a `main` sin permiso explícito del dueño.
 
 ## 3. Un solo lugar para el estado y los pendientes
+- **Tablero de sesiones: issue https://github.com/tunena1023/Admingsocd.com/issues/5** (varias sesiones trabajan a
+  la vez). Al empezar, lee todos sus comentarios; antes de tocar algo, comenta "🔒 Tomo: ..." (qué, repos, archivos,
+  tu sesión); si otra sesión ya lo tomó, no lo toques. Al terminar, "✅ Listo: ..." o "🔓 Suelto: ...". Avisos para
+  las demás sesiones, ahí mismo ("⚠️ Aviso: ..."). Con la herramienta de GitHub (issue #5 del repo Admingsocd.com).
 - El estado completo (qué está en producción, qué está en `preview`, la lista de pendientes #1–#16 y lo que falta
   que decida el dueño) está en `HANDOFF.md` de la rama **`preview` de Admin**, sección 4 (A–D). Léelo primero.
   Si tocas algo de esa lista, actualízalo AHÍ, en el mismo push. No abras listas nuevas en otros archivos o ramas.
