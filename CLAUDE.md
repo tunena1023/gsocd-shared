@@ -22,6 +22,9 @@ Esto lo carga cualquier sesión al empezar. Es instrucción del dueño y manda s
   la vez). Al empezar, lee todos sus comentarios; antes de tocar algo, comenta "🔒 Tomo: ..." (qué, repos, archivos,
   tu sesión); si otra sesión ya lo tomó, no lo toques. Al terminar, "✅ Listo: ..." o "🔓 Suelto: ...". Avisos para
   las demás sesiones, ahí mismo ("⚠️ Aviso: ..."). Con la herramienta de GitHub (issue #5 del repo Admingsocd.com).
+- **Ahorrar tokens (dueño, 28/09):** no quedarse suscrito a PRs (`subscribe_pr_activity`) salvo una prueba corta, y
+  no programar check-ins (`send_later`, triggers) para "vigilar". Una sesión trabaja cuando el dueño le habla; para
+  coordinarse basta el tablero #5 (se lee al empezar y antes de cada push).
 - El estado completo (qué está en producción, qué está en `preview`, la lista de pendientes #1–#16 y lo que falta
   que decida el dueño) está en `HANDOFF.md` de la rama **`preview` de Admin**, sección 4 (A–D). Léelo primero.
   Si tocas algo de esa lista, actualízalo AHÍ, en el mismo push. No abras listas nuevas en otros archivos o ramas.
