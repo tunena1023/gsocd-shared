@@ -118,6 +118,20 @@
     'Service Order Changed':      'Service order changed',
     'Service Added':              'Service added to order',
     'Service Removed':            'Service removed from order',
+    /* Estimados (28/09/2026, dueño). Los de QuickBooks y "Moved to
+       Estimates" son internos: el cliente no los ve (isHiddenFromClient). */
+    'Moved To Estimate':          'Moved to Estimates',
+    'QuickBooks Estimate Created':'Estimate sent to QuickBooks',
+    'QuickBooks Estimate Updated':'Estimate updated in QuickBooks',
+    'QuickBooks Invoice Created': 'Invoice sent to QuickBooks',
+    'Estimate Emailed':           'Estimate emailed to client',
+    'Estimate Changes Requested': 'Changes requested by client',
+    'Estimate Changes Approved':  'Changes approved by office',
+    'Estimate Changes Rejected':  'Changes rejected by office',
+    'Estimate Approved':          'Estimate approved by client · order created',
+    'Estimate Accepted':          'Estimate approved by client',
+    'Made Into Order':            'Made into an order',
+    'Estimate Declined':          'Estimate declined',
     /* Inspeccion (25/09/2026): la oficina manda "Inspection first", el
        supervisor va a ver, y luego la orden sigue a Scheduling. */
     'Inspection':                 'Inspection scheduled',
@@ -191,6 +205,9 @@
        queda como un renglon vacio pegado justo despues, repitiendo lo
        mismo sin decir nada nuevo. */
     if (String(h.ChangeType || '') === 'Order Approved') return true;
+    /* Estimados (28/09/2026, dueño: "eso es un movimiento interno ... al
+       cliente eso no le incumbe"): lo de QuickBooks y el paso a Estimates. */
+    if (/^QuickBooks /.test(String(h.ChangeType || '')) || String(h.ChangeType || '') === 'Moved To Estimate') return true;
     /* "Assign by service" -- pasos internos/mecanicos del modelo por
        servicio (el tecnico ya dijo "ya acabe" pero oficina todavia no
        lo confirma, el sistema avanzando solo al siguiente servicio,
@@ -1344,6 +1361,8 @@
       var hasDetail = lines.length > 0;
       var isRegression = regressionTypes.indexOf(String(h.ChangeType || '')) !== -1;
       var noteTxt = h.MergedNotes != null ? h.MergedNotes : noteFor(h);
+      /* La etiqueta "Estimate created" ya lo dice. */
+      if (String(h.ChangeType || '') === 'Created' && /^Created as an estimate\.?$/.test(String(noteTxt || '').trim())) noteTxt = '';
       /* Al cliente solo le sale ya completada: la frase de "la oficina
          todavia tiene que confirmar" ya no aplica. */
       if (mode === 'client' && String(h.ChangeType || '') === 'Tech Marked Complete') {
@@ -1361,7 +1380,9 @@
       }
       return {
         date: h.ChangeDate, dateText: fmtDateTime(h.ChangeDate),
-        type: String(h.ChangeType || ''), label: h._label || labelFor(h.ChangeType),
+        type: String(h.ChangeType || ''),
+        /* Una orden que nacio como estimado (Admin > Create Order con el switch). */
+        label: h._label || (String(h.ChangeType || '') === 'Created' && /^Created as an estimate/.test(String(h.Notes || '')) ? 'Estimate created' : labelFor(h.ChangeType)),
         by: h.ChangedBy ? actorLabel(h.ChangedBy) : '',
         note: noteTxt || '', lines: lines, regression: isRegression
       };
