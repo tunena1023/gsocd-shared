@@ -2,6 +2,12 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag (commit en main) — 2026-09-29 (bloques sugeridos de Routing)
+
+- **lib/schedule-entries.js**: exporta `estimate(services, timesBySku)` y `liveServices(list)` (ya existian por
+  dentro). Los usan los bloques sugeridos de Admin (`lib/suggest-blocks`) para que los minutos de una orden sean
+  los mismos que dice el Calendario. Nada mas cambia. Test: `node lib/schedule-entries.test.js`.
+
 ## Sin tag (commit en main) — 2026-09-29 (crecer sin leer toda la lista Orders)
 
 - **lib/order-seq.js** (nuevo, backend): `require('gsocd-shared/lib/order-seq')(graph)`. Contadores globales de
