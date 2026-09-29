@@ -2,6 +2,13 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag (commit en main) — 2026-09-29 (precios en el PDF con el switch del cliente)
+
+- **lib/order-pdf.js**: si el cliente tiene **Show prices** prendido (Clients.ShowPrices), los PDFs de la orden,
+  Solicitud y Completacion agregan la columna Price (precio del servicio segun su nivel x cantidad) y "Estimated
+  total". Son los mismos precios del portal (ServicesCatalog: Price = Level 1, Level2/3Price + Mode). Apagado: sin
+  precios, como antes. Dueño: el switch "debería de ocultar esa pieza de información de todas partes".
+
 ## Sin tag (commit en main) — 2026-09-29 (numero de estimado en el PDF)
 
 - **lib/order-pdf.js**: el documento de la orden y el de Completacion muestran "QuickBooks Estimate 1025" (Order
