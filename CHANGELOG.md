@@ -2,6 +2,15 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag (commit en main) — 2026-09-29 (crecer sin leer toda la lista Orders)
+
+- **lib/order-seq.js** (nuevo, backend): `require('gsocd-shared/lib/order-seq')(graph)`. Contadores globales de
+  numeros de orden en Settings (`seq_suffix` desde 1001, `seq_po` desde 5000, `seq_rec` desde 1). `reserve(kind, n)`
+  aparta n seguidos; `open(kind)` -> `next()` / `commit()` para el cron. Solo la primera vez (sin renglon) lee el
+  OrderID de toda la lista para arrancar. Admin y Orders comparten el contador; toda ruta que cree ordenes debe
+  usarlo. Test: `node lib/order-seq.test.js`.
+- **lib/site-readiness.js**: `morning()` lee solo las ordenes que no estan Completed (antes, toda la lista).
+
 ## Sin tag (commit en main) — 2026-09-29 (precios en el PDF con el switch del cliente)
 
 - **lib/order-pdf.js**: si el cliente tiene **Show prices** prendido (Clients.ShowPrices), los PDFs de la orden,
