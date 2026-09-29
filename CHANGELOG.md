@@ -2,6 +2,12 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag (commit en main) — 2026-09-29 (numero de estimado en el PDF)
+
+- **lib/order-pdf.js**: el documento de la orden y el de Completacion muestran "QuickBooks Estimate 1025" (Order
+  Details / Completion) cuando la orden tiene estimado. Sale del historial ("QuickBooks Estimate Created", el mas
+  reciente); nueva `estimateNumberOf(history)`. Si nunca tuvo estimado, el renglon no sale. Dueño: "ponlo".
+
 ## v1.45.0 — 2026-09-27 (el sitio está listo: avisos a la oficina y confirmación un día antes)
 
 - **lib/site-readiness.js** (nuevo, backend): `require('gsocd-shared/lib/site-readiness')(graph, notify)`. Reglas del
