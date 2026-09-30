@@ -65,6 +65,10 @@
     '.gs-svb-ed-hit{all:unset;box-sizing:border-box;width:100%;padding:7px 10px;font-size:12.5px;border-radius:4px;cursor:pointer;display:flex;justify-content:space-between;gap:10px}' +
     '.gs-svb-ed-hit:hover,.gs-svb-ed-hit:focus-visible{background:var(--bg,var(--off,#F8F7F4))}' +
     '.gs-svb-ed-hit b{color:#27ae60;font-weight:700;font-size:11px;white-space:nowrap}' +
+    '.gs-svb-ed-pt{display:inline-flex;border:1px solid var(--border,#E0DDD6);border-radius:4px;overflow:hidden;margin:0 0 8px}' +
+    '.gs-svb-ed-pt button{all:unset;cursor:pointer;padding:6px 14px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--gray,#6B6B6B)}' +
+    '.gs-svb-ed-pt button.on{background:var(--gold,#C9A84C);color:#111}' +
+    '.gs-svb-ed-pt button:focus-visible{outline:2px solid var(--gold-dk,#8C6F2A);outline-offset:-2px}' +
     '.gs-svb-editing .gs-svb-head{cursor:default}' +
     '.gs-svb-editing .gs-svb-body{padding:12px 14px}' +
     '.sv-list { display: flex; flex-direction: column; gap: 10px; padding: 12px 0; }' +
@@ -206,6 +210,8 @@
          services: [{ServiceName, Category, SubOption, Level, Quantity}],
          catalog: [{serviceName, sku, category, division, requiresQuantity}],
          catalogFilter: function (c) { return true; },      // opcional
+         propertyTypes: ['Commercial', 'Residential'],     // opcional: selector arriba del buscador
+         propertyType: 'Commercial', onPropertyType(pt),   // opcional: el que arranca / aviso al cambiar
          minutesOf: function (sku, level, qty) { return n|null }, // opcional
          estimateHtml: function (rows) { return html },           // opcional
          diffHtml: function (baseNames, nowNames) { return html }, // opcional
@@ -218,7 +224,7 @@
          rowExtraHtml: function (row, i) { return html },  // opcional: p.ej. camarita
          reasonPlaceholder: 'Required — ...',  // opcional: texto de la nota del quitado
          removedLabel: function (needNote) { return 'not completed' } })  // opcional
-       ed.collect() -> { ok, added:[{serviceName, level, qty}],
+       ed.collect() -> { ok, added:[{serviceName, sku, level, qty}],
                          removed:[{serviceName, note}], levels:[{serviceName, from, to}],
                          notes:[{serviceName, note}] }  // notas del lapiz
        ed.changed()
@@ -237,10 +243,24 @@
     });
     var query = '';
     var catalog = (o.catalog || []).filter(function (c) { return c && c.serviceName && (!o.catalogFilter || o.catalogFilter(c)); });
-    function entry(name) { for (var i = 0; i < catalog.length; i++) if (catalog[i].serviceName === name) return catalog[i]; return null; }
-    function skuOf(r) { var c = entry(r.name); return r.sku || (c && c.sku) || ''; }
-    function isJan(r) { var c = entry(r.name); return String((c && c.division) || o.division || '').toLowerCase() === 'janitorial'; }
-    function needsQty(r) { var c = entry(r.name); return !!(c && c.requiresQuantity); }
+    /* 30/09/2026 (dueño): el SKU es lo que manda, no el nombre -- hay
+       servicios con el MISMO nombre en Commercial y Residential (p. ej.
+       "Move-In Cleaning", cada uno con su SKU en QuickBooks). Antes se
+       buscaba por nombre: agregar el Commercial metia el Residential, y si
+       la orden ya traia uno, el otro ni salia en el buscador. */
+    function entry(sku, name) {
+      var k = String(sku || '').trim(), i;
+      if (k) for (i = 0; i < catalog.length; i++) if (String(catalog[i].sku || '').trim() === k) return catalog[i];
+      if (!k && name) for (i = 0; i < catalog.length; i++) if (catalog[i].serviceName === name) return catalog[i];
+      return null;
+    }
+    function rowEntry(r) { return entry(r.sku, r.name) || (r.sku ? entry('', r.name) : null); }
+    function skuOf(r) { var c = rowEntry(r); return r.sku || (c && c.sku) || ''; }
+    function isJan(r) { var c = rowEntry(r); return String((c && c.division) || o.division || '').toLowerCase() === 'janitorial'; }
+    function needsQty(r) { var c = rowEntry(r); return !!(c && c.requiresQuantity); }
+    /* Selector Commercial | Residential: el buscador solo ensena los de ese tipo. */
+    var pts = Array.isArray(o.propertyTypes) ? o.propertyTypes.filter(Boolean) : [];
+    var pt = pts.length ? (pts.indexOf(o.propertyType) !== -1 ? o.propertyType : pts[0]) : '';
     function mins(r) { return o.minutesOf ? o.minutesOf(skuOf(r), r.level, r.qty) : null; }
     function live() { return rows.filter(function (r) { return !r.removed; }); }
 
@@ -281,8 +301,12 @@
     function resultsHtml() {
       var q = query.trim().toLowerCase();
       if (!q) return '';
-      var have = {}; rows.forEach(function (r) { have[r.name] = true; });
-      var hits = catalog.filter(function (c) { return c.serviceName.toLowerCase().indexOf(q) !== -1 && !have[c.serviceName]; });
+      var haveSku = {}, haveName = {};
+      rows.forEach(function (r) { if (r.sku) haveSku[String(r.sku).trim()] = true; else haveName[r.name] = true; });
+      var hits = catalog.filter(function (c) {
+        if (pt && c.propertyType && c.propertyType !== pt) return false;
+        return c.serviceName.toLowerCase().indexOf(q) !== -1 && !(c.sku ? haveSku[String(c.sku).trim()] : haveName[c.serviceName]);
+      });
       /* otherDivisions: tambien salen servicios de otras divisiones,
          despues de los de la division que se edita y con su etiqueta
          (Approvals de Admin, 25/09/2026). */
@@ -292,8 +316,14 @@
       if (!hits.length) return '<div style="font-size:12px;color:#C9C5BA;font-style:italic;padding:4px 10px">No matches.</div>';
       return hits.map(function (c) {
         var tag = o.otherDivisions && div && c.division && c.division !== div ? ' <span class="sv-other-div">' + esc(c.division) + '</span>' : '';
-        return '<button type="button" class="gs-svb-ed-hit" data-act="add" data-name="' + esc(c.serviceName) + '"><span>' + esc(c.serviceName) + tag + '</span><b>+ add</b></button>';
+        return '<button type="button" class="gs-svb-ed-hit" data-act="add" data-sku="' + esc(c.sku || '') + '" data-name="' + esc(c.serviceName) + '"><span>' + esc(c.serviceName) + tag + '</span><b>+ add</b></button>';
       }).join('');
+    }
+    function ptHtml() {
+      if (!pts.length) return '';
+      return '<div class="gs-svb-ed-pt" role="group" aria-label="Type of services">' + pts.map(function (t) {
+        return '<button type="button" data-act="pt" data-v="' + esc(t) + '" class="' + (t === pt ? 'on' : '') + '" aria-pressed="' + (t === pt) + '">' + esc(t) + '</button>';
+      }).join('') + '</div>';
     }
     function names(list) { return list.map(function (r) { return r.name; }); }
     function diffPart() {
@@ -309,7 +339,7 @@
     var chev = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.5 6 8.5 10 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     function listPart() {
       return (rows.length ? rows.map(rowHtml).join('') : '<p class="empty-note" style="padding:12px 0">No services.</p>') +
-        '<div style="padding:12px 0 4px"><input type="text" data-act="q" placeholder="Search the catalog to add a service…" aria-label="Search the catalog to add a service" value="' + esc(query) + '" ' +
+        '<div style="padding:12px 0 4px">' + ptHtml() + '<input type="text" data-act="q" placeholder="Search the catalog to add a service…" aria-label="Search the catalog to add a service" value="' + esc(query) + '" ' +
           'style="width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid var(--border,#E0DDD6);border-radius:4px;font-size:13px;font-family:Inter,sans-serif;background:var(--white,#fff)">' +
           '<div class="gs-svb-ed-results" style="margin-top:8px">' + resultsHtml() + '</div></div>';
     }
@@ -344,7 +374,8 @@
          cambiar de division al agregar). */
       if (a === 'x' && o.onRemove) { if (rows[i]) o.onRemove(i, rows[i]); return; }
       if (a === 'lv' && o.onLevel) { if (rows[i]) o.onLevel(i, b.getAttribute('data-v'), rows[i]); return; }
-      if (a === 'add' && o.onAdd) { var ce = entry(b.getAttribute('data-name')); if (ce) o.onAdd(ce); return; }
+      if (a === 'pt') { pt = b.getAttribute('data-v') || pt; if (o.onPropertyType) o.onPropertyType(pt); refresh(true); return; }
+      if (a === 'add' && o.onAdd) { var ce = entry(b.getAttribute('data-sku'), b.getAttribute('data-name')); if (ce) o.onAdd(ce); return; }
       if (a === 'x') {
         var r = rows[i]; if (!r) return;
         if (r.existing) { r.removed = !r.removed; r.err = false; if (!r.removed) { r.open = false; r.reason = ''; } else r.open = true; } else rows.splice(i, 1);
@@ -358,12 +389,12 @@
       } else if (a === 'lv') {
         rows[i].level = b.getAttribute('data-v'); refresh(); fire();
       } else if (a === 'add') {
-        var c = entry(b.getAttribute('data-name')); if (!c) return;
+        var c = entry(b.getAttribute('data-sku'), b.getAttribute('data-name')); if (!c) return;
         rows.push({ name: c.serviceName, cat: c.category || '', sku: c.sku || '', level: String(c.division || '').toLowerCase() === 'janitorial' ? 'Level 1' : '', level0: '', qty: c.requiresQuantity ? 1 : '', existing: false, removed: false, reason: '' });
         query = ''; refresh(true); fire();
       }
     }
-    el.addEventListener('click', function (e) { var b = e.target.closest('[data-act]'); if (b && el.contains(b) && ['x', 'lv', 'add', 'pen', 'name'].indexOf(b.getAttribute('data-act')) !== -1) act(b); });
+    el.addEventListener('click', function (e) { var b = e.target.closest('[data-act]'); if (b && el.contains(b) && ['x', 'lv', 'add', 'pen', 'name', 'pt'].indexOf(b.getAttribute('data-act')) !== -1) act(b); });
     /* Cantidad en modo controlado: al terminar de escribir (change), no
        en cada tecla, para no re-montar mientras se escribe. */
     el.addEventListener('change', function (e) {
@@ -389,7 +420,7 @@
         if (!ok) refresh();
         return {
           ok: ok,
-          added: rows.filter(function (r) { return !r.existing; }).map(function (r) { return { serviceName: r.name, level: r.level || '', qty: r.qty || '' }; }),
+          added: rows.filter(function (r) { return !r.existing; }).map(function (r) { return { serviceName: r.name, sku: skuOf(r), level: r.level || '', qty: r.qty || '' }; }),
           removed: rows.filter(function (r) { return r.removed; }).map(function (r) { return { serviceName: r.name, note: String(r.reason || '').trim() }; }),
           levels: rows.filter(function (r) { return r.existing && !r.removed && r.level !== r.level0; }).map(function (r) { return { serviceName: r.name, from: r.level0, to: r.level }; }),
           notes: rows.filter(function (r) { return !r.removed && String(r.reason || '').trim(); }).map(function (r) { return { serviceName: r.name, note: String(r.reason).trim() }; })

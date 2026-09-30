@@ -2,6 +2,14 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag (commit en main) — 2026-09-30 (servicios por SKU y por tipo)
+
+- **services-box/services-box.js** `editor()`: busca y agrega por **SKU**, no por nombre (hay servicios con el mismo
+  nombre en Commercial y Residential, p. ej. "Move-In Cleaning", cada uno con su SKU). Antes agregar el Commercial
+  metia el Residential, y si la orden ya traia uno el otro no salia en el buscador. Nuevo opcional
+  `propertyTypes: ['Commercial','Residential']` + `propertyType` + `onPropertyType(pt)`: selector arriba del buscador,
+  que solo ensena los servicios de ese tipo. `collect().added` trae tambien `sku`. Sin esas opciones se ve igual.
+
 ## Sin tag (commit en main) — 2026-09-29 (bloques sugeridos de Routing)
 
 - **lib/schedule-entries.js**: exporta `estimate(services, timesBySku)` y `liveServices(list)` (ya existian por
