@@ -158,7 +158,9 @@
     'Requested Dates Rejected':   'Requested dates not approved',
     'Cancellation Reversed':      'Cancellation reversed',
     /* Tech, primera foto del dia (tech lib/on-site.js). */
-    'Crew On Site':               'Crew on site'
+    'Crew On Site':               'Crew on site',
+    /* Notas por servicio (dueño 01/10/2026): solo oficina y Tech. */
+    'Service Note':               'Service note'
   };
   function labelFor(ct) { return LABELS[String(ct || '')] || String(ct || 'Update'); }
 
@@ -223,6 +225,9 @@
     var perServiceHiddenTypes = ['Order Moved To Active', 'Service Marked Done By Tech',
       'Service Now Active', 'Service Needs Scheduling', 'Service Order Changed'];
     if (perServiceHiddenTypes.indexOf(String(h.ChangeType || '')) !== -1) return true;
+    /* Notas por servicio (dueño 01/10/2026: "deben ser visibles solo para los
+       de oficina, no para los clientes"), aunque las haya escrito el cliente. */
+    if (String(h.ChangeType || '') === 'Service Note') return true;
     return false;
   }
 

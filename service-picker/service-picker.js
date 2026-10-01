@@ -159,6 +159,14 @@
       '.gs-sp-price{display:inline-block;margin-left:8px;font-size:11px;font-weight:700;color:var(--gold-dk,#8C6F2A);background:#FBF7EC;border:1px solid rgba(201,168,76,.35);padding:1px 7px;border-radius:10px;white-space:nowrap;vertical-align:1px}' +
       '.gs-sp-price.inc{color:#3E7A4C;background:#F1F7F2;border-color:#CFE3D3}' +
       '.gs-sp-inpkg{font-size:10px;font-weight:700;color:#3E7A4C;margin-left:6px;text-transform:uppercase;letter-spacing:.04em}' +
+      /* Notas por servicio (01/10/2026, dueño): lapicito en cada servicio escogido. */
+      '.gs-sp-cell{min-width:0}' +
+      '.gs-sp-cell-chip{position:relative}.gs-sp-cell-chip .gs-sp-chip-btn{width:100%;padding-right:34px}' +
+      '.gs-sp-note-pen{flex-shrink:0;width:26px;height:26px;border:none;background:transparent;color:var(--gold-dk,#8C6F2A);cursor:pointer;font-size:14px;line-height:1;border-radius:50%;padding:0;font-family:inherit}' +
+      '.gs-sp-note-pen:hover,.gs-sp-note-pen.on{background:#F5EDD6}' +
+      '.gs-sp-cell-chip .gs-sp-note-pen{position:absolute;top:50%;right:6px;transform:translateY(-50%)}' +
+      '.gs-sp-note-text{display:block;width:100%;box-sizing:border-box;margin-top:4px;border:1.5px solid var(--gold,#C9A84C);border-radius:4px;padding:6px 8px;font-size:12px;font-family:inherit;background:#fff;color:var(--black,#111);outline:none;resize:vertical}' +
+      '.gs-sp-note-show{display:block;margin-top:4px;padding:4px 8px;font-size:11.5px;line-height:1.4;color:var(--black,#111);background:#FBF6E9;border-left:2px solid var(--gold,#C9A84C);border-radius:0 3px 3px 0;cursor:pointer;white-space:pre-wrap;word-break:break-word}' +
       '@media (max-width:640px){.gs-sp-accordion{grid-template-columns:1fr}}';
     document.head.appendChild(style);
   }
@@ -234,7 +242,27 @@
     var n = Number(p);
     return '<span class="gs-sp-price">$' + (n % 1 ? n.toFixed(2) : String(n)) + '</span>';
   }
+  /* Notas por servicio (01/10/2026): solo con options.serviceNotes y solo en
+     servicios escogidos. La nota vive en inst.notes[sku] hasta que se manda la
+     orden (handle.getNotes()); se cierra sola al salir de la cajita. */
+  function notePenHtml(inst, s, sel) {
+    if (!inst.notesOn || !sel) return '';
+    var on = inst.noteOpen === String(s.sku);
+    return '<button type="button" class="gs-sp-note-pen' + (on ? ' on' : '') + '" data-note-sku="' + escapeAttr(s.sku) + '" title="Note for this service" aria-label="Note for ' + escapeAttr(s.serviceName) + '">\u270E</button>';
+  }
+  function noteBelowHtml(inst, s, sel) {
+    if (!inst.notesOn || !sel) return '';
+    var k = String(s.sku), t = inst.notes[k] || '';
+    if (inst.noteOpen === k) return '<textarea class="gs-sp-note-text" rows="2" data-note-text="' + escapeAttr(k) + '" placeholder="Note about this service" aria-label="Note for ' + escapeAttr(s.serviceName) + '">' + escapeHtml(t) + '</textarea>';
+    return t.trim() ? '<span class="gs-sp-note-show" data-note-open="' + escapeAttr(k) + '">' + escapeHtml(t) + '</span>' : '';
+  }
   function itemHtml(inst, s) {
+    if (!inst.notesOn) return itemRowHtml(inst, s);
+    var sel = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
+    var chip = !isLeveledItem(s) && !isQuantityItem(s);
+    return '<div class="gs-sp-cell' + (chip ? ' gs-sp-cell-chip' : '') + '">' + itemRowHtml(inst, s) + noteBelowHtml(inst, s, sel) + '</div>';
+  }
+  function itemRowHtml(inst, s) {
     if (isLeveledItem(s)) {
       var sel = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
       var lvl = sel ? inst.svcLevel[svcKey(inst.propertyType, s.serviceName)] : null;
@@ -244,7 +272,7 @@
       }).join('');
       return '<div class="gs-sp-row' + (lvl ? ' selected' : '') + '">' +
         '<span class="gs-sp-row-name">' + nameWithTip(s) + priceHtml(inst, s) + '</span>' +
-        '<div class="gs-sp-lvl-group">' + btns + '</div></div>';
+        '<span style="display:flex;align-items:center;gap:4px">' + notePenHtml(inst, s, !!lvl) + '<div class="gs-sp-lvl-group">' + btns + '</div></span></div>';
     }
     if (isQuantityItem(s)) {
       var qsel = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
@@ -253,10 +281,10 @@
         '<span class="gs-sp-row-name">' + nameWithTip(s) + priceHtml(inst, s) + '</span>' +
         '<span><span class="gs-sp-qty-label">Qty</span>' +
         '<input type="number" class="gs-sp-qty-input" min="1" step="1" inputmode="numeric" ' +
-        'data-sku="' + escapeAttr(s.sku) + '" value="' + escapeAttr(qty) + '"></span></div>';
+        'data-sku="' + escapeAttr(s.sku) + '" value="' + escapeAttr(qty) + '">' + notePenHtml(inst, s, qsel) + '</span></div>';
     }
     var active = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
-    return '<button type="button" class="gs-sp-chip-btn' + (active ? ' active' : '') + '" data-sku="' + escapeAttr(s.sku) + '">' + nameWithTip(s) + priceHtml(inst, s) + '</button>';
+    return '<button type="button" class="gs-sp-chip-btn' + (active ? ' active' : '') + '" data-sku="' + escapeAttr(s.sku) + '">' + nameWithTip(s) + priceHtml(inst, s) + '</button>' + notePenHtml(inst, s, active);
   }
 
   function bindItemEvents(inst, pickerId, scopeEl) {
@@ -279,6 +307,35 @@
       input.addEventListener('input', function () { setQuantity(pickerId, input.dataset.sku, input.value, false); });
       input.addEventListener('change', function () { setQuantity(pickerId, input.dataset.sku, input.value, true); });
       input.addEventListener('click', function (e) { e.stopPropagation(); });
+    });
+    if (!inst.notesOn) return;
+    function openNote(sku) {
+      inst.noteOpen = sku; renderGrid(pickerId);
+      var t = inst.gridEl && inst.gridEl.querySelector('[data-note-text="' + String(sku).replace(/"/g, '\\"') + '"]');
+      if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); }
+    }
+    Array.prototype.forEach.call(scopeEl.querySelectorAll('.gs-sp-note-pen[data-note-sku]'), function (btn) {
+      btn.addEventListener('mousedown', function (e) { if (inst.noteOpen === btn.dataset.noteSku) e.preventDefault(); });
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var k = btn.dataset.noteSku;
+        if (inst.noteOpen === k) { inst.noteOpen = null; renderGrid(pickerId); fireChange(pickerId); return; }
+        if (Date.now() - (inst.noteClosedAt || 0) < 400 && inst.noteClosedSku === k) return;
+        openNote(k);
+      });
+    });
+    Array.prototype.forEach.call(scopeEl.querySelectorAll('[data-note-open]'), function (el) {
+      el.addEventListener('click', function (e) { e.stopPropagation(); openNote(el.dataset.noteOpen); });
+    });
+    Array.prototype.forEach.call(scopeEl.querySelectorAll('[data-note-text]'), function (ta) {
+      ta.addEventListener('click', function (e) { e.stopPropagation(); });
+      ta.addEventListener('input', function () { inst.notes[ta.dataset.noteText] = ta.value; });
+      /* Se guarda al cerrar: salir de la cajita la cierra (sin boton). */
+      ta.addEventListener('blur', function () {
+        if (inst.noteOpen !== ta.dataset.noteText) return;
+        inst.noteOpen = null; inst.noteClosedAt = Date.now(); inst.noteClosedSku = ta.dataset.noteText;
+        setTimeout(function () { renderGrid(pickerId); fireChange(pickerId); }, 0);
+      });
     });
   }
 
@@ -1179,6 +1236,7 @@
       selected: options.initialSelected || {},
       svcLevel: options.initialLevels || {},
       svcQty: options.initialQuantities || {},
+      notesOn: !!options.serviceNotes, notes: {}, noteOpen: null,
       selAllActive: null,
       onChange: options.onChange || null
     };
@@ -1332,6 +1390,14 @@
       },
       getLevels: function () { return inst.svcLevel; },
       getQuantities: function () { return inst.svcQty; },
+      /* 01/10/2026: { sku: nota } de los servicios escogidos con nota. */
+      getNotes: function () {
+        var out = {}, sel = {};
+        Object.keys(inst.selected || {}).forEach(function (pt) { Object.keys(inst.selected[pt] || {}).forEach(function (n) { sel[String(inst.selected[pt][n])] = true; }); });
+        Object.keys(inst.notes).forEach(function (k) { var t = String(inst.notes[k] || '').trim(); if (t && sel[k]) out[k] = t; });
+        return out;
+      },
+      clearNotes: function () { inst.notes = {}; inst.noteOpen = null; },
       getPropertyType: function () { return inst.propertyType; },
       setSelected: function (selected, levels, quantities, packageLevels) {
         inst.selected = selected || {};

@@ -62,6 +62,12 @@
     '.gs-svb-note:focus{border-color:var(--gold,#C9A84C);background:var(--white,#fff)}' +
     '.gs-svb-note::placeholder{color:#A9A49A}' +
     '.gs-svb-note.warn{border-color:var(--red,#c0392b)}' +
+    /* Notas por servicio (01/10/2026). */
+    '.svc-remove-btn.gs-svb-sn-pen{color:var(--gold-dk,#8C6F2A);margin-right:6px}' +
+    '.svc-remove-btn.gs-svb-sn-pen.on{background:var(--gold-lt,#F5EDD6);border-radius:50%}' +
+    '.gs-svb-sn-list{margin:-4px 0 8px;padding:6px 10px;background:#FBF6E9;border-left:2px solid var(--gold,#C9A84C);border-radius:0 4px 4px 0}' +
+    '.gs-svb-sn-item{font-size:11.5px;color:var(--black,#111);line-height:1.5;white-space:pre-wrap}' +
+    '.gs-svb-sn-item b{color:var(--gold-dk,#8C6F2A);font-weight:600}' +
     '.gs-svb-ed-hit{all:unset;box-sizing:border-box;width:100%;padding:7px 10px;font-size:12.5px;border-radius:4px;cursor:pointer;display:flex;justify-content:space-between;gap:10px}' +
     '.gs-svb-ed-hit:hover,.gs-svb-ed-hit:focus-visible{background:var(--bg,var(--off,#F8F7F4))}' +
     '.gs-svb-ed-hit b{color:#27ae60;font-weight:700;font-size:11px;white-space:nowrap}' +
@@ -228,7 +234,15 @@
                          removed:[{serviceName, note}], levels:[{serviceName, from, to}],
                          notes:[{serviceName, note}] }  // notas del lapiz
        ed.changed()
-       ed.rows() -> [{name, sku, level, qty, existing, removed, reason}] */
+       ed.rows() -> [{name, sku, level, qty, existing, removed, reason}]
+     serviceNotes (01/10/2026, dueño: "un lapicito que se le de clic y se abre
+     la notita y se guarda cuando se cierra, sin boton"): opcional,
+       serviceNotes: { list: [{key, sku, name, text, by, at}],  // GSOrderHistory.serviceNotesOf
+                       by: 'Juan Perez',                       // quien escribe (para pintarla ya)
+                       onSave(row, text) -> Promise }          // guarda el renglon 'Service Note'
+     Cada servicio trae su lapiz (aparte de la X) y abajo sus notas, que no
+     se borran. La nota nueva se guarda al cerrar la cajita (salir de ella o
+     picar el lapiz otra vez); se agrega a list al momento. */
   function fmtMin(m) { if (m == null) return ''; var h = Math.floor(m / 60), r = Math.round(m % 60); return h && r ? h + 'h ' + r + 'min' : h ? h + 'h' : r + 'min'; }
   function editor(o) {
     styleTag();
@@ -264,6 +278,39 @@
     function mins(r) { return o.minutesOf ? o.minutesOf(skuOf(r), r.level, r.qty) : null; }
     function live() { return rows.filter(function (r) { return !r.removed; }); }
 
+    /* Notas por servicio (01/10/2026). */
+    var sn = o.serviceNotes && typeof o.serviceNotes === 'object' ? o.serviceNotes : null;
+    if (sn && !Array.isArray(sn.list)) sn.list = [];
+    var snOpen = {}, snText = {}, snClosedAt = {};
+    function snKey(r) { var k = skuOf(r); return k ? 'sku:' + String(k).trim().toUpperCase() : 'name:' + String(r.name || '').trim().toLowerCase(); }
+    function snOf(r) { if (!sn) return []; var k = snKey(r), nm = 'name:' + String(r.name || '').trim().toLowerCase(); return sn.list.filter(function (n) { return n && (n.key === k || n.key === nm); }); }
+    function snWhen(at) { var d = new Date(at); return isNaN(d.getTime()) ? '' : (d.getMonth() + 1) + '/' + d.getDate(); }
+    function snListHtml(r) {
+      var l = snOf(r); if (!l.length) return '';
+      return '<div class="gs-svb-sn-list">' + l.map(function (n) {
+        return '<div class="gs-svb-sn-item"><b>' + esc(n.by || 'Note') + (snWhen(n.at) ? ' · ' + esc(snWhen(n.at)) : '') + ':</b> ' + esc(n.text) + '</div>';
+      }).join('') + '</div>';
+    }
+    function snClose(i) {
+      var r = rows[i]; if (!r || !snOpen[i]) return;
+      var text = String(snText[i] || '').trim();
+      snOpen[i] = false; snText[i] = ''; snClosedAt[i] = Date.now();
+      if (text && sn) {
+        var note = { key: snKey(r), sku: skuOf(r), name: r.name, text: text, by: sn.by || 'You', at: new Date().toISOString() };
+        sn.list.push(note);
+        if (typeof sn.onSave === 'function') {
+          var p = sn.onSave({ name: r.name, sku: skuOf(r) }, text);
+          if (p && typeof p.then === 'function') p.then(function (saved) {
+            if (saved && saved.by) note.by = saved.by;
+          }, function () {
+            var k = sn.list.indexOf(note); if (k !== -1) sn.list.splice(k, 1);
+            snOpen[i] = true; snText[i] = text; refresh();
+          });
+        }
+      }
+      refresh();
+    }
+
     /* 27/09/2026 (dueno): renglon parejo -- nombre a la izquierda (si
        es largo se parte en dos lineas) y niveles/tiempo/boton siempre a
        la derecha en la misma linea, alineados en todos los renglones.
@@ -290,12 +337,14 @@
       var nameHtml = '<span' + (r.open && !r.removed && o.pencil !== false ? ' class="gs-svb-ed-name" data-act="name" data-i="' + i + '" role="button" tabindex="0" title="Close the note"' : '') + '>' +
         '<span' + (r.removed ? ' style="text-decoration:line-through"' : '') + '>' + esc(r.name) + '</span>' +
         (r.removed ? '<br><span class="gs-svb-ed-tag">' + esc(o.removedLabel ? o.removedLabel(needNote) : (needNote ? 'removed \u2014 note required' : 'removed')) + '</span>' : '') + '</span>';
+      var snBtn = sn && !r.removed ? '<button type="button" class="svc-remove-btn gs-svb-sn-pen' + (snOpen[i] ? ' on' : '') + '" data-act="sn" data-i="' + i + '" title="Note for this service" aria-label="Note for ' + esc(r.name) + '">&#9998;</button>' : '';
       var line = '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:13px">' + nameHtml +
-        '<span style="display:flex;align-items:center">' + lv + qty + time + (o.rowExtraHtml ? o.rowExtraHtml(r, i) || '' : '') + btn + '</span></div>';
+        '<span style="display:flex;align-items:center">' + lv + qty + time + (o.rowExtraHtml ? o.rowExtraHtml(r, i) || '' : '') + snBtn + btn + '</span></div>';
+      var snPart = sn ? snListHtml(r) + (snOpen[i] && !r.removed ? '<div class="gs-svb-ed-why"><textarea rows="2" class="gs-svb-note" data-act="snt" data-i="' + i + '" placeholder="Note about this service. It saves when you close it." aria-label="Note for ' + esc(r.name) + '">' + esc(snText[i] || '') + '</textarea></div>' : '') : '';
       var why = (r.open || r.removed) && o.reasonInline !== false
         ? '<div class="gs-svb-ed-why"><textarea rows="2" class="gs-svb-note' + (needNote && !String(r.reason || '').trim() ? ' warn' : '') + '" data-act="why" data-i="' + i + '" placeholder="' +
             esc(needNote ? (o.reasonPlaceholder || 'Required \u2014 explain why you want to remove it') : 'Note for the office \u2014 optional') + '" aria-label="Note for ' + esc(r.name) + '">' + esc(r.reason) + '</textarea></div>' : '';
-      return '<div class="gs-svb-ed-row' + (needNote ? ' gs-svb-ed-removed' : '') + '">' + line + why + '</div>';
+      return '<div class="gs-svb-ed-row' + (needNote ? ' gs-svb-ed-removed' : '') + '">' + line + snPart + why + '</div>';
     }
 
     function resultsHtml() {
@@ -372,6 +421,14 @@
          vuelve a montar (asi Admin conserva sus reglas: Not Completed
          con la nota a la derecha en Active, quitar directo en Approvals,
          cambiar de division al agregar). */
+      if (a === 'sn') {
+        if (!rows[i]) return;
+        if (snOpen[i]) { snClose(i); return; }
+        if (Date.now() - (snClosedAt[i] || 0) < 400) return; // el blur ya la cerro con este mismo toque
+        snOpen[i] = true; refresh();
+        var st = el.querySelector('[data-act="snt"][data-i="' + i + '"]'); if (st) st.focus();
+        return;
+      }
       if (a === 'x' && o.onRemove) { if (rows[i]) o.onRemove(i, rows[i]); return; }
       if (a === 'lv' && o.onLevel) { if (rows[i]) o.onLevel(i, b.getAttribute('data-v'), rows[i]); return; }
       if (a === 'pt') { pt = b.getAttribute('data-v') || pt; if (o.onPropertyType) o.onPropertyType(pt); refresh(true); return; }
@@ -394,17 +451,22 @@
         query = ''; refresh(true); fire();
       }
     }
-    el.addEventListener('click', function (e) { var b = e.target.closest('[data-act]'); if (b && el.contains(b) && ['x', 'lv', 'add', 'pen', 'name', 'pt'].indexOf(b.getAttribute('data-act')) !== -1) act(b); });
+    el.addEventListener('click', function (e) { var b = e.target.closest('[data-act]'); if (b && el.contains(b) && ['x', 'lv', 'add', 'pen', 'name', 'pt', 'sn'].indexOf(b.getAttribute('data-act')) !== -1) act(b); });
     /* Cantidad en modo controlado: al terminar de escribir (change), no
        en cada tecla, para no re-montar mientras se escribe. */
     el.addEventListener('change', function (e) {
       var t = e.target;
       if (o.onQty && t.getAttribute && t.getAttribute('data-act') === 'qty') { var i = Number(t.getAttribute('data-i')); if (rows[i]) o.onQty(i, t.value, rows[i]); }
     });
+    el.addEventListener('focusout', function (e) {
+      var t = e.target;
+      if (t.getAttribute && t.getAttribute('data-act') === 'snt') snClose(Number(t.getAttribute('data-i')));
+    });
     el.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && /^(lv|name)$/.test(e.target.getAttribute('data-act') || '')) { e.preventDefault(); act(e.target); } });
     el.addEventListener('input', function (e) {
       var t = e.target, a = t.getAttribute && t.getAttribute('data-act'), i = Number(t.getAttribute('data-i'));
       if (a === 'q') { query = t.value; var box = el.querySelector('.gs-svb-ed-results'); if (box) box.innerHTML = resultsHtml(); }
+      else if (a === 'snt') { snText[i] = t.value; }
       else if (a === 'why' && rows[i]) { rows[i].reason = t.value; if (rows[i].removed && o.reasonRequired !== false) t.classList.toggle('warn', !t.value.trim()); fire(); }
       else if (a === 'qty' && rows[i] && !o.onQty) { var n = parseInt(t.value, 10); rows[i].qty = n > 0 ? n : ''; el.querySelector('[data-part="est"]').innerHTML = estPart(); el.querySelector('[data-part="meta"]').textContent = metaText(); fire(); }
     });
