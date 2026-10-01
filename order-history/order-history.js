@@ -451,6 +451,19 @@
 
     if (h.ChangeType === 'Service Change Requested') return lines.concat(serviceChangeRequestLines(h));
 
+    /* Nota por servicio (01/10/2026, captura del dueño: el detalle salia como
+       "(none) → {json crudo}"). NewValue { sku, name, text }: el servicio y su
+       nota, un renglon por linea. */
+    if (h.ChangeType === 'Service Note') {
+      var sn = null; try { sn = JSON.parse(h.NewValue || 'null'); } catch (e) { sn = null; }
+      var noteName = (sn && sn.name) || String(h.FieldChanged || '');
+      var noteText = sn && sn.text != null ? String(sn.text) : String(h.Notes || '').replace(/^[^:]*:\s*/, '');
+      if (noteName) lines.push('📝 ' + esc(noteName));
+      noteText.split(/\r?\n/).map(function (t) { return t.trim(); }).filter(Boolean)
+        .forEach(function (t) { lines.push('• ' + esc(t)); });
+      return lines;
+    }
+
     /* Solo trae la lista nueva (sin antes contra que comparar):
        - 'Services Updated' del cliente (submit-order.js): cambios de
          nivel/cantidad aplicados directo, NewValue {services:[...]}.
