@@ -161,10 +161,11 @@
       '.gs-sp-inpkg{font-size:10px;font-weight:700;color:#3E7A4C;margin-left:6px;text-transform:uppercase;letter-spacing:.04em}' +
       /* Notas por servicio (01/10/2026, dueño): lapicito en cada servicio escogido. */
       '.gs-sp-cell{min-width:0}' +
-      '.gs-sp-cell-chip{position:relative}.gs-sp-cell-chip .gs-sp-chip-btn{width:100%;padding-right:34px}' +
+      '.gs-sp-chip-wrap{position:relative;display:block}.gs-sp-chip-wrap .gs-sp-chip-btn{width:100%;padding-right:34px}' +
       '.gs-sp-note-pen{flex-shrink:0;width:26px;height:26px;border:none;background:transparent;color:var(--gold-dk,#8C6F2A);cursor:pointer;font-size:14px;line-height:1;border-radius:50%;padding:0;font-family:inherit}' +
       '.gs-sp-note-pen:hover,.gs-sp-note-pen.on{background:#F5EDD6}' +
-      '.gs-sp-cell-chip .gs-sp-note-pen{position:absolute;top:50%;right:6px;transform:translateY(-50%)}' +
+      '.gs-sp-chip-wrap .gs-sp-note-pen{position:absolute;top:50%;right:6px;transform:translateY(-50%)}' +
+      '.gs-sp-chip-btn.active + .gs-sp-note-pen{color:#171310}' +
       '.gs-sp-note-text{display:block;width:100%;box-sizing:border-box;margin-top:4px;border:1.5px solid var(--gold,#C9A84C);border-radius:4px;padding:6px 8px;font-size:12px;font-family:inherit;background:#fff;color:var(--black,#111);outline:none;resize:vertical}' +
       '.gs-sp-note-show{display:block;margin-top:4px;padding:4px 8px;font-size:11.5px;line-height:1.4;color:var(--black,#111);background:#FBF6E9;border-left:2px solid var(--gold,#C9A84C);border-radius:0 3px 3px 0;cursor:pointer;white-space:pre-wrap;word-break:break-word}' +
       '@media (max-width:640px){.gs-sp-accordion{grid-template-columns:1fr}}';
@@ -284,7 +285,9 @@
         'data-sku="' + escapeAttr(s.sku) + '" value="' + escapeAttr(qty) + '">' + notePenHtml(inst, s, qsel) + '</span></div>';
     }
     var active = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
-    return '<button type="button" class="gs-sp-chip-btn' + (active ? ' active' : '') + '" data-sku="' + escapeAttr(s.sku) + '">' + nameWithTip(s) + priceHtml(inst, s) + '</button>' + notePenHtml(inst, s, active);
+    var chipBtn = '<button type="button" class="gs-sp-chip-btn' + (active ? ' active' : '') + '" data-sku="' + escapeAttr(s.sku) + '">' + nameWithTip(s) + priceHtml(inst, s) + '</button>';
+    /* El lapiz va centrado contra el boton, no contra la caja de la nota (01/10). */
+    return inst.notesOn ? '<span class="gs-sp-chip-wrap">' + chipBtn + notePenHtml(inst, s, active) + '</span>' : chipBtn;
   }
 
   function bindItemEvents(inst, pickerId, scopeEl) {
