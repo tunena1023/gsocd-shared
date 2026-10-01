@@ -1401,6 +1401,23 @@
         return out;
       },
       clearNotes: function () { inst.notes = {}; inst.noteOpen = null; },
+      /* 01/10/2026 (dueño: "cuando se esten creando ordenes y se actualice la
+         pagina, los datos se guarden"): todo lo escogido, para guardarlo como
+         borrador y ponerlo de vuelta con restore() (avisa con onChange). */
+      getState: function () {
+        return { propertyType: inst.propertyType, workMode: inst.workMode, selected: inst.selected, levels: inst.svcLevel,
+          quantities: inst.svcQty, packageLevels: this.getPackageLevels(), notes: inst.notes };
+      },
+      restore: function (st) {
+        st = st || {};
+        if (st.propertyType) { inst.propertyType = st.propertyType; if (toggleEl) toggleEl.checked = st.propertyType === 'Residential'; }
+        if (st.workMode) { inst.workMode = st.workMode === 'recurring' ? 'recurring' : 'units'; if (workEl) workEl.checked = inst.workMode === 'units'; }
+        inst.selected = st.selected || {}; inst.svcLevel = st.levels || {}; inst.svcQty = st.quantities || {};
+        inst.pkgItemLevels = {};
+        Object.keys(st.packageLevels || {}).forEach(function (k) { var o = {}; (st.packageLevels[k] || []).forEach(function (x) { if (x && x.sku && x.level) o[String(x.sku)] = x.level; }); inst.pkgItemLevels[String(k)] = o; });
+        inst.notes = Object.assign({}, st.notes || {}); inst.noteOpen = null;
+        syncModeUI(); renderGrid(pickerId); fireChange(pickerId);
+      },
       getPropertyType: function () { return inst.propertyType; },
       setSelected: function (selected, levels, quantities, packageLevels) {
         inst.selected = selected || {};
