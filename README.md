@@ -176,6 +176,14 @@ Para que `applyChrome()` funcione, el HTML de cada página debe usar estos nombr
 
 **`GSNavPremium.refresh(containerId)`** -- reacomoda la línea dorada debajo de la pestaña activa actual. Se llama después de que algo de afuera le cambia el ancho a una pestaña YA renderizada (ej. un contador que arranca en 0 y luego se actualiza al número real).
 
+## order-details
+
+`GSOrderDetails` (02/10/2026): el bloque "Order Details" en 3 grupos (When / Where / Who), el día asignado de una
+orden (`assignedDayText`) y la ventana corta (`shortWindow`). Ver el comentario de arriba del archivo para las opciones.
+```html
+<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@<sha>/order-details/order-details.js"></script>
+```
+
 ## order-badges
 
 Componente compartido para los badges de "unidad ocupada" y "se necesita algo de la oficina" -- una sola pieza para Admingsocd.com, tech.gsocd.com y ordersgsocd.com.

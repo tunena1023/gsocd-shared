@@ -2,6 +2,15 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag (commit en main) — 2026-10-02 (Order Details: When / Where / Who)
+
+- **order-details/order-details.js** (nuevo, navegador): `GSOrderDetails.html(o, opts)` arma el bloque "Order Details"
+  en 3 grupos, When / Where / Who (opción A que escogió el dueño). Who: en inspección "Inspecting", si no Supervisor
+  (role 'Supervisor' en `opts.techs`) y Technician(s). Opciones: `assignments`, `techs`, `showWho`, `showPhones`,
+  `poHtml`, `live`. También `assignedDayText(o, {weekday})` (el día asignado de las tarjetas de Tech) y
+  `shortWindow('8:00 AM - 11:00 AM')` -> `8:00–11:00 AM`. Lo usan Admin (`admin.html`) y Tech
+  (`supervisor.html`, `employee.html`); Orders todavía no.
+
 ## Sin tag (commit en main) — 2026-10-02 (Gallery: estatus y gente asignada)
 
 - **gallery-groups/gallery-groups.js**: opcional `statusHtml(group)` en `render()`: burbuja del estatus a la derecha
