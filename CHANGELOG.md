@@ -2,6 +2,13 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag (commit en main) — 2026-10-02 (Gallery: estatus y gente asignada)
+
+- **gallery-groups/gallery-groups.js**: opcional `statusHtml(group)` en `render()`: burbuja del estatus a la derecha
+  del nombre (la pinta cada portal con sus colores). Opcional `group.crew` (arreglo de nombres): con el, el
+  encabezado dice "Supervisor: <supervisor>" y abajo "Assigned: <crew>" en vez de "Assigned: <supervisor>". Sin esas
+  opciones se ve igual (Tech y Orders no cambian).
+
 ## Sin tag (commit en main) — 2026-09-30 (servicios por SKU y por tipo)
 
 - **services-box/services-box.js** `editor()`: busca y agrega por **SKU**, no por nombre (hay servicios con el mismo

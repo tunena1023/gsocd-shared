@@ -74,6 +74,9 @@
          openOrderId: 'GS-1001-1013', // opcional: esa orden llega ya
                                        // abierta y con scroll automatico;
                                        // las demas quedan cerradas
+         statusHtml: function(group) { ... }, // opcional (02/10/2026): burbuja
+                                       // del estatus a la derecha, la pinta
+                                       // cada portal con sus colores
          onPhotoClick: function(groupIndex, photoIndex, group) {
            GSLightbox.open(group.photos, photoIndex);
          }
@@ -83,6 +86,9 @@
    "groups" es un arreglo de:
      { orderId, clientLabel, date (string ya formateada),
        bedrooms, bathrooms, division, supervisor, unitNumber,
+       crew (opcional, 02/10/2026 -- arreglo de nombres de la gente
+         asignada; si viene, el encabezado dice "Supervisor: <supervisor>"
+         y abajo "Assigned: <crew>" en vez de "Assigned: <supervisor>"),
        completedDate (todos opcionales -- string, se muestran en los
          renglones de detalle debajo del encabezado cuando la tarjeta
          esta cerrada; cualquiera ausente simplemente no aparece),
@@ -364,7 +370,8 @@
          listas de orden en los 3 portales, no solo Gallery. El
          contador de fotos y la flechita son especificos de Gallery,
          asi que van como trailingHtml. */
-      var trailing = '<span class="gs-gal-grp-count">' + count + '</span>' +
+      var trailing = (opts.statusHtml ? (opts.statusHtml(g) || '') : '') +
+        '<span class="gs-gal-grp-count">' + count + '</span>' +
         '<span class="gs-gal-grp-arrow">\u25B8</span>';
       var headerInner = window.GSOrderCardHeader
         ? window.GSOrderCardHeader.html({
@@ -374,9 +381,12 @@
             unitNumber: g.unitNumber,
             bedrooms: g.bedrooms,
             bathrooms: g.bathrooms,
-            supervisor: g.supervisor,
+            supervisor: g.crew ? '' : g.supervisor,
             completedDateText: g.completedDate ? fmtGroupDate(g.completedDate) : ''
-          }, { trailingHtml: trailing })
+          }, { trailingHtml: trailing }) + (g.crew
+            ? (g.supervisor ? '<div class="gs-ordhdr-sub">Supervisor: ' + esc(g.supervisor) + '</div>' : '') +
+              (g.crew.length ? '<div class="gs-ordhdr-sub">Assigned: ' + esc(g.crew.join(', ')) + '</div>' : '')
+            : '')
         /* Respaldo si por alguna razon order-card-header.js no cargo
            antes que este script. */
         : '<div class="gs-ordhdr-top"><span class="gs-ordhdr-name">' + esc(g.clientLabel || g.orderId) + '</span>' +
