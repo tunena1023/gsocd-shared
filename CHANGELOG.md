@@ -2,6 +2,11 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag (commit en main) — 2026-10-02 (reporte mensual de recurrentes)
+
+- **lib/notify.js**: evento nuevo `recurring-report` (Updates): "Your <mes> service report", con el PDF del mes adjunto.
+  Copiado tal cual a `lib/notify.js` de Admin, Orders y Tech.
+
 ## Sin tag (commit en main) — 2026-10-02 (calendario de recurrentes el día 1)
 
 - **lib/notify.js** `recurring-month`: el texto dice "this month" (sale el día 1 con el mes en curso) y, con
