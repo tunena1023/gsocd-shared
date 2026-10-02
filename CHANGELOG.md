@@ -2,6 +2,13 @@
 
 Todas las versiones publicadas de este repo, más recientes primero.
 
+## Sin tag (commit en main) — 2026-10-02 (contador de órdenes que se corrige solo)
+
+- **lib/order-seq.js**: `open()` / `reserve()` ya no confían ciegamente en el renglón de Settings. Antes de usarlo leen
+  las órdenes creadas desde la última vez que se escribió (`fields/Created ge`, 10 min de colchón; Created indexada) y
+  toman el mayor. Así, si una orden se numeró sin el contador (código viejo, otra ruta), no se repiten números y nadie
+  tiene que borrar renglones a mano. Test: `node lib/order-seq.test.js`; e2e de Admin S37.
+
 ## Sin tag (commit en main) — 2026-10-02 (Order Details: When / Where / Who)
 
 - **order-details/order-details.js** (nuevo, navegador): `GSOrderDetails.html(o, opts)` arma el bloque "Order Details"
