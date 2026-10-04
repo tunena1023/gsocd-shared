@@ -6,7 +6,7 @@ Dos modos: `'toggle'` (un chip, se prende o apaga) y `'levels'` (fila con 3 boto
 ## Uso
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@v1.0.0/service-picker/service-picker.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@<sha>/service-picker/service-picker.js"></script>
 ```
 
 ```js
@@ -55,19 +55,3 @@ document.addEventListener('gs-services-changed', (e) => {
   console.log(e.detail.pickerId, e.detail.selected, e.detail.svcLevel);
 });
 ```
-
-## Historial
-
-- **v1.2.0** — Se agrega `filterMode` (`'selected-plus-search'`, para editar algo que ya existe
-  sin mostrar el catálogo completo de entrada), `crossDivision` (buscar sin límite de división),
-  y `getPropertyType()` — el tipo de propiedad ahora también se puede leer desde fuera, y cambiar
-  de tipo también dispara `onChange`/`gs-services-changed`. Encontrado al revisar TODOS los
-  lugares candidatos a usar este componente (customer.html, templates.html, admin.html ×3,
-  developer.html, recurring.html) antes de conectar el primero, en vez de ir descubriendo huecos
-  uno a la vez.
-- **v1.0.0** — Primera versión. Extraído de las 3 copias que vivían dentro de `admin.html`
-  (Approvals/Review, Active, Create Order), más las de `developer.html`, `recurring.html`,
-  `customer.html`, y `templates.html`. (`supervisor.html` de tech.gsocd.com se ve parecido —
-  mismo estilo de botones L1/L2/L3 — pero es una herramienta distinta: modifica los servicios de
-  una orden que ya existe, con quitar/deshacer, no arma una selección desde el catálogo. No es
-  candidato a este componente.)

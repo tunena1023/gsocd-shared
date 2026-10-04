@@ -25,55 +25,44 @@ Cada componente se sirve gratis a través de [jsDelivr](https://www.jsdelivr.com
 cualquier archivo de este repo (público) y lo entrega por internet sin que haya que configurar
 ni pagar nada.
 
-**Siempre se usa una versión específica, nunca "lo que sea que esté ahora".** Así, un cambio aquí
-nunca le llega a un portal hasta que alguien decide a propósito subirlo a esa versión nueva —
-igual que ya se usa `ultimo-build-bueno-2026-09-08` en los otros 3 repos como punto seguro de
-regreso.
+**Siempre se usa una versión fija, por SHA de commit, nunca "lo que esté ahora".** Así un cambio aquí no le
+llega a ningún portal hasta que alguien cambia a propósito el SHA en ese portal (en su rama `preview`):
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@v1.0.0/lightbox/lightbox.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@<sha>/lightbox/lightbox.js"></script>
 ```
 
-Para pasar a una versión nueva, se cambia el número (`@v1.0.0` → `@v1.1.0`) en cada portal que la
-use, uno a la vez — nunca los 3 al mismo tiempo sin haber probado primero.
+Algunos componentes que no se han tocado en mucho tiempo todavía se cargan por un tag viejo (`@v1.x.y`); al
+cambiarlos, pasarlos a SHA. Ya no se crean tags.
 
-## Piezas de backend (Node) -- desde v1.34.0
+## Piezas de backend (Node)
 
-Hasta v1.33.0, todo lo de este repo era código de **navegador**: se sirve por jsDelivr y se
-carga con `<script src="...">` en las páginas HTML de los 3 portales.
-
-Desde v1.34.0 este repo *también* puede tener piezas de **backend (Node)** -- lógica que corre
-del lado del servidor, en las funciones serverless de cada portal (`admin-update-order.js`,
-`submit-supervisor-update.js`, etc.), no en el navegador. Esas piezas viven en `lib/` (ver
-`lib/division-rules.js` para el primer ejemplo real).
-
-**Cómo lo usa cada portal (distinto al navegador):** en vez de una URL de jsDelivr, el repo se
-instala como una dependencia real de `npm`, apuntando a un tag fijo (mismo criterio de "nunca
-la más nueva, siempre una versión específica" que ya usa todo lo demás aquí):
-
-```json
-"dependencies": {
-  "gsocd-shared": "github:tunena1023/gsocd-shared#v1.34.0"
-}
-```
-
-Y se usa con `require()` normal, como cualquier otro paquete de `node_modules`:
+Admin y Orders instalan este repo como dependencia de npm, fijado por SHA en su `package.json`
+(`"gsocd-shared": "github:tunena1023/gsocd-shared#<sha>"`); Tech no lo usa por npm. Se usa con `require()`:
 
 ```js
-const { resolveOrderDivision } = require('gsocd-shared/lib/division-rules');
-// o, si se necesita mas de una pieza:
-const { divisionRules } = require('gsocd-shared');
+const orderPdf = require('gsocd-shared/lib/order-pdf');
 ```
 
-Para pasar a una versión nueva: cambiar el tag en el `package.json` de cada portal (uno a la
-vez, igual que con las piezas de navegador) y correr `npm install` de nuevo -- Vercel lo hace
-solo en cada deploy.
+Por npm se usan `lib/order-pdf`, `lib/pdf`, `lib/push`, `lib/order-seq`, `lib/site-readiness`,
+`lib/schedule-entries` y `lib/service-notes`. Para pasar a una versión nueva: cambiar el SHA en el `package.json` de
+Admin y Orders (Vercel instala solo en cada deploy).
 
-Las piezas de backend son funciones **puras** a propósito: no hacen sus propias consultas a
-SharePoint/Graph ni saben nada de `createListItem`/`updateListItemByItemId` -- cada portal
-sigue siendo el que hace sus propias consultas y guarda sus propios datos; estas piezas solo
-calculan, para poder probarlas con Node solo (`node lib/division-rules.test.js`), sin necesitar
-credenciales ni conexión a nada.
+**Excepción, van como COPIA en cada portal:** `lib/notify.js` (copia idéntica en Admin, Orders y Tech) y
+`lib/division-rules.js` (copia en Admin y Orders). Si cambian aquí, se copian a mano a esos portales en el mismo
+cambio; el encabezado de la copia dice "no editar aquí".
+
+Las piezas de backend son funciones **puras**: no hacen sus propias consultas a SharePoint/Graph; cada portal hace
+sus consultas y guarda sus datos. Se prueban con Node solo: `node lib/<pieza>.test.js`.
+
+## Reglas que siguen vigentes
+
+- **`camera-capture.html` va una copia por dominio** (vive en los 3 repos), porque IndexedDB no cruza dominios.
+- **Las fotos siempre se guardan:** `camera-queue` es genérico y no sabe de endpoints; `notReady`/`release` existen
+  solo para la orden nueva que todavía no tiene OrderID. El video sigue con la cámara nativa del teléfono.
+- **`ServicesCatalog` es la fuente del selector de servicios**; `Services` es la lista vieja. `Category` no la toca el
+  import; se edita a mano en Admin › Developer.
+- **`groupByCategory: true`** es el estándar donde se crea o edita una orden o plantilla (Admin y Orders).
 
 ## Componentes disponibles
 
@@ -85,20 +74,7 @@ credenciales ni conexión a nada.
 | Barra de navegación | [`nav-premium/`](./nav-premium) | Tarjeta dorada de pestañas + `<nav>` con logo -- usada por las 3 apps |
 | Preview de foto al pasar el mouse | [`photo-hover-preview/`](./photo-hover-preview) | Al quedarse 1s con el mouse sobre una miniatura, crece a tamaño máximo en pantalla sin clic. Usado en Admin y Orders. |
 | Lista + selector + diff de servicios | [`service-change-panel/`](./service-change-panel) | Servicios actuales (nombre + nota + cámara), selector real y diff agregados/quitados con nota obligatoria. Usado en Orders (Recurring, Processing) y Admin. |
-| Regla de Division Mixed (backend) | [`lib/division-rules.js`](./lib/division-rules.js) | Detecta si los servicios que se van a guardar en una orden pertenecen a otra división y calcula el cambio a 'Mixed' -- función pura de Node, no de navegador. Usado en Admin, Tech y Orders. |
-
-Los 3 quedan listos para conectar — todavía ningún portal usa el reloj/calendario ni el selector
-de servicios (solo Tech está conectado al lightbox por ahora).
-
-## Cómo se numeran las versiones
-
-`vMAYOR.MENOR.PARCHE` (ej. `v1.2.0`):
-
-- **PARCHE** (`v1.0.0` → `v1.0.1`): se arregló un bug, nadie tiene que cambiar cómo lo usa.
-- **MENOR** (`v1.0.0` → `v1.1.0`): se agregó algo nuevo (otro componente, u otra opción en uno
-  que ya existía), sin romper lo que ya funcionaba.
-- **MAYOR** (`v1.0.0` → `v2.0.0`): algo que ya funcionaba de una forma, ahora funciona distinto —
-  el portal que lo use tiene que revisar su código, no solo cambiar el número.
+| Regla de Division Mixed (backend) | [`lib/division-rules.js`](./lib/division-rules.js) | Detecta si los servicios que se van a guardar en una orden pertenecen a otra división y calcula el cambio a 'Mixed' -- función pura de Node, no de navegador. Va como copia en Admin y Orders. |
 
 ## Cómo agregar un componente nuevo (para referencia futura)
 
@@ -108,8 +84,7 @@ de servicios (solo Tech está conectado al lightbox por ahora).
 3. Documentar arriba del archivo: para qué sirve, y cómo se usa (mismo formato que
    `lightbox/lightbox.js`).
 4. Agregar el componente a la tabla de arriba en este README.
-5. Subir una nueva versión (`git tag vX.X.X`) — nunca se sube sin etiqueta, porque los portales
-   siempre piden una versión específica, nunca "lo más nuevo".
+5. Subirlo a `main` de este repo y, en el portal que lo use, poner el SHA nuevo (en su rama `preview`).
 
 ## order-history
 

@@ -8,7 +8,7 @@ razonable, pero se ve mejor si la página ya los define (los 3 portales ya los t
 ## Uso
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@v1.0.0/date-time-picker/date-time-picker.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@<sha>/date-time-picker/date-time-picker.js"></script>
 ```
 
 ### Campo de fecha
@@ -82,36 +82,3 @@ document.addEventListener('gs-time-picked', (e) => {
 - Al elegir una fecha u hora, el input oculto también dispara su propio evento nativo `'change'`
   (además del `'gs-date-picked'`/`'gs-time-picked'` de arriba) — así una página que ya escuche
   `change` en ese input (patrón común) sigue funcionando sin cambios.
-
-## Historial
-
-- **v1.1.8** — BUG REAL: elegir solo la hora (sin llegar a elegir el minuto) nunca guardaba nada
-  -- el usuario veía el reloj avanzar a "elegir minuto", pero si cerraba ahí (pensando que ya
-  había terminado), el valor se quedaba en lo que hubiera antes (típicamente 8:00, el default).
-  Ahora, elegir la hora guarda de inmediato "H:00" (o el minuto que ya estuviera elegido antes);
-  el popover sigue abierto para poder afinar el minuto después, pero ya no depende de llegar
-  hasta ahí para que algo quede guardado. Cambiar AM/PM también confirma el valor actual, por la
-  misma razón. Existía desde antes de este componente -- las 5 copias locales originales tenían
-  el mismo diseño de 2 pasos.
-- **v1.1.7** — `dateHtml` acepta un 4to parámetro `options` con `{ min, max }` (fechas límite en
-  formato `'YYYY-MM-DD'`). Los días fuera de ese rango se ven apagados y no se pueden elegir.
-  Necesario para el panel de "Assign" en `admin.html`, que ya usaba `min`/`max` nativos del
-  navegador (la fecha asignada tiene que caer entre Entry Date y Due Date de la orden).
-- **v1.1.6** — `dateHtml`/`timeHtml` ahora SI limpian el estado interno cuando se llaman sin valor
-  inicial (antes solo lo hacía `syncDate`/`syncTime`, no la generación del HTML). Encontrado al
-  conectar Create Order en `admin.html`: el formulario se regenera con el mismo `fieldId` cada
-  vez que se abre para un cliente distinto — sin este arreglo, el calendario podía seguir
-  mostrando el mes/día que había dejado el cliente anterior, aunque el botón dijera "Pick a date".
-- **v1.1.5** — El popover cambia de `position: absolute` a `position: fixed`, con su propio
-  cálculo de posición en JS (relativo al botón que lo abre, recorriéndose si se saldría de
-  pantalla por la derecha). Encontrado al conectar Create Order en `admin.html`: ese formulario
-  vive dentro de una tarjeta con `overflow: hidden` — con `position: absolute`, el calendario/reloj
-  se hubiera recortado o desaparecido al abrirse ahí. `position: fixed` no depende de ningún
-  ancestro, funciona igual sin importar qué contenedor envuelva al campo.
-- **v1.1.2** — Al elegir fecha/hora, el input oculto también dispara su evento nativo `'change'`
-  (compatible con paginas que ya escuchaban ese patron estandar).
-- **v1.1.1** — Se agrega `syncDate`/`syncTime`, para cuando el valor se pone desde fuera (cargar un
-  borrador, editar una orden existente) sin pasar por el calendario/reloj.
-- **v1.0.0** — Primera versión. Extraído de las copias que vivían por separado en `admin.html` y
-  `developer.html` (Admingsocd.com), y en `tracking.html`, `customer.html`, y `profile.html`
-  (ordersgsocd.com).

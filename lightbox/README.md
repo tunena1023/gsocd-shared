@@ -7,7 +7,7 @@ móvil, eso se trataba como una descarga de archivo en vez de "ver la imagen".
 ## Uso
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@v1.0.0/lightbox/lightbox.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@<sha>/lightbox/lightbox.js"></script>
 ```
 
 Una sola línea. El archivo se inyecta su propio HTML y CSS al cargar — no hace falta copiar
@@ -30,13 +30,7 @@ GSLightbox.nav(1);    // avanzar una foto (-1 para retroceder)
 
 ## Comportamiento
 
-- Clic fuera de la imagen, tecla Escape, o el botón ✕: cierra.
+- Tocar cualquier parte (también la foto), tecla Escape, o el botón ✕: cierra. Solo las flechas no cierran.
 - Flechas del teclado (← →), o los botones de flecha: navega entre fotos.
 - Las flechas se deshabilitan solas en la primera y última foto del grupo.
 - Cargar el script más de una vez en la misma página no duplica nada (se protege solo).
-
-## Historial
-
-- **v1.0.0** — Primera versión. Extraído de las copias que vivían por separado en
-  `tech.gsocd.com` (Employee y Supervisor) y `Admingsocd.com` (Admin) — mismo componente, mismo
-  comportamiento, ahora en un solo lugar.
