@@ -91,7 +91,7 @@ sus consultas y guarda sus datos. Se prueban con Node solo: `node lib/<pieza>.te
 Componente compartido para armar el historial de una orden -- una sola pieza para Admingsocd.com (staff), tech.gsocd.com (staff) y ordersgsocd.com (cliente). Agrupa/etiqueta/filtra igual sin importar quien la llama; el filtrado por modo (`staff` vs `client`) es lo único que cambia qué se ve, nunca cómo se llama lo que sí se ve.
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@v1.3.0/order-history/order-history.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@<sha>/order-history/order-history.js"></script>
 ```
 
 ```js
@@ -109,7 +109,7 @@ const html = GSOrderHistory.html(orderId, history, { mode: 'client' });
 Formato OFICIAL de la barra de navegación superior -- tarjeta dorada con el logo real de GS Solutions flotando y rebotando dentro, destellos animados, y pestañas con línea subrayada deslizante. La usan las 3 apps (Admin, Orders, Tech) para su barra de pestañas.
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@v1.24.0/nav-premium/nav-premium.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@<sha>/nav-premium/nav-premium.js"></script>
 ```
 
 **`GSNavPremium.init(containerId, tabs)`** -- construye la tarjeta dorada completa dentro de `<div id="containerId"></div>`. Cada pestaña acepta:
@@ -164,7 +164,7 @@ orden (`assignedDayText`) y la ventana corta (`shortWindow`). Ver el comentario 
 Componente compartido para los badges de "unidad ocupada" y "se necesita algo de la oficina" -- una sola pieza para Admingsocd.com, tech.gsocd.com y ordersgsocd.com.
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@v1.7.0/order-badges/order-badges.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@<sha>/order-badges/order-badges.js"></script>
 ```
 
 ```js
@@ -178,7 +178,7 @@ GSOrderBadges.officeNeedNote(o) // texto completo, o '' si no aplica
 Botón "Print"/"Print PDF" de una orden -- una sola pieza para Admingsocd.com (staff) y ordersgsocd.com (cliente), para que los 2 portales impriman bajo las mismas reglas.
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@v1.30.0/print-button/print-button.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/tunena1023/gsocd-shared@<sha>/print-button/print-button.js"></script>
 ```
 
 ```js
