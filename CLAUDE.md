@@ -25,8 +25,7 @@ Esto lo carga cualquier sesión al empezar. Es instrucción del dueño y manda s
 - **Ahorrar tokens (dueño, 28/09):** no quedarse suscrito a PRs (`subscribe_pr_activity`) salvo una prueba corta, y
   no programar check-ins (`send_later`, triggers) para "vigilar". Una sesión trabaja cuando el dueño le habla; para
   coordinarse basta el tablero #5 (se lee al empezar y antes de cada push).
-- El estado completo (qué está en producción, qué está en `preview`, la lista de pendientes #1–#16 y lo que falta
-  que decida el dueño) está en `HANDOFF.md` de la rama **`preview` de Admin**, sección 4 (A–D). Léelo primero.
+- El estado completo (qué está en `preview` y no en producción, lo pendiente y lo que falta que decida el dueño) está en `HANDOFF.md` de la rama **`preview` de Admin**: §3 "QUÉ FALTA DE VERDAD". Léelo primero.
   Si tocas algo de esa lista, actualízalo AHÍ, en el mismo push. No abras listas nuevas en otros archivos o ramas.
   (Ver la sección 4: cada cambio se anota en el momento.)
 - Reglas fijas de trabajo: `WORKFLOW.md` de Admin.
@@ -35,14 +34,14 @@ Esto lo carga cualquier sesión al empezar. Es instrucción del dueño y manda s
 ## 4. Cada vez que se haga algo, se actualiza (dueño, 04/10/2026)
 El 04/10 el tablero y el HANDOFF decían "pendiente" o "solo en `preview`" de cosas que ya estaban en producción o que
 el dueño ya había hecho. Para que no vuelva a pasar, **en cada cosa que hagas, en el mismo momento**:
-- **Subes a `preview`:** en el mismo push, HANDOFF §4 dice "EN `preview`" con el commit, y comentas "✅ Listo" en el #5.
-- **Subes a `main`:** en el HANDOFF cambias la nota a "EN PRODUCCIÓN (fecha, commit de `main`)" y **borras** cualquier
-  "solo en `preview`", "falta para el sábado/domingo" o "pendiente" de eso mismo, en todas las partes donde salga
-  (busca el nombre o el commit con grep). Y lo dices en el #5.
+- **Subes a `preview`:** en el mismo push, HANDOFF §3 dice "EN `preview`" con el commit, y comentas "✅ Listo" en el #5.
+- **Subes a `main`:** lo quitas de "QUÉ FALTA DE VERDAD" y **borras** cualquier "solo en `preview`", "falta para el
+  sábado/domingo" o "pendiente" de eso mismo, en todas las partes donde salga (busca el nombre o el commit con grep).
+  No se escribe la historia de lo que se subió (para eso está `git log`). Y lo dices en el #5.
 - **El dueño dice que ya hizo algo** (crear o indexar una columna, picar un botón) o **decide algo**: lo anotas en el
   HANDOFF y en el #5 en ese momento, aunque no haya código.
 - **Algo se cancela o se suelta:** se quita o se marca así en el HANDOFF, no se deja como pendiente.
-- **El bloque "QUÉ FALTA DE VERDAD"** al inicio de HANDOFF §4 es la lista corta de lo pendiente: si lo terminas, lo
+- **El bloque "QUÉ FALTA DE VERDAD"** (HANDOFF §3) es la lista corta de lo pendiente: si lo terminas, lo
   quitas de ahí; si sale algo nuevo, lo agregas ahí.
 - Antes de decirle al dueño qué falta, compara con el código (`git diff origin/main origin/preview --stat` y
   `git log`), no solo con las notas.
