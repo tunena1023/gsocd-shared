@@ -2,6 +2,9 @@
 
 Esto lo carga cualquier sesión al empezar. Es instrucción del dueño y manda sobre la rama que te haya dado tu entorno.
 
+**Antes que nada:** lee "CONTEXTO PARA CADA SESIÓN NUEVA" al inicio de `HANDOFF.md` (rama `preview` de Admin): qué es la
+app, su objetivo, la etapa (en uso real desde el 02/10/2026) y cómo trabaja el dueño. Así no se le vuelve a preguntar.
+
 ## 1. Ramas
 - En **Admin, Orders y Tech** solo existen `main` (producción) y `preview` (lo que sale el próximo sábado).
   En **gsocd-shared** solo `main` (los portales lo cargan por SHA, así que subir a main de shared no cambia
