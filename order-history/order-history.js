@@ -459,6 +459,12 @@
        nota, un renglon por linea. */
     /* Nota interna para supervisores (05/10/2026, dueño: "se van reemplazando y
        la nota vieja pasa al historial"): la que habia antes y la que quedo. */
+    /* "Send to <empleado>" (lib/crew-note.js): a quien y que nota le llego. */
+    if (h.ChangeType === 'Internal Note' && String(h.FieldChanged || '') === 'Sent') {
+      if (h.OldValue) lines.push('<b>To:</b> ' + esc(String(h.OldValue)));
+      lines.push('<b>Note:</b> ' + esc(String(h.NewValue || '')).replace(/\r?\n/g, '<br>'));
+      return lines;
+    }
     if (h.ChangeType === 'Internal Note') {
       var before = String(h.OldValue || '').trim(), now = String(h.NewValue || '').trim();
       if (before) lines.push('<b>Before:</b> ' + esc(before).replace(/\r?\n/g, '<br>'));
@@ -1413,7 +1419,7 @@
         date: h.ChangeDate, dateText: fmtDateTime(h.ChangeDate),
         type: String(h.ChangeType || ''),
         /* Una orden que nacio como estimado (Admin > Create Order con el switch). */
-        label: h._label || (String(h.ChangeType || '') === 'Created' && /^Created as an estimate/.test(String(h.Notes || '')) ? 'Estimate created' : labelFor(h.ChangeType)),
+        label: h._label || (String(h.ChangeType || '') === 'Internal Note' && String(h.FieldChanged || '') === 'Sent' ? 'Internal note sent' : '') || (String(h.ChangeType || '') === 'Created' && /^Created as an estimate/.test(String(h.Notes || '')) ? 'Estimate created' : labelFor(h.ChangeType)),
         by: h.ChangedBy ? actorLabel(h.ChangedBy) : '',
         note: noteTxt || '', lines: lines, regression: isRegression
       };
