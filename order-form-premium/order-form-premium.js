@@ -358,6 +358,11 @@ const ICONS = {
                            showUnitDetailCancel para prenderlo despues,
                            ej. al entrar a modo edicion en Orders)
        submitLabel/submitOnclick/cancelLabel/cancelOnclick
+       unitReady        -- (05/10/2026) agrega el switch "Unit ready" arriba
+                           de Entry Date; prendido, salen Ready date, hora y
+                           "¿vive alguien?" (en la columna de los botones,
+                           arriba de ellos) y la Entry date/hora toman esos
+                           valores y quedan en gris. Ver getUnitReady.
      Los mounts de fecha/hora (dom+'-entry-mount' etc.) los llena quien
      use esto, con GSDateTimePicker.dateHtml/timeHtml -- igual que ya
      se hace con officeAccessHtml, este solo regresa el esqueleto. */
@@ -374,15 +379,17 @@ const ICONS = {
     let html = '<div class="gs-ofp-unit-detail-grid ' + gridClass + '">';
     html += officeAccessHtml(dom, officeOpts);
     html += '<div class="gs-ofp-unit-detail-dates">';
+    if (opts.unitReady) html += unitReadyRowHtml(dom);
     html += '<div class="gs-ofp-unit-detail-field"><label id="' + dom + '-entry-label">Entry Date</label><div id="' + dom + '-entry-mount"></div></div>';
     if (showTime) {
       html += '<div class="gs-ofp-unit-detail-field"><label id="' + dom + '-entry-time-label">Entry Time</label><div id="' + dom + '-entry-time-mount"></div></div>';
     }
     html += '<div class="gs-ofp-unit-detail-field"><label id="' + dom + '-due-label">Due Date</label><div id="' + dom + '-due-mount"></div></div>';
+    if (opts.unitReady && !showButtons) html += unitReadyDetailsHtml(dom);
     html += '</div>';
     if (showButtons) {
       const cancelStyle = (opts.showCancel === false) ? ' style="display:none"' : '';
-      html += '<div class="gs-ofp-unit-detail-buttons">' +
+      html += '<div class="gs-ofp-unit-detail-buttons">' + (opts.unitReady ? unitReadyDetailsHtml(dom) : '') +
         '<button type="button" class="gs-ofp-btn-primary" id="' + dom + '-submit-btn" onclick="' + (opts.submitOnclick || '') + '">' + (opts.submitLabel || 'Save') + '</button>' +
         '<div id="' + dom + '-cancel-wrap"' + cancelStyle + '>' +
           '<button type="button" class="gs-ofp-btn-secondary" onclick="' + (opts.cancelOnclick || '') + '">' + (opts.cancelLabel || 'Cancel') + '</button>' +
@@ -391,6 +398,136 @@ const ICONS = {
     }
     html += '</div>';
     return html;
+  }
+
+  /* ================================================================
+     "Unit ready" al crear la orden (05/10/2026, lo pidio un cliente;
+     diseño aprobado por el dueño con capturas). Mismo switch redondo que
+     el de Processing. Prendido: Ready date + hora + "¿vive alguien?";
+     la Entry date/hora del panel toman esos valores y se desactivan (el
+     cliente no las pone dos veces). Apagarlo al crear no pide nota.
+     Solo Janitorial ("Unit ready") y Renovations ("Materials ready"):
+     setUnitReadyDivision(dom, div) lo esconde o le cambia el nombre.
+       GSOrderFormPremium.getUnitReady(dom) -> { on, ready, date, time, occupied }
+         (ready = prendido y con fecha y hora; on = prendido aunque falte algo)
+     Los datos van al servidor como UnitReady/ReadyDate/ReadyTime/
+     UnitOccupied (gsocd-shared lib/site-readiness readyFieldsAtCreate). */
+  const UR_STYLE_ID = 'gs-ofp-ur-style';
+  function urStyle() {
+    if (document.getElementById(UR_STYLE_ID)) return;
+    const t = document.createElement('style');
+    t.id = UR_STYLE_ID;
+    t.textContent =
+      '.gs-ofp-ur-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--border,#E0D9CC);border-radius:7px;padding:12px 14px;background:var(--white,#fff)}' +
+      '.gs-ofp-ur-row b{font-size:13px;display:block;font-weight:600;color:var(--black,#111)}.gs-ofp-ur-row small{font-size:11px;color:var(--gray,#6B6B6B);line-height:1.4}' +
+      '.gs-ofp-ur-switch{position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;flex-shrink:0}' +
+      '.gs-ofp-ur-switch input{opacity:0;width:0;height:0;position:absolute}' +
+      '.gs-ofp-ur-track{position:absolute;inset:0;background:var(--border,#E0D9CC);border-radius:24px;transition:background .2s}' +
+      '.gs-ofp-ur-track::before{content:"";position:absolute;height:20px;width:20px;left:2px;top:2px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.25)}' +
+      '.gs-ofp-ur-switch input:checked + .gs-ofp-ur-track{background:var(--gold,#C9A84C)}' +
+      '.gs-ofp-ur-switch input:checked + .gs-ofp-ur-track::before{transform:translateX(20px)}' +
+      '.gs-ofp-ur-details{border:1px solid var(--border,#E0D9CC);border-radius:7px;padding:12px 14px;background:var(--off,#FAF8F3);display:flex;flex-direction:column;gap:10px}' +
+      '.gs-ofp-ur-details[hidden]{display:none}' +
+      '.gs-ofp-ur-details label{display:block;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gray,#6B6B6B);font-weight:600;margin-bottom:5px}' +
+      '.gs-ofp-ur-occ{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:var(--black,#111)}' +
+      '.gs-ofp-ur-occ span.st{font-size:12px;font-weight:600;color:var(--gray,#6B6B6B);margin-left:8px}' +
+      '.gs-ofp-ur-locked .gs-dtp-trigger{background:var(--off,#F3F1EC);color:var(--gray,#8a8478);cursor:not-allowed}';
+    document.head.appendChild(t);
+  }
+  function urLabel(div) { return String(div || '').toLowerCase() === 'renovations' ? 'Materials ready' : 'Unit ready'; }
+  function urSub(div) {
+    return String(div || '').toLowerCase() === 'renovations'
+      ? 'Everything is on site and we can come in.'
+      : 'The unit is empty and we can come in.';
+  }
+  function unitReadyRowHtml(dom) {
+    urStyle();
+    return '<div class="gs-ofp-ur-row" id="' + dom + '-ur-row">' +
+      '<div><b id="' + dom + '-ur-label">Unit ready</b><small id="' + dom + '-ur-sub">' + urSub('') + '</small></div>' +
+      '<label class="gs-ofp-ur-switch"><input type="checkbox" id="' + dom + '-ur-on" onchange="GSOrderFormPremium._urToggle(\'' + dom + '\')"><span class="gs-ofp-ur-track"></span></label>' +
+    '</div>';
+  }
+  function unitReadyDetailsHtml(dom) {
+    urStyle();
+    return '<div class="gs-ofp-ur-details" id="' + dom + '-ur-details" hidden>' +
+      '<div><label>Ready date</label><div id="' + dom + '-ur-date-mount"></div></div>' +
+      '<div><label>What time can we come in?</label><div id="' + dom + '-ur-time-mount"></div></div>' +
+      '<div class="gs-ofp-ur-occ"><span>Someone living in the unit?</span><span style="display:flex;align-items:center">' +
+        '<label class="gs-ofp-ur-switch"><input type="checkbox" id="' + dom + '-ur-occ" onchange="document.getElementById(\'' + dom + '-ur-occ-st\').textContent = this.checked ? \'Yes\' : \'No\'"><span class="gs-ofp-ur-track"></span></label>' +
+        '<span class="st" id="' + dom + '-ur-occ-st">No</span></span></div>' +
+    '</div>';
+  }
+  /* Las Entry date/hora del panel (las pone quien lo usa en sus mounts). */
+  function urEntryIds(dom) {
+    const d = document.querySelector('#' + dom + '-entry-mount input[type=hidden]');
+    const t = document.querySelector('#' + dom + '-entry-time-mount input[type=hidden]');
+    return { date: d ? d.id : null, time: t ? t.id : null };
+  }
+  function urSetEntry(id, value, isTime) {
+    const el = id && document.getElementById(id);
+    if (!el || !value || el.value === value) return;
+    el.value = value;
+    if (window.GSDateTimePicker) { if (isTime) GSDateTimePicker.syncTime(id); else GSDateTimePicker.syncDate(id); }
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  function urLock(dom, locked) {
+    ['-entry-mount', '-entry-time-mount'].forEach(suf => {
+      const m = document.getElementById(dom + suf);
+      if (!m) return;
+      m.classList.toggle('gs-ofp-ur-locked', !!locked);
+      m.querySelectorAll('.gs-dtp-trigger').forEach(b => { b.disabled = !!locked; });
+    });
+  }
+  function _urToggle(dom) {
+    const on = !!(document.getElementById(dom + '-ur-on') || {}).checked;
+    const box = document.getElementById(dom + '-ur-details');
+    if (box) box.hidden = !on;
+    if (on && window.GSDateTimePicker) {
+      const ids = urEntryIds(dom);
+      const dm = document.getElementById(dom + '-ur-date-mount'), tm = document.getElementById(dom + '-ur-time-mount');
+      const today = new Date(); const iso = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+      if (dm && !dm.firstChild) dm.innerHTML = GSDateTimePicker.dateHtml(dom + '-ur-date', (ids.date && GSDateTimePicker.getDate(ids.date)) || null, null, { min: iso });
+      if (tm && !tm.firstChild) tm.innerHTML = GSDateTimePicker.timeHtml(dom + '-ur-time', (ids.time && GSDateTimePicker.getTime(ids.time)) || null);
+      urSetEntry(ids.date, GSDateTimePicker.getDate(dom + '-ur-date'), false);
+      urSetEntry(ids.time, GSDateTimePicker.getTime(dom + '-ur-time'), true);
+    }
+    urLock(dom, on);
+  }
+  /* Lo que se escoge en Ready date/hora pasa a la Entry date/hora. */
+  document.addEventListener('gs-date-picked', e => {
+    const id = e.detail && e.detail.fieldId; const m = /^(.*)-ur-date$/.exec(id || '');
+    if (m) urSetEntry(urEntryIds(m[1]).date, e.detail.value, false);
+  });
+  document.addEventListener('gs-time-picked', e => {
+    const id = e.detail && e.detail.fieldId; const m = /^(.*)-ur-time$/.exec(id || '');
+    if (m) urSetEntry(urEntryIds(m[1]).time, e.detail.value, true);
+  });
+  function setUnitReadyDivision(dom, div) {
+    const row = document.getElementById(dom + '-ur-row');
+    if (!row) return;
+    const d = String(div || '').toLowerCase();
+    const applies = d === 'janitorial' || d === 'renovations';
+    row.style.display = applies ? '' : 'none';
+    const lb = document.getElementById(dom + '-ur-label'), sb = document.getElementById(dom + '-ur-sub');
+    if (lb) lb.textContent = urLabel(div);
+    if (sb) sb.textContent = urSub(div);
+    if (!applies) resetUnitReady(dom);
+  }
+  /* Apagado y en blanco (formulario nuevo, otra division, borrador). */
+  function resetUnitReady(dom) {
+    const on = document.getElementById(dom + '-ur-on');
+    if (on && on.checked) { on.checked = false; _urToggle(dom); }
+    const occ = document.getElementById(dom + '-ur-occ');
+    if (occ) { occ.checked = false; const st = document.getElementById(dom + '-ur-occ-st'); if (st) st.textContent = 'No'; }
+  }
+  function getUnitReady(dom) {
+    const row = document.getElementById(dom + '-ur-row');
+    const on = !!(row && row.style.display !== 'none' && (document.getElementById(dom + '-ur-on') || {}).checked);
+    const g = window.GSDateTimePicker;
+    const date = on && g ? (g.getDate(dom + '-ur-date') || '') : '';
+    const time = on && g ? (g.getTime(dom + '-ur-time') || '') : '';
+    const occ = !!(row && row.style.display !== 'none' && (document.getElementById(dom + '-ur-occ') || {}).checked);
+    return { on, ready: on && !!date && !!time, date, time, occupied: occ };
   }
 
   /* Para casos como Orders/New Order, donde Cancel arranca oculto
@@ -609,6 +746,10 @@ const ICONS = {
     onOfficeNeedChange: onOfficeNeedChange,
     _onOfficeTextInput: _onOfficeTextInput,
     unitDetailPanelHtml: unitDetailPanelHtml,
+    getUnitReady: getUnitReady,
+    setUnitReadyDivision: setUnitReadyDivision,
+    resetUnitReady: resetUnitReady,
+    _urToggle: _urToggle,
     showUnitDetailCancel: showUnitDetailCancel,
     setUnitDetailSubmitLabel: setUnitDetailSubmitLabel,
     notifCardHtml: notifCardHtml,
