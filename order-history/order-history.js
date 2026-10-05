@@ -160,7 +160,8 @@
     /* Tech, primera foto del dia (tech lib/on-site.js). */
     'Crew On Site':               'Crew on site',
     /* Notas por servicio (dueño 01/10/2026): solo oficina y Tech. */
-    'Service Note':               'Service note'
+    'Service Note':               'Service note',
+    'Internal Note':              'Internal note'
   };
   function labelFor(ct) { return LABELS[String(ct || '')] || String(ct || 'Update'); }
 
@@ -181,7 +182,7 @@
        redundante junto a "Order created", que ya trae Entry/Due/
        servicios. BUG REAL reportado por el dueno con captura real,
        18/09/2026. */
-    'Batch Created'];
+    'Batch Created', 'Internal Note'];  /* Internal Note: notas internas para supervisores, solo Admin (dueño 05/10) */
 
   /* --- Ademas de lo anterior, esto se esconde SOLO del cliente --
      mismas reglas que ya existian en tracking.html, mas Office
@@ -454,6 +455,13 @@
     /* Nota por servicio (01/10/2026, captura del dueño: el detalle salia como
        "(none) → {json crudo}"). NewValue { sku, name, text }: el servicio y su
        nota, un renglon por linea. */
+    /* Nota interna para supervisores (05/10/2026): el texto como quedo. */
+    if (h.ChangeType === 'Internal Note') {
+      String(h.NewValue || '').split(/\r?\n/).map(function (t) { return t.trim(); }).filter(Boolean)
+        .forEach(function (t) { lines.push('📝 ' + esc(t)); });
+      if (!String(h.NewValue || '').trim()) lines.push('📝 (cleared)');
+      return lines;
+    }
     if (h.ChangeType === 'Service Note') {
       var sn = null; try { sn = JSON.parse(h.NewValue || 'null'); } catch (e) { sn = null; }
       var noteName = (sn && sn.name) || String(h.FieldChanged || '');

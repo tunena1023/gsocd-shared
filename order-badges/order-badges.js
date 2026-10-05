@@ -27,7 +27,7 @@
 
   function occupied(o) {
     const div = String((o && o.Division) || '').toLowerCase();
-    if (div !== 'renovations' && div !== 'janitorial') return '';
+    if (div !== 'renovations' && div !== 'janitorial' && div !== 'mixed') return ''; /* Mixed desde el 05/10 */
     if (!o || !o.UnitOccupied) return '';
     return '<span class="gs-occupied-badge"><span class="gs-occupied-dot"></span>Occupied unit</span>';
   }
@@ -90,7 +90,7 @@
     try { return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }); }
     catch (e) { return new Date().toISOString().slice(0, 10); }
   }
-  function nounOf(div) { return div === 'renovations' ? 'Materials' : div === 'janitorial' ? 'Unit' : 'Site'; }
+  function nounOf(div) { return div === 'renovations' ? 'Materials' : (div === 'janitorial' || div === 'mixed') ? 'Unit' : 'Site'; }
   function visitAnswer(o) {
     const st = String((o && o.VisitConfirmStatus) || '');
     const day = String((o && o.VisitConfirmDate) || '').slice(0, 10);
@@ -111,7 +111,7 @@
       return '<span class="gs-ready-badge gs-ready-now"><span class="gs-ready-dot"></span>Ready \u2014 confirmed' +
         (visitDay ? ' for ' + esc(visitDay) : '') + '</span>';
     }
-    if (div !== 'renovations' && div !== 'janitorial') return '';
+    if (div !== 'renovations' && div !== 'janitorial' && div !== 'mixed') return ''; /* Mixed desde el 05/10 */
     if (!o.MaterialsReady || !o.ExpectedReadyDate || !o.EntryTime) return '';
     const readyDay = String(o.ExpectedReadyDate).slice(0, 10);
     if (readyDay && readyDay <= todayChicago()) {
