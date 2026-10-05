@@ -249,6 +249,7 @@
       var s = document.createElement('style');
       s.id = 'gs-bg-style';
       s.textContent =
+        '.gs-bg-slot:empty{display:none}.gs-bg-slot{margin-top:6px}' +
         '.gs-bg-pill{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;font:600 11px/1.3 Inter,system-ui,sans-serif;letter-spacing:.02em;color:#8C6F2A;background:#FBF5E6;border:1px solid #E5D3A1;border-radius:3px;padding:3px 8px;text-transform:none}' +
         '.gs-bg-pill .gs-bg-dot{width:7px;height:7px;border-radius:50%;background:#C9A84C;animation:gsBgPulse 1.1s ease-in-out infinite}' +
         '.gs-bg-wait{color:#6B6B6B;background:#F3F1EC;border-color:#E0D9CC}.gs-bg-wait .gs-bg-dot{background:#9A9A9A}' +
