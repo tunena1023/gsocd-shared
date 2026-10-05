@@ -154,8 +154,7 @@
     if (!l.length) return null;
     var failed = l.filter(function (x) { return x.status === 'failed'; });
     if (failed.length) return { failed: failed[0], pending: l.length - failed.length };
-    var waiting = l.some(function (x) { return x.tries > 0 && x.lastError && !running[x.id]; });
-    return { pending: l.length, waiting: waiting };
+    return { pending: l.length };
   }
   function pillHtml(group) {
     var s = stateOf(group);
@@ -167,8 +166,9 @@
         ' <button type="button" class="gs-bg-btn" data-gs-bg-retry="' + esc(f.id) + '">Retry</button>' +
         '<button type="button" class="gs-bg-btn gs-bg-x" data-gs-bg-discard="' + esc(f.id) + '" aria-label="Dismiss">×</button></span>';
     }
-    return '<span class="gs-bg-pill' + (s.waiting ? ' gs-bg-wait' : '') + '" role="status"><span class="gs-bg-dot"></span>' +
-      '<span>' + (s.waiting ? 'Waiting for signal · will send by itself' : 'Saving…') + '</span></span>';
+    /* Sin explicaciones (dueño, 05/10): lo que se guarda en segundo plano
+       solo dice "Saving…", haya señal o no. */
+    return '<span class="gs-bg-pill" role="status"><span class="gs-bg-dot"></span><span>Saving…</span></span>';
   }
   function paint() {
     try {

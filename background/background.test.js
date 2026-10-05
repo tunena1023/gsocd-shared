@@ -51,7 +51,7 @@ const el = g => { const e = { innerHTML: '', getAttribute: () => g }; els[g] = e
   const p2 = el('ORD-4');
   const d = B.run({ group: 'ORD-4', kind: 'done', label: 'Done', path: '/d', body: {} });
   await wait(15);
-  assert('sin señal: se queda guardada con "Waiting for signal"', B.list('ORD-4').length === 1 && /Waiting for signal/.test(p2.innerHTML), p2.innerHTML);
+  assert('sin señal: se queda guardada y solo dice "Saving…" (sin explicaciones)', B.list('ORD-4').length === 1 && /Saving/.test(p2.innerHTML) && !/signal/i.test(p2.innerHTML), p2.innerHTML);
   await wait(60);
   assert('se reintenta solo', sent.filter(x => x.id === d.id).length >= 2, sent.length);
   mode = 'ok';
