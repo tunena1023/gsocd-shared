@@ -407,7 +407,7 @@ const ICONS = {
      la Entry date/hora del panel toman esos valores y se desactivan (el
      cliente no las pone dos veces). Apagarlo al crear no pide nota.
      Solo Janitorial ("Unit ready") y Renovations ("Materials ready"):
-     setUnitReadyDivision(dom, div) lo esconde o le cambia el nombre.
+     setUnitReadyDivision(dom, div) lo esconde (Exteriors/Mixed, o false) o le cambia el nombre.
        GSOrderFormPremium.getUnitReady(dom) -> { on, ready, date, time, occupied }
          (ready = prendido y con fecha y hora; on = prendido aunque falte algo)
      Los datos van al servidor como UnitReady/ReadyDate/ReadyTime/
@@ -505,8 +505,10 @@ const ICONS = {
   function setUnitReadyDivision(dom, div) {
     const row = document.getElementById(dom + '-ur-row');
     if (!row) return;
-    const d = String(div || '').toLowerCase();
-    const applies = d === 'janitorial' || d === 'renovations';
+    /* Sin division escogida todavia: se ve (casi siempre es Janitorial).
+       Exteriors / Mixed: no aplica. false: esconderlo (editar una orden). */
+    const d = div === false ? 'none' : String(div || '').toLowerCase();
+    const applies = d === '' || d === 'janitorial' || d === 'renovations';
     row.style.display = applies ? '' : 'none';
     const lb = document.getElementById(dom + '-ur-label'), sb = document.getElementById(dom + '-ur-sub');
     if (lb) lb.textContent = urLabel(div);
