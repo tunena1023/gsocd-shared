@@ -86,6 +86,19 @@ const el = g => { const e = { innerHTML: '', getAttribute: () => g }; els[g] = e
   await wait(80);
   assert('...y sale el ultimo valor', done.includes(r3.id) && !done.includes(r1.id) && !done.includes(r2.id));
 
+  // wait: la pantalla de carga espera maximo ms
+  mode = 'ok';
+  const w1 = B.run({ group: 'ORD-9', kind: 'x', path: '/w', body: {} });
+  const wr1 = await B.wait(w1, 1000);
+  assert('wait: si sale rapido, regresa done con la respuesta', wr1.done === true && wr1.result && wr1.result.ok, wr1);
+  mode = 'net';
+  const w2 = B.run({ group: 'ORD-10', kind: 'x', path: '/w', body: {} });
+  const wr2 = await B.wait(w2, 30);
+  assert('wait: si tarda, a los ms regresa slow (la accion sigue en la cola)', wr2.slow === true && B.list("ORD-10").length === 1, wr2);
+  mode = 'ok';
+  await wait(80);
+  B.discard(w2.id);
+
   // discard
   mode = 'bad';
   const x = B.run({ group: 'ORD-7', kind: 'bad', path: '/b', body: {} });

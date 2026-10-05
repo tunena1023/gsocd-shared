@@ -44,7 +44,8 @@
   var STORE = 'gs_background_v1';
   var STUCK_MS = 15 * 60000, LOCK_MS = 70000; /* Vercel corta a los 60 s */
   var WAITS = [5000, 10000, 20000, 30000, 60000, 120000, 300000];
-  var hooks = {}, inited = false, timer = null, running = {}, mem = [];
+  var hooks = {}, inited = false, timer = null, running = {}, mem = [], waiters = {};
+  function settle(id, out) { var w = waiters[id]; if (!w) return; delete waiters[id]; w.forEach(function (f) { try { f(out); } catch (e) { /* sigue */ } }); }
 
   function newKey() {
     try { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) { /* abajo */ }
@@ -92,6 +93,7 @@
       delete running[id];
       del(id);
       changed();
+      settle(id, { done: true, result: res });
       if (hooks.onDone) { try { hooks.onDone(x, res); } catch (e) { /* sigue */ } }
       return res;
     }, function (err) {
@@ -106,6 +108,7 @@
           cur.status = 'failed';
           put(cur);
           changed();
+          settle(id, { failed: true, error: err });
           if (hooks.onFail) { try { hooks.onFail(cur, err); } catch (e) { /* sigue */ } }
         } else if (cur.replace && load().some(function (y) { return y.id !== cur.id && String(y.group) === String(cur.group) && y.kind === cur.kind && y.at >= cur.at; })) {
           /* Ya hay un valor mas nuevo de lo mismo (replace): este ya no vale. */
@@ -241,6 +244,17 @@
       put(x); changed(); pump();
     },
     discard: function (id) { del(id); changed(); schedule(); },
+    /* La pantalla de carga de siempre (dueño, 05/10): se espera a que salga,
+       pero maximo ms; despues la pantalla se quita y sigue en segundo plano.
+       -> { done, result } | { failed, error } | { slow: true } */
+    wait: function (entry, ms) {
+      var id = entry && entry.id ? entry.id : entry;
+      if (!get(id)) return Promise.resolve({ done: true });
+      return new Promise(function (resolve) {
+        var t = setTimeout(function () { resolve({ slow: true }); }, ms == null ? 10000 : ms);
+        (waiters[id] = waiters[id] || []).push(function (out) { clearTimeout(t); resolve(out); });
+      });
+    },
     paint: paint,
     pillHtml: pillHtml,
     retryable: retryable,
