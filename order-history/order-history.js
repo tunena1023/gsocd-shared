@@ -182,7 +182,7 @@
        redundante junto a "Order created", que ya trae Entry/Due/
        servicios. BUG REAL reportado por el dueno con captura real,
        18/09/2026. */
-    'Batch Created', 'Internal Note'];  /* Internal Note: notas internas para supervisores, solo Admin (dueño 05/10) */
+    'Batch Created'];
 
   /* --- Ademas de lo anterior, esto se esconde SOLO del cliente --
      mismas reglas que ya existian en tracking.html, mas Office
@@ -229,6 +229,8 @@
     /* Notas por servicio (dueño 01/10/2026: "deben ser visibles solo para los
        de oficina, no para los clientes"), aunque las haya escrito el cliente. */
     if (String(h.ChangeType || '') === 'Service Note') return true;
+    /* Notas internas para supervisores (05/10/2026): nunca el cliente. */
+    if (String(h.ChangeType || '') === 'Internal Note') return true;
     return false;
   }
 
@@ -455,11 +457,12 @@
     /* Nota por servicio (01/10/2026, captura del dueño: el detalle salia como
        "(none) → {json crudo}"). NewValue { sku, name, text }: el servicio y su
        nota, un renglon por linea. */
-    /* Nota interna para supervisores (05/10/2026): el texto como quedo. */
+    /* Nota interna para supervisores (05/10/2026, dueño: "se van reemplazando y
+       la nota vieja pasa al historial"): la que habia antes y la que quedo. */
     if (h.ChangeType === 'Internal Note') {
-      String(h.NewValue || '').split(/\r?\n/).map(function (t) { return t.trim(); }).filter(Boolean)
-        .forEach(function (t) { lines.push('📝 ' + esc(t)); });
-      if (!String(h.NewValue || '').trim()) lines.push('📝 (cleared)');
+      var before = String(h.OldValue || '').trim(), now = String(h.NewValue || '').trim();
+      if (before) lines.push('<b>Before:</b> ' + esc(before).replace(/\r?\n/g, '<br>'));
+      lines.push('<b>Now:</b> ' + (now ? esc(now).replace(/\r?\n/g, '<br>') : '(cleared)'));
       return lines;
     }
     if (h.ChangeType === 'Service Note') {
@@ -1342,6 +1345,8 @@
       if (mode === 'client' && isHiddenFromClient(h)) return false;
       if (mode === 'client' && ctxHidden.indexOf(h) !== -1) return false;
       if (mode === 'tech' && isHiddenFromTech(h)) return false;
+      /* Nota interna: en Tech solo el supervisor (opts.showInternal); el empleado no. */
+      if (mode === 'tech' && !opts.showInternal && String(h.ChangeType || '') === 'Internal Note') return false;
       return true;
     });
     if (mode === 'client') {
