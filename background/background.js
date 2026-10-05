@@ -174,8 +174,10 @@
     try {
       var els = document.querySelectorAll('[data-gs-bg]');
       for (var i = 0; i < els.length; i++) {
+        /* Se compara con lo que se pinto la ultima vez, no con innerHTML:
+           Tech traduce el aviso al español y no hay que volver a pintarlo. */
         var h = pillHtml(els[i].getAttribute('data-gs-bg'));
-        if (els[i].innerHTML !== h) els[i].innerHTML = h;
+        if (els[i].__gsBg !== h) { els[i].__gsBg = h; els[i].innerHTML = h; }
       }
     } catch (e) { /* sin DOM */ }
   }
