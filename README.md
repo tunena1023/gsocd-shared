@@ -45,7 +45,7 @@ const orderPdf = require('gsocd-shared/lib/order-pdf');
 ```
 
 Por npm se usan `lib/order-pdf`, `lib/pdf`, `lib/push`, `lib/order-seq`, `lib/site-readiness`,
-`lib/schedule-entries` y `lib/service-notes`. Para pasar a una versión nueva: cambiar el SHA en el `package.json` de
+`lib/schedule-entries`, `lib/service-notes` y `lib/submit-key`. Para pasar a una versión nueva: cambiar el SHA en el `package.json` de
 Admin y Orders (Vercel instala solo en cada deploy).
 
 **Excepción, van como COPIA en cada portal:** `lib/notify.js` (copia idéntica en Admin, Orders y Tech) y
@@ -74,6 +74,7 @@ sus consultas y guarda sus datos. Se prueban con Node solo: `node lib/<pieza>.te
 | Barra de navegación | [`nav-premium/`](./nav-premium) | Tarjeta dorada de pestañas + `<nav>` con logo -- usada por las 3 apps |
 | Preview de foto al pasar el mouse | [`photo-hover-preview/`](./photo-hover-preview) | Al quedarse 1s con el mouse sobre una miniatura, crece a tamaño máximo en pantalla sin clic. Usado en Admin y Orders. |
 | Lista + selector + diff de servicios | [`service-change-panel/`](./service-change-panel) | Servicios actuales (nombre + nota + cámara), selector real y diff agregados/quitados con nota obligatoria. Usado en Orders (Recurring, Processing) y Admin. |
+| Llave contra órdenes duplicadas | [`submit-key/`](./submit-key) + [`lib/submit-key.js`](./lib/submit-key.js) | Cada envío que crea una orden lleva `SubmitKey` (amarrada al contenido del formulario); reintentar lo mismo regresa la orden que ya existía, también en un PO a medias. Admin (Create Order, Add Unit) y Orders (New Order, Add Unit). |
 | Regla de Division Mixed (backend) | [`lib/division-rules.js`](./lib/division-rules.js) | Detecta si los servicios que se van a guardar en una orden pertenecen a otra división y calcula el cambio a 'Mixed' -- función pura de Node, no de navegador. Va como copia en Admin y Orders. |
 
 ## Cómo agregar un componente nuevo (para referencia futura)
