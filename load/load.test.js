@@ -46,6 +46,19 @@ const err = (st, m) => Object.assign(new Error(m || 'boom'), { status: st });
   r = await p2;
   assert('la segunda llamada reintenta ya, con la fn nueva', r === 'second' && calls.join(',') === '1,2', calls);
 
+  /* Filtro: cambiar de mes mientras el mes viejo sigue reintentando */
+  let oldDone = false, oldTries = 0;
+  const pOld = L.get('month-09', async () => { oldTries++; throw err(500); }, { slot: 'qb-month' });
+  pOld.then(() => { oldDone = true; }, () => { oldDone = true; });
+  await wait(5);
+  r = await L.get('month-10', async () => 'october', { slot: 'qb-month' });
+  const triesAtSwitch = oldTries;
+  await wait(80);
+  assert('slot: la carga nueva llega', r === 'october', r);
+  assert('slot: la vieja se cancela (no se cumple ni sigue reintentando)', !oldDone && oldTries === triesAtSwitch && !L.pending().some(x => x.key === 'month-09'), { oldDone, oldTries, triesAtSwitch });
+  r = await L.get('order-A', async () => 'A', { slot: null });
+  assert('sin slot no se cancela nada', r === 'A', r);
+
   /* Volver la señal: reintenta de inmediato */
   L._cfg({ waits: [100000], stuck: 1e9 });
   let m = 0;
