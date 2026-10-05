@@ -75,6 +75,7 @@ sus consultas y guarda sus datos. Se prueban con Node solo: `node lib/<pieza>.te
 | Preview de foto al pasar el mouse | [`photo-hover-preview/`](./photo-hover-preview) | Al quedarse 1s con el mouse sobre una miniatura, crece a tamaño máximo en pantalla sin clic. Usado en Admin y Orders. |
 | Lista + selector + diff de servicios | [`service-change-panel/`](./service-change-panel) | Servicios actuales (nombre + nota + cámara), selector real y diff agregados/quitados con nota obligatoria. Usado en Orders (Recurring, Processing) y Admin. |
 | Llave contra órdenes duplicadas | [`submit-key/`](./submit-key) + [`lib/submit-key.js`](./lib/submit-key.js) | Cada envío que crea una orden lleva `SubmitKey` (amarrada al contenido del formulario); reintentar lo mismo regresa la orden que ya existía, también en un PO a medias. Admin (Create Order, Add Unit) y Orders (New Order, Add Unit). |
+| Cargar sin error | [`load/`](./load) | `GSLoad.get(key, fn)`: si leer algo falla por la señal o el sistema (5xx, 504, sin red), la pantalla se queda en "Loading…" y se reintenta sola (2 s … 5 min, y al volver la señal); solo un error de dato (400/403/404/409) llega a la pantalla. `onStuck` a los 15 min. Regla del dueño 05/10. Admin. |
 | Regla de Division Mixed (backend) | [`lib/division-rules.js`](./lib/division-rules.js) | Detecta si los servicios que se van a guardar en una orden pertenecen a otra división y calcula el cambio a 'Mixed' -- función pura de Node, no de navegador. Va como copia en Admin y Orders. |
 
 ## Cómo agregar un componente nuevo (para referencia futura)
