@@ -17,6 +17,15 @@
      packageLevels, catalog }; btn = el boton .gs-osum-remove picado. Cambia
      state en su lugar y regresa { svc, pkgName? } para el aviso.
    Las X llevan la clase gs-osum-remove (quien lo usa escucha el click).
+
+   Varias unidades (07/10/2026, dueño: "el summary y abajo cada unidad ... al
+   hacer clic en la unidad, el desplegable con los servicios ... solo los que
+   cambian de unidad a unidad"):
+   GSOrderSummary.unitsHtml(units, orderLines, { timeOf: lines => '2h' | '' })
+     units = [{ label: '101', lines: [...] | null }]  (null = los de la orden)
+   Cada unidad es un desplegable con SOLO lo distinto a la orden (+ agregado,
+   - quitado, ~ nivel/cantidad). El tiempo sale solo si timeOf regresa algo
+   (el switch de tiempo del cliente); si no, el renglon se ve igual sin el.
 ============================================================ */
 (function () {
   'use strict';
@@ -37,7 +46,24 @@
       '.gs-osum-empty{font-size:12px;color:#bbb;font-style:italic;margin:0}' +
       '.gs-osum-remove{background:none;border:none;color:var(--gray,#6B6B6B);cursor:pointer;font-size:12px;line-height:1;padding:2px;flex-shrink:0;margin:0;transition:color .15s,transform .15s}' +
       '.gs-osum-remove:hover{color:#B33A3A;transform:scale(1.2)}' +
-      '.gs-osum-time{font-size:11px}';
+      '.gs-osum-time{font-size:11px}' +
+      '.gs-osum-units{margin-top:16px;border-top:1px solid var(--border,#E0D9CC);padding-top:10px}' +
+      '.gs-osum-units-h{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gray,#6B6B6B);font-weight:700;margin:0 0 6px}' +
+      '.gs-osum-unit{border-bottom:1px solid var(--border,#E0D9CC)}' +
+      '.gs-osum-unit:last-child{border-bottom:none}' +
+      '.gs-osum-unit>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:7px 0;font-size:12px}' +
+      '.gs-osum-unit>summary::-webkit-details-marker{display:none}' +
+      '.gs-osum-unit>summary:before{content:"\\25B8";font-size:9px;color:var(--gray,#6B6B6B);transition:transform .15s}' +
+      '.gs-osum-unit[open]>summary:before{transform:rotate(90deg)}' +
+      '.gs-osum-unit-n{color:var(--black,#111);font-weight:600}' +
+      '.gs-osum-tag{font-size:10px;padding:1px 7px;border-radius:9px;background:#F0E4C4;color:var(--gold-dk,#8C6F2A);font-weight:700}' +
+      '.gs-osum-tag.same{background:var(--off,#F7F6F3);color:var(--gray,#6B6B6B);font-weight:500}' +
+      '.gs-osum-unit-t{margin-left:auto;font-size:11px;color:var(--gray,#6B6B6B);white-space:nowrap}' +
+      '.gs-osum-d{font-size:12px;padding:3px 0 3px 17px;color:var(--black,#111)}' +
+      '.gs-osum-d b{display:inline-block;width:14px;color:var(--gray,#6B6B6B)}' +
+      '.gs-osum-d.add b{color:#2E7D4F}.gs-osum-d.del{color:var(--gray,#6B6B6B);text-decoration:line-through}.gs-osum-d.del b{color:#B33A3A}' +
+      '.gs-osum-d span{color:var(--gray,#6B6B6B)}' +
+      '.gs-osum-unit-body{padding-bottom:8px}';
     document.head.appendChild(st);
   }
 
@@ -105,5 +131,50 @@
     return { svc: svc };
   }
 
-  window.GSOrderSummary = { lines: lines, html: html, remove: remove, styleTag: styleTag };
+  function detailOf(l) { return [l.lvl || '', l.qty ? 'Qty ' + l.qty : ''].filter(Boolean).join(' · '); }
+
+  /* Lo distinto de una unidad contra la orden (por SKU). */
+  function diff(orderLines, unitLines) {
+    var o = {}, u = {}, out = [];
+    (orderLines || []).forEach(function (l) { o[l.sku] = l; });
+    (unitLines || []).forEach(function (l) { u[l.sku] = l; });
+    (unitLines || []).forEach(function (l) {
+      var b = o[l.sku];
+      if (!b) out.push({ kind: 'add', l: l });
+      else if (detailOf(b) !== detailOf(l)) out.push({ kind: 'chg', l: l, before: b });
+    });
+    (orderLines || []).forEach(function (l) { if (!u[l.sku]) out.push({ kind: 'del', l: l }); });
+    return out;
+  }
+
+  function unitsHtml(units, orderLines, o) {
+    styleTag();
+    o = o || {};
+    if (!units || units.length < 2) return '';
+    return '<div class="gs-osum-units"><p class="gs-osum-units-h">Units (' + units.length + ')</p>' +
+      units.map(function (u) {
+        var own = Array.isArray(u.lines);
+        var d = own ? diff(orderLines, u.lines) : [];
+        var t = o.timeOf ? o.timeOf(own ? u.lines : orderLines) : '';
+        var adds = d.filter(function (x) { return x.kind === 'add'; }).length;
+        var dels = d.filter(function (x) { return x.kind === 'del'; }).length;
+        var chgs = d.filter(function (x) { return x.kind === 'chg'; }).length;
+        var tag = d.length
+          ? '<span class="gs-osum-tag">' + [adds ? '+' + adds : '', dels ? '\u2212' + dels : '', chgs ? '~' + chgs : ''].filter(Boolean).join(' ') + '</span>'
+          : '<span class="gs-osum-tag same">Same</span>';
+        var body = d.length
+          ? d.map(function (x) {
+              if (x.kind === 'add') return '<div class="gs-osum-d add"><b>+</b>' + esc(x.l.svc) + (detailOf(x.l) ? ' <span>' + esc(detailOf(x.l)) + '</span>' : '') + '</div>';
+              if (x.kind === 'del') return '<div class="gs-osum-d del"><b>\u2212</b>' + esc(x.l.svc) + '</div>';
+              return '<div class="gs-osum-d chg"><b>~</b>' + esc(x.l.svc) + ' <span>' + esc(detailOf(x.before) || '\u2014') + ' \u2192 ' + esc(detailOf(x.l) || '\u2014') + '</span></div>';
+            }).join('')
+          : '<div class="gs-osum-d"><span>Same as the order.</span></div>';
+        return '<details class="gs-osum-unit"' + (u.open ? ' open' : '') + ' data-unit="' + esc(u.key || u.label) + '"><summary>' +
+          '<span class="gs-osum-unit-n">' + esc(u.label || '\u2014') + '</span>' + tag +
+          '<span class="gs-osum-unit-t">' + esc(t || '') + '</span></summary>' +
+          '<div class="gs-osum-unit-body">' + body + '</div></details>';
+      }).join('') + '</div>';
+  }
+
+  window.GSOrderSummary = { lines: lines, html: html, remove: remove, unitsHtml: unitsHtml, diff: diff, styleTag: styleTag };
 })();
