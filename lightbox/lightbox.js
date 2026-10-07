@@ -42,8 +42,12 @@
     imgEl.src = photo.downloadUrl;
     imgEl.alt = photo.name || 'Photo';
     counterEl.textContent = (currentIndex + 1) + ' / ' + currentPhotos.length;
-    prevBtn.disabled = currentIndex === 0;
-    nextBtn.disabled = currentIndex === currentPhotos.length - 1;
+    /* Da la vuelta (dueño, 07/10/2026): de la ultima pasa a la primera y de
+       la primera a la ultima, asi que las flechas nunca se apagan; con una
+       sola foto no hay a donde ir y se esconden. */
+    var single = currentPhotos.length < 2;
+    prevBtn.style.display = single ? 'none' : '';
+    nextBtn.style.display = single ? 'none' : '';
   }
 
   function open(photos, index) {
@@ -61,9 +65,9 @@
   }
 
   function nav(delta) {
-    var next = currentIndex + delta;
-    if (next < 0 || next >= currentPhotos.length) return;
-    currentIndex = next;
+    var n = currentPhotos.length;
+    if (n < 2) return;
+    currentIndex = ((currentIndex + delta) % n + n) % n;
     render();
   }
 
