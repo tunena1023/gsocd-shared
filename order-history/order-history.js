@@ -161,7 +161,13 @@
     'Crew On Site':               'Crew on site',
     /* Notas por servicio (dueño 01/10/2026): solo oficina y Tech. */
     'Service Note':               'Service note',
-    'Internal Note':              'Internal note'
+    'Internal Note':              'Internal note',
+    /* Lo que se cambio EN QuickBooks a un documento de la app (Admin
+       lib/qb-change-watch, 08/10/2026): solo oficina (FieldChanged
+       'Office Change (Internal)' lo esconde de Tech; "QuickBooks " del cliente). */
+    'QuickBooks Changed':         'Changed in QuickBooks',
+    'QuickBooks Estimate Linked': 'Estimate kept as it is in QuickBooks',
+    'QuickBooks Invoice Linked':  'Invoice kept as it is in QuickBooks'
   };
   function labelFor(ct) { return LABELS[String(ct || '')] || String(ct || 'Update'); }
 
@@ -252,6 +258,7 @@
 
   function noteFor(h) {
     if (!h.Notes) return '';
+    if (h.ChangeType === 'QuickBooks Changed') return ''; /* ya va en renglones */
     if (h.Notes.indexOf('SERVICES:') === 0) return '';
     if (h.Notes === 'Submitted from draft.') return '';
     /* Nota automatica generica de aprobar/rechazar/marcar visto: el
@@ -463,6 +470,12 @@
     if (h.ChangeType === 'Internal Note' && String(h.FieldChanged || '') === 'Sent') {
       if (h.OldValue) lines.push('<b>To:</b> ' + esc(String(h.OldValue)));
       lines.push('<b>Note:</b> ' + esc(String(h.NewValue || '')).replace(/\r?\n/g, '<br>'));
+      return lines;
+    }
+    /* Cambios en QuickBooks: el primer renglon dice que documento; los demas, un cambio cada uno. */
+    if (h.ChangeType === 'QuickBooks Changed') {
+      String(h.Notes || '').split(/\r?\n/).map(function (t) { return t.trim(); }).filter(Boolean)
+        .forEach(function (t, i) { lines.push(i === 0 ? esc(t) : '• ' + esc(t)); });
       return lines;
     }
     if (h.ChangeType === 'Internal Note') {
