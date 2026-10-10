@@ -190,6 +190,30 @@
        18/09/2026. */
     'Batch Created'];
 
+  /* --- Limpieza del historial (dueño 10/10/2026: "se esta llenando de cosas que
+     nadie quiere ver"): ya no se ven en NINGUN portal (Admin incluido). Los
+     renglones siguen en SharePoint; solo no se pintan. El PDF de la orden se ve en
+     sus documentos; "Marked as seen" es un paso interno; el lote ya va en la orden. --- */
+  var NOISE_TYPES = ['Document Generated', 'Batch Created', 'Order Approved'];
+  /* Pasos de "ya acabe" que el "Completed" final ya resume (quien hizo que). */
+  var DONE_STEP_TYPES = ['Service Marked Done By Tech', 'Tech Marked Complete', 'Service Completed', 'Work Completed'];
+  /* Notas automaticas que solo repiten quien y que (ya van en el encabezado). */
+  var AUTO_NOTES = [/^Reassigned by .+ — same tech, day, and time\.$/, /^Change approved by .+ — same crew, day and time; waiting to be sent to the tech\.$/];
+
+  /* --- Cobro (dueño 10/10/2026: "cuando se envia como estimado ... getting ready to
+     bill" y "cuando se hace invoice ... eso si lo debe ver el cliente"). Solo el
+     estimado de cobro de una orden (QuickBooks › Orders, Title '-qbestimate') y el
+     invoice (Title '-qbinvoice'); los de cotizacion ('-qbquote') siguen ocultos. --- */
+  function clientBilling(h) {
+    var ct = String(h.ChangeType || ''), t = String(h.Title || '');
+    if (ct === 'QuickBooks Estimate Created' && /-qbestimate$/.test(t)) return { label: 'Getting ready to bill', note: '' };
+    if (ct === 'QuickBooks Invoice Created' && /-qbinvoice$/.test(t)) {
+      var m = /Invoice (#?\w+)/.exec(String(h.Notes || ''));
+      return { label: 'Invoice created', note: m ? 'Invoice ' + (m[1].charAt(0) === '#' ? m[1] : '#' + m[1]) : '' };
+    }
+    return null;
+  }
+
   /* --- Ademas de lo anterior, esto se esconde SOLO del cliente --
      mismas reglas que ya existian en tracking.html, mas Office
      Change (Internal) que ya cubre las notas de oficina. --- */
@@ -216,6 +240,7 @@
     if (String(h.ChangeType || '') === 'Order Approved') return true;
     /* Estimados (28/09/2026, dueño: "eso es un movimiento interno ... al
        cliente eso no le incumbe"): lo de QuickBooks y el paso a Estimates. */
+    if (clientBilling(h)) return false;
     if (/^QuickBooks /.test(String(h.ChangeType || '')) || String(h.ChangeType || '') === 'Moved To Estimate') return true;
     /* "Assign by service" -- pasos internos/mecanicos del modelo por
        servicio (el tecnico ya dijo "ya acabe" pero oficina todavia no
@@ -268,6 +293,9 @@
     if (/^Approved by .+\.$/.test(h.Notes)) return '';
     if (/^Marked as seen by .+\.$/.test(h.Notes)) return '';
     if (/^Rejected by .+?\.( Previous services were restored\.)?$/.test(h.Notes)) return '';
+    for (var a = 0; a < AUTO_NOTES.length; a++) if (AUTO_NOTES[a].test(h.Notes)) return '';
+    if (h.ChangeType === 'Draft Deleted') return String(h.Notes).replace(/\s*\d+ row\(s\) were removed\.?/, '');
+    if (/ intuit_tid /.test(h.Notes)) return String(h.Notes).replace(/\s*intuit_tid \S+/, '');
     return h.Notes;
   }
 
@@ -369,7 +397,13 @@
     return levelChanged ? 'level-only' : 'none';
   }
 
+  /* 2026-09-28 -> Sep 28, 2026 (dueño 10/10: "las fechas que no salgan asi"). */
+  function prettyVal(v) {
+    var t = String(v == null ? '' : v);
+    return /^\d{4}-\d{2}-\d{2}(T[\d:.]+Z?)?$/.test(t) ? (fmtDate(t.length > 10 && /T12:00:00/.test(t) ? t.slice(0, 10) : t) || t) : v;
+  }
   function changeLine(icon, label, oldVal, newVal) {
+    oldVal = prettyVal(oldVal); newVal = prettyVal(newVal);
     if (oldVal === newVal) return icon + ' ' + esc(label) + ': ' + esc(oldVal || '—');
     return icon + ' ' + esc(label) + ': ' + esc(oldVal || '(none)') + ' → ' + esc(newVal || '(none)');
   }
@@ -800,7 +834,8 @@
        marca de la decision sobre un cambio interno (Old/New = estatus),
        no un campo: salia "Office Change (Internal): Change Requested →
        Assigned". */
-    if (!inspRow && h.FieldChanged && h.FieldChanged !== 'Status' && h.FieldChanged !== 'TechMarkedComplete' && h.FieldChanged !== 'Office Change (Internal)' && (h.OldValue || h.NewValue) &&
+    if (!inspRow && h.FieldChanged && h.FieldChanged !== 'Status' && h.FieldChanged !== 'TechMarkedComplete' && h.FieldChanged !== 'Office Change (Internal)' &&
+        h.FieldChanged !== 'Draft' && h.FieldChanged !== 'Client Confirmation' && (h.OldValue || h.NewValue) &&
         String(h.NewValue || '') !== String(h.ChangeType || '')) {
       lines.push(changeLine('🔄', h.FieldChanged, h.OldValue || '', h.NewValue || ''));
     }
@@ -1323,6 +1358,21 @@
       }
       out.push({ rep: Object.assign({}, g.rep, { _extraLines: extra }), rows: rows });
     });
+    /* Tambien el "Order updated" (Technician / Completed Date) que se guarda justo
+       DESPUES del Completed (10/10/2026: salia "Technician: (empty)" aparte). */
+    for (var i = out.length - 1; i > 0; i--) {
+      var cur = out[i], before = out[i - 1];
+      var beforeDone = String(before.rep.ChangeType || '') === 'Completed' && String(before.rep.FieldChanged || '') === 'Status';
+      if (!beforeDone || !completionOnly(cur.rep) || !sameMoment(before.rep, cur.rep)) continue;
+      var more = [];
+      detailParts(cur.rep.Notes).forEach(function (p) {
+        if (!p.value || p.value === '(empty)') return;
+        more.push(p.label === 'Completed Date' ? '📅 Completed: ' + esc(p.value) : '👤 Technician: ' + esc(p.value));
+      });
+      before.rep = Object.assign({}, before.rep, { _extraLines: (before.rep._extraLines || []).concat(more) });
+      before.rows = before.rows.concat(cur.rows);
+      out.splice(i, 1);
+    }
     return out;
   }
 
@@ -1357,8 +1407,14 @@
     var rows = (history || []).map(function (h) {
       var rv = mode === 'client' ? revealOf(h) : null;
       return rv ? Object.assign({}, h, rv.patch, { _revealed: true }) : h;
-    }).filter(function (h) {
+    });
+    /* El ultimo "Completed" de la orden: lo de "ya acabe" de antes ya va ahi. */
+    var lastDone = -1;
+    rows.forEach(function (h, i) { if (String(h.ChangeType || '') === 'Completed' && String(h.FieldChanged || '') === 'Status') lastDone = i; });
+    rows = rows.filter(function (h, i) {
       if (h._revealed) return true;
+      if (NOISE_TYPES.indexOf(String(h.ChangeType || '')) !== -1) return false;
+      if (i < lastDone && DONE_STEP_TYPES.indexOf(String(h.ChangeType || '')) !== -1) return false;
       /* Admin ve todo (dueño, 27/09): esto solo se le quita a Tech y al cliente. */
       if (mode !== 'staff' && ALWAYS_HIDDEN_TYPES.indexOf(String(h.ChangeType || '')) !== -1) return false;
       if (mode === 'client' && isHiddenFromClient(h)) return false;
@@ -1370,6 +1426,8 @@
     });
     if (mode === 'client') {
       rows = rows.map(function (h) {
+        var bill = clientBilling(h);
+        if (bill) return Object.assign({}, h, { _label: bill.label, Notes: bill.note });
         for (var q = 0; q < ctx.relabel.length; q++) if (ctx.relabel[q].row === h) return Object.assign({}, h, { _label: ctx.relabel[q].label });
         if (String(h.ChangeType || '') !== 'Order Details Set') return h;
         var cn = clientDetailsNote(h.Notes);
@@ -1381,7 +1439,16 @@
       }).filter(function (h) { return String(h.ChangeType || '') !== 'Order Details Set' || h.Notes; });
     }
     rows = rows.map(function (h) {
-      return String(h.ChangeType || '') === 'Order Details Set' ? Object.assign({}, h, { Notes: prettyDetailsNote(h.Notes) }) : h;
+      if (String(h.ChangeType || '') !== 'Order Details Set') return h;
+      /* Quitar la asignacion (Reschedule) salia "Supervisor: (empty) · Service Window:
+         (empty) · Dispatch Date: (empty)" (dueño 10/10): un solo "Sent back to Scheduling". */
+      var parts = detailParts(h.Notes);
+      var unassign = parts.some(function (p) { return p.label === 'Supervisor'; }) && parts.every(function (p) {
+        if (p.label === 'Delay Reason' && /^\(cleared/.test(p.value)) return true;
+        return ['Supervisor', 'Service Window', 'Dispatch Date'].indexOf(p.label) !== -1 && (!p.value || p.value === '(empty)');
+      });
+      if (unassign) return Object.assign({}, h, { Notes: '', _label: 'Sent back to Scheduling' });
+      return Object.assign({}, h, { Notes: prettyDetailsNote(h.Notes) });
     });
     /* Admin ve todos los renglones; esto solo limpia cliente y Tech. */
     if (mode !== 'staff') rows = dropRedundantResolved(rows);
