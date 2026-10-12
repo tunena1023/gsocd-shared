@@ -147,7 +147,11 @@
       '\n  @media (max-width: 560px) { .gs-gal-2col { grid-template-columns: 1fr; } }' +
       '\n  .gs-gal-col-label { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #6B6B6B; margin-bottom: 10px; }' +
       '\n\n  .gs-gal-hero { position: relative; width: 100%; aspect-ratio: 1; border-radius: 8px; overflow: hidden; cursor: pointer; background: #eee; }' +
-      '\n  .gs-gal-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }' +
+      '\n  /* 12/10/2026: en iPhone la foto grande salia de varias pantallas de alto (Safari no' +
+      '\n     limita bien el alto de la imagen dentro de aspect-ratio). Ahora la imagen va' +
+      '\n     encima del cuadro y el cuadro tiene su alto fijo por padding. */' +
+      '\n  .gs-gal-hero { height: 0; padding-bottom: 100%; aspect-ratio: auto; min-height: 0; }' +
+      '\n  .gs-gal-hero img, .gs-gal-hero video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: block; }' +
       '\n  .gs-gal-hero.video::after { content: "\\25B6"; position: absolute; top: 8px; right: 9px; color: #FFF3D6; font-size: 13px; background: rgba(17,17,17,.6); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }' +
       '\n  .gs-gal-hero-cap { font-size: 11.5px; color: #111; margin: 6px 0 10px; min-height: 14px; }' +
       '\n  .gs-gal-hero-cap b { font-weight: 700; }' +
