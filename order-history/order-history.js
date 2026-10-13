@@ -30,7 +30,9 @@
            'staff'. Cada portal ve SU version de la misma informacion
            (pedido del dueño, 26/09/2026).
          opts.clientId + opts.clientName: si ChangedBy es el ClientID
-           de la orden (lo que guarda Orders), se muestra el nombre.
+           de la orden (lo que guarda Orders), se muestra el nombre. Con
+           clientId, "Order created" de alguien que no es el cliente sale
+           "by <quien> for <cliente>" (orden puesta por la oficina).
          opts.actorName(changedBy): igual, pero decide quien llama
            (Admin tiene la lista de clientes). Devuelve '' para dejarlo.
        GSOrderHistory.toggleDetail(id) -- toggle del detalle expandible,
@@ -1077,6 +1079,45 @@
     return out;
   }
 
+  /* --- Pasada 5 (dueño 13/10/2026: "cuando el cliente pone una orden y
+     la marca como ready se crean dos eventos y se debe crear solo uno con
+     toda la informacion"). Crear la orden con "Unit ready" deja, en el
+     mismo envio, 'Materials Ready' + 'Expected Ready Date' (ya juntos por
+     la pasada 4) y 'Created'. Se pinta UN solo "Order created" con el
+     listo adentro. site-readiness (onCreatedReady) escribe el listo ANTES
+     que 'Created', asi que vale en cualquier orden. Los renglones siguen
+     igual en SharePoint (los avisos de listo los usan). Prender el switch
+     despues, desde Processing, sigue siendo su propio evento. */
+  var READY_TYPES = ['Materials Ready', 'Expected Ready Date'];
+  function mergeCreatedWithReady(groups) {
+    var out = [];
+    groups.forEach(function (g) {
+      var prev = out[out.length - 1];
+      var type = String(g.rep.ChangeType || ''), prevType = prev ? String(prev.rep.ChangeType || '') : '';
+      var created = type === 'Created' ? g : (prevType === 'Created' ? prev : null);
+      var ready = READY_TYPES.indexOf(type) !== -1 ? g : (READY_TYPES.indexOf(prevType) !== -1 ? prev : null);
+      var close = prev && Math.abs(new Date(g.rep.ChangeDate) - new Date(prev.rep.ChangeDate)) < GROUP_WINDOW_MS;
+      if (created && ready && created !== ready && close && !created.rep._readyRows) {
+        out[out.length - 1] = Object.assign({}, created, { rep: Object.assign({}, created.rep, { _readyRows: ready.rows }) });
+      } else {
+        out.push(g);
+      }
+    });
+    return out;
+  }
+  /* "✅ Unit ready: Oct 12, 2026 at 9:00 AM" con la fecha y la hora de
+     los renglones del listo (renglones viejos sin NewValue: su nota). */
+  function readyAtCreateLine(rows) {
+    var date = '', time = '', notes = [];
+    rows.forEach(function (r) {
+      if (r.ChangeType === 'Expected Ready Date' && r.NewValue) date = fmtDate(r.NewValue);
+      else if (r.ChangeType === 'Materials Ready' && r.NewValue) time = fmtTime24(r.NewValue);
+      else if (noteFor(r)) notes.push(noteFor(r));
+    });
+    var when = [date, time].filter(Boolean).join(' at ');
+    return '✅ Unit ready' + (when ? ': ' + esc(when) : '') + (notes.length ? ' — ' + esc(notes.join(' ')) : '');
+  }
+
   /* --- Reglas del cliente que dependen de lo que paso antes/despues
      (27/09/2026, dueño, recorriendo una orden completa): el cliente ve
      lo que el hizo, lo que le pedimos o contestamos, cuando vamos, a
@@ -1394,6 +1435,15 @@
       if (typeof opts.actorName === 'function') { var n = opts.actorName(by); if (n) return String(n); }
       return by;
     }
+    /* Orden puesta por la oficina (dueño 13/10: "debe salir el nombre del
+       cliente pero tambien de quien puso la orden en oficina"):
+       "by Maria for Senior Lofts". Necesita opts.clientId de la orden. */
+    function createdFor(h) {
+      if (String(h.ChangeType || '') !== 'Created' || !opts.clientId) return '';
+      if (String(h.ChangedBy || '') === String(opts.clientId)) return '';
+      var client = actorLabel(opts.clientId);
+      return client ? ' for ' + client : '';
+    }
     var catalog = opts.timesCatalog || null;
     /* Tipos de evento que representan un RETROCESO real (algo que se
        deshizo) -- si se pasa, esos renglones del historial se marcan
@@ -1459,12 +1509,19 @@
     groups = mergeDecisionWithDetail(groups);
     groups = mergeRescheduleRequest(groups);
     groups = mergeMaterialsReadyWithDate(groups);
+    groups = mergeCreatedWithReady(groups);
     groups = mergeSchedulingPair(groups);
     groups = mergeCompletion(groups);
 
     return groups.map(function (g, idx) {
       var h = g.rep;
       var lines = (h._extraLines || []).concat(g.rows.reduce(function (acc, row) { return acc.concat(detailLinesFor(row, catalog, mode)); }, []));
+      /* Creada ya lista (pasada 5): el listo va despues de las fechas, antes de los servicios. */
+      if (h._readyRows) {
+        var at = 0;
+        while (at < lines.length && /^(📅|🕐) /.test(lines[at])) at++;
+        lines.splice(at, 0, readyAtCreateLine(h._readyRows));
+      }
       /* No repetir la misma linea "antes -> despues" dos veces seguidas
          (la decision fusionada trae su propio detalle que puede calzar
          con el de la solicitud justo anterior). */
@@ -1500,7 +1557,7 @@
         type: String(h.ChangeType || ''),
         /* Una orden que nacio como estimado (Admin > Create Order con el switch). */
         label: h._label || (String(h.ChangeType || '') === 'Internal Note' && String(h.FieldChanged || '') === 'Sent' ? 'Internal note sent' : '') || (String(h.ChangeType || '') === 'Created' && /^Created as an estimate/.test(String(h.Notes || '')) ? 'Estimate created' : labelFor(h.ChangeType)),
-        by: h.ChangedBy ? actorLabel(h.ChangedBy) : '',
+        by: h.ChangedBy ? actorLabel(h.ChangedBy) + createdFor(h) : '',
         note: noteTxt || '', lines: lines, regression: isRegression
       };
     });
