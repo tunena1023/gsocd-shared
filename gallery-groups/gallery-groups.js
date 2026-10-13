@@ -347,11 +347,11 @@
       var st = currentStage(gi);
       var stageBar = (counts.inspection && counts.work)
         ? '<div class="gs-gal-stages" role="tablist">' +
-            '<button type="button" role="tab" class="gs-gal-stage' + (st === 'inspection' ? ' on' : '') + '" aria-selected="' + (st === 'inspection') + '" data-stage="inspection">Inspection · before<b>' + counts.inspection + '</b></button>' +
-            '<button type="button" role="tab" class="gs-gal-stage' + (st === 'work' ? ' on' : '') + '" aria-selected="' + (st === 'work') + '" data-stage="work">Work · after<b>' + counts.work + '</b></button>' +
+            '<button type="button" role="tab" class="gs-gal-stage' + (st === 'inspection' ? ' on' : '') + '" aria-selected="' + (st === 'inspection') + '" data-stage="inspection">Before<b>' + counts.inspection + '</b></button>' +
+            '<button type="button" role="tab" class="gs-gal-stage' + (st === 'work' ? ' on' : '') + '" aria-selected="' + (st === 'work') + '" data-stage="work">After<b>' + counts.work + '</b></button>' +
           '</div>'
         : '';
-      var label = stageBar ? '' : '<div class="gs-gal-col-label">' + (counts.inspection && !counts.work ? 'Inspection photos · before' : 'Photos') + '</div>';
+      var label = stageBar ? '' : '<div class="gs-gal-col-label">' + (counts.inspection && !counts.work ? 'Photos · before' : 'Photos') + '</div>';
       var photosCol = label + stageBar + heroHtml +
         (thumbsHtml ? '<div class="gs-gal-thumb-strip">' + thumbsHtml + '</div>' : '') +
         (people.length > 1 ? '<div class="gs-gal-people">' + peopleHtml + '</div>' : '');
