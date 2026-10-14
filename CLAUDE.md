@@ -19,6 +19,10 @@ app, su objetivo, la etapa (en uso real desde el 02/10/2026) y cómo trabaja el 
 - Todo cambio va a `preview` y se sube a `main` el **sábado a media noche**, con el OK del dueño.
 - Única excepción: cambios de **recurrentes**, y aun esos se le avisan al dueño antes de subir.
 - Nada se sube a `main` sin permiso explícito del dueño.
+- **Si algo se sube a `main` por separado** (antes del sábado, con OK del dueño): cada commit con
+  `git cherry-pick -x <commit de preview>` (anota de qué commit salió) y, **en ese mismo momento**,
+  `git merge origin/main` en `preview` y push de `preview` (dueño 14/10). Así `preview` siempre contiene a `main` y
+  lo ya subido no vuelve a salir como pendiente. Qué falta subir: `bash tools/que-falta-en-main.sh` (Admin, Orders, Tech).
 
 ## 3. Un solo lugar para el estado y los pendientes
 - **Tablero de sesiones: issue https://github.com/tunena1023/Admingsocd.com/issues/5** (varias sesiones trabajan a
