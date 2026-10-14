@@ -21,7 +21,8 @@ app, su objetivo, la etapa (en uso real desde el 02/10/2026) y cómo trabaja el 
 - Nada se sube a `main` sin permiso explícito del dueño.
 - **Si algo se sube a `main` por separado** (antes del sábado, con OK del dueño): cada commit con
   `git cherry-pick -x <commit de preview>` (anota de qué commit salió) y, **en ese mismo momento**,
-  `git merge origin/main` en `preview` y push de `preview` (dueño 14/10). Así `preview` siempre contiene a `main` y
+  `git merge origin/main` en `preview` y push de `preview` (dueño 14/10); ese push va sin `rebase` (un rebase
+  aplana el merge y `main` vuelve a quedar suelto: si `preview` se movió, `git merge origin/preview`). Así `preview` siempre contiene a `main` y
   lo ya subido no vuelve a salir como pendiente. Qué falta subir: `bash tools/que-falta-en-main.sh` (Admin, Orders, Tech).
 
 ## 3. Un solo lugar para el estado y los pendientes
