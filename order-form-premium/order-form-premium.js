@@ -361,8 +361,9 @@ const ICONS = {
        unitReady        -- (05/10/2026) agrega el switch "Unit ready" arriba
                            de Entry Date; prendido, salen Ready date, hora y
                            "¿vive alguien?" (en la columna de los botones,
-                           arriba de ellos) y la Entry date/hora toman esos
-                           valores y quedan en gris. Ver getUnitReady.
+                           arriba de ellos); la Entry date/hora toman esos
+                           valores y, con el Due date, se esconden (14/10/2026).
+                           Ver getUnitReady.
      Los mounts de fecha/hora (dom+'-entry-mount' etc.) los llena quien
      use esto, con GSDateTimePicker.dateHtml/timeHtml -- igual que ya
      se hace con officeAccessHtml, este solo regresa el esqueleto. */
@@ -470,12 +471,17 @@ const ICONS = {
     if (window.GSDateTimePicker) { if (isTime) GSDateTimePicker.syncTime(id); else GSDateTimePicker.syncDate(id); }
     el.dispatchEvent(new Event('change', { bubbles: true }));
   }
+  /* Prendido, Entry date/hora y Due date se esconden (dueño 14/10/2026: confundian a los
+     clientes; con la unidad lista el due date no tiene sentido). La Entry date/hora siguen
+     tomando la Ready date/hora; el Due date no se manda (ver getUnitReady().on). */
   function urLock(dom, locked) {
-    ['-entry-mount', '-entry-time-mount'].forEach(suf => {
+    ['-entry-mount', '-entry-time-mount', '-due-mount'].forEach(suf => {
       const m = document.getElementById(dom + suf);
       if (!m) return;
       m.classList.toggle('gs-ofp-ur-locked', !!locked);
       m.querySelectorAll('.gs-dtp-trigger').forEach(b => { b.disabled = !!locked; });
+      const field = m.closest('.gs-ofp-unit-detail-field');
+      if (field) field.style.display = locked ? 'none' : '';
     });
   }
   function _urToggle(dom) {
