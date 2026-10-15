@@ -179,6 +179,17 @@
       var current = row.querySelector('.t.active') || row.querySelector('.t');
       if (current) moveU(current);
     };
+    /* 15/10/2026 (dueño: "la barrita abajo del tab seleccionado se mueve"): las paginas que no
+       llaman refresh() (Warehouse, Relations, Calendar) dejaban la linea donde estaba al cargar,
+       y al llegar los contadores de Approvals/Review/Active las pestanas se recorren. Ahora la
+       linea se vuelve a poner sola cuando cambia el ancho de cualquier pestana (contador, la
+       pestana de Developer que aparece despues) y cuando terminan de cargar las letras. */
+    if (window.ResizeObserver) {
+      var tabsRO = new ResizeObserver(refreshFns[containerId]);
+      tabsRO.observe(row);
+      row.querySelectorAll('.t').forEach(function (t) { tabsRO.observe(t); });
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(refreshFns[containerId]);
   }
 
   var refreshFns = {};
