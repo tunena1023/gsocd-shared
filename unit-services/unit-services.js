@@ -13,11 +13,11 @@
    quien lo usa: getItems() regresa []).
 
    GSUnitServices.mount(container, {
-     catalog, division, crossDivision, propertyType,
+     catalog, division, crossDivision, propertyType, workMode: 'units' | 'recurring',
      levelFor: sku => 'Level 2' (opcional: nivel con el que arranca),
      onChange: items => {}
    }) -> { getItems() -> [{ sku, level, qty }], setItems(items),
-           setCatalog(c), setDivision(d, cross), setPropertyType(t), destroy() }
+           setCatalog(c), setDivision(d, cross), setPropertyType(t), setWorkMode(m), destroy() }
 ============================================================ */
 (function () {
   'use strict';
@@ -56,7 +56,7 @@
     var o = options || {};
     var st = {
       catalog: o.catalog || [], division: o.division || '', cross: !!o.crossDivision,
-      propertyType: o.propertyType || 'Commercial', items: [], hi: -1
+      propertyType: o.propertyType || 'Commercial', workMode: o.workMode === 'recurring' ? 'recurring' : 'units', items: [], hi: -1
     };
 
     container.innerHTML = '<div class="gs-us">' +
@@ -71,7 +71,9 @@
     function leveled(s) { return String(s.division || '').toLowerCase() === 'janitorial'; }
 
     /* Mismo criterio que el picker de la orden: division (o todas en Mixed),
-       tipo de propiedad, sin areas comunes ni paquetes. */
+       tipo de propiedad, sin paquetes. Areas comunes solo se esconden en Units
+       (16/10/2026: en Recurring "Lobby Cleaning" no salia aqui aunque la barra
+       de la orden si lo encontraba; igual que el picker, v1.66.0). */
     function matches(q) {
       q = q.trim().toLowerCase();
       if (!q) return [];
@@ -81,7 +83,7 @@
         if (have[String(s.sku)]) return false;
         if (!st.cross && String(s.division || '').toLowerCase() !== String(st.division || '').toLowerCase()) return false;
         if (s.propertyType && s.propertyType !== st.propertyType) return false;
-        if (String(s.category || '') === 'Common Areas') return false;
+        if (st.workMode === 'units' && String(s.category || '') === 'Common Areas') return false;
         if (Array.isArray(s.packageItems) && s.packageItems.length) return false;
         return String(s.serviceName || '').toLowerCase().indexOf(q) !== -1;
       }).sort(function (a, b) { return String(a.serviceName).localeCompare(String(b.serviceName)); }).slice(0, 12);
@@ -161,6 +163,7 @@
       setCatalog: function (c) { st.catalog = c || []; paintChips(); paintDrop(); },
       setDivision: function (d, cross) { st.division = d || ''; st.cross = !!cross; paintDrop(); },
       setPropertyType: function (t) { st.propertyType = t || 'Commercial'; paintDrop(); },
+      setWorkMode: function (m) { st.workMode = m === 'recurring' ? 'recurring' : 'units'; paintDrop(); },
       destroy: function () { container.innerHTML = ''; }
     };
     return api;

@@ -28,6 +28,8 @@ const picker = GSServicePicker.mount(pickerId, container, options);
     (por defecto `false`).
   - `propertyType`: `'Commercial'` (por defecto) o `'Residential'`.
   - `showPropertyToggle`: mostrar el interruptor Residential/Commercial (por defecto `true`).
+    Con el interruptor, al buscar también salen abajo ("Also in Residential") los que coinciden del
+    otro tipo; al picar uno el interruptor se pasa a ese tipo (16/10/2026).
   - `showSelectAll`: mostrar el control "Select all L1/L2/L3" (por defecto `false`, típico solo en
     modo `'levels'`).
   - `initialSelected` / `initialLevels`: para pre-llenar (ej. al editar una orden que ya tiene

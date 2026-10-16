@@ -39,6 +39,9 @@
       '.gs-sp-lvl-btn.active{background:var(--gold,#C9A84C);color:var(--black,#111)}' +
       '.gs-sp-lvl-btn:hover:not(.active){background:var(--off,#F7F6F3)}' +
       '.gs-sp-empty{color:var(--gray,#6B6B6B);font-size:13px}' +
+      '.gs-sp-other{grid-column:1/-1;margin-top:14px;padding-top:12px;border-top:1px dashed var(--border,#E0D9CC)}' +
+      '.gs-sp-other-h{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin-bottom:8px}' +
+      '.gs-sp-other-tag{font-size:10px;font-weight:700;color:var(--gold-dk,#8C6F2A);text-transform:uppercase;letter-spacing:.04em;margin-left:4px}' +
       /* Cantidad -- servicios marcados en el catalogo (Developer >
          Catalog, casilla "Requires quantity") como puertas, ventanas,
          persianas, etc. que no son un simple si/no sino "cuantas".
@@ -1005,7 +1008,55 @@
     });
   }
 
+  /* 16/10/2026 (dueño: "la barra de busqueda no da servicios"): la busqueda
+     solo mira el tipo del switch (Commercial/Residential) y los portales lo
+     ponen en Commercial al abrir; quien busca un servicio Residential veia
+     "No services match". Ahora, al escribir, abajo salen los que coinciden
+     del OTRO tipo; al picar uno el switch se pasa solo a ese tipo (con lo
+     mismo que hace el switch) y el servicio queda a la vista para escogerlo.
+     Lo escogido no se mezcla entre tipos: el switch sigue mandando. */
+  function otherTypeHits(inst, pickerId) {
+    var q = inst.searchEl ? (inst.searchEl.value || '').trim().toLowerCase() : '';
+    var rt = document.getElementById('gs-sp-restoggle-' + pickerId);
+    if (!q || !rt || rt.disabled) return { type: '', list: [] };
+    var other = inst.propertyType === 'Residential' ? 'Commercial' : 'Residential';
+    if (other === 'Residential' && inst.workMode === 'recurring' && inst.workToggle) return { type: other, list: [] };
+    var hideCA = inst.workMode === 'units' && (inst.workToggle || inst.showPackages);
+    var list = inst.catalog.filter(function (s) {
+      var divMatch = inst.crossDivision || String(s.division || '').toLowerCase() === String(inst.division || '').toLowerCase();
+      return divMatch && s.propertyType === other && String(s.serviceName || '').toLowerCase().indexOf(q) !== -1 &&
+        !(hideCA && String(s.category || '') === 'Common Areas');
+    }).sort(function (a, b) { return a.serviceName.localeCompare(b.serviceName); });
+    return { type: other, list: list };
+  }
+
   function renderGrid(pickerId) {
+    var inst = instances[pickerId];
+    renderGridInner(pickerId);
+    var hits = otherTypeHits(inst, pickerId);
+    if (!hits.list.length || !inst.gridEl) return;
+    var box = document.createElement('div');
+    box.className = 'gs-sp-other';
+    box.innerHTML = '<div class="gs-sp-other-h">Also in ' + escapeHtml(hits.type) + ' — tap one to switch to ' + escapeHtml(hits.type) + '</div>' +
+      '<div class="gs-sp-chip-grid">' + hits.list.slice(0, 24).map(function (s) {
+        return '<button type="button" class="gs-sp-chip-btn gs-sp-other-btn" data-other-sku="' + escapeAttr(s.sku) + '">' + escapeHtml(s.serviceName) +
+          ' <span class="gs-sp-other-tag">' + escapeHtml(hits.type) + '</span></button>';
+      }).join('') + '</div>';
+    inst.gridEl.appendChild(box);
+    Array.prototype.forEach.call(box.querySelectorAll('[data-other-sku]'), function (b) {
+      b.addEventListener('click', function () {
+        var rt = document.getElementById('gs-sp-restoggle-' + pickerId);
+        if (!rt || rt.disabled) return;
+        var svc = inst.catalog.find(function (x) { return String(x.sku) === String(b.dataset.otherSku); });
+        rt.checked = hits.type === 'Residential';
+        rt.dispatchEvent(new Event('change'));
+        /* Si no pide nivel ni cantidad, se escoge de una vez (un solo clic). */
+        if (svc && !isLeveledItem(svc) && !isQuantityItem(svc) && inst.propertyType === hits.type) toggleChip(pickerId, svc.sku);
+      });
+    });
+  }
+
+  function renderGridInner(pickerId) {
     var inst = instances[pickerId];
     var grid = inst.gridEl;
     var list = visibleList(inst);
