@@ -737,6 +737,23 @@ const ICONS = {
     input.dispatchEvent(new Event('change', { bubbles: true }));
   }
 
+  /* Recamaras y banos (dueño 16/10/2026): una orden de Recurring (areas comunes:
+     pasillos, gimnasio del clubhouse) no los tiene. setRoomsHidden esconde (o vuelve a
+     ensenar) el campo .gs-ofp-unitfield de cada input Bedrooms/Bathrooms que cae en
+     `selector`; roomsNone dice si una orden ya va sin ellos (agregarle una unidad o
+     editarla tampoco los pide). Lo mismo del lado del servidor: lib/order-rooms. */
+  function roomNum(v) {
+    const m = String(v == null ? '' : v).trim().match(/^(\d+(?:\.\d+)?)\b/);
+    return m && Number(m[1]) > 0 ? Number(m[1]) : null;
+  }
+  function roomsNone(order) { return !roomNum(order && order.Bedrooms) && !roomNum(order && order.Bathrooms); }
+  function setRoomsHidden(selector, hidden) {
+    document.querySelectorAll(selector).forEach(function (el) {
+      const f = el.closest('.gs-ofp-unitfield');
+      if (f) f.style.display = hidden ? 'none' : '';
+    });
+  }
+
   window.GSOrderFormPremium = {
     styleTag: styleTag,
     ICONS: ICONS,
@@ -765,6 +782,8 @@ const ICONS = {
     textFieldHtml: textFieldHtml,
     customerPoFieldHtml: customerPoFieldHtml,
     moveCustomerPo: moveCustomerPo,
-    officeHoursHtml: officeHoursHtml
+    officeHoursHtml: officeHoursHtml,
+    roomsNone: roomsNone,
+    setRoomsHidden: setRoomsHidden
   };
 })();

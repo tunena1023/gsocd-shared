@@ -45,7 +45,7 @@ const orderPdf = require('gsocd-shared/lib/order-pdf');
 ```
 
 Por npm se usan `lib/order-pdf`, `lib/pdf`, `lib/push`, `lib/order-seq`, `lib/site-readiness`,
-`lib/schedule-entries`, `lib/service-notes` y `lib/submit-key`. Para pasar a una versión nueva: cambiar el SHA en el `package.json` de
+`lib/schedule-entries`, `lib/service-notes`, `lib/submit-key` y `lib/order-rooms`. Para pasar a una versión nueva: cambiar el SHA en el `package.json` de
 Admin y Orders (Vercel instala solo en cada deploy).
 
 **Excepción, van como COPIA en cada portal:** `lib/notify.js` (copia idéntica en Admin, Orders y Tech) y
@@ -76,6 +76,7 @@ sus consultas y guarda sus datos. Se prueban con Node solo: `node lib/<pieza>.te
 | Lista + selector + diff de servicios | [`service-change-panel/`](./service-change-panel) | Servicios actuales (nombre + nota + cámara), selector real y diff agregados/quitados con nota obligatoria. Usado en Orders (Recurring, Processing) y Admin. |
 | Llave contra órdenes duplicadas | [`submit-key/`](./submit-key) + [`lib/submit-key.js`](./lib/submit-key.js) | Cada envío que crea una orden lleva `SubmitKey` (amarrada al contenido del formulario); reintentar lo mismo regresa la orden que ya existía, también en un PO a medias. Admin (Create Order, Add Unit) y Orders (New Order, Add Unit). |
 | Cargar sin error | [`load/`](./load) | `GSLoad.get(key, fn)`: si leer algo falla por la señal o el sistema (5xx, 504, sin red), la pantalla se queda en "Loading…" y se reintenta sola (2 s … 5 min, y al volver la señal); solo un error de dato (400/403/404/409) llega a la pantalla. `onStuck` a los 15 min. Regla del dueño 05/10. Admin. |
+| Recámaras y baños de una orden | [`lib/order-rooms.js`](./lib/order-rooms.js) + `GSOrderFormPremium.roomsNone / setRoomsHidden` | Bedrooms/Bathrooms son columnas de número: `roomNumber` (vacío -> null). Una orden de Recurring (áreas comunes) va sin ellos (dueño 16/10/2026): en el formulario se esconden y no se piden; agregar una unidad a un lote que ya va sin ellos tampoco los pide (`roomsNone`). Admin y Orders, por npm y en el navegador. |
 | Regla de Division Mixed (backend) | [`lib/division-rules.js`](./lib/division-rules.js) | Detecta si los servicios que se van a guardar en una orden pertenecen a otra división y calcula el cambio a 'Mixed' -- función pura de Node, no de navegador. Va como copia en Admin y Orders. |
 
 ## Cómo agregar un componente nuevo (para referencia futura)
