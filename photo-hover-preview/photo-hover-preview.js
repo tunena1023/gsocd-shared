@@ -20,11 +20,10 @@
    Uso:
      GSPhotoHoverPreview.setup();               // una sola vez, al cargar la pagina
      GSPhotoHoverPreview.stripHtml(photosArray); // el HTML de la tira, dado un arreglo de fotos
+   Picar una miniatura de la tira la abre en grande (necesita gsocd-shared/lightbox en la pagina), igual en
+   Admin y en Orders. Tech tiene su propia tira (tech-photos.js, por las fotos que se estan subiendo) y tambien
+   abre el lightbox al picar.
 
-   stripHtml() NO envuelve el resultado en ningun link -- si una
-   pagina quiere que la tira completa sea clickeable (como hace Admin,
-   mandando a Gallery filtrado a esa orden), envuelve el HTML que este
-   devuelve en su propio <a onclick="...">.
 ============================================================ */
 (function () {
   'use strict';
@@ -87,6 +86,31 @@
     return img ? img.src : null;
   }
 
+  /* Las fotos de cada tira, para abrirlas en el lightbox al picarlas (17/10/2026, dueño: "deben de funcionar
+     igual en todas partes"; Admin lo tenia escrito aparte y el cliente en Orders solo veia las miniaturas). La
+     misma lista (el mismo arreglo) usa siempre el mismo numero, asi repintar no llena la memoria. */
+  var lists = {}, seq = 0, idOf = typeof WeakMap === 'function' ? new WeakMap() : null;
+  function listId(photos) {
+    var id = idOf && idOf.get(photos);
+    if (!id) { id = String(++seq); if (idOf) idOf.set(photos, id); }
+    lists[id] = photos;
+    return id;
+  }
+
+  /* Picar una miniatura abre esa foto en grande (gsocd-shared/lightbox), con flechas por todas las de la orden;
+     el "+N" abre en la primera que no se ve. Va en captura para que no abra/cierre la tarjeta de abajo. */
+  function onStripClick(e) {
+    var strip = e.target.closest && e.target.closest('.order-photo-strip[data-gs-photos]');
+    if (!strip || !window.GSLightbox) return;
+    var photos = lists[strip.getAttribute('data-gs-photos')];
+    if (!photos || !photos.length) return;
+    var thumbs = Array.prototype.slice.call(strip.querySelectorAll('.order-photo-thumb'));
+    var i = e.target.closest('.order-photo-more') ? thumbs.length : thumbs.indexOf(e.target.closest('.order-photo-thumb'));
+    e.stopPropagation();
+    e.preventDefault();
+    window.GSLightbox.open(photos, Math.max(0, i));
+  }
+
   var wired = false;
   function setup() {
     injectStyle();
@@ -105,6 +129,7 @@
     function isRealMouse(e) { return e.pointerType === 'mouse'; }
     document.addEventListener('pointerdown', hidePreview, true);
     document.addEventListener('click', hidePreview, true);
+    document.addEventListener('click', onStripClick, true);
 
     document.addEventListener('pointerover', function (e) {
       if (!isRealMouse(e)) return;
@@ -142,7 +167,7 @@
       return '<img class="order-photo-thumb" src="' + esc(p.downloadUrl) + '" loading="lazy">';
     }).join('');
     var moreHtml = extra > 0 ? '<span class="order-photo-more">+' + extra + '</span>' : '';
-    return '<div class="order-photo-strip">' + thumbsHtml + moreHtml + '</div>';
+    return '<div class="order-photo-strip" data-gs-photos="' + listId(photos) + '" title="View photos" style="cursor:pointer">' + thumbsHtml + moreHtml + '</div>';
   }
 
   window.GSPhotoHoverPreview = { setup: setup, stripHtml: stripHtml };
