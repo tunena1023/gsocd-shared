@@ -303,14 +303,15 @@
         catch (e) { status(e.message, true); }
       }
     }
-    var pickSource = 'gallery';
+    /* En celular salen de la galeria; en computadora, de la PC. */
+    var pickSource = pcMode ? 'computer' : 'gallery';
     $('pick-file').addEventListener('change', function (e) { addFiles(e.target.files, pickSource); e.target.value = ''; });
-    if ($('gal-btn')) $('gal-btn').addEventListener('click', function () { pickSource = 'gallery'; $('pick-file').click(); });
-    $('pc-pick-btn').addEventListener('click', function () { pickSource = 'computer'; $('pick-file').click(); });
+    if ($('gal-btn')) $('gal-btn').addEventListener('click', function () { $('pick-file').click(); });
+    $('pc-pick-btn').addEventListener('click', function () { $('pick-file').click(); });
     var pick = $('pc-pick');
     ['dragenter', 'dragover'].forEach(function (ev) { pick.addEventListener(ev, function (e) { e.preventDefault(); pick.classList.add('drag'); }); });
     ['dragleave', 'drop'].forEach(function (ev) { pick.addEventListener(ev, function (e) { e.preventDefault(); pick.classList.remove('drag'); }); });
-    pick.addEventListener('drop', function (e) { addFiles(e.dataTransfer.files, 'computer'); });
+    pick.addEventListener('drop', function (e) { addFiles(e.dataTransfer.files, pickSource); });
 
     function onQueueChange(pending) {
       var byId = {};
