@@ -335,7 +335,11 @@
       var now = new Date();
       st.calSelYear = null; st.calSelMonth = null; st.calSelDay = null;
       st.calViewYear = now.getFullYear(); st.calViewMonth = now.getMonth();
-      if (st.min) { var minP = parseISODate(st.min); if (minP) { st.calViewYear = minP.year; st.calViewMonth = minP.month; } }
+      /* Abre en el mes de hoy (17/10/2026, dueño: "no se abría en el mes actual"). Solo si hoy queda fuera del
+         rango abre en el mes del minimo (todo es despues) o del maximo (todo es antes). */
+      var todayIso = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+      var jump = (st.min && st.min > todayIso) ? st.min : (st.max && st.max < todayIso) ? st.max : null;
+      if (jump) { var jp = parseISODate(jump); if (jp) { st.calViewYear = jp.year; st.calViewMonth = jp.month; } }
     }
     return '' +
       '<div class="gs-dtp-rel">' +
