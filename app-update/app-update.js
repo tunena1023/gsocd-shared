@@ -78,6 +78,9 @@
   function decide() {
     if (!pendingNew) return;
     if (busy()) return; /* se vuelve a revisar cada 2 s hasta que termine */
+    /* Una pestaña que nadie esta viendo se recarga cuando la vuelven a ver (17/10/2026: cada version nueva recargaba
+       todas las ventanas abiertas a la vez, tambien las de fondo, y cada recarga vuelve a pedir todo al servidor). */
+    if (document.visibilityState === 'hidden') return;
     reload();
   }
 
