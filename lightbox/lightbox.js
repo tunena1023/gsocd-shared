@@ -41,7 +41,8 @@
     if (!photo) return;
     imgEl.src = photo.downloadUrl;
     imgEl.alt = photo.name || 'Photo';
-    counterEl.textContent = (currentIndex + 1) + ' / ' + currentPhotos.length;
+    /* "From gallery" (17/10/2026): subida de la galeria o de la PC (nombre "-gal", gsocd-shared/camera-capture). */
+    counterEl.textContent = (currentIndex + 1) + ' / ' + currentPhotos.length + (/-gal\.[a-z0-9]+$/i.test(String(photo.name || '')) ? ' · From gallery' : '');
     /* Da la vuelta (dueño, 07/10/2026): de la ultima pasa a la primera y de
        la primera a la ultima, asi que las flechas nunca se apagan; con una
        sola foto no hay a donde ir y se esconden. */

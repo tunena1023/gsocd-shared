@@ -159,6 +159,8 @@
       '\n  .gs-gal-cap-reason { display: block; color: #8C6F2A; font-style: italic; font-size: 10.5px; margin-top: 1px; }' +
       '\n  .gs-gal-cap-date { display: block; color: #6B6B6B; font-size: 10.5px; margin-top: 1px; }' +
       '\n  .gs-gal-cap-by { display: block; color: #6B6B6B; font-size: 10.5px; margin-top: 1px; }' +
+      '\n  .gs-gal-cap-from { display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 3px; background: rgba(201,168,76,.18); color: #8C6F2A; font-weight: 600; }' +
+      '\n  .gs-gal-cap-by .gs-gal-cap-from:first-child { margin-left: 0; }' +
       '\n  .gs-gal-person { border: 1px solid #F0EBDD; border-radius: 6px; margin-top: 8px; overflow: hidden; }' +
       '\n  .gs-gal-person-h { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 12px; cursor: pointer; background: #F7F6F3; font-size: 12.5px; font-weight: 600; color: #111; }' +
       '\n  .gs-gal-person-h:focus-visible { outline: 2px solid #C9A227; outline-offset: -2px; }' +
@@ -222,8 +224,12 @@
 
   /* Quien tomo la foto (26/09/2026, pedido de los supervisores): viene
      en p.takenBy (cada portal la manda desde lib/photo-log.js). */
+  /* "From gallery" (17/10/2026, dueño): la foto se subio de la galeria del telefono o de la PC, no se tomo
+     con la camara de la app (el nombre del archivo termina en "-gal", ver gsocd-shared/camera-capture). */
+  function fromGallery(p) { return /-gal\.[a-z0-9]+$/i.test(String((p && p.name) || '')); }
   function byLineHtml(p) {
-    return p && p.takenBy ? '<span class="gs-gal-cap-by">📷 ' + esc(p.takenBy) + '</span>' : '';
+    var gal = fromGallery(p) ? '<span class="gs-gal-cap-from">From gallery</span>' : '';
+    return p && p.takenBy ? '<span class="gs-gal-cap-by">📷 ' + esc(p.takenBy) + gal + '</span>' : (gal ? '<span class="gs-gal-cap-by">' + gal + '</span>' : '');
   }
   function photoCapHtml(p) {
     if (!p) return '';
