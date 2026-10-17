@@ -1320,9 +1320,9 @@
       return l + ': ' + p.value;
     }).join('  ·  ');
   }
-  /* Las fechas de solo dia llegan crudas ("2026-10-08"). */
+  /* Las fechas de solo dia llegan crudas ("2026-10-08"), tambien la nueva de "vieja → nueva". */
   function prettyDetailsNote(notes) {
-    return String(notes || '').replace(/(^|: )(\d{4}-\d{2}-\d{2})(?=$|\s)/g, function (m, pre, d) { return pre + fmtDate(d); });
+    return String(notes || '').replace(/(^|: |→ )(\d{4}-\d{2}-\d{2})(?=$|\s)/g, function (m, pre, d) { return pre + fmtDate(d); });
   }
 
   /* 'Service Change Resolved' justo al lado de 'Service Added'/'Service
