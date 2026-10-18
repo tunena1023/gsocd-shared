@@ -53,9 +53,12 @@
     return '' +
       ':root{--black:#111;--gold:#C9A84C;--gold-lt:#E2C97E;--gold-dk:#8C6F2A;--white:#fff;--off:#F7F6F3;--gray:#6B6B6B;--border:#E0D9CC;--red:#c0392b;--green:#27ae60}' +
       '*{box-sizing:border-box}' +
-      /* 100dvh, no 100vh (18/09/2026): en movil 100vh se calcula con la barra de direcciones colapsada y la
-         pagina quedaba mas alta que lo visible. height fijo + overflow:hidden = nunca hay scroll. */
-      'html,body{margin:0;font-family:"Inter",-apple-system,sans-serif;background:#000;color:var(--white);height:100dvh;overflow:hidden;display:flex;flex-direction:column}' +
+      /* Alto de la pantalla (18/10/2026, CFO en iPhone: "abajo no sale ningun boton"): en Safari de iPhone 100dvh puede
+         quedar mas alto que lo que se ve (la barra de Safari tapa lo de abajo) y con overflow:hidden el disparador,
+         Gallery y Done quedaban fuera. Ahora el body es fixed y fitScreen() le pone el alto que de verdad se ve
+         (visualViewport / innerHeight); 100dvh queda solo de respaldo. Nunca hay scroll. */
+      'html{height:100%;overflow:hidden;background:#000}' +
+      'body{margin:0;font-family:"Inter",-apple-system,sans-serif;background:#000;color:var(--white);position:fixed;top:0;left:0;right:0;height:100%;height:100dvh;overflow:hidden;display:flex;flex-direction:column}' +
       '.top-bar{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:rgba(0,0,0,.65);position:relative;z-index:5;flex-shrink:0}' +
       '.top-bar h1{font-size:14px;margin:0;font-weight:600}' +
       '.close-btn{background:none;border:none;color:var(--white);font-size:20px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center}' +
@@ -64,7 +67,7 @@
       'video{width:100%;height:100%;object-fit:cover;display:block}' +
       '.camera-error{color:var(--gray);font-size:13px;text-align:center;padding:24px;display:none}' +
       '.counter-pill{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.55);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;letter-spacing:.02em}' +
-      '.bottom-panel{background:var(--black);padding:14px 16px 20px;flex-shrink:0}' +
+      '.bottom-panel{background:var(--black);padding:14px 16px calc(20px + env(safe-area-inset-bottom, 0px));flex-shrink:0}' +
       '.thumb-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:12px;min-height:60px}' +
       '.thumb{width:52px;height:52px;border-radius:6px;flex-shrink:0;position:relative;background:#333;overflow:hidden;border:1px solid rgba(255,255,255,.15);cursor:default}' +
       '.thumb img{width:100%;height:100%;object-fit:cover;display:block}' +
@@ -124,6 +127,15 @@
   }
 
   function $(id) { return document.getElementById(id); }
+
+  /* El body mide lo que se ve de verdad (ver css()): el menor entre visualViewport y innerHeight. Si el navegador no da
+     ninguno, se queda el 100dvh del CSS. */
+  function fitScreen() {
+    var vv = window.visualViewport, h = Math.min(window.innerHeight || Infinity, vv && vv.height ? vv.height : Infinity);
+    if (!isFinite(h) || h < 100) return;
+    document.body.style.height = Math.round(h) + 'px';
+    document.body.style.top = (vv && vv.offsetTop > 0 ? Math.round(vv.offsetTop) : 0) + 'px';
+  }
 
   /* Celular o tablet (pantalla tactil) -> camara + Gallery. Computadora -> fotos de la PC (si allowComputer). */
   function isPhone() {
@@ -245,6 +257,10 @@
 
     var st = document.createElement('style'); st.textContent = css(); document.head.appendChild(st);
     document.body.innerHTML = html(MAX);
+    fitScreen();
+    if (window.visualViewport) visualViewport.addEventListener('resize', fitScreen);
+    ['resize', 'orientationchange', 'pageshow'].forEach(function (ev) { window.addEventListener(ev, fitScreen); });
+    document.addEventListener('visibilitychange', fitScreen);
     if (pcMode) document.body.classList.add('pc');
     /* Gallery solo en celular; en computadora sin allowComputer (Tech) queda la camara como siempre. */
     if (!phone) $('gal-btn').outerHTML = '<div class="spacer-btn"></div>';
