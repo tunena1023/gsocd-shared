@@ -420,10 +420,12 @@
           entry.status.textContent = '✓';
         }
       });
-      if (failed) status(failed + ' photo' + (failed === 1 ? '' : 's') + ' could not be uploaded — tap it to try again.', true);
-      else if (waiting) status(waiting + ' photo' + (waiting === 1 ? '' : 's') + ' waiting for signal — will upload automatically.', true);
-      else if (saved) status(saved + ' photo' + (saved === 1 ? '' : 's') + ' saved — will attach once you submit the order.', true);
-      else status(pickNote, !!pickNote);
+      var q = failed ? failed + ' photo' + (failed === 1 ? '' : 's') + ' could not be uploaded — tap it to try again.'
+        : waiting ? waiting + ' photo' + (waiting === 1 ? '' : 's') + ' waiting for signal — will upload automatically.'
+        : saved ? saved + ' photo' + (saved === 1 ? '' : 's') + ' saved — will attach once you submit the order.' : '';
+      /* El aviso de una foto vieja que no entro se queda a la vista hasta la siguiente foto. */
+      var msg = [pickNote, q].filter(Boolean).join(' ');
+      status(msg, !!msg);
     }
   }
 
