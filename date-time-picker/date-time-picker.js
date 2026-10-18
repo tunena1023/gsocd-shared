@@ -67,12 +67,16 @@
     return { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10) - 1, day: parseInt(parts[2], 10) };
   }
 
+  /* "18:00" o "6:00 PM" (18/10/2026: varios contratos guardan la hora con AM/PM; "6:00 PM" se leia
+     como 6:00 AM y al tocar el reloj se guardaba 06:00). */
   function parseHHMM(hhmm) {
     if (!hhmm) return null;
-    var parts = hhmm.split(':');
-    if (parts.length !== 2) return null;
-    var h24 = parseInt(parts[0], 10);
-    var m = parseInt(parts[1], 10);
+    var mt = /^\s*(\d{1,2}):(\d{2})\s*([AaPp])?\.?\s*[Mm]?\.?\s*$/.exec(String(hhmm));
+    if (!mt) return null;
+    var h24 = parseInt(mt[1], 10);
+    var m = parseInt(mt[2], 10);
+    if (mt[3]) { h24 = h24 % 12; if (/p/i.test(mt[3])) h24 += 12; }
+    if (h24 > 23 || m > 59) return null;
     var ampm = h24 >= 12 ? 'PM' : 'AM';
     var h12 = h24 % 12; if (h12 === 0) h12 = 12;
     return { hour: h12, minute: m, ampm: ampm };
