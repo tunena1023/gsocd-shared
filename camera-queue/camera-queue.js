@@ -195,11 +195,17 @@
     });
   }
 
+  /* Foto esperando su ubicacion (waitLoc, 18/10/2026): ya esta guardada; si en WAIT_LOC_MS no llego la ubicacion
+     (GPS lento, la app se cerro) sube sin ella. */
+  var WAIT_LOC_MS = 20000;
   function retryAll() {
     return dbGetAll().then(function (items) {
-      var todo = items.filter(function (it) { return !it.failed && !it.notReady; });
+      var now = Date.now();
+      var todo = items.filter(function (it) { return !it.failed && !it.notReady && (!it.waitLoc || now - (it.createdAt || 0) > WAIT_LOC_MS); });
+      var late = todo.filter(function (it) { return it.waitLoc; });
+      late.forEach(function (it) { it.waitLoc = false; });
       if (!todo.length) return;
-      return Promise.all(todo.map(function (it) { return attemptUpload(it, false); }))
+      return Promise.all(late.map(dbPut)).then(function () { return Promise.all(todo.map(function (it) { return attemptUpload(it, false); })); })
         .then(notifyChange);
     });
   }
@@ -240,12 +246,13 @@
         attempts: 0,
         failed: false,
         notReady: !!opts.notReady,
+        waitLoc: !!opts.waitLoc && !opts.notReady,
         lastError: null,
         createdAt: Date.now()
       };
       return dbAdd(item).then(function (id) {
         item.id = id;
-        if (item.notReady) { notifyChange(); return id; }
+        if (item.notReady || item.waitLoc) { notifyChange(); return id; }
         /* Intento inmediato -- si hay señal, sube al toque; si no,
            ya quedo guardada de todos modos (eso ya paso arriba, antes
            de este intento). */
@@ -267,6 +274,18 @@
     },
 
     retryAll: function () { return retryAll().then(function () { notifyChange(); }); },
+
+    /* La ubicacion de una foto guardada con waitLoc (camera-capture): se le pone y se sube. Si ya subio sin ella
+       (paso WAIT_LOC_MS), no hace nada. */
+    addLocation: function (id, bodyPatch) {
+      return dbGetAll().then(function (items) {
+        var item = items.filter(function (it) { return it.id === id; })[0];
+        if (!item || !item.waitLoc || Date.now() - (item.createdAt || 0) > WAIT_LOC_MS) return false;
+        item.body = Object.assign({}, item.body, bodyPatch || {});
+        item.waitLoc = false;
+        return dbPut(item).then(function () { return attemptUpload(item, false); }).then(function (ok) { notifyChange(); return ok; });
+      });
+    },
 
     /* Completa un item que se guardo con notReady:true, en cuanto se
        sepa el dato que faltaba (ej. el OrderID real ya existe) --

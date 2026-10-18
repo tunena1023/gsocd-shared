@@ -196,12 +196,18 @@
     var stream = null, count = 0, thumbById = {};
 
     function stopStream() { if (stream) stream.getTracks().forEach(function (t) { t.stop(); }); }
-    function goBack() { stopStream(); location.href = returnTo; }
+    /* Fotos que todavia se estan guardando (18/10/2026): Done y ✕ esperan a que queden en el telefono. */
+    var saving = [];
+    function whenSaved(fn) {
+      if (!saving.length) { fn(); return; }
+      status('Saving photos…');
+      Promise.all(saving.slice()).then(function () { whenSaved(fn); }, function () { whenSaved(fn); });
+    }
+    function goBack() { whenSaved(function () { stopStream(); location.href = returnTo; }); }
     function status(text, warn) { var s = $('status-line'); s.textContent = text || ''; s.className = 'status-line' + (warn ? ' warn' : ''); }
     function finish() {
       if (requireAtLeastOne && count === 0) { status('Take at least 1 photo before finishing.', true); return; }
-      stopStream();
-      location.href = (cfg.finish && cfg.finish(params)) || returnTo;
+      whenSaved(function () { stopStream(); location.href = (cfg.finish && cfg.finish(params)) || returnTo; });
     }
     $('close-btn').addEventListener('click', goBack);
     $('done-btn').addEventListener('click', finish);
@@ -267,21 +273,41 @@
       if ($('gal-btn')) $('gal-btn').disabled = dis;
     }
 
-    /* Guarda y sube UNA imagen. source/takenAt solo si no viene de esta camara. */
-    async function sendImage(imageBase64, source, takenAt) {
-      if (count >= MAX) return;
+    /* Guarda y sube UNA imagen. source/takenAt solo si no viene de esta camara.
+       18/10/2026 (revision): PRIMERO se guarda en el telefono (IndexedDB) y despues se le pone la ubicacion; antes se
+       esperaba el GPS (hasta 8 s) por foto y si cerraban o la app se iba al fondo, la foto se perdia. La ubicacion es
+       solo de la camara (donde se tomo): una de la galeria no la lleva (seria donde se subio, no donde se tomo). */
+    function sendImage(imageBase64, source, takenAt) {
+      if (count >= MAX) return Promise.resolve();
       count++;
       $('counter-pill').textContent = count + ' / ' + MAX + ' photos';
       var t = addThumb(imageBase64, source);
-      try {
-        var loc = cfg.withLocation ? await getLocationSafe() : null;
-        var up = cfg.upload({ params: params, imageBase64: imageBase64, loc: loc }) || {};
-        var body = Object.assign({}, up.body);
-        if (source) { body.source = source; if (takenAt) body.takenAt = takenAt; }
-        /* enqueue() guarda la foto ANTES de intentar subirla (regla de oro: nunca se pierde). */
-        var id = await GSCameraQueue.enqueue({ endpoint: up.endpoint, body: body, notReady: !!up.notReady, meta: up.meta || { orderId: orderId } });
-        thumbById[id] = t;
-      } finally { full(); }
+      var wantLoc = cfg.withLocation && !source;
+      var p = (async function () {
+        try {
+          var up = cfg.upload({ params: params, imageBase64: imageBase64, loc: null }) || {};
+          var body = Object.assign({}, up.body);
+          if (source) { body.source = source; if (takenAt) body.takenAt = takenAt; }
+          var waitLoc = wantLoc && !up.notReady;
+          /* enqueue() guarda la foto ANTES de intentar subirla (regla de oro: nunca se pierde). */
+          var id = await GSCameraQueue.enqueue({ endpoint: up.endpoint, body: body, notReady: !!up.notReady, waitLoc: waitLoc, meta: up.meta || { orderId: orderId } });
+          thumbById[id] = t;
+          if (waitLoc) {
+            getLocationSafe().then(function (loc) {
+              var patch = {};
+              if (loc) {
+                var b2 = (cfg.upload({ params: params, imageBase64: imageBase64, loc: loc }) || {}).body || {};
+                Object.keys(b2).forEach(function (k) { if (k !== 'imageBase64' && JSON.stringify(b2[k]) !== JSON.stringify(body[k])) patch[k] = b2[k]; });
+              }
+              GSCameraQueue.addLocation(id, patch);
+            });
+          }
+        } finally { full(); }
+      })();
+      saving.push(p);
+      var drop = function () { var i = saving.indexOf(p); if (i >= 0) saving.splice(i, 1); };
+      p.then(drop, drop);
+      return p;
     }
 
     /* Sin candado entre fotos (25/09/2026): cada toque toma SU foto (cada una lleva su photoKey). */
