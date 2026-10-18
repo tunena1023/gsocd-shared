@@ -275,14 +275,14 @@
 
     /* Guarda y sube UNA imagen. source/takenAt solo si no viene de esta camara.
        18/10/2026 (revision): PRIMERO se guarda en el telefono (IndexedDB) y despues se le pone la ubicacion; antes se
-       esperaba el GPS (hasta 8 s) por foto y si cerraban o la app se iba al fondo, la foto se perdia. La ubicacion es
-       solo de la camara (donde se tomo): una de la galeria no la lleva (seria donde se subio, no donde se tomo). */
+       esperaba el GPS (hasta 8 s) por foto y si cerraban o la app se iba al fondo, la foto se perdia. Una de la galeria
+       tambien lleva la ubicacion (dueña 18/10): es donde se subio, no donde se tomo. */
     function sendImage(imageBase64, source, takenAt) {
       if (count >= MAX) return Promise.resolve();
       count++;
       $('counter-pill').textContent = count + ' / ' + MAX + ' photos';
       var t = addThumb(imageBase64, source);
-      var wantLoc = cfg.withLocation && !source;
+      var wantLoc = !!cfg.withLocation;
       var p = (async function () {
         try {
           var up = cfg.upload({ params: params, imageBase64: imageBase64, loc: null }) || {};
