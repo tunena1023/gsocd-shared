@@ -62,6 +62,10 @@
 
   function shortWindow(w) {
     var m = String(w || '').match(/^\s*(\d{1,2}:\d{2})\s*(AM|PM)\s*-\s*(\d{1,2}:\d{2})\s*(AM|PM)\s*$/i);
+    /* Una sola hora = la hora de inicio (dueña 18/10/2026: las visitas recurrentes llevan solo cuando empiezan, sin
+       hora de salida): "6:00 PM" -> "Starts 6:00 PM". */
+    var one = String(w || '').match(/^\s*(\d{1,2}:\d{2})\s*(AM|PM)\s*$/i);
+    if (one) return 'Starts ' + one[1] + ' ' + one[2].toUpperCase();
     if (!m) return String(w || '');
     var a = m[2].toUpperCase(), b = m[4].toUpperCase();
     return a === b ? m[1] + '–' + m[3] + ' ' + b : m[1] + ' ' + a + '–' + m[3] + ' ' + b;
