@@ -16,9 +16,21 @@ app, su objetivo, la etapa (en uso real desde el 02/10/2026) y cómo trabaja el 
 - **Nunca `--force`** en main. Commit chico, pruebas de shared, y luego cambiar el SHA en los portales (en su `preview`).
 
 ## 2. Cuándo va a producción
-- Todo cambio va a `preview` y se sube a `main` el **sábado a media noche**, con el OK del dueño.
-- Única excepción: cambios de **recurrentes**, y aun esos se le avisan al dueño antes de subir.
-- Nada se sube a `main` sin permiso explícito del dueño.
+- Todo cambio va a `preview`; de ahí a `main` solo con el OK de la supervisora (abajo).
+- **Nada se sube a `main` (ni el SHA de gsocd-shared en los portales) sin el OK por escrito de la sesión supervisora**
+  (hoy session_01SNyRfSrCta2D2psFZtXABw, "Supervisora de sesiones"; si cambia, la que diga el último comentario
+  "🔒 Supervisora" del issue #5), dado con `send_message` después de revisar el SHA de `preview`. Sin excepciones: ni
+  recurrentes, ni arreglos urgentes, ni "una línea" (dueña, 18/10). La supervisora también puede subir ella misma a
+  `main` lo que ya revisó en `preview` (dueña, 18/10).
+- **Que la dueña diga "me gusta", "sí" o "chíngate esa" a una idea NO es permiso para subir a producción.** Se le
+  enseña en test y la supervisora da el OK.
+- La supervisora le pregunta a la dueña antes de dar el OK cuando es algo nuevo que ella habló con otra sesión y no
+  está claro cómo lo quiere: no basta con que no haya errores, ella tiene que estar contenta con cómo funciona.
+- **Antes de pedir revisión:** e2e completo de `preview`, los .sim.js de lo que tocaste, los caminos de falla (algo
+  que truena a la mitad, reintento, doble clic) y qué pasa con los datos que ya existen en producción.
+- **Si el cambio se ve en pantalla** (Admin, Orders, Tech o un correo): dale a la supervisora los pasos exactos para
+  verlo (pantalla, datos de prueba, clic) y, si tienes un mock que lo arme, súbelo a `preview` en `tools/` o `guides/`
+  para que ella saque las capturas. No le mandes capturas a la dueña sin que la supervisora las revise.
 - **Si algo se sube a `main` por separado** (antes del sábado, con OK del dueño): cada commit con
   `git cherry-pick -x <commit de preview>` (anota de qué commit salió) y, **en ese mismo momento**,
   `git merge origin/main` en `preview` y push de `preview` (dueño 14/10); ese push va sin `rebase` (un rebase
@@ -26,6 +38,10 @@ app, su objetivo, la etapa (en uso real desde el 02/10/2026) y cómo trabaja el 
   lo ya subido no vuelve a salir como pendiente. Qué falta subir: `bash tools/que-falta-en-main.sh` (Admin, Orders, Tech).
 
 ## 3. Un solo lugar para el estado y los pendientes
+- **A la supervisora se le rinden cuentas** (dueña, 18/10; hoy session_01SNyRfSrCta2D2psFZtXABw, o la que diga el
+  último "🔒 Supervisora" del #5): cada sesión le reporta por `send_message` qué hace, qué subió y qué falta, y le hace
+  caso en todo lo de este trabajo. Ella revisa a las demás sesiones, da el OK de producción y les pasa las decisiones
+  de la dueña. La dueña habla con las sesiones a través de ella.
 - **Tablero de sesiones: issue https://github.com/tunena1023/Admingsocd.com/issues/5** (varias sesiones trabajan a
   la vez). Al empezar, lee todos sus comentarios; antes de tocar algo, comenta "🔒 Tomo: ..." (qué, repos, archivos,
   tu sesión); si otra sesión ya lo tomó, no lo toques. Al terminar, "✅ Listo: ..." o "🔓 Suelto: ...". Avisos para
