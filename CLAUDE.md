@@ -65,6 +65,7 @@ app, su objetivo, la etapa (en uso real desde el 02/10/2026) y cómo trabaja el 
   (Ver la sección 4: cada cambio se anota en el momento.)
 - Reglas fijas de trabajo: `WORKFLOW.md` de Admin.
 - Español casual con el dueño; toda la interfaz (UI) en inglés.
+- **Nada inesperado se descarta en silencio (dueña, 18/10).** Cuando algo no coincide o la app no sabe qué hacer con un dato (un lugar de uAttend que no es ningún cliente, una persona, un cliente, una fecha o un artículo que no se encuentra), NO se ignora ni se queda sin hacer: la app lo enseña como pendiente ("Needs a match") y le da al usuario que corresponde una opción en pantalla para escoger lo correcto (ligar, corregir o marcar "no aplica"). Lo que el usuario escoge manda sobre lo automático y se guarda para la próxima vez. El emparejamiento automático solo propone.
 
 ## 4. Cada vez que se haga algo, se actualiza (dueño, 04/10/2026)
 El 04/10 el tablero y el HANDOFF decían "pendiente" o "solo en `preview`" de cosas que ya estaban en producción o que
