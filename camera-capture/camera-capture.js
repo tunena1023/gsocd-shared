@@ -369,11 +369,20 @@
     }
     $('shutter-btn').addEventListener('click', capture);
 
-    /* cfg.gallerySameDay (Tech, dueña 18/10/2026): una foto de la galeria tiene que ser del mismo dia del trabajo
-       (su fecha EXIF); una mas vieja no entra. Sin fecha (captura de pantalla, reenviada): entra con takenAt vacio y
-       Admin la ve como "date unknown". */
+    /* cfg.gallerySameDay (Tech, dueña 18/10/2026): una foto de la galeria tiene que ser de un dia del trabajo (su
+       fecha EXIF, hora local del telefono, comparada como AAAA-MM-DD sin pasar por UTC): hoy o cualquiera de
+       cfg.jobDays(params) (dias programados de la orden, el de la visita en un recurrente) que no sea despues de hoy.
+       Una de otro dia no entra. Sin fecha (captura de pantalla, reenviada): entra con takenAt vacio y Admin la ve como
+       "date unknown". */
+    var jobDaysP = Promise.resolve(typeof cfg.jobDays === 'function' ? cfg.jobDays(params) : (cfg.jobDays || []))
+      .then(function (d) { return Array.isArray(d) ? d.map(String) : []; }, function () { return []; });
+    function shortDay(ymd) { var p = String(ymd).split('-'); return MONTHS[+p[1] - 1] + ' ' + (+p[2]); }
     async function addFiles(files, source) {
+      /* La lista ANTES de cualquier await: quien llama limpia el input (value = '') en cuanto regresa. */
       var list = Array.prototype.filter.call(files || [], function (f) { return /^image\//.test(f.type); });
+      var jobDays = cfg.gallerySameDay ? await jobDaysP : [];
+      var today = todayLocal();
+      var okDay = function (day) { return day === today || (day < today && jobDays.indexOf(day) >= 0); };
       var room = MAX - count, old = [];
       pickNote = '';
       if (list.length > room) status('Only ' + room + ' more photo' + (room === 1 ? '' : 's') + ' fit — the rest were skipped.', true);
@@ -381,7 +390,7 @@
         var f = list[i];
         try {
           var ex = await exifTakenAt(f);
-          if (cfg.gallerySameDay && ex && ymdOf(ex) < todayLocal()) { old.push(ex); continue; }
+          if (cfg.gallerySameDay && ex && !okDay(ymdOf(ex))) { old.push(ex); continue; }
           var takenAt = ex ? new Date(ex.y, ex.mo - 1, ex.d, ex.h, ex.mi, ex.s).toISOString()
             : (cfg.gallerySameDay ? '' : (f.lastModified ? new Date(f.lastModified).toISOString() : ''));
           await sendImage(await fileToJpeg(f), source, takenAt);
@@ -390,8 +399,11 @@
       }
       if (old.length) {
         var when = MONTHS[old[0].mo - 1] + ' ' + old[0].d;
-        pickNote = old.length === 1 ? 'This photo was taken on ' + when + ', before this job. Take a new one with the camera.'
-          : old.length + ' photos were taken before today (one on ' + when + '). Take new ones with the camera.';
+        var days = jobDays.filter(function (d) { return d <= today; }).concat(jobDays.indexOf(today) < 0 ? [today] : []).sort();
+        var jobTxt = days.length > 1 ? 'This job is on ' + days.slice(0, -1).map(shortDay).join(', ') + ' and ' + shortDay(days[days.length - 1]) + '.'
+          : 'This job is today.';
+        pickNote = (old.length === 1 ? 'This photo was taken on ' + when + '. ' : old.length + ' photos are from another day (one on ' + when + '). ') +
+          jobTxt + ' Take ' + (old.length === 1 ? 'a new one' : 'new ones') + ' with the camera.';
         status(pickNote, true);
       }
     }
