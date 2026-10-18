@@ -210,13 +210,23 @@
   function ymdOf(x) { return x.y + '-' + String(x.mo).padStart(2, '0') + '-' + String(x.d).padStart(2, '0'); }
   function todayLocal() { var n = new Date(); return ymdOf({ y: n.getFullYear(), mo: n.getMonth() + 1, d: n.getDate() }); }
 
-  function fileToJpeg(file) {
+  /* rawHeic (Admin, cfg.serverHeic, 18/10/2026): una HEIC que este navegador no sabe leer (Windows/Chrome, Android) va
+     tal cual y el servidor la pasa a JPEG. */
+  function isHeic(file) { return /hei[cf]/i.test(file.type || '') || /\.hei[cf]$/i.test(file.name || ''); }
+  function fileToJpeg(file, rawHeic) {
     return new Promise(function (resolve, reject) {
       var fr = new FileReader();
       fr.onerror = function () { reject(new Error('Could not read ' + file.name)); };
       fr.onload = function () {
         var img = new Image();
-        img.onerror = function () { reject(new Error(file.name + ' is not an image we can read')); };
+        img.onerror = function () {
+          if (rawHeic && isHeic(file)) {
+            if (file.size > 3.2 * 1024 * 1024) { reject(new Error(file.name + ' is too big to send. Save it as JPEG first.')); return; }
+            resolve(String(fr.result).replace(/^data:[^;,]*;/, 'data:image/heic;'));
+            return;
+          }
+          reject(new Error(file.name + ' is not an image we can read'));
+        };
         img.onload = function () { resolve(toJpeg(img, img.width, img.height).toDataURL('image/jpeg', 0.85)); };
         img.src = fr.result;
       };
@@ -393,7 +403,7 @@
           if (cfg.gallerySameDay && ex && !okDay(ymdOf(ex))) { old.push(ex); continue; }
           var takenAt = ex ? new Date(ex.y, ex.mo - 1, ex.d, ex.h, ex.mi, ex.s).toISOString()
             : (cfg.gallerySameDay ? '' : (f.lastModified ? new Date(f.lastModified).toISOString() : ''));
-          await sendImage(await fileToJpeg(f), source, takenAt);
+          await sendImage(await fileToJpeg(f, !!cfg.serverHeic), source, takenAt);
         }
         catch (e) { status(e.message, true); }
       }
