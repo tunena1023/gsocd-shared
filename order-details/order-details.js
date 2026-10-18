@@ -22,6 +22,7 @@
                       y su telefono
          showWho      default true (false = solo When y Where)
          showPhones   default true
+         afterName    fn(nombre) -> HTML junto a cada persona (opcional)
          poHtml       HTML propio para el valor de Customer PO (Admin lo
                       edita); si no, el texto de o.CustomerPO
          live         true = pone id="due-display-<orden>" y
@@ -117,7 +118,8 @@
       var t = (opts.techs || []).find(function (x) { return String(x.name || '').trim().toLowerCase() === String(n).trim().toLowerCase(); });
       return t && t.phone ? t.phone : '';
     };
-    var person = function (n) { var ph = showPhones ? phoneOf(n) : ''; return esc(n) + (ph ? '<br><span class="gs-od-sub">' + esc(ph) + '</span>' : ''); };
+    /* opts.afterName(nombre) -> HTML junto al nombre (Admin: las palomitas del aviso, 18/10/2026). */
+    var person = function (n) { var ph = showPhones ? phoneOf(n) : ''; return esc(n) + (opts.afterName ? opts.afterName(n) || '' : '') + (ph ? '<br><span class="gs-od-sub">' + esc(ph) + '</span>' : ''); };
     var kv = function (k, v) { return '<span class="gs-od-k">' + k + '</span><span class="gs-od-v">' + v + '</span>'; };
     var inInspection = INSPECTION.indexOf(o.Status) !== -1;
     var closed = o.Status === 'Completed' || o.Status === 'Cancelled';
