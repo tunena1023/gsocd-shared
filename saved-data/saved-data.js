@@ -10,7 +10,7 @@
    no lo deja (modo privado viejo), en localStorage; si tampoco, no guarda
    y todo sigue igual. Nunca truena.
 
-     GSSaved.save(key, data)            -> Promise
+     GSSaved.save(key, data)            -> Promise<true si quedo guardado>
      GSSaved.read(key, maxAgeMs)        -> Promise<{ at, data } | null>
      GSSaved.clear(prefix)              -> Promise  (borra las llaves que empiezan asi)
      GSSaved.bar.show(text) / .hide()   -> aviso abajo ("Offline. Showing…")
@@ -39,23 +39,28 @@
         try {
           var t = d.transaction(ST, mode), r = fn(t.objectStore(ST));
           t.oncomplete = function () { resolve({ value: r && 'result' in r ? r.result : undefined }); };
-          t.onerror = t.onabort = function () { resolve({ failed: true }); };
-        } catch (e) { resolve({ failed: true }); }
+          t.onerror = t.onabort = function () { dbP = null; resolve({ failed: true }); };
+        } catch (e) { dbP = null; resolve({ failed: true }); }
       });
     });
   }
   var LS = 'gs_saved:';
 
+  /* -> Promise<true si quedo guardado>. Si IndexedDB falla (Safari "connection to IndexedDB lost" en una app abierta
+     varios dias, 18/10/2026), se guarda en localStorage y la proxima vez se vuelve a abrir IndexedDB (dbP = null). */
   function save(key, data) {
     var row = { at: Date.now(), data: data };
     return tx('readwrite', function (s) { return s.put(row, key); }).then(function (r) {
-      if (r.noDb) { try { localStorage.setItem(LS + key, JSON.stringify(row)); } catch (e) { /* lleno: sin copia */ } }
+      if (!r.noDb && !r.failed) { try { localStorage.removeItem(LS + key); } catch (e) {} return true; }
+      try { localStorage.setItem(LS + key, JSON.stringify(row)); return true; } catch (e) { return false; /* lleno: sin copia */ }
     });
   }
+  /* La mas nueva de las dos (IndexedDB o la de respaldo en localStorage). */
   function read(key, maxAge) {
     return tx('readonly', function (s) { return s.get(key); }).then(function (r) {
-      var v = r.value;
-      if (r.noDb) { try { v = JSON.parse(localStorage.getItem(LS + key) || 'null'); } catch (e) { v = null; } }
+      var v = r.value, l = null;
+      try { l = JSON.parse(localStorage.getItem(LS + key) || 'null'); } catch (e) { l = null; }
+      if (l && (!v || (l.at || 0) > (v.at || 0))) v = l;
       return v && v.data !== undefined && (!maxAge || Date.now() - v.at < maxAge) ? v : null;
     });
   }
