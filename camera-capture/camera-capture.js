@@ -161,6 +161,55 @@
     return c;
   }
 
+  /* Cuando se TOMO una foto de la galeria (18/10/2026, dueña: "lo que no quiero es que vayan a subir fotos viejas"): la
+     fecha que la camara del telefono escribe dentro del JPEG (EXIF DateTimeOriginal, hora local del telefono).
+     -> Promise<{ y, mo, d, h, mi, s } | null> (null = el archivo no la trae: captura de pantalla, reenviada...). */
+  function exifTakenAt(file) {
+    if (!file || !file.slice || !/jpe?g/i.test(file.type || '')) return Promise.resolve(null);
+    return new Promise(function (resolve) {
+      var fr = new FileReader();
+      fr.onerror = function () { resolve(null); };
+      fr.onload = function () {
+        try { resolve(parseExifDate(new DataView(fr.result))); } catch (e) { resolve(null); }
+      };
+      fr.readAsArrayBuffer(file.slice(0, 256 * 1024));
+    });
+  }
+  function parseExifDate(v) {
+    if (v.byteLength < 4 || v.getUint16(0) !== 0xFFD8) return null;
+    var off = 2;
+    while (off + 4 <= v.byteLength) {
+      if (v.getUint8(off) !== 0xFF) return null;
+      var marker = v.getUint8(off + 1), len = v.getUint16(off + 2);
+      if (marker === 0xE1 && v.getUint32(off + 4) === 0x45786966) return readTiffDate(v, off + 10);
+      if (marker === 0xDA) return null;
+      off += 2 + len;
+    }
+    return null;
+  }
+  function readTiffDate(v, t) {
+    var le = v.getUint16(t) === 0x4949;
+    var u16 = function (o) { return v.getUint16(o, le); }, u32 = function (o) { return v.getUint32(o, le); };
+    var ascii = function (o, n) { var x = ''; for (var i = 0; i < n; i++) { var c = v.getUint8(o + i); if (!c) break; x += String.fromCharCode(c); } return x; };
+    var tagIn = function (ifd, want) {
+      var n = u16(ifd);
+      for (var i = 0; i < n; i++) { var e = ifd + 2 + i * 12; if (u16(e) === want) return e; }
+      return 0;
+    };
+    var ifd0 = t + u32(t + 4);
+    var exifPtr = tagIn(ifd0, 0x8769);
+    var e = exifPtr ? tagIn(t + u32(exifPtr + 8), 0x9003) : 0;
+    if (!e) e = tagIn(ifd0, 0x0132); /* DateTime, si no trae la original */
+    if (!e) return null;
+    var str = ascii(t + u32(e + 8), 19);
+    var m = /^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/.exec(str);
+    if (!m || m[1] === '0000') return null;
+    return { y: +m[1], mo: +m[2], d: +m[3], h: +m[4], mi: +m[5], s: +m[6] };
+  }
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function ymdOf(x) { return x.y + '-' + String(x.mo).padStart(2, '0') + '-' + String(x.d).padStart(2, '0'); }
+  function todayLocal() { var n = new Date(); return ymdOf({ y: n.getFullYear(), mo: n.getMonth() + 1, d: n.getDate() }); }
+
   function fileToJpeg(file) {
     return new Promise(function (resolve, reject) {
       var fr = new FileReader();
@@ -193,7 +242,7 @@
     var orderId = params.get('orderId');
     $('page-title').textContent = (cfg.title && cfg.title(params)) || params.get('label') || (orderId ? 'Order ' + orderId : 'Camera');
 
-    var stream = null, count = 0, thumbById = {};
+    var stream = null, count = 0, thumbById = {}, pickNote = '';
 
     function stopStream() { if (stream) stream.getTracks().forEach(function (t) { t.stop(); }); }
     /* Fotos que todavia se estan guardando (18/10/2026): Done y ✕ esperan a que queden en el telefono. */
@@ -313,20 +362,37 @@
     /* Sin candado entre fotos (25/09/2026): cada toque toma SU foto (cada una lleva su photoKey). */
     function capture() {
       if (count >= MAX || !stream) return;
+      pickNote = '';
       var shot = captureFrame();
       if (!shot) { cameraNotReady(); return; }
       sendImage(shot, null);
     }
     $('shutter-btn').addEventListener('click', capture);
 
+    /* cfg.gallerySameDay (Tech, dueña 18/10/2026): una foto de la galeria tiene que ser del mismo dia del trabajo
+       (su fecha EXIF); una mas vieja no entra. Sin fecha (captura de pantalla, reenviada): entra con takenAt vacio y
+       Admin la ve como "date unknown". */
     async function addFiles(files, source) {
       var list = Array.prototype.filter.call(files || [], function (f) { return /^image\//.test(f.type); });
-      var room = MAX - count;
+      var room = MAX - count, old = [];
+      pickNote = '';
       if (list.length > room) status('Only ' + room + ' more photo' + (room === 1 ? '' : 's') + ' fit — the rest were skipped.', true);
       for (var i = 0; i < Math.min(list.length, Math.max(0, room)); i++) {
         var f = list[i];
-        try { await sendImage(await fileToJpeg(f), source, f.lastModified ? new Date(f.lastModified).toISOString() : ''); }
+        try {
+          var ex = await exifTakenAt(f);
+          if (cfg.gallerySameDay && ex && ymdOf(ex) < todayLocal()) { old.push(ex); continue; }
+          var takenAt = ex ? new Date(ex.y, ex.mo - 1, ex.d, ex.h, ex.mi, ex.s).toISOString()
+            : (cfg.gallerySameDay ? '' : (f.lastModified ? new Date(f.lastModified).toISOString() : ''));
+          await sendImage(await fileToJpeg(f), source, takenAt);
+        }
         catch (e) { status(e.message, true); }
+      }
+      if (old.length) {
+        var when = MONTHS[old[0].mo - 1] + ' ' + old[0].d;
+        pickNote = old.length === 1 ? 'This photo was taken on ' + when + ', before this job. Take a new one with the camera.'
+          : old.length + ' photos were taken before today (one on ' + when + '). Take new ones with the camera.';
+        status(pickNote, true);
       }
     }
     /* En celular salen de la galeria; en computadora, de la PC. */
@@ -357,7 +423,7 @@
       if (failed) status(failed + ' photo' + (failed === 1 ? '' : 's') + ' could not be uploaded — tap it to try again.', true);
       else if (waiting) status(waiting + ' photo' + (waiting === 1 ? '' : 's') + ' waiting for signal — will upload automatically.', true);
       else if (saved) status(saved + ' photo' + (saved === 1 ? '' : 's') + ' saved — will attach once you submit the order.', true);
-      else status('');
+      else status(pickNote, !!pickNote);
     }
   }
 

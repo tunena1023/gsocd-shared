@@ -228,7 +228,8 @@
      con la camara de la app (el nombre del archivo termina en "-gal", ver gsocd-shared/camera-capture). */
   function fromGallery(p) { return /-gal\.[a-z0-9]+$/i.test(String((p && p.name) || '')); }
   function byLineHtml(p) {
-    var gal = fromGallery(p) ? '<span class="gs-gal-cap-from">From gallery</span>' : '';
+    /* p.dateUnknown (solo Admin, 18/10/2026): de la galeria y el telefono no trajo cuando se tomo. */
+    var gal = fromGallery(p) ? '<span class="gs-gal-cap-from">From gallery' + (p.dateUnknown ? ' · date unknown' : '') + '</span>' : '';
     return p && p.takenBy ? '<span class="gs-gal-cap-by">📷 ' + esc(p.takenBy) + gal + '</span>' : (gal ? '<span class="gs-gal-cap-by">' + gal + '</span>' : '');
   }
   function photoCapHtml(p) {
