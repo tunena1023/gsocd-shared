@@ -145,6 +145,9 @@
       '\n\n  .gs-gal-empty { font-size: 13px; color: #999; text-align: center; padding: 40px 0; }' +
       '\n\n  .gs-gal-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }' +
       '\n  @media (max-width: 560px) { .gs-gal-2col { grid-template-columns: 1fr; } }' +
+      /* La columna no se estira con la tira de miniaturas (CFO 19/10): con mas de ~5 fotos la foto grande salia
+         de ~820 px en vez del ancho de la columna. min-width: 0 deja que la tira se recorra de lado. */
+      '\n  .gs-gal-2col > * { min-width: 0; }' +
       '\n  .gs-gal-col-label { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #6B6B6B; margin-bottom: 10px; }' +
       '\n\n  .gs-gal-hero { position: relative; width: 100%; aspect-ratio: 1; border-radius: 8px; overflow: hidden; cursor: pointer; background: #eee; }' +
       '\n  /* 12/10/2026: en iPhone la foto grande salia de varias pantallas de alto (Safari no' +
