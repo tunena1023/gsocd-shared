@@ -36,12 +36,20 @@ const picker = GSServicePicker.mount(pickerId, container, options);
     servicios elegidos).
   - `onChange(selected, svcLevel, propertyType)`: función que se llama cada vez que algo cambia —
     ya sea la selección o el tipo de propiedad (opcional).
+  - v1.67.0 (19/10/2026, Admin "Correct this visit"), todo opcional; sin esto el picker pinta igual que antes:
+    - `allowOff` + `offList` `{ sku: true }`: en cada servicio escogido, "Mark not done" / "Undo". Queda escogido y
+      tachado ("Not done this visit").
+    - `people`: `{ choices: [{ id, name }], bySku: { sku: [ids] } }`: chips de quién lo hizo, con × y "+ person…".
+    - `tagOf(servicio) -> 'Extra' | ''`: etiqueta chica debajo del servicio.
+    - `keepSelected` `{ sku: true }`: esos no se pueden quitar (se marcan "Not done").
 
 `mount()` devuelve un objeto con:
 
 ```js
 picker.getSelected()          // { propertyType: { nombreServicio: sku } }
 picker.getLevels()            // { 'propertyType|nombreServicio': 'Level 2' }
+picker.getOff()               // v1.67.0: { sku: true } escogidos marcados "Not done"
+picker.getPeople()            // v1.67.0: { sku: [ids] } quién hizo cada escogido
 picker.getPropertyType()      // 'Commercial' o 'Residential', el actual
 picker.setSelected(sel, lvl)  // pre-llenar despues de montado
 picker.setDivision(div)       // cambiar de division sin volver a montar

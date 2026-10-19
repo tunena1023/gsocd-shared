@@ -1,0 +1,110 @@
+/* node service-picker/service-picker.test.js -- GSServicePicker en Chromium (19/10/2026, v1.67.0).
+   - Lo de antes: sin las opciones nuevas, el picker pinta EXACTAMENTE lo mismo que la version anterior (git HEAD~ o
+     OLD_PICKER=<archivo>), en modo niveles, chips, cantidad, con notas y con 'selected-plus-search'.
+   - Lo nuevo (Admin "Correct this visit"): allowOff / offList, people, tagOf y keepSelected.
+   Necesita playwright (NODE_PATH) y Chromium (CHROMIUM o el de Playwright). */
+'use strict';
+const path = require('path'), fs = require('fs'), cp = require('child_process');
+const { chromium } = require('playwright');
+const NEW = fs.readFileSync(path.join(__dirname, 'service-picker.js'), 'utf8');
+let OLD = '';
+try { OLD = process.env.OLD_PICKER ? fs.readFileSync(process.env.OLD_PICKER, 'utf8') : cp.execSync('git show HEAD~:service-picker/service-picker.js', { cwd: path.join(__dirname, '..'), encoding: 'utf8' }); } catch (e) { OLD = ''; }
+let ok = 0, bad = 0;
+const check = (n, c, x) => { if (c) { ok++; console.log('OK   - ' + n); } else { bad++; console.log('FAIL - ' + n + (x !== undefined ? '  ' + JSON.stringify(x).slice(0, 400) : '')); } };
+
+const CATALOG = [
+  { sku: '111-10', serviceName: 'Common Area Vacuuming', division: 'Janitorial', propertyType: 'Commercial', category: 'Floors' },
+  { sku: '111-12', serviceName: 'Trash Removal', division: 'Janitorial', propertyType: 'Commercial', category: 'Trash' },
+  { sku: '111-14', serviceName: 'Carpet Spot Treatment', division: 'Janitorial', propertyType: 'Commercial', category: 'Floors' },
+  { sku: '410-01', serviceName: 'Paint Door', division: 'Renovations', propertyType: 'Commercial', category: 'Paint' },
+  { sku: '410-12', serviceName: 'Blinds', division: 'Renovations', propertyType: 'Commercial', category: 'Windows', requiresQuantity: true }
+];
+const page = async (b, src) => {
+  const p = await b.newPage();
+  await p.setContent('<!doctype html><html><body><div id="a"></div><div id="b"></div><div id="c"></div><div id="d"></div><div id="e"></div></body></html>');
+  await p.addScriptTag({ content: src });
+  await p.evaluate(c => { window.CAT = c; }, CATALOG);
+  return p;
+};
+/* Las mismas pantallas que ya usan los portales, sin opciones nuevas. */
+const OLD_CASES = async p => p.evaluate(() => {
+  const sel = { Commercial: { 'Common Area Vacuuming': '111-10', 'Blinds': '410-12' } };
+  GSServicePicker.mount('a', 'a', { catalog: CAT, division: 'Janitorial', mode: 'levels', crossDivision: true, initialSelected: JSON.parse(JSON.stringify(sel)), initialLevels: { 'Commercial|Common Area Vacuuming': 'Level 2' }, initialQuantities: { 'Commercial|Blinds': 3 } });
+  GSServicePicker.mount('b', 'b', { catalog: CAT, division: 'Renovations', mode: 'toggle', initialSelected: { Commercial: { 'Paint Door': '410-01' } } });
+  GSServicePicker.mount('c', 'c', { catalog: CAT, division: 'Janitorial', mode: 'levels', serviceNotes: true, initialSelected: JSON.parse(JSON.stringify(sel)), initialLevels: { 'Commercial|Common Area Vacuuming': 'Level 1' } });
+  GSServicePicker.mount('d', 'd', { catalog: CAT, division: 'Janitorial', mode: 'levels', filterMode: 'selected-plus-search', initialSelected: JSON.parse(JSON.stringify(sel)), initialLevels: { 'Commercial|Common Area Vacuuming': 'Level 3' } });
+  GSServicePicker.mount('e', 'e', { catalog: CAT, division: 'Janitorial', mode: 'levels', groupByCategory: true });
+  return ['a', 'b', 'c', 'd', 'e'].map(id => document.getElementById(id).innerHTML);
+});
+
+(async () => {
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM || undefined });
+  /* ---- Lo de antes queda igual ---- */
+  if (OLD) {
+    const po = await page(b, OLD), pn = await page(b, NEW);
+    const [ho, hn] = [await OLD_CASES(po), await OLD_CASES(pn)];
+    ['levels + quantity', 'toggle chips', 'with notes', 'selected-plus-search', 'grouped by category'].forEach((n, i) => check('Same HTML as before without the new options: ' + n, ho[i] === hn[i], { old: ho[i].length, new: hn[i].length }));
+    /* Y se comporta igual: picar el nivel activo lo quita, picar otro lo cambia. */
+    const act = async p => p.evaluate(() => {
+      const h = GSServicePicker.mount('z', 'a', { catalog: CAT, division: 'Janitorial', mode: 'levels', initialSelected: { Commercial: { 'Trash Removal': '111-12' } }, initialLevels: { 'Commercial|Trash Removal': 'Level 1' } });
+      document.querySelector('#a .gs-sp-lvl-btn[data-sku="111-12"][data-level="Level 1"]').click();
+      const gone = !(h.getSelected().Commercial || {})['Trash Removal'];
+      document.querySelector('#a .gs-sp-lvl-btn[data-sku="111-10"][data-level="Level 3"]').click();
+      return { gone, picked: (h.getSelected().Commercial || {})['Common Area Vacuuming'], lvl: h.getLevels()['Commercial|Common Area Vacuuming'] };
+    });
+    const [ao, an] = [await act(po), await act(pn)];
+    check('Same behavior: active level click removes, another level picks', JSON.stringify(ao) === JSON.stringify(an) && an.gone && an.picked === '111-10' && an.lvl === 'Level 3', { ao, an });
+    await po.close(); await pn.close();
+  } else console.log('(no previous version found: set OLD_PICKER to compare)');
+
+  /* ---- Lo nuevo ---- */
+  const p = await page(b, NEW);
+  const r = await p.evaluate(() => {
+    const out = {}, changes = [];
+    const h = GSServicePicker.mount('v', 'a', { catalog: CAT, division: 'Janitorial', mode: 'levels', filterMode: 'selected-plus-search',
+      initialSelected: { Commercial: { 'Common Area Vacuuming': '111-10', 'Trash Removal': '111-12' } },
+      initialLevels: { 'Commercial|Common Area Vacuuming': 'Level 2', 'Commercial|Trash Removal': 'Level 1' },
+      allowOff: true, offList: { '111-12': true }, keepSelected: { '111-10': true, '111-12': true },
+      people: { choices: [{ id: '4101', name: 'Maria Santos' }, { id: '4102', name: 'Carlos Mendez' }], bySku: { '111-10': ['4101'] } },
+      tagOf: s => s.sku === '111-14' ? 'Extra' : '', onChange: () => changes.push(1) });
+    const g = () => document.getElementById('a');
+    out.rows = g().querySelectorAll('.gs-sp-cell').length;
+    out.offShown = !!g().querySelector('.gs-sp-cell.gs-sp-off [data-off-sku="111-12"]') && /Not done this visit/.test(g().textContent);
+    out.offStart = JSON.stringify(h.getOff());
+    out.chip = /Maria Santos/.test(g().querySelector('.gs-sp-pp').textContent);
+    /* Not done en el que estaba hecho, y Undo en el otro */
+    g().querySelector('[data-off-sku="111-10"]').click();
+    g().querySelector('[data-off-sku="111-12"]').click();
+    out.offAfter = JSON.stringify(h.getOff());
+    g().querySelector('[data-off-sku="111-10"]').click();
+    /* Quitar y agregar persona */
+    g().querySelector('[data-pp-del="111-10"]').click();
+    const s1 = g().querySelector('[data-pp-add="111-10"]'); s1.value = '4102'; s1.dispatchEvent(new Event('change'));
+    const s2 = g().querySelector('[data-pp-add="111-12"]'); s2.value = '4101'; s2.dispatchEvent(new Event('change'));
+    out.people = JSON.stringify(h.getPeople());
+    /* keepSelected: picar su nivel activo no lo quita; otro nivel si cambia */
+    g().querySelector('.gs-sp-lvl-btn[data-sku="111-10"][data-level="Level 2"]').click();
+    out.kept = (h.getSelected().Commercial || {})['Common Area Vacuuming'] === '111-10';
+    g().querySelector('.gs-sp-lvl-btn[data-sku="111-10"][data-level="Level 3"]').click();
+    out.lvl = h.getLevels()['Commercial|Common Area Vacuuming'];
+    /* Agregar un extra buscandolo: sale con su etiqueta y se puede quitar (no esta en keepSelected) */
+    const q = document.getElementById('gs-sp-search-v'); q.value = 'carpet'; q.dispatchEvent(new Event('input'));
+    g().querySelector('.gs-sp-lvl-btn[data-sku="111-14"][data-level="Level 1"]').click();
+    q.value = ''; q.dispatchEvent(new Event('input'));
+    out.extra = (h.getSelected().Commercial || {})['Carpet Spot Treatment'] === '111-14' && /Extra/.test(g().textContent);
+    g().querySelector('.gs-sp-lvl-btn[data-sku="111-14"][data-level="Level 1"]').click();
+    out.extraGone = !(h.getSelected().Commercial || {})['Carpet Spot Treatment'];
+    out.changes = changes.length;
+    return out;
+  });
+  check('New: every selected service shows its row with the extras (2 rows)', r.rows === 2, r);
+  check('New: offList shows "Not done this visit" and stays selected', r.offShown && r.offStart === '{"111-12":true}', r);
+  check('New: "Mark not done" / "Undo" toggle and getOff()', r.offAfter === '{"111-10":true}', r);
+  check('New: people chips, remove and "+ person…" add, getPeople()', r.chip && r.people === '{"111-10":["4102"],"111-12":["4101"]}', r);
+  check('New: keepSelected cannot be removed by clicking its level; another level still changes it', r.kept && r.lvl === 'Level 3', r);
+  check('New: an extra picked from the search shows its tag and can be taken off', r.extra && r.extraGone, r);
+  check('New: onChange fires on each change', r.changes >= 8, r.changes);
+  await b.close();
+  console.log('\n' + ok + ' OK, ' + bad + ' FAIL');
+  process.exit(bad ? 1 : 0);
+})().catch(e => { console.error(e); process.exit(1); });

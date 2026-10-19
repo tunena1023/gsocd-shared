@@ -39,6 +39,18 @@
       '.gs-sp-lvl-btn.active{background:var(--gold,#C9A84C);color:var(--black,#111)}' +
       '.gs-sp-lvl-btn:hover:not(.active){background:var(--off,#F7F6F3)}' +
       '.gs-sp-empty{color:var(--gray,#6B6B6B);font-size:13px}' +
+      /* v1.67.0 (19/10/2026, Admin "Correct this visit"): not done, quien lo hizo y etiqueta por servicio. Solo con
+         allowOff / people / tagOf; sin eso nada cambia. */
+      '.gs-sp-cell.gs-sp-off .gs-sp-row-name,.gs-sp-cell.gs-sp-off .gs-sp-chip-btn{text-decoration:line-through;color:var(--gray,#6B6B6B)}' +
+      '.gs-sp-cell.gs-sp-off .gs-sp-row.selected{border-color:#E5B4AC;background:#FDF5F4}' +
+      '.gs-sp-xl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px}' +
+      '.gs-sp-tag{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:10px;background:#E7F3EB;color:#1F5C3A}' +
+      '.gs-sp-offbtn{font-family:inherit;font-size:11px;font-weight:600;padding:4px 10px;border:1px solid var(--border,#E0D9CC);border-radius:12px;background:var(--white,#fff);color:var(--black,#111);cursor:pointer}' +
+      '.gs-sp-offbtn.on{border-color:#C9786C;color:#A33A2E;background:#FDF5F4}' +
+      '.gs-sp-offnote{font-size:11px;font-weight:700;color:#A33A2E}' +
+      '.gs-sp-pp{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;padding:3px 8px;border-radius:12px;background:#FFFBEF;border:1px solid #E6D6A6}' +
+      '.gs-sp-pp button{border:none;background:none;color:#A33A2E;cursor:pointer;font-size:12px;padding:0 0 0 2px;line-height:1}' +
+      '.gs-sp-ppadd{font-family:inherit;font-size:11.5px;padding:3px 6px;border:1px solid var(--border,#E0D9CC);border-radius:12px;background:var(--white,#fff);max-width:160px}' +
       '.gs-sp-other{grid-column:1/-1;margin-top:14px;padding-top:12px;border-top:1px dashed var(--border,#E0D9CC)}' +
       '.gs-sp-other-h{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin-bottom:8px}' +
       '.gs-sp-other-tag{font-size:10px;font-weight:700;color:var(--gold-dk,#8C6F2A);text-transform:uppercase;letter-spacing:.04em;margin-left:4px}' +
@@ -186,6 +198,12 @@
   }
 
 
+  function selectedSkus(inst) {
+    var sel = {};
+    Object.keys(inst.selected || {}).forEach(function (pt) { Object.keys(inst.selected[pt] || {}).forEach(function (n) { sel[String(inst.selected[pt][n])] = true; }); });
+    return sel;
+  }
+
   function visibleList(inst) {
     var q = inst.searchEl ? (inst.searchEl.value || '').trim().toLowerCase() : '';
     var list = inst.catalog.filter(function (s) {
@@ -260,11 +278,32 @@
     if (inst.noteOpen === k) return '<textarea class="gs-sp-note-text" rows="2" data-note-text="' + escapeAttr(k) + '" placeholder="Note about this service" aria-label="Note for ' + escapeAttr(s.serviceName) + '">' + escapeHtml(t) + '</textarea>';
     return t.trim() ? '<span class="gs-sp-note-show" data-note-open="' + escapeAttr(k) + '">' + escapeHtml(t) + '</span>' : '';
   }
+  function extrasOn(inst) { return !!(inst.allowOff || inst.people || inst.tagOf); }
+  /* v1.67.0: debajo de un servicio escogido, su etiqueta, "Not done" y quien lo hizo. */
+  function extrasBelowHtml(inst, s, sel) {
+    if (!sel || !extrasOn(inst)) return '';
+    var k = String(s.sku), h = '';
+    var tag = inst.tagOf ? inst.tagOf(s) : '';
+    if (tag) h += '<span class="gs-sp-tag">' + escapeHtml(tag) + '</span>';
+    if (inst.allowOff) {
+      h += inst.off[k] ? '<span class="gs-sp-offnote">Not done this visit</span><button type="button" class="gs-sp-offbtn on" data-off-sku="' + escapeAttr(k) + '">Undo</button>'
+        : '<button type="button" class="gs-sp-offbtn" data-off-sku="' + escapeAttr(k) + '">Mark not done</button>';
+    }
+    if (inst.people && !inst.off[k]) {
+      var have = inst.people.bySku[k] || [];
+      var nameOf = function (id) { var c = inst.people.choices.find(function (x) { return String(x.id) === String(id); }); return c ? c.name : String(id); };
+      h += have.map(function (id) { return '<span class="gs-sp-pp">' + escapeHtml(nameOf(id)) + '<button type="button" data-pp-del="' + escapeAttr(k) + '" data-pp-id="' + escapeAttr(id) + '" aria-label="Remove ' + escapeAttr(nameOf(id)) + '">\u00D7</button></span>'; }).join('');
+      var left = inst.people.choices.filter(function (c) { return have.indexOf(String(c.id)) === -1; });
+      if (left.length) h += '<select class="gs-sp-ppadd" data-pp-add="' + escapeAttr(k) + '" aria-label="Who did ' + escapeAttr(s.serviceName) + '"><option value="">+ person\u2026</option>' +
+        left.map(function (c) { return '<option value="' + escapeAttr(c.id) + '">' + escapeHtml(c.name) + '</option>'; }).join('') + '</select>';
+    }
+    return h ? '<div class="gs-sp-xl">' + h + '</div>' : '';
+  }
   function itemHtml(inst, s) {
-    if (!inst.notesOn) return itemRowHtml(inst, s);
+    if (!inst.notesOn && !extrasOn(inst)) return itemRowHtml(inst, s);
     var sel = String((inst.selected[inst.propertyType] || {})[s.serviceName]) === String(s.sku);
     var chip = !isLeveledItem(s) && !isQuantityItem(s);
-    return '<div class="gs-sp-cell' + (chip ? ' gs-sp-cell-chip' : '') + '">' + itemRowHtml(inst, s) + noteBelowHtml(inst, s, sel) + '</div>';
+    return '<div class="gs-sp-cell' + (chip ? ' gs-sp-cell-chip' : '') + (sel && inst.off[String(s.sku)] ? ' gs-sp-off' : '') + '">' + itemRowHtml(inst, s) + noteBelowHtml(inst, s, sel) + extrasBelowHtml(inst, s, sel) + '</div>';
   }
   function itemRowHtml(inst, s) {
     if (isLeveledItem(s)) {
@@ -313,6 +352,32 @@
       input.addEventListener('input', function () { setQuantity(pickerId, input.dataset.sku, input.value, false); });
       input.addEventListener('change', function () { setQuantity(pickerId, input.dataset.sku, input.value, true); });
       input.addEventListener('click', function (e) { e.stopPropagation(); });
+    });
+    Array.prototype.forEach.call(scopeEl.querySelectorAll('[data-off-sku]'), function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var k = btn.dataset.offSku;
+        if (inst.off[k]) delete inst.off[k]; else inst.off[k] = true;
+        renderGrid(pickerId); fireChange(pickerId);
+      });
+    });
+    Array.prototype.forEach.call(scopeEl.querySelectorAll('[data-pp-del]'), function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var k = btn.dataset.ppDel;
+        inst.people.bySku[k] = (inst.people.bySku[k] || []).filter(function (x) { return x !== btn.dataset.ppId; });
+        renderGrid(pickerId); fireChange(pickerId);
+      });
+    });
+    Array.prototype.forEach.call(scopeEl.querySelectorAll('[data-pp-add]'), function (sel) {
+      sel.addEventListener('click', function (e) { e.stopPropagation(); });
+      sel.addEventListener('change', function () {
+        var k = sel.dataset.ppAdd, v = sel.value;
+        if (!v) return;
+        var a = inst.people.bySku[k] || (inst.people.bySku[k] = []);
+        if (a.indexOf(v) === -1) a.push(v);
+        renderGrid(pickerId); fireChange(pickerId);
+      });
     });
     if (!inst.notesOn) return;
     function openNote(sku) {
@@ -1110,6 +1175,7 @@
     if (!svc) return;
     if (!inst.selected[inst.propertyType]) inst.selected[inst.propertyType] = {};
     if (String(inst.selected[inst.propertyType][svc.serviceName]) === String(sku)) {
+      if (inst.keep[String(sku)]) return; /* v1.67.0: no se quita; se marca "Not done" */
       delete inst.selected[inst.propertyType][svc.serviceName];
       if (!Object.keys(inst.selected[inst.propertyType]).length) delete inst.selected[inst.propertyType];
     } else {
@@ -1126,6 +1192,7 @@
     var k = svcKey(inst.propertyType, svc.serviceName);
     if (!inst.selected[inst.propertyType]) inst.selected[inst.propertyType] = {};
     var already = String(inst.selected[inst.propertyType][svc.serviceName]) === String(sku) && inst.svcLevel[k] === level;
+    if (already && inst.keep[String(sku)]) return; /* v1.67.0: no se quita; se marca "Not done" */
     if (already) {
       delete inst.selected[inst.propertyType][svc.serviceName];
       if (!Object.keys(inst.selected[inst.propertyType]).length) delete inst.selected[inst.propertyType];
@@ -1158,6 +1225,7 @@
     var k = svcKey(inst.propertyType, svc.serviceName);
     if (!inst.selected[inst.propertyType]) inst.selected[inst.propertyType] = {};
     var n = parseInt(rawValue, 10);
+    if ((!n || n < 1) && inst.keep[String(sku)] && String(inst.selected[inst.propertyType][svc.serviceName]) === String(sku)) { if (rerender) renderGrid(pickerId); return; } /* v1.67.0 */
     if (!n || n < 1) {
       delete inst.selected[inst.propertyType][svc.serviceName];
       if (!Object.keys(inst.selected[inst.propertyType]).length) delete inst.selected[inst.propertyType];
@@ -1291,6 +1359,12 @@
       svcLevel: options.initialLevels || {},
       svcQty: options.initialQuantities || {},
       notesOn: !!options.serviceNotes, notes: {}, noteOpen: null,
+      /* v1.67.0: { sku: true } "not done" (el servicio se queda escogido, tachado); quien lo hizo por servicio;
+         etiqueta por servicio; y los que no se pueden quitar (solo marcarlos not done). Todo opcional. */
+      allowOff: !!options.allowOff, off: Object.assign({}, options.offList || {}),
+      people: options.people ? { choices: (options.people.choices || []).slice(), bySku: (function (m) { var o = {}; Object.keys(m || {}).forEach(function (k) { o[String(k)] = (m[k] || []).map(String); }); return o; })(options.people.bySku) } : null,
+      tagOf: typeof options.tagOf === 'function' ? options.tagOf : null,
+      keep: Object.assign({}, options.keepSelected || {}),
       selAllActive: null,
       onChange: options.onChange || null
     };
@@ -1443,6 +1517,9 @@
         renderGrid(pickerId);
       },
       getLevels: function () { return inst.svcLevel; },
+      /* v1.67.0: { sku: true } de los escogidos marcados "Not done"; { sku: [ids] } de quien hizo cada escogido. */
+      getOff: function () { var out = {}, sel = selectedSkus(inst); Object.keys(inst.off).forEach(function (k) { if (inst.off[k] && sel[k]) out[k] = true; }); return out; },
+      getPeople: function () { var out = {}, sel = selectedSkus(inst); if (!inst.people) return out; Object.keys(inst.people.bySku).forEach(function (k) { if (sel[k]) out[k] = inst.people.bySku[k].slice(); }); return out; },
       getQuantities: function () { return inst.svcQty; },
       /* 01/10/2026: { sku: nota } de los servicios escogidos con nota. */
       getNotes: function () {
