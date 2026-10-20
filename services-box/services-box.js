@@ -81,6 +81,14 @@
     '.gs-svb-ed-pt button{all:unset;cursor:pointer;padding:6px 14px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--gray,#6B6B6B)}' +
     '.gs-svb-ed-pt button.on{background:var(--gold,#C9A84C);color:#111}' +
     '.gs-svb-ed-pt button:focus-visible{outline:2px solid var(--gold-dk,#8C6F2A);outline-offset:-2px}' +
+    /* compact (CFO 20/10, Admin "Correct this visit" y contrato por piso v4): solo con la opcion; nada mas cambia. */
+    '.gs-svb-ed-compact .gs-svb-ed-line{width:fit-content;min-width:min(100%,440px);max-width:100%;box-sizing:border-box}' +
+    '.gs-svb-ed-compact .gs-svb-ed-line>span:first-child{line-height:1.25}' +
+    '.gs-svb-ed-compact .gs-svb-ed-tag{font-size:9.5px;line-height:1.2}' +
+    '.gs-svb-ed-compact .gs-sp-lvl-btn{width:28px;height:22px;font-size:10px}' +
+    '.gs-svb-ed-compact .svc-remove-btn{font-size:11px;padding:2px 4px}' +
+    '.gs-svb-ed-compact .svc-remove-btn.gs-svb-sn-pen{margin-right:2px}' +
+    '.gs-svb-ed-compact .gs-svb-ed-why{padding:0 0 6px}' +
     '.gs-svb-editing .gs-svb-head{cursor:default}' +
     '.gs-svb-editing .gs-svb-body{padding:12px 14px}' +
     '.sv-list { display: flex; flex-direction: column; gap: 10px; padding: 12px 0; }' +
@@ -241,7 +249,9 @@
          onNoteOpen(i, open, row),      // opcional: con reasonOnPencil, quien lo usa guarda cual esta abierta y re-monta;
                                         // services[i].noteOpen la trae abierta al montar
          noteExtraHtml: function (row, i) { return html },     // opcional: arriba de la nota que abre el ✎ (p.ej. frecuencia)
-         countAll: true })              // opcional: "N services" cuenta tambien los quitados (no hechos)
+         countAll: true,                // opcional: "N services" cuenta tambien los quitados (no hechos)
+         compact: true })               // opcional (CFO 20/10): renglones mas bajos y juntos, L1-L3 y botones mas chicos y
+                                        // pegados al nombre (clase gs-svb-ed-compact; sin ella, igual que siempre)
        ed.collect() -> { ok, added:[{serviceName, sku, level, qty}],
                          removed:[{serviceName, note}], levels:[{serviceName, from, to}],
                          notes:[{serviceName, note}] }  // notas del lapiz
@@ -347,14 +357,15 @@
     function rowHtml(r, i) {
       /* Mismo renglon que renderApprSvcEditable de Admin: flex, nombre a
          la izquierda, controles a la derecha, sin anchos fijos. */
-      var lv = isJan(r) && !r.removed ? '<div class="gs-sp-lvl-group" style="margin-right:14px">' + ['Level 1', 'Level 2', 'Level 3'].map(function (l, k) {
+      var gap = o.compact ? 8 : 14; /* compact: los controles mas juntos */
+      var lv = isJan(r) && !r.removed ? '<div class="gs-sp-lvl-group" style="margin-right:' + gap + 'px">' + ['Level 1', 'Level 2', 'Level 3'].map(function (l, k) {
         return '<div class="gs-sp-lvl-btn' + (r.level === l ? ' active' : '') + '" role="button" tabindex="0" data-act="lv" data-i="' + i + '" data-v="' + l + '">L' + (k + 1) + '</div>';
       }).join('') + '</div>' : '';
-      var qty = needsQty(r) && !r.removed ? '<span style="margin-right:14px;display:inline-flex;align-items:center;white-space:nowrap"><span style="font-size:10px;color:var(--gray,#6B6B6B);text-transform:uppercase;margin-right:4px">Qty</span>' +
+      var qty = needsQty(r) && !r.removed ? '<span style="margin-right:' + gap + 'px;display:inline-flex;align-items:center;white-space:nowrap"><span style="font-size:10px;color:var(--gray,#6B6B6B);text-transform:uppercase;margin-right:4px">Qty</span>' +
         '<input type="number" min="1" step="1" inputmode="numeric" data-act="qty" data-i="' + i + '" value="' + esc(r.qty) + '" style="display:inline-block;width:48px;padding:5px 6px;border:1px solid var(--border,#E0DDD6);border-radius:4px;font-size:12px;text-align:center;font-family:inherit"></span>' : '';
       var m = r.removed ? null : mins(r);
       var needNote = r.removed && o.reasonRequired !== false && o.reasonInline !== false;
-      var time = m != null ? '<span style="color:var(--gold-dk,#8C6F2A);font-weight:600;margin-right:14px">' + esc(fmtMin(m)) + '</span>' : '';
+      var time = m != null ? '<span style="color:var(--gold-dk,#8C6F2A);font-weight:600;margin-right:' + gap + 'px">' + esc(fmtMin(m)) + '</span>' : '';
       var btn = r.removed
         ? '<button type="button" class="svc-remove-btn gs-svb-ed-undo" data-act="x" data-i="' + i + '" title="Undo" aria-label="Undo remove ' + esc(r.name) + '">&#8635;</button>'
         : r.open || o.pencil === false
@@ -366,7 +377,7 @@
       var snBtn = sn && !r.removed ? '<button type="button" class="svc-remove-btn gs-svb-sn-pen' + (snOpen[i] ? ' on' : '') + '" data-act="sn" data-i="' + i + '" title="Note for this service" aria-label="Note for ' + esc(r.name) + '">&#9998;</button>' : '';
       /* reasonOnPencil: el quitado trae su ✎ (abre / cierra su nota) antes del deshacer. */
       if (o.reasonOnPencil && r.removed && o.reasonInline !== false) snBtn = '<button type="button" class="svc-remove-btn gs-svb-sn-pen' + (r.noteOpen ? ' on' : '') + '" data-act="wpen" data-i="' + i + '" title="Note for this service" aria-label="Note for ' + esc(r.name) + '">&#9998;</button>';
-      var line = '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:13px">' + nameHtml +
+      var line = '<div' + (o.compact ? ' class="gs-svb-ed-line"' : '') + ' style="display:flex;justify-content:space-between;align-items:center;padding:' + (o.compact ? '4px' : '9px') + ' 0;font-size:13px">' + nameHtml +
         '<span style="display:flex;align-items:center">' + lv + qty + time + (o.rowExtraHtml ? o.rowExtraHtml(r, i) || '' : '') + snBtn + btn + '</span></div>';
       var extra = function () { return o.noteExtraHtml ? o.noteExtraHtml(r, i) || '' : ''; };
       var snPart = sn ? snListHtml(r) + (snOpen[i] && !r.removed ? '<div class="gs-svb-ed-why">' + extra() + '<textarea rows="2" class="gs-svb-note" data-act="snt" data-i="' + i + '" placeholder="Note about this service. It saves when you close it." aria-label="Note for ' + esc(r.name) + '">' + esc(snText[i] || '') + '</textarea></div>' : '') : '';
@@ -424,7 +435,7 @@
           '<div class="gs-svb-ed-results" style="margin-top:8px">' + resultsHtml() + '</div></div>';
     }
     function render() {
-      el.innerHTML = '<div class="sv-sec open gs-svb-ed">' +
+      el.innerHTML = '<div class="sv-sec open gs-svb-ed' + (o.compact ? ' gs-svb-ed-compact' : '') + '">' +
         '<button type="button" class="sv-sec-head" aria-expanded="true" tabindex="-1"><span class="sv-sec-bar"></span><span class="sv-sec-txt"><span class="sv-sec-name">' + esc(o.division || 'Services') + '</span>' +
           '<span class="sv-sec-meta" data-part="meta">' + esc(metaText()) + '</span><span class="sv-sec-editing">Editing</span></span><span class="sv-sec-chev">' + chev + '</span></button>' +
         '<div class="sv-sec-wrap"><div><div class="sv-sec-body editing">' +

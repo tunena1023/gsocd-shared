@@ -129,6 +129,20 @@ const OLD_CASES = async p => p.evaluate(() => {
   check('mouse: el clic en un boton de noteExtraHtml llega (no se pierde con el blur de la nota)', m2.indexOf('fq0') !== -1, m2);
   check('mouse: con una nota abierta, UN clic en otro ✎ abre esa (la primera se guarda y se cierra; el foco queda en la nueva)', m3.open.join() === '1' && m3.focus === 'snt1' && m3.saved.join('|') === 'Common Area Vacuuming:Lobby first', m3);
   check('mouse: con la nota abierta, el clic en un boton de afuera llega y la nota ya estaba guardada', m4.log.indexOf('outside:2') !== -1 && m4.saved.length === 2 && m4.open === 0, m4);
+  /* compact (CFO 20/10): renglones mas bajos, L1-L3 y botones mas chicos; mismos datos y mismos botones. */
+  const cm = await p.evaluate(() => {
+    const mk = (id, compact) => { const el = document.getElementById(id); el.innerHTML = ''; el.style.width = '600px';
+      GSServicesBox.editor({ el, division: 'Janitorial', services: JSON.parse(JSON.stringify(window.SVC)), catalog: CAT, pencil: false, reasonOnPencil: true, compact }); };
+    mk('a', false); mk('b', true);
+    const m = id => { const q = s => document.querySelector('#' + id + ' ' + s); const r = q('.gs-svb-ed-row'), lv = q('.gs-sp-lvl-btn');
+      return { root: !!q('.gs-svb-ed-compact'), rowH: r.getBoundingClientRect().height, lvW: lv.getBoundingClientRect().width, lvH: lv.getBoundingClientRect().height,
+        acts: [...document.querySelectorAll('#' + id + ' [data-act]')].map(e => e.getAttribute('data-act') + e.getAttribute('data-i')).join(),
+        text: document.querySelector('#' + id + ' [data-part="list"]').innerText.replace(/\s+/g, ' ') }; };
+    return { a: m('a'), b: m('b') };
+  });
+  check('compact: clase gs-svb-ed-compact solo con la opcion', !cm.a.root && cm.b.root, cm);
+  check('compact: renglon mas bajo y L1-L3 mas chicos', cm.b.rowH < cm.a.rowH - 10 && cm.b.lvW < cm.a.lvW && cm.b.lvH < cm.a.lvH, cm);
+  check('compact: mismos botones y mismo texto', cm.a.acts === cm.b.acts && cm.a.text === cm.b.text, cm);
   await b.close();
   console.log('\n' + ok + ' ok, ' + bad + ' failed');
   process.exit(bad ? 1 : 0);
