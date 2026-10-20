@@ -27,6 +27,12 @@
 ============================================================ */
 (function () {
   'use strict';
+  /* Hay un clic a medias (pointerdown sin su click todavia)? Lo usa la nota del ✎ al cerrarse con el blur (20/10/2026). */
+  var ptrDown = false;
+  if (typeof document !== 'undefined' && document.addEventListener) {
+    document.addEventListener('pointerdown', function () { ptrDown = true; }, true);
+    document.addEventListener('pointerup', function () { setTimeout(function () { ptrDown = false; }, 0); }, true);
+  }
   if (window.GSServicesBox) return;
 
   var STYLE_ID = 'gs-services-box-style';
@@ -297,7 +303,21 @@
         return '<div class="gs-svb-sn-item"><b>' + esc(n.by || 'Note') + (snWhen(n.at) ? ' · ' + esc(snWhen(n.at)) : '') + ':</b> ' + esc(n.text) + '</div>';
       }).join('') + '</div>';
     }
-    function snClose(i) {
+    /* La nota se cierra con el blur del mousedown (20/10/2026, QA de Admin): lo que se escribio se guarda en ese
+       momento, pero el renglon se repinta DESPUES del click. Si se repinta antes, el boton picado (otro ✎, la
+       frecuencia de noteExtraHtml, Save de quien lo usa) ya no existe o se movio y el clic se pierde. Si en medio ya
+       se repinto (p.ej. ese click abrio otro ✎), no se repinta otra vez (no se le quita el foco a la nota nueva). */
+    var paints = 0, mine = {};
+    el.__gsSvbEditor = mine; // si quien lo usa monta otro editor en el mismo el, este ya no lo repinta
+    function refreshAfterClick() {
+      if (!ptrDown) return refresh();
+      var at = paints, done = false;
+      var run = function () { if (done) return; done = true; window.removeEventListener('click', onClick, true); if (paints === at && el.__gsSvbEditor === mine) refresh(); };
+      var onClick = function () { setTimeout(run, 0); };
+      window.addEventListener('click', onClick, true);
+      setTimeout(run, 1500);
+    }
+    function snClose(i, fromBlur) {
       var r = rows[i]; if (!r || !snOpen[i]) return;
       var text = String(snText[i] || '').trim();
       snOpen[i] = false; snText[i] = ''; snClosedAt[i] = Date.now();
@@ -314,7 +334,7 @@
           });
         }
       }
-      refresh();
+      if (fromBlur) refreshAfterClick(); else refresh();
     }
 
     /* 27/09/2026 (dueno): renglon parejo -- nombre a la izquierda (si
@@ -414,6 +434,7 @@
         '</div></div></div></div>';
     }
     function refresh(keepSearchFocus) {
+      paints++;
       var list = el.querySelector('[data-part="list"]');
       if (!list) return render();
       list.innerHTML = listPart();
@@ -479,7 +500,7 @@
     });
     el.addEventListener('focusout', function (e) {
       var t = e.target;
-      if (t.getAttribute && t.getAttribute('data-act') === 'snt') snClose(Number(t.getAttribute('data-i')));
+      if (t.getAttribute && t.getAttribute('data-act') === 'snt') snClose(Number(t.getAttribute('data-i')), true);
     });
     el.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && /^(lv|name)$/.test(e.target.getAttribute('data-act') || '')) { e.preventDefault(); act(e.target); } });
     el.addEventListener('input', function (e) {

@@ -99,6 +99,36 @@ const OLD_CASES = async p => p.evaluate(() => {
     return [a, el.querySelector('[data-part="meta"]').textContent];
   });
   check('countAll: "3 services" (2 of them not done); without it "1 service" like before', r3[0] === '3 services' && r3[1] === '1 service', r3);
+
+  /* Con el mouse de verdad (20/10/2026, QA de Admin): la nota del ✎ abierta se cierra con el blur del mousedown, pero el
+     renglon se repinta despues del click: el clic en otro ✎, en un boton de noteExtraHtml o fuera del editor no se pierde,
+     y lo escrito se guarda antes de ese click. */
+  await p.evaluate(() => {
+    const el = document.getElementById('d'); el.innerHTML = '';
+    window.LOG = []; window.SAVED = [];
+    document.body.insertAdjacentHTML('beforeend', '<button id="outside" onclick="LOG.push(\'outside:\' + SAVED.length)">Save</button>');
+    const svc = [{ ServiceName: 'Common Area Vacuuming', SubOption: '111-10', Level: 'Level 2' }, { ServiceName: 'Trash Removal', SubOption: '111-12', Level: 'Level 1' }];
+    GSServicesBox.editor({ el, division: 'Janitorial', services: svc, catalog: CAT, pencil: false, onRemove: () => {},
+      serviceNotes: { list: [], by: 'CFO', onSave: (row, text) => { SAVED.push(row.name + ':' + text); return Promise.resolve(null); } },
+      noteExtraHtml: (row, i) => '<button type="button" class="fqb" data-i="' + i + '" onclick="LOG.push(\'fq' + i + '\')">Monthly</button>' });
+  });
+  const D = '#d ';
+  await p.click(D + '[data-act="sn"][data-i="0"]');
+  const m1 = await p.evaluate(() => document.activeElement && document.activeElement.getAttribute('data-act') + document.activeElement.getAttribute('data-i'));
+  await p.click(D + '.fqb[data-i="0"]');
+  const m2 = await p.evaluate(() => LOG.slice());
+  await p.waitForTimeout(450); /* el clic en la frecuencia cerro la nota (aqui sin preventDefault); se vuelve a abrir */
+  if (!(await p.$(D + '[data-act="snt"][data-i="0"]'))) await p.click(D + '[data-act="sn"][data-i="0"]');
+  await p.type(D + '[data-act="snt"][data-i="0"]', 'Lobby first');
+  await p.click(D + '[data-act="sn"][data-i="1"]'); await p.waitForTimeout(50);
+  const m3 = await p.evaluate(() => ({ open: [...document.querySelectorAll('#d [data-act="snt"]')].map(t => t.getAttribute('data-i')), focus: document.activeElement && document.activeElement.getAttribute('data-act') + document.activeElement.getAttribute('data-i'), saved: SAVED.slice() }));
+  await p.type(D + '[data-act="snt"][data-i="1"]', 'Bags in the closet');
+  await p.click('#outside'); await p.waitForTimeout(50);
+  const m4 = await p.evaluate(() => ({ log: LOG.slice(), saved: SAVED.slice(), open: document.querySelectorAll('#d [data-act="snt"]').length }));
+  check('mouse: el ✎ abre su nota con el foco', m1 === 'snt0', m1);
+  check('mouse: el clic en un boton de noteExtraHtml llega (no se pierde con el blur de la nota)', m2.indexOf('fq0') !== -1, m2);
+  check('mouse: con una nota abierta, UN clic en otro ✎ abre esa (la primera se guarda y se cierra; el foco queda en la nueva)', m3.open.join() === '1' && m3.focus === 'snt1' && m3.saved.join('|') === 'Common Area Vacuuming:Lobby first', m3);
+  check('mouse: con la nota abierta, el clic en un boton de afuera llega y la nota ya estaba guardada', m4.log.indexOf('outside:2') !== -1 && m4.saved.length === 2 && m4.open === 0, m4);
   await b.close();
   console.log('\n' + ok + ' ok, ' + bad + ' failed');
   process.exit(bad ? 1 : 0);
