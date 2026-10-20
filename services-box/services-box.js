@@ -229,7 +229,12 @@
                                         // opcional: modo controlado (quien lo usa guarda y re-monta)
          rowExtraHtml: function (row, i) { return html },  // opcional: p.ej. camarita
          reasonPlaceholder: 'Required — ...',  // opcional: texto de la nota del quitado
-         removedLabel: function (needNote) { return 'not completed' } })  // opcional
+         removedLabel: function (needNote) { return 'not completed' },  // opcional
+         reasonOnPencil: true,          // opcional (CFO 20/10): el quitado sale tachado y su nota CERRADA; un ✎ en su
+                                        // renglon la abre (una a la vez si quien lo usa lo controla con noteOpen/onNoteOpen)
+         onNoteOpen(i, open, row),      // opcional: con reasonOnPencil, quien lo usa guarda cual esta abierta y re-monta;
+                                        // services[i].noteOpen la trae abierta al montar
+         noteExtraHtml: function (row, i) { return html } })  // opcional: arriba de la nota que abre el ✎ (p.ej. frecuencia)
        ed.collect() -> { ok, added:[{serviceName, sku, level, qty}],
                          removed:[{serviceName, note}], levels:[{serviceName, from, to}],
                          notes:[{serviceName, note}] }  // notas del lapiz
@@ -253,7 +258,7 @@
       /* removed/note/added/Level0: para reabrir un cambio a medias
          (p.ej. al regresar de la camara en Tech). */
       return { name: sv.ServiceName || '', cat: sv.Category || '', sku: sv.SubOption || '', level: sv.Level || '', level0: sv.Level0 != null ? sv.Level0 : (sv.Level || ''), qty: sv.Quantity || '',
-        existing: !sv.added, removed: !!sv.removed, reason: sv.note || '', open: !!sv.removed || !!String(sv.note || '').trim() };
+        existing: !sv.added, removed: !!sv.removed, reason: sv.note || '', open: !!sv.removed || !!String(sv.note || '').trim(), noteOpen: !!sv.noteOpen };
     });
     var query = '';
     var catalog = (o.catalog || []).filter(function (c) { return c && c.serviceName && (!o.catalogFilter || o.catalogFilter(c)); });
@@ -338,11 +343,15 @@
         '<span' + (r.removed ? ' style="text-decoration:line-through"' : '') + '>' + esc(r.name) + '</span>' +
         (r.removed ? '<br><span class="gs-svb-ed-tag">' + esc(o.removedLabel ? o.removedLabel(needNote) : (needNote ? 'removed \u2014 note required' : 'removed')) + '</span>' : '') + '</span>';
       var snBtn = sn && !r.removed ? '<button type="button" class="svc-remove-btn gs-svb-sn-pen' + (snOpen[i] ? ' on' : '') + '" data-act="sn" data-i="' + i + '" title="Note for this service" aria-label="Note for ' + esc(r.name) + '">&#9998;</button>' : '';
+      /* reasonOnPencil: el quitado trae su ✎ (abre / cierra su nota) antes del deshacer. */
+      if (o.reasonOnPencil && r.removed && o.reasonInline !== false) snBtn = '<button type="button" class="svc-remove-btn gs-svb-sn-pen' + (r.noteOpen ? ' on' : '') + '" data-act="wpen" data-i="' + i + '" title="Note for this service" aria-label="Note for ' + esc(r.name) + '">&#9998;</button>';
       var line = '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:13px">' + nameHtml +
         '<span style="display:flex;align-items:center">' + lv + qty + time + (o.rowExtraHtml ? o.rowExtraHtml(r, i) || '' : '') + snBtn + btn + '</span></div>';
-      var snPart = sn ? snListHtml(r) + (snOpen[i] && !r.removed ? '<div class="gs-svb-ed-why"><textarea rows="2" class="gs-svb-note" data-act="snt" data-i="' + i + '" placeholder="Note about this service. It saves when you close it." aria-label="Note for ' + esc(r.name) + '">' + esc(snText[i] || '') + '</textarea></div>' : '') : '';
-      var why = (r.open || r.removed) && o.reasonInline !== false
-        ? '<div class="gs-svb-ed-why"><textarea rows="2" class="gs-svb-note' + (needNote && !String(r.reason || '').trim() ? ' warn' : '') + '" data-act="why" data-i="' + i + '" placeholder="' +
+      var extra = function () { return o.noteExtraHtml ? o.noteExtraHtml(r, i) || '' : ''; };
+      var snPart = sn ? snListHtml(r) + (snOpen[i] && !r.removed ? '<div class="gs-svb-ed-why">' + extra() + '<textarea rows="2" class="gs-svb-note" data-act="snt" data-i="' + i + '" placeholder="Note about this service. It saves when you close it." aria-label="Note for ' + esc(r.name) + '">' + esc(snText[i] || '') + '</textarea></div>' : '') : '';
+      var whyShown = (r.open || r.removed) && o.reasonInline !== false && (!o.reasonOnPencil || !r.removed || r.noteOpen);
+      var why = whyShown
+        ? '<div class="gs-svb-ed-why">' + (o.reasonOnPencil && r.removed ? extra() : '') + '<textarea rows="2" class="gs-svb-note' + (needNote && !String(r.reason || '').trim() ? ' warn' : '') + '" data-act="why" data-i="' + i + '" placeholder="' +
             esc(needNote ? (o.reasonPlaceholder || 'Required \u2014 explain why you want to remove it') : 'Note for the office \u2014 optional') + '" aria-label="Note for ' + esc(r.name) + '">' + esc(r.reason) + '</textarea></div>' : '';
       return '<div class="gs-svb-ed-row' + (needNote ? ' gs-svb-ed-removed' : '') + '">' + line + snPart + why + '</div>';
     }
@@ -429,13 +438,21 @@
         var st = el.querySelector('[data-act="snt"][data-i="' + i + '"]'); if (st) st.focus();
         return;
       }
+      if (a === 'wpen') {
+        if (!rows[i]) return;
+        var op = !rows[i].noteOpen;
+        if (o.onNoteOpen) { o.onNoteOpen(i, op, rows[i]); return; }
+        rows[i].noteOpen = op; refresh();
+        if (op) { var wt = el.querySelector('[data-act="why"][data-i="' + i + '"]'); if (wt) wt.focus(); }
+        return;
+      }
       if (a === 'x' && o.onRemove) { if (rows[i]) o.onRemove(i, rows[i]); return; }
       if (a === 'lv' && o.onLevel) { if (rows[i]) o.onLevel(i, b.getAttribute('data-v'), rows[i]); return; }
       if (a === 'pt') { pt = b.getAttribute('data-v') || pt; if (o.onPropertyType) o.onPropertyType(pt); refresh(true); return; }
       if (a === 'add' && o.onAdd) { var ce = entry(b.getAttribute('data-sku'), b.getAttribute('data-name')); if (ce) o.onAdd(ce); return; }
       if (a === 'x') {
         var r = rows[i]; if (!r) return;
-        if (r.existing) { r.removed = !r.removed; r.err = false; if (!r.removed) { r.open = false; r.reason = ''; } else r.open = true; } else rows.splice(i, 1);
+        if (r.existing) { r.removed = !r.removed; r.err = false; if (!r.removed) { r.open = false; r.reason = ''; r.noteOpen = false; } else { r.open = true; r.noteOpen = true; } } else rows.splice(i, 1);
         refresh(); fire();
         if (r.removed) { var w = el.querySelector('[data-act="why"][data-i="' + i + '"]'); if (w) w.focus(); }
       } else if (a === 'pen') {
@@ -451,7 +468,7 @@
         query = ''; refresh(true); fire();
       }
     }
-    el.addEventListener('click', function (e) { var b = e.target.closest('[data-act]'); if (b && el.contains(b) && ['x', 'lv', 'add', 'pen', 'name', 'pt', 'sn'].indexOf(b.getAttribute('data-act')) !== -1) act(b); });
+    el.addEventListener('click', function (e) { var b = e.target.closest('[data-act]'); if (b && el.contains(b) && ['x', 'lv', 'add', 'pen', 'name', 'pt', 'sn', 'wpen'].indexOf(b.getAttribute('data-act')) !== -1) act(b); });
     /* Cantidad en modo controlado: al terminar de escribir (change), no
        en cada tecla, para no re-montar mientras se escribe. */
     el.addEventListener('change', function (e) {

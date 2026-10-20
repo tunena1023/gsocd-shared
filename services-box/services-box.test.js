@@ -1,0 +1,97 @@
+/* node services-box/services-box.test.js -- GSServicesBox.editor en Chromium (20/10/2026).
+   - Lo de antes: sin las opciones nuevas, el editor pinta EXACTAMENTE lo mismo que la version anterior (git HEAD~ o
+     OLD_BOX=<archivo>): normal, con quitados, con lapiz de notas y con pencil:false.
+   - Lo nuevo (Admin "Correct this visit", maqueta v4 de la CFO): reasonOnPencil (el quitado sale tachado con la nota
+     cerrada y un ✎ que la abre), noteOpen / onNoteOpen (controlado) y noteExtraHtml (arriba de la nota del ✎).
+   Necesita playwright (NODE_PATH) y Chromium (CHROMIUM o el de Playwright). */
+'use strict';
+const path = require('path'), fs = require('fs'), cp = require('child_process');
+const { chromium } = require('playwright');
+const NEW = fs.readFileSync(path.join(__dirname, 'services-box.js'), 'utf8');
+let OLD = '';
+try { OLD = process.env.OLD_BOX ? fs.readFileSync(process.env.OLD_BOX, 'utf8') : cp.execSync('git show HEAD~:services-box/services-box.js', { cwd: path.join(__dirname, '..'), encoding: 'utf8' }); } catch (e) { OLD = ''; }
+let ok = 0, bad = 0;
+const check = (n, c, x) => { if (c) { ok++; console.log('OK   - ' + n); } else { bad++; console.log('FAIL - ' + n + (x !== undefined ? '  ' + JSON.stringify(x).slice(0, 400) : '')); } };
+const CATALOG = [
+  { sku: '111-10', serviceName: 'Common Area Vacuuming', division: 'Janitorial', category: 'Floors' },
+  { sku: '111-12', serviceName: 'Trash Removal', division: 'Janitorial', category: 'Trash' },
+  { sku: '111-14', serviceName: 'Carpet Spot Treatment', division: 'Janitorial', category: 'Floors' },
+  { sku: '410-12', serviceName: 'Blinds', division: 'Renovations', category: 'Windows', requiresQuantity: true }
+];
+const SVC = [
+  { ServiceName: 'Common Area Vacuuming', SubOption: '111-10', Level: 'Level 2' },
+  { ServiceName: 'Trash Removal', SubOption: '111-12', Level: 'Level 1', removed: true, note: 'Dumpster blocked' },
+  { ServiceName: 'Carpet Spot Treatment', SubOption: '111-14', Level: 'Level 1', removed: true }
+];
+const page = async (b, src) => {
+  const p = await b.newPage();
+  await p.setContent('<!doctype html><html><body><div id="a"></div><div id="b"></div><div id="c"></div><div id="d"></div></body></html>');
+  await p.addScriptTag({ content: src });
+  await p.evaluate(([c, s]) => { window.CAT = c; window.SVC = s; }, [CATALOG, SVC]);
+  return p;
+};
+const OLD_CASES = async p => p.evaluate(() => {
+  const S = () => JSON.parse(JSON.stringify(window.SVC));
+  GSServicesBox.editor({ el: 'a', division: 'Janitorial', services: S(), catalog: CAT });
+  GSServicesBox.editor({ el: 'b', division: 'Janitorial', services: S(), catalog: CAT, pencil: false, reasonPlaceholder: 'Why?', removedLabel: n => n ? 'not completed — note required' : 'not completed' });
+  GSServicesBox.editor({ el: 'c', division: 'Janitorial', services: S(), catalog: CAT, pencil: false, serviceNotes: { list: [{ key: 'sku:111-10', name: 'Common Area Vacuuming', text: 'Lobby first', by: 'CFO', at: '2026-10-19T15:00:00Z' }], by: 'CFO' } });
+  GSServicesBox.editor({ el: 'd', division: 'Janitorial', services: S(), catalog: CAT, reasonInline: false, rowExtraHtml: () => '<i>cam</i>' });
+  return ['a', 'b', 'c', 'd'].map(id => document.getElementById(id).innerHTML);
+});
+(async () => {
+  const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+  if (OLD) {
+    const po = await page(b, OLD), pn = await page(b, NEW);
+    const [ho, hn] = [await OLD_CASES(po), await OLD_CASES(pn)];
+    ['default', 'pencil:false', 'serviceNotes', 'reasonInline:false'].forEach((n, k) => check('sin opciones nuevas pinta igual que antes: ' + n, ho[k] === hn[k], { old: ho[k].length, now: hn[k].length }));
+    await po.close(); await pn.close();
+  } else console.log('SKIP - no hay version anterior para comparar');
+
+  const p = await page(b, NEW);
+  /* reasonOnPencil sin controlar: quitados tachados, nota cerrada, ✎ abre y cierra; noteExtraHtml arriba. */
+  const r1 = await p.evaluate(() => {
+    const el = document.getElementById('a'); el.innerHTML = '';
+    GSServicesBox.editor({ el, division: 'Janitorial', services: JSON.parse(JSON.stringify(SVC)), catalog: CAT, pencil: false, reasonOnPencil: true,
+      serviceNotes: { list: [], by: 'CFO' }, noteExtraHtml: (row, i) => '<div class="fq" data-i="' + i + '">Frequency of ' + row.name + '</div>' });
+    const out = {};
+    out.textareas = el.querySelectorAll('[data-act="why"]').length;
+    out.wpens = el.querySelectorAll('[data-act="wpen"]').length;
+    out.strike = [...el.querySelectorAll('.gs-svb-ed-row span[style*="line-through"]')].map(s => s.textContent);
+    el.querySelector('[data-act="wpen"][data-i="1"]').click();
+    out.afterOpen = { why: el.querySelectorAll('[data-act="why"]').length, whyVal: (el.querySelector('[data-act="why"][data-i="1"]') || {}).value, fq: (el.querySelector('.fq[data-i="1"]') || {}).textContent,
+      on: el.querySelector('[data-act="wpen"][data-i="1"]').classList.contains('on'), focus: document.activeElement && document.activeElement.getAttribute('data-act') };
+    el.querySelector('[data-act="wpen"][data-i="1"]').click();
+    out.afterClose = el.querySelectorAll('[data-act="why"]').length;
+    /* ✎ de un servicio hecho (notas): abre su caja con noteExtraHtml arriba. */
+    el.querySelector('[data-act="sn"][data-i="0"]').click();
+    out.sn = { snt: el.querySelectorAll('[data-act="snt"]').length, fq: (el.querySelector('.fq[data-i="0"]') || {}).textContent };
+    /* × en uno hecho: queda quitado con su nota ABIERTA (para escribir por que). */
+    el.querySelector('[data-act="snt"]').blur();
+    el.querySelector('[data-act="x"][data-i="0"]').click();
+    out.removedNow = { why0: !!el.querySelector('[data-act="why"][data-i="0"]'), why2: !!el.querySelector('[data-act="why"][data-i="2"]') };
+    return out;
+  });
+  check('reasonOnPencil: ningun quitado trae su nota abierta al montar', r1.textareas === 0, r1);
+  check('reasonOnPencil: cada quitado trae su ✎', r1.wpens === 2, r1);
+  check('reasonOnPencil: quitados tachados', r1.strike.join('|') === 'Trash Removal|Carpet Spot Treatment', r1.strike);
+  check('✎ del quitado abre SU nota con lo escrito y el foco', r1.afterOpen.why === 1 && r1.afterOpen.whyVal === 'Dumpster blocked' && r1.afterOpen.on && r1.afterOpen.focus === 'why', r1.afterOpen);
+  check('noteExtraHtml arriba de la nota del quitado', r1.afterOpen.fq === 'Frequency of Trash Removal', r1.afterOpen);
+  check('otro clic en el ✎ la cierra', r1.afterClose === 0, r1);
+  check('✎ de un servicio hecho: su caja de nota con noteExtraHtml', r1.sn.snt === 1 && r1.sn.fq === 'Frequency of Common Area Vacuuming', r1.sn);
+  check('× en uno hecho: su nota abre para escribir por que; las otras siguen cerradas', r1.removedNow.why0 && !r1.removedNow.why2, r1.removedNow);
+
+  /* Controlado: noteOpen al montar y onNoteOpen avisa (no cambia solo). */
+  const r2 = await p.evaluate(() => {
+    const el = document.getElementById('b'); el.innerHTML = ''; const calls = [];
+    const s = JSON.parse(JSON.stringify(SVC)); s[2].noteOpen = true;
+    GSServicesBox.editor({ el, division: 'Janitorial', services: s, catalog: CAT, pencil: false, reasonOnPencil: true, onRemove: () => {}, onNoteOpen: (i, open, row) => calls.push([i, open, row.name]) });
+    const open0 = [...el.querySelectorAll('[data-act="why"]')].map(t => t.getAttribute('data-i'));
+    el.querySelector('[data-act="wpen"][data-i="1"]').click();
+    return { open0, calls, after: [...el.querySelectorAll('[data-act="why"]')].map(t => t.getAttribute('data-i')) };
+  });
+  check('noteOpen: solo la que viene abierta sale abierta', r2.open0.join() === '2', r2);
+  check('onNoteOpen: avisa (i, true, row) y no cambia solo', JSON.stringify(r2.calls) === JSON.stringify([[1, true, 'Trash Removal']]) && r2.after.join() === '2', r2);
+  await b.close();
+  console.log('\n' + ok + ' ok, ' + bad + ' failed');
+  process.exit(bad ? 1 : 0);
+})().catch(e => { console.error(e); process.exit(1); });
