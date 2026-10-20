@@ -234,7 +234,8 @@
                                         // renglon la abre (una a la vez si quien lo usa lo controla con noteOpen/onNoteOpen)
          onNoteOpen(i, open, row),      // opcional: con reasonOnPencil, quien lo usa guarda cual esta abierta y re-monta;
                                         // services[i].noteOpen la trae abierta al montar
-         noteExtraHtml: function (row, i) { return html } })  // opcional: arriba de la nota que abre el ✎ (p.ej. frecuencia)
+         noteExtraHtml: function (row, i) { return html },     // opcional: arriba de la nota que abre el ✎ (p.ej. frecuencia)
+         countAll: true })              // opcional: "N services" cuenta tambien los quitados (no hechos)
        ed.collect() -> { ok, added:[{serviceName, sku, level, qty}],
                          removed:[{serviceName, note}], levels:[{serviceName, from, to}],
                          notes:[{serviceName, note}] }  // notas del lapiz
@@ -390,7 +391,8 @@
     }
     function estPart() { return o.estimateHtml ? o.estimateHtml(live().map(function (r) { return { SubOption: skuOf(r), Level: r.level, Quantity: r.qty, ServiceName: r.name }; })) : ''; }
     function metaText() {
-      var l = live(), total = 0, any = false;
+      /* countAll (CFO 20/10, "Correct this visit"): el total de servicios de ese dia, tambien los no hechos. */
+      var l = o.countAll ? rows : live(), total = 0, any = false;
       l.forEach(function (r) { var m = mins(r); if (m != null) { total += m; any = true; } });
       return l.length + (l.length === 1 ? ' service' : ' services') + (any ? ' · ' + fmtMin(total) : '');
     }

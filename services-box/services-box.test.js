@@ -91,6 +91,14 @@ const OLD_CASES = async p => p.evaluate(() => {
   });
   check('noteOpen: solo la que viene abierta sale abierta', r2.open0.join() === '2', r2);
   check('onNoteOpen: avisa (i, true, row) y no cambia solo', JSON.stringify(r2.calls) === JSON.stringify([[1, true, 'Trash Removal']]) && r2.after.join() === '2', r2);
+  const r3 = await p.evaluate(() => {
+    const el = document.getElementById('c'); el.innerHTML = '';
+    GSServicesBox.editor({ el, division: 'Janitorial', services: JSON.parse(JSON.stringify(SVC)), catalog: CAT, pencil: false, countAll: true });
+    const a = el.querySelector('[data-part="meta"]').textContent;
+    el.innerHTML = ''; GSServicesBox.editor({ el, division: 'Janitorial', services: JSON.parse(JSON.stringify(SVC)), catalog: CAT, pencil: false });
+    return [a, el.querySelector('[data-part="meta"]').textContent];
+  });
+  check('countAll: "3 services" (2 of them not done); without it "1 service" like before', r3[0] === '3 services' && r3[1] === '1 service', r3);
   await b.close();
   console.log('\n' + ok + ' ok, ' + bad + ' failed');
   process.exit(bad ? 1 : 0);
