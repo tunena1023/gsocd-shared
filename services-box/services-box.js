@@ -84,9 +84,16 @@
     /* compact (CFO 20/10, Admin "Correct this visit" y contrato por piso v4): solo con la opcion; nada mas cambia. */
     '.gs-svb-ed-compact .gs-svb-ed-line{width:fit-content;min-width:min(100%,440px);max-width:100%;box-sizing:border-box}' +
     '.gs-svb-ed-compact .gs-svb-ed-line>span:first-child{line-height:1.25}' +
-    '.gs-svb-ed-compact .gs-svb-ed-tag{font-size:9.5px;line-height:1.2}' +
-    '.gs-svb-ed-compact .gs-sp-lvl-btn{width:28px;height:22px;font-size:10px}' +
-    '.gs-svb-ed-compact .svc-remove-btn{font-size:11px;padding:2px 4px}' +
+    '.gs-svb-ed-compact .gs-svb-ed-tag{font-size:9px;line-height:1.2}' +
+    '.gs-svb-ed-compact .gs-sp-lvl-btn{width:21px;height:19px;font-size:9px}' +
+    '.gs-svb-ed-compact .svc-remove-btn{font-size:10.5px;padding:2px}' +
+    /* compact a lo angosto (CFO 20/10: sin zigzag): nombre y controles en UN solo renglon en todos los servicios; los
+       controles (mas chicos, tambien la camarita del portal) no se bajan; el nombre largo baja a un 2o renglon en su lugar. */
+    '.gs-svb-ed-compact .gs-svb-ed-line{flex-wrap:nowrap!important;gap:5px}' +
+    '.gs-svb-ed-compact .gs-svb-ed-line>span:first-child{flex:1 1 auto;min-width:0;white-space:normal!important;overflow-wrap:break-word}' +
+    '.gs-svb-ed-compact .gs-svb-ed-line>span:last-child{flex:0 0 auto;flex-wrap:nowrap!important}' +
+    '.gs-svb-ed-compact .svc-row-cam{width:22px!important;height:20px!important;margin-right:3px!important}' +
+    '.gs-svb-ed-compact .svc-row-cam svg{width:12px;height:12px}' +
     '.gs-svb-ed-compact .svc-remove-btn.gs-svb-sn-pen{margin-right:2px}' +
     '.gs-svb-ed-compact .gs-svb-ed-why{padding:0 0 6px}' +
     '.gs-svb-editing .gs-svb-head{cursor:default}' +
@@ -357,7 +364,7 @@
     function rowHtml(r, i) {
       /* Mismo renglon que renderApprSvcEditable de Admin: flex, nombre a
          la izquierda, controles a la derecha, sin anchos fijos. */
-      var gap = o.compact ? 8 : 14; /* compact: los controles mas juntos */
+      var gap = o.compact ? 4 : 14; /* compact: los controles mas juntos */
       var lv = isJan(r) && !r.removed ? '<div class="gs-sp-lvl-group" style="margin-right:' + gap + 'px">' + ['Level 1', 'Level 2', 'Level 3'].map(function (l, k) {
         return '<div class="gs-sp-lvl-btn' + (r.level === l ? ' active' : '') + '" role="button" tabindex="0" data-act="lv" data-i="' + i + '" data-v="' + l + '">L' + (k + 1) + '</div>';
       }).join('') + '</div>' : '';

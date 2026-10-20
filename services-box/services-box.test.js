@@ -143,6 +143,24 @@ const OLD_CASES = async p => p.evaluate(() => {
   check('compact: clase gs-svb-ed-compact solo con la opcion', !cm.a.root && cm.b.root, cm);
   check('compact: renglon mas bajo y L1-L3 mas chicos', cm.b.rowH < cm.a.rowH - 10 && cm.b.lvW < cm.a.lvW && cm.b.lvH < cm.a.lvH, cm);
   check('compact: mismos botones y mismo texto', cm.a.acts === cm.b.acts && cm.a.text === cm.b.text, cm);
+  /* compact a lo angosto (CFO 20/10, sin zigzag): a 270px, con un nombre largo, la camarita del portal (svc-row-cam, 32px como
+     Admin) y el flex-wrap que Admin le pone al renglon en el celular, los controles quedan en el MISMO renglon que el nombre en
+     TODOS los servicios (antes: los cortos al lado y los largos abajo). */
+  const nz = await p.evaluate(() => {
+    if (!document.getElementById('nz-css')) { const st = document.createElement('style'); st.id = 'nz-css';
+      st.textContent = '.svc-row-cam{flex-shrink:0;width:32px;height:32px;display:inline-flex}.gs-svb-ed-row > div:first-child{flex-wrap:wrap;gap:6px}.gs-svb-ed-row > div:first-child > span:first-child{white-space:normal}';
+      document.head.appendChild(st); }
+    const el = document.getElementById('b'); el.innerHTML = ''; el.style.width = '270px';
+    const svc = [{ ServiceName: 'Vacuuming', SubOption: '111-10', Category: 'Commercial', Level: 'Level 2' }, { ServiceName: 'Dusting (surfaces, ledges & handrails)', SubOption: '111-22', Category: 'Commercial', Level: 'Level 1' },
+      { ServiceName: 'Strip and wax', SubOption: '111-41', Category: 'Commercial', Level: 'Level 1' }, { ServiceName: 'Carpet Spot Treatment', SubOption: '111-14', Category: 'Commercial', Level: 'Level 2' }];
+    GSServicesBox.editor({ el, division: 'Janitorial', services: svc, catalog: CAT, pencil: false, compact: true, serviceNotes: { list: [], by: 'x', onSave: () => Promise.resolve(null) },
+      rowExtraHtml: () => '<button type="button" class="svc-row-cam" style="margin-right:10px">c</button>' });
+    return [...el.querySelectorAll('.gs-svb-ed-line')].map(l => { const n = l.firstElementChild.getBoundingClientRect(), c = l.lastElementChild.getBoundingClientRect();
+      return { sameRow: c.top < n.bottom - 2, right: Math.round(c.right), fits: c.right <= el.getBoundingClientRect().right + 1, noOverlap: n.right <= c.left + 1, lines: Math.round(n.height / parseFloat(getComputedStyle(l.firstElementChild).lineHeight || 16)), over: l.firstElementChild.scrollWidth > l.firstElementChild.clientWidth + 1 }; });
+  });
+  check('compact: a 270px los controles se quedan en el renglon del nombre en todos, sin encimarse (sin zigzag)', nz.length === 4 && nz.every(r => r.sameRow && r.fits && r.noOverlap && !r.over), nz);
+  check('compact: a 270px los controles quedan alineados a la derecha, iguales en todos', new Set(nz.map(r => r.right)).size === 1, nz);
+  check('compact: el nombre largo baja a 2 renglones en su lugar (los cortos en 1)', nz[0].lines === 1 && nz[2].lines === 1 && nz[1].lines >= 2, nz);
   await b.close();
   console.log('\n' + ok + ' ok, ' + bad + ' failed');
   process.exit(bad ? 1 : 0);
