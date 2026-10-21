@@ -280,7 +280,10 @@
     if (o.current) S.step = 'r';
     paint();
     return {
-      set: function (p) { Object.keys(p || {}).forEach(function (k) { o[k] = p[k]; }); if (!o.reports[S.key]) use(Object.keys(o.reports)[0], ''); paint(); },
+      /* Si cambian los reportes (llegaron los datos de uno que estaba "Loading…"), el de pantalla toma sus columnas de nuevo. */
+      set: function (p) { var before = o.reports && o.reports[S.key]; Object.keys(p || {}).forEach(function (k) { o[k] = p[k]; });
+        if (!o.reports[S.key]) use(Object.keys(o.reports)[0], ''); else if (p && p.reports && o.reports[S.key] !== before && String((before || {}).cols) !== String(o.reports[S.key].cols)) use(S.key, S.savedId);
+        paint(); },
       use: function (k, s) { use(k, s); S.step = 'r'; paint(); },
       refresh: paint,
       state: function () { return Object.assign({}, S); }
