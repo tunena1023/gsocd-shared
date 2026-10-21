@@ -12,7 +12,8 @@
    GSReportTable.mount(el, {
      reports: { key: { name, sub, cols: [[key, label, type, sum]], def: [keys], main: [keys], group: [keys],
                        filters: [keys], date: 'key', sort: { k, d }, grp: 'key', note, rows: () => [ {...} ] } },
-       type: 'num' | 'date' | ''   sum: 1 = nunca se suma; 'q' = solo si todos los renglones son del mismo `item`
+       type: 'num' | 'date' | 'wrap' (texto largo que baja de renglón, p. ej. una lista de edificios) | ''
+       sum: 1 = nunca se suma; 'q' = solo si todos los renglones son del mismo `item`
        un renglón puede traer `_<key>` para ordenar o agrupar por otra cosa (fecha real detrás de "Week of Oct 4"),
        `_go` (lo que recibe onOpen) y `_tone: { key: 'bad' | 'warn' }` para pintar una celda.
      sections: [[título, [keys]]]   (opcional; sin esto, todos en una lista)
@@ -114,11 +115,12 @@
       '.gs-rt-tb td{padding:9px 12px;border-bottom:1px solid rgba(0,0,0,.06);white-space:nowrap}' +
       '.gs-rt-tb tr.r:hover td{background:#F3ECD9;cursor:pointer}.gs-rt-tb tr.g td{background:var(--bg,#F8F7F4);font-weight:600}.gs-rt-tb tr.g span{font-weight:400;color:var(--gray,#6B6B6B)}' +
       '.gs-rt-tb tr.s td{color:var(--gray,#6B6B6B)}.gs-rt-tb tfoot td{position:sticky;bottom:0;background:#FBFAF7;border-top:1px solid var(--border,#E0DDD6);font-weight:600}' +
-      '.gs-rt-tb .n{text-align:right}.gs-rt-tb .bad{color:#A33A2E;font-weight:600}.gs-rt-tb .warn{color:#8a5200;font-weight:600}' +
+      '.gs-rt-tb .n{text-align:right}.gs-rt-tb td.w{white-space:normal;min-width:160px;max-width:300px}.gs-rt-tb .bad{color:#A33A2E;font-weight:600}.gs-rt-tb .warn{color:#8a5200;font-weight:600}' +
       '.gs-rt-empty{padding:16px;color:var(--gray,#6B6B6B);font-size:12.5px}' +
       '.gs-rt-m{border:1px solid var(--border,#E0DDD6);border-radius:8px;background:var(--white,#fff);max-height:calc(100vh - 220px);overflow-y:auto}' +
       '.gs-rt-m .it{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid rgba(0,0,0,.06);padding:10px 14px;font:inherit;cursor:pointer}' +
-      '.gs-rt-m .it b{display:block;font-size:13.5px;font-weight:600}.gs-rt-m .it i{display:block;font-style:normal;font-size:12px;color:var(--gray,#6B6B6B);margin-top:2px}' +
+      '.gs-rt-m .it b{display:block;font-size:13.5px;font-weight:600}.gs-rt-m .it i{display:flex;flex-wrap:wrap;gap:2px 12px;font-style:normal;font-size:12.5px;color:var(--black,#111);margin-top:3px}' +
+      '.gs-rt-m .kv em{font-style:normal;color:var(--gray,#6B6B6B)}.gs-rt-m .kv.bad{color:#A33A2E;font-weight:600}.gs-rt-m .kv.warn{color:#8a5200;font-weight:600}' +
       '.gs-rt-m .gh{padding:10px 14px 6px;font-weight:600;font-size:12.5px;background:var(--bg,#F8F7F4)}.gs-rt-m .gh span{font-weight:400;color:var(--gray,#6B6B6B)}.gs-rt-m .tot{padding:10px 14px;font-weight:600;font-size:12.5px}' +
       '.gs-rt-back{background:none;border:0;font:inherit;font-size:14px;font-weight:600;color:#8C6F2A;cursor:pointer;padding:4px 0 10px}' +
       '.gs-rt-ml{border:1px solid var(--border,#E0DDD6);border-radius:8px;background:var(--bg,#F8F7F4);max-height:70vh;overflow-y:auto}' +
@@ -148,7 +150,7 @@
     var nFil = function () { return fkeys().length + (S.filters.from || S.filters.to ? 1 : 0); };
     function cell(r, k) {
       var d = defOf(), t = colDef(d, k)[2], tone = r._tone && r._tone[k];
-      return '<td class="' + (t === 'num' ? 'n' : '') + (tone ? ' ' + tone : '') + '">' + esc(fmt(r[k], t)).replace(/\n/g, '<br>') + '</td>';
+      return '<td class="' + (t === 'num' ? 'n' : t === 'wrap' ? 'w' : '') + (tone ? ' ' + tone : '') + '">' + esc(fmt(r[k], t)).replace(/\n/g, '<br>') + '</td>';
     }
     function table(v) {
       var d = defOf(), cols = S.group && S.cols.length > 1 ? S.cols.filter(function (k) { return k !== S.group; }) : S.cols, all = [];
@@ -210,10 +212,14 @@
       if (isMob()) {
         if (S.step !== 'r') { el.innerHTML = '<div class="gs-rt-ml">' + left() + '</div>'; return; }
         ROWS = [];
-        var m0 = d.main || d.def.slice(0, 3), main = S.group ? m0.filter(function (k) { return k !== S.group; }) : m0, all = [];
+        /* Cada renglón trae TODO lo que trae en la computadora (supervisora 21/10): la primera columna en negritas y las
+           demás con su nombre, en 2–3 renglones. Las que están en `main` van primero. */
+        var m0 = (d.main || []).filter(function (k) { return S.cols.indexOf(k) >= 0; }).concat(S.cols.filter(function (k) { return (d.main || []).indexOf(k) < 0; }));
+        var main = S.group ? m0.filter(function (k) { return k !== S.group; }) : m0, all = [];
         var items = v.map(function (g) { all = all.concat(g.rows);
           return (S.group ? '<div class="gh">' + esc(colDef(d, S.group)[1] + ': ' + g.name) + ' <span>· ' + g.rows.length + '</span></div>' : '') + g.rows.map(function (r) { ROWS.push(r);
-            return '<button class="it" data-rt="open" data-i="' + (ROWS.length - 1) + '"><b>' + esc(fmt(r[main[0]], colDef(d, main[0])[2])) + '</b><i>' + main.slice(1).map(function (k) { var t = colDef(d, k)[2]; return (t === 'num' ? esc(colDef(d, k)[1]) + ' ' : '') + esc(fmt(r[k], t)); }).filter(Boolean).join(' · ') + '</i></button>'; }).join(''); }).join('');
+            return '<button class="it" data-rt="open" data-i="' + (ROWS.length - 1) + '"><b>' + esc(fmt(r[main[0]], colDef(d, main[0])[2])) + '</b><i>' + main.slice(1).map(function (k) { var t = colDef(d, k)[2], v = fmt(r[k], t), tone = r._tone && r._tone[k];
+              return v === '' ? '' : '<span class="kv' + (tone ? ' ' + tone : '') + '"><em>' + esc(colDef(d, k)[1]) + '</em> ' + esc(v) + '</span>'; }).filter(Boolean).join('') + '</i></button>'; }).join(''); }).join('');
         var tk = d.def.filter(function (k) { return total(d, all, k) !== ''; })[0];
         el.innerHTML = '<button class="gs-rt-back" data-rt="back">‹ Reports</button><div class="gs-rt-top"><span class="gs-rt-t">' + esc(title()) + ' · ' + n + '</span><button class="gs-rt-b" data-rt="xlsx">Download Excel</button></div>' +
           (o.asOf ? '<div class="gs-rt-top">' + asOfHtml() + '</div>' : '') + (d.note ? '<p class="gs-rt-note">' + esc(d.note) + '</p>' : '') + chips() +
