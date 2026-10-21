@@ -22,6 +22,8 @@ GSLightbox.open(photos, index);
 - `photos`: arreglo de objetos `{ downloadUrl, name }` — todas las fotos del grupo donde vive la
   que se apretó (para que las flechas tengan entre qué moverse).
 - `index`: posición (empezando en 0) de la foto que se apretó, dentro de ese arreglo.
+- `opts.sections` (opcional, 21/10/2026): `[{ label, start, count }]`. El contador dice "Before 2 / 4" en vez de
+  "2 / 10". Lo usa gallery-groups para que antes y después no se mezclen.
 
 ```js
 GSLightbox.close();   // cerrar a la fuerza (normalmente no hace falta, el usuario lo cierra solo)
@@ -32,5 +34,5 @@ GSLightbox.nav(1);    // avanzar una foto (-1 para retroceder)
 
 - Tocar cualquier parte (también la foto), tecla Escape, o el botón ✕: cierra. Solo las flechas no cierran.
 - Flechas del teclado (← →), o los botones de flecha: navega entre fotos.
-- Las flechas se deshabilitan solas en la primera y última foto del grupo.
+- Las flechas dan la vuelta (de la última a la primera); con una sola foto se esconden.
 - Cargar el script más de una vez en la misma página no duplica nada (se protege solo).

@@ -35,6 +35,16 @@
 
   var currentPhotos = [];
   var currentIndex = null;
+  /* opts.sections (21/10/2026, gallery-groups con antes/despues): [{ label, start, count }] -- el contador dice
+     "Before 2 / 4" en vez de "2 / 10". Sin sections, el contador de siempre. */
+  var currentSections = null;
+  function counterOf(i) {
+    var secs = currentSections || [];
+    for (var k = 0; k < secs.length; k++) {
+      if (i >= secs[k].start && i < secs[k].start + secs[k].count) return secs[k].label + ' ' + (i - secs[k].start + 1) + ' / ' + secs[k].count;
+    }
+    return (i + 1) + ' / ' + currentPhotos.length;
+  }
 
   function render() {
     var photo = currentPhotos[currentIndex];
@@ -42,7 +52,7 @@
     imgEl.src = photo.downloadUrl;
     imgEl.alt = photo.name || 'Photo';
     /* "From gallery" (17/10/2026): subida de la galeria o de la PC (nombre "-gal", gsocd-shared/camera-capture). */
-    counterEl.textContent = (currentIndex + 1) + ' / ' + currentPhotos.length + (/-gal\.[a-z0-9]+$/i.test(String(photo.name || '')) ? ' · From gallery' + (photo.dateUnknown ? ' · date unknown' : '') : '');
+    counterEl.textContent = counterOf(currentIndex) + (/-gal\.[a-z0-9]+$/i.test(String(photo.name || '')) ? ' · From gallery' + (photo.dateUnknown ? ' · date unknown' : '') : '');
     /* Da la vuelta (dueño, 07/10/2026): de la ultima pasa a la primera y de
        la primera a la ultima, asi que las flechas nunca se apagan; con una
        sola foto no hay a donde ir y se esconden. */
@@ -51,9 +61,10 @@
     nextBtn.style.display = single ? 'none' : '';
   }
 
-  function open(photos, index) {
+  function open(photos, index, opts) {
     currentPhotos = photos || [];
     currentIndex = index || 0;
+    currentSections = (opts && opts.sections) || null;
     if (!currentPhotos.length) return;
     render();
     overlay.classList.add('open');
@@ -63,6 +74,7 @@
     overlay.classList.remove('open');
     currentPhotos = [];
     currentIndex = null;
+    currentSections = null;
   }
 
   function nav(delta) {

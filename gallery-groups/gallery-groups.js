@@ -8,6 +8,22 @@
    Reemplaza el HTML de galeria que se repetia por separado en
    Tech (employee.html/supervisor.html) y ahora tambien en Admin.
 
+   21/10/2026 (CFO: "arregla la galeria"; antes salian en miniatura y en
+   el visor se revolvian las de antes y las de despues):
+     - Pastilla Before | After | Both (si la orden trae de los dos); la
+       tarjeta abre en Both: las de antes arriba y las de despues abajo,
+       cada grupo con su titulo. Con un solo tipo no hay pastilla.
+     - Cuadricula de fotos medianas (3 por renglon; 2 en celular), cada
+       foto COMPLETA (sin recortar, object-fit: contain) en un cuadro de
+       4:3. Abajo de cada una: servicio, fecha y quien la tomo. Ya no hay
+       foto grande + tira de miniaturas, ni desplegables por persona.
+     - Picar una foto abre el visor (GSLightbox) SOLO con las fotos de lo
+       que se ve, en el mismo orden; con Both, primero las de antes y luego
+       las de despues, y el contador dice "Before 2 / 4" / "After 1 / 3".
+       Nunca brinca de Before a After estando en Before.
+     - La lista "Scheduled Services" va abajo de las fotos.
+   Lo de abajo (hero, rotacion, desplegables por persona) es historia.
+
    v1.31.0 (19/09/2026): rediseño del cuerpo de la tarjeta abierta,
    aprobado con varias iteraciones de mini interactivo -- ya NO es
    "Fotos del departamento" + "Por servicio" en 2 secciones separadas.
@@ -110,12 +126,11 @@
              cuenta como 'work', igual que antes) }
      ] }
 
-   Si se omite onPhotoClick, se usa GSLightbox.open(group.photos, i)
-   automaticamente si GSLightbox esta disponible en la pagina. El
-   indice "i" que se manda es siempre el indice DENTRO de
-   group.photos (el arreglo completo, orden original del backend),
-   sin importar en que posicion este rotada esa foto en ese momento --
-   asi el lightbox puede navegar prev/next sobre la lista completa real.
+   Si se omite onPhotoClick, se usa GSLightbox.open(<las fotos que se
+   ven, en su orden>, i, { sections }) si GSLightbox esta en la pagina
+   (21/10/2026: antes se le pasaba group.photos entero y el visor
+   mezclaba antes y despues). onPhotoClick sigue recibiendo el indice
+   DENTRO de group.photos.
 
    Todas las clases llevan el prefijo "gs-gal-" a proposito, para no
    chocar con CSS que ya exista en cada pagina.
@@ -143,46 +158,34 @@
       '\n\n  .gs-gal-grp-body { display: none; padding: 16px; background: #fff; }' +
       '\n  .gs-gal-grp.open > .gs-gal-grp-body { display: block; }' +
       '\n\n  .gs-gal-empty { font-size: 13px; color: #999; text-align: center; padding: 40px 0; }' +
-      '\n\n  .gs-gal-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }' +
-      '\n  @media (max-width: 560px) { .gs-gal-2col { grid-template-columns: 1fr; } }' +
-      /* La columna no se estira con la tira de miniaturas (CFO 19/10): con mas de ~5 fotos la foto grande salia
-         de ~820 px en vez del ancho de la columna. min-width: 0 deja que la tira se recorra de lado. */
-      '\n  .gs-gal-2col > * { min-width: 0; }' +
-      '\n  .gs-gal-col-label { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #6B6B6B; margin-bottom: 10px; }' +
-      '\n\n  .gs-gal-hero { position: relative; width: 100%; aspect-ratio: 1; border-radius: 8px; overflow: hidden; cursor: pointer; background: #eee; }' +
-      '\n  /* 12/10/2026: en iPhone la foto grande salia de varias pantallas de alto (Safari no' +
-      '\n     limita bien el alto de la imagen dentro de aspect-ratio). Ahora la imagen va' +
-      '\n     encima del cuadro y el cuadro tiene su alto fijo por padding. */' +
-      '\n  .gs-gal-hero { height: 0; padding-bottom: 100%; aspect-ratio: auto; min-height: 0; }' +
-      '\n  .gs-gal-hero img, .gs-gal-hero video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: block; }' +
-      '\n  .gs-gal-hero.video::after { content: "\\25B6"; position: absolute; top: 8px; right: 9px; color: #FFF3D6; font-size: 13px; background: rgba(17,17,17,.6); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }' +
-      '\n  .gs-gal-hero-cap { font-size: 11.5px; color: #111; margin: 6px 0 10px; min-height: 14px; }' +
-      '\n  .gs-gal-hero-cap b { font-weight: 700; }' +
+      '\n\n  .gs-gal-col-label { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #6B6B6B; margin-bottom: 10px; }' +
+      '\n  .gs-gal-section + .gs-gal-section { margin-top: 18px; }' +
+      '\n  .gs-gal-section-title { font-size: 12px; font-weight: 700; color: #111; margin-bottom: 8px; }' +
+      '\n  .gs-gal-section-title b { font-weight: 700; color: #8C6F2A; margin-left: 4px; }' +
+      /* Fotos medianas, completas (CFO 21/10/2026): 3 por renglon, 2 en celular; el cuadro es 4:3 por padding
+         (Safari en iPhone no respeta bien aspect-ratio con la imagen adentro, ver 12/10/2026) y la imagen va
+         con contain, asi se ve entera aunque sea vertical u horizontal. */
+      '\n  .gs-gal-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }' +
+      '\n  @media (max-width: 560px) { .gs-gal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }' +
+      '\n  .gs-gal-cell { min-width: 0; }' +
+      '\n  .gs-gal-photo { position: relative; width: 100%; height: 0; padding-bottom: 75%; border-radius: 6px; overflow: hidden; cursor: pointer; background: #F2EEE4; }' +
+      '\n  .gs-gal-photo img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: block; }' +
+      '\n  .gs-gal-photo.video::after { content: "\\25B6"; position: absolute; top: 6px; right: 6px; color: #FFF3D6; font-size: 11px; background: rgba(17,17,17,.6); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }' +
+      '\n  .gs-gal-photo:focus-visible { outline: 2px solid #C9A227; outline-offset: 2px; }' +
+      '\n  .gs-gal-cap { font-size: 11px; color: #111; margin-top: 5px; line-height: 1.35; overflow-wrap: anywhere; }' +
+      '\n  .gs-gal-cap b { font-weight: 700; }' +
       '\n  .gs-gal-cap-level { color: #6B6B6B; font-weight: 400; }' +
       '\n  .gs-gal-cap-reason { display: block; color: #8C6F2A; font-style: italic; font-size: 10.5px; margin-top: 1px; }' +
       '\n  .gs-gal-cap-date { display: block; color: #6B6B6B; font-size: 10.5px; margin-top: 1px; }' +
       '\n  .gs-gal-cap-by { display: block; color: #6B6B6B; font-size: 10.5px; margin-top: 1px; }' +
       '\n  .gs-gal-cap-from { display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 3px; background: rgba(201,168,76,.18); color: #8C6F2A; font-weight: 600; }' +
       '\n  .gs-gal-cap-by .gs-gal-cap-from:first-child { margin-left: 0; }' +
-      '\n  .gs-gal-person { border: 1px solid #F0EBDD; border-radius: 6px; margin-top: 8px; overflow: hidden; }' +
-      '\n  .gs-gal-person-h { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 12px; cursor: pointer; background: #F7F6F3; font-size: 12.5px; font-weight: 600; color: #111; }' +
-      '\n  .gs-gal-person-h:focus-visible { outline: 2px solid #C9A227; outline-offset: -2px; }' +
-      '\n  .gs-gal-person-h .n { margin-left: auto; font-size: 11px; font-weight: 700; color: #6B5A22; background: #E9DDBB; padding: 1px 7px; border-radius: 10px; }' +
-      '\n  .gs-gal-person-h .chev { color: #999; font-size: 11px; transition: transform .2s; }' +
-      '\n  .gs-gal-person.open .gs-gal-person-h .chev { transform: rotate(90deg); }' +
-      '\n  .gs-gal-person-body { display: none; padding: 10px 12px 12px; }' +
-      '\n  .gs-gal-person.open .gs-gal-person-body { display: block; }' +
-      '\n\n  .gs-gal-stages { display: inline-flex; gap: 4px; background: #F2EEE4; border-radius: 99px; padding: 3px; margin-bottom: 10px; }' +
+      '\n\n  .gs-gal-stages { display: inline-flex; gap: 4px; background: #F2EEE4; border-radius: 99px; padding: 3px; margin-bottom: 12px; }' +
       '\n  .gs-gal-stage { all: unset; cursor: pointer; font-size: 11.5px; font-weight: 600; padding: 5px 12px; border-radius: 99px; color: #6B6B6B; }' +
       '\n  .gs-gal-stage b { font-weight: 700; margin-left: 4px; color: #8C6F2A; }' +
       '\n  .gs-gal-stage.on { background: #fff; color: #111; box-shadow: 0 1px 2px rgba(0,0,0,.08); }' +
       '\n  .gs-gal-stage:focus-visible { outline: 2px solid #C9A227; outline-offset: 1px; }' +
-      '\n\n  .gs-gal-thumb-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }' +
-      '\n  .gs-gal-thumb-wrap { flex: 0 0 auto; width: 56px; }' +
-      '\n  .gs-gal-thumb { position: relative; width: 56px; height: 56px; border-radius: 6px; overflow: hidden; cursor: pointer; background: #eee; }' +
-      '\n  .gs-gal-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }' +
-      '\n  .gs-gal-thumb.video::after { content: "\\25B6"; position: absolute; bottom: 3px; right: 3px; color: #FFF3D6; font-size: 8px; background: rgba(17,17,17,.6); width: 13px; height: 13px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }' +
-      '\n  .gs-gal-thumb-cap { font-size: 9px; color: #6B6B6B; text-align: center; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }' +
+      '\n\n  .gs-gal-svc { margin-top: 20px; padding-top: 14px; border-top: 1px solid #F0EBDD; }' +
       '\n\n  .gs-gal-svclist { list-style: none; margin: 0; padding: 0; }' +
       '\n  .gs-gal-svclist li { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #F0EBDD; font-size: 13px; }' +
       '\n  .gs-gal-svclist li:last-child { border-bottom: none; }' +
@@ -237,7 +240,8 @@
   }
   function photoCapHtml(p) {
     if (!p) return '';
-    if (!p.serviceName) return byLineHtml(p);
+    /* Foto general (sin servicio): fecha y quien la tomo (21/10/2026: cada foto de la cuadricula lleva su renglon). */
+    if (!p.serviceName) return (p.caption ? '<span class="gs-gal-cap-date">' + esc(p.caption) + '</span>' : '') + byLineHtml(p);
     return '<b>' + esc(p.serviceName) + '</b>' +
       (p.level ? ' <span class="gs-gal-cap-level">— ' + esc(p.level) + '</span>' : '') +
       (p.reason ? '<span class="gs-gal-cap-reason">' + esc(p.reason) + '</span>' : '') +
@@ -267,111 +271,75 @@
       return;
     }
 
-    /* photoOrderState: por-grupo, el orden ROTADO de las fotos (el
-       indice 0 es la que esta de "hero"/grande en este momento).
-       Arranca ordenado por fecha (mas reciente primero) la primera
-       vez que se pinta cada grupo. Vive en closure de render(); se
-       reinicia si se vuelve a llamar render() con datos nuevos. */
-    var photoOrderState = {};
-    /* Antes / despues (v1.69.0): fotos de inspeccion (stage
-       'inspection') y de trabajo (el resto). Si una orden trae de los
-       dos, cada grupo recuerda que pestaña esta viendo; arranca en
-       Work (el resultado), o en Inspection si todavia no hay de
-       trabajo. */
+    /* Antes / despues (v1.69.0; 21/10/2026): fotos de inspeccion (stage
+       'inspection') y de trabajo (el resto). Si una orden trae de los dos,
+       cada grupo recuerda que esta viendo: 'both' (como abre), 'inspection'
+       o 'work'. Vive en closure de render(); se reinicia al volver a llamar
+       render() con datos nuevos. */
     var stageState = {};
-    var personOpen = {}; /* que desplegable de persona esta abierto (sobrevive al repintar) */
+    var STAGE_LABEL = { inspection: 'Before', work: 'After' };
     function stageOf(p) { return p && p.stage === 'inspection' ? 'inspection' : 'work'; }
     function stageCounts(gi) {
       var c = { inspection: 0, work: 0 };
       (groups[gi].photos || []).forEach(function (p) { c[stageOf(p)]++; });
       return c;
     }
+    function hasBoth(gi) { var c = stageCounts(gi); return !!(c.inspection && c.work); }
     function currentStage(gi) {
-      if (!stageState[gi]) stageState[gi] = stageCounts(gi).work ? 'work' : 'inspection';
-      return stageState[gi];
+      if (!hasBoth(gi)) return 'both';
+      return stageState[gi] || 'both';
+    }
+    /* Las secciones que se ven, en orden: [{ stage, idxs }] con los indices
+       DENTRO de group.photos, cada seccion de la mas reciente a la mas vieja
+       (igual que antes). Con 'both': antes arriba, despues abajo. */
+    function sectionsOf(gi) {
+      var photos = groups[gi].photos || [];
+      var st = currentStage(gi);
+      return ['inspection', 'work'].filter(function (k) { return st === 'both' || st === k; }).map(function (k) {
+        var idxs = photos.map(function (_, i) { return i; }).filter(function (i) { return stageOf(photos[i]) === k; });
+        idxs.sort(function (x, y) { return dateSortKey(photos[y]).localeCompare(dateSortKey(photos[x])); });
+        return { stage: k, idxs: idxs };
+      }).filter(function (sec) { return sec.idxs.length; });
     }
 
-    function currentOrder(gi) {
-      var key = gi + ':' + currentStage(gi);
-      if (!photoOrderState[key]) {
-        var photos = groups[gi].photos || [];
-        var st = currentStage(gi);
-        var idxs = photos.map(function (_, i) { return i; }).filter(function (i) { return stageOf(photos[i]) === st; });
-        idxs.sort(function (a, b) { return dateSortKey(photos[b]).localeCompare(dateSortKey(photos[a])); });
-        photoOrderState[key] = idxs;
-      }
-      return photoOrderState[key];
+    function cellHtml(photos, pi) {
+      var p = photos[pi];
+      return '<div class="gs-gal-cell">' +
+        '<div class="gs-gal-photo' + (p.isVideo ? ' video' : '') + ' gs-gal-ph" data-pi="' + pi + '" role="button" tabindex="0">' +
+          '<img src="' + escAttr(p.downloadUrl) + '" loading="lazy" alt="">' +
+        '</div>' +
+        '<div class="gs-gal-cap">' + photoCapHtml(p) + '</div>' +
+      '</div>';
     }
 
     function bodyHtml(gi) {
       var g = groups[gi];
       var photos = g.photos || [];
-      var ord = currentOrder(gi);
-      var heroIdx = ord[0];
-      var hero = photos[heroIdx];
-
-      var heroHtml = !hero ? '<p class="gs-gal-empty">No photos yet.</p>' : (
-        '<div class="gs-gal-hero' + (hero.isVideo ? ' video' : '') + ' gs-gal-ph" data-pi="' + heroIdx + '">' +
-          '<img src="' + escAttr(hero.downloadUrl) + '" loading="lazy" alt="">' +
-        '</div>' +
-        '<div class="gs-gal-hero-cap">' + photoCapHtml(hero) + '</div>'
-      );
-
-      var thumbOf = function (pi) {
-        var p = photos[pi];
-        return '<div class="gs-gal-thumb-wrap">' +
-          '<div class="gs-gal-thumb' + (p.isVideo ? ' video' : '') + ' gs-gal-ph" data-pi="' + pi + '">' +
-            '<img src="' + escAttr(p.downloadUrl) + '" loading="lazy" alt="">' +
-          '</div>' +
-          (p.serviceName ? '<div class="gs-gal-thumb-cap">' + esc(p.serviceName) + '</div>' : '') +
-        '</div>';
-      };
-      /* Varias personas tomaron fotos (26/09/2026, pedido de los
-         supervisores): un desplegable por persona, cerrado hasta que se
-         abre, con todas sus fotos. Una sola persona: como siempre. */
-      var people = [], byPerson = {};
-      var knowsWho = ord.some(function (pi) { return photos[pi] && photos[pi].takenBy !== undefined; });
-      if (knowsWho) ord.forEach(function (pi) {
-        var who = (photos[pi] && photos[pi].takenBy) || 'Not recorded';
-        if (!byPerson[who]) { byPerson[who] = []; people.push(who); }
-        byPerson[who].push(pi);
-      });
-      var thumbsHtml;
-      if (people.length > 1) {
-        thumbsHtml = '';
-        var peopleHtml = people.map(function (who) {
-          var key = gi + ':' + currentStage(gi) + ':' + who;
-          var n = byPerson[who].length;
-          return '<div class="gs-gal-person' + (personOpen[key] ? ' open' : '') + '" data-person="' + escAttr(key) + '">' +
-            '<button type="button" class="gs-gal-person-h" aria-expanded="' + !!personOpen[key] + '">' +
-              '<span>👤 ' + esc(who) + '</span><span class="n">' + n + (n === 1 ? ' photo' : ' photos') + '</span><span class="chev">\u25B8</span>' +
-            '</button>' +
-            '<div class="gs-gal-person-body"><div class="gs-gal-thumb-strip">' + byPerson[who].map(thumbOf).join('') + '</div></div>' +
-          '</div>';
-        }).join('');
-      } else {
-        thumbsHtml = ord.slice(1).map(thumbOf).join('');
-      }
-
       var counts = stageCounts(gi);
       var st = currentStage(gi);
-      var stageBar = (counts.inspection && counts.work)
+      var both = counts.inspection && counts.work;
+      var secs = sectionsOf(gi);
+
+      var stageBar = both
         ? '<div class="gs-gal-stages" role="tablist">' +
-            '<button type="button" role="tab" class="gs-gal-stage' + (st === 'inspection' ? ' on' : '') + '" aria-selected="' + (st === 'inspection') + '" data-stage="inspection">Before<b>' + counts.inspection + '</b></button>' +
-            '<button type="button" role="tab" class="gs-gal-stage' + (st === 'work' ? ' on' : '') + '" aria-selected="' + (st === 'work') + '" data-stage="work">After<b>' + counts.work + '</b></button>' +
+            [['inspection', 'Before', counts.inspection], ['work', 'After', counts.work], ['both', 'Both', counts.inspection + counts.work]].map(function (t) {
+              return '<button type="button" role="tab" class="gs-gal-stage' + (st === t[0] ? ' on' : '') + '" aria-selected="' + (st === t[0]) + '" data-stage="' + t[0] + '">' + t[1] + '<b>' + t[2] + '</b></button>';
+            }).join('') +
           '</div>'
         : '';
-      var label = stageBar ? '' : '<div class="gs-gal-col-label">' + (counts.inspection && !counts.work ? 'Photos · before' : 'Photos') + '</div>';
-      var photosCol = label + stageBar + heroHtml +
-        (thumbsHtml ? '<div class="gs-gal-thumb-strip">' + thumbsHtml + '</div>' : '') +
-        (people.length > 1 ? '<div class="gs-gal-people">' + peopleHtml + '</div>' : '');
+      var label = both ? '' : '<div class="gs-gal-col-label">' + (counts.inspection && !counts.work ? 'Photos · before' : 'Photos') + '</div>';
+      var sectionsHtml = !secs.length ? '<p class="gs-gal-empty">No photos yet.</p>' : secs.map(function (sec) {
+        /* El titulo solo cuando se ven las dos (con Before o After ya lo dice la pastilla). */
+        var title = (both && st === 'both')
+          ? '<div class="gs-gal-section-title">' + STAGE_LABEL[sec.stage] + '<b>' + sec.idxs.length + '</b></div>'
+          : '';
+        return '<div class="gs-gal-section" data-stage-section="' + sec.stage + '">' + title +
+          '<div class="gs-gal-grid">' + sec.idxs.map(function (pi) { return cellHtml(photos, pi); }).join('') + '</div>' +
+        '</div>';
+      }).join('');
 
       var svcHtml = servicesListHtml(g.services);
-
-      return '<div class="gs-gal-2col">' +
-        '<div>' + photosCol + '</div>' +
-        (svcHtml ? '<div>' + svcHtml + '</div>' : '') +
-      '</div>';
+      return label + stageBar + sectionsHtml + (svcHtml ? '<div class="gs-gal-svc">' + svcHtml + '</div>' : '');
     }
 
     container.innerHTML = groups.map(function (g, gi) {
@@ -418,23 +386,25 @@
       if (target && target.scrollIntoView) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
+    /* Abre el visor con las fotos que se ven, en el mismo orden (21/10/2026). Con las dos a la vista, el
+       contador dice en cual va ("Before 2 / 4", "After 1 / 3"); sin antes, el contador de siempre. */
+    function openViewer(gi, pi) {
+      var group = groups[gi];
+      if (opts.onPhotoClick) { opts.onPhotoClick(gi, pi, group); return; }
+      if (!window.GSLightbox) return;
+      var photos = group.photos || [];
+      var list = [], sections = [], idx = 0;
+      var labeled = hasBoth(gi) || stageCounts(gi).inspection > 0;
+      sectionsOf(gi).forEach(function (sec) {
+        if (labeled) sections.push({ label: STAGE_LABEL[sec.stage], start: list.length, count: sec.idxs.length });
+        sec.idxs.forEach(function (i) { if (i === pi) idx = list.length; list.push(photos[i]); });
+      });
+      window.GSLightbox.open(list, idx, sections.length ? { sections: sections } : undefined);
+    }
+
     function wireBody(gi) {
       var body = container.querySelector('[data-grp-body="' + gi + '"]');
       if (!body) return;
-
-      var heroEl = body.querySelector('.gs-gal-hero');
-      if (heroEl) {
-        heroEl.addEventListener('click', function (ev) {
-          ev.stopPropagation();
-          var pi = parseInt(heroEl.dataset.pi, 10);
-          var group = groups[gi];
-          if (opts.onPhotoClick) {
-            opts.onPhotoClick(gi, pi, group);
-          } else if (window.GSLightbox) {
-            window.GSLightbox.open(group.photos, pi);
-          }
-        });
-      }
 
       body.querySelectorAll('.gs-gal-stage').forEach(function (el) {
         el.addEventListener('click', function (ev) {
@@ -445,31 +415,13 @@
         });
       });
 
-      body.querySelectorAll('.gs-gal-person-h').forEach(function (el) {
-        el.addEventListener('click', function (ev) {
+      body.querySelectorAll('.gs-gal-photo').forEach(function (el) {
+        var go = function (ev) {
           ev.stopPropagation();
-          var box = el.parentElement, key = box.getAttribute('data-person');
-          personOpen[key] = !box.classList.contains('open');
-          box.classList.toggle('open', personOpen[key]);
-          el.setAttribute('aria-expanded', personOpen[key] ? 'true' : 'false');
-        });
-      });
-
-      body.querySelectorAll('.gs-gal-thumb').forEach(function (el) {
-        el.addEventListener('click', function (ev) {
-          ev.stopPropagation();
-          var pi = parseInt(el.dataset.pi, 10);
-          var ord = currentOrder(gi);
-          var pos = ord.indexOf(pi);
-          if (pos > 0) {
-            /* ROTACION real: la miniatura que se pica se va al frente,
-               y todas las demas se recorren en el mismo orden circular
-               -- NO es un intercambio de solo 2 lugares. */
-            photoOrderState[gi + ':' + currentStage(gi)] = ord.slice(pos).concat(ord.slice(0, pos));
-          }
-          body.innerHTML = bodyHtml(gi);
-          wireBody(gi);
-        });
+          openViewer(gi, parseInt(el.dataset.pi, 10));
+        };
+        el.addEventListener('click', go);
+        el.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(ev); } });
       });
     }
 
