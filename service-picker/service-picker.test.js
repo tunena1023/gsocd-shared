@@ -154,6 +154,20 @@ const OLD_CASES = async p => p.evaluate(() => {
   check('v1.68.0: otherTypeSearch:false hides "Also in" and the search still finds it', u.otherOff && u.stillFinds, u);
   check('v1.68.0: Recurring unchanged (area cards, no packages)', u.recCard && u.recNoPkg, u);
   check('v1.68.0: Residential Common Areas (Ozone 110-58) shows in Units', u.resOzone, u);
+  /* v1.69.0: categoryColumns: 1 = categorias en una columna; sin la opcion, igual (el HTML de antes ya se compara arriba). */
+  const cc = await p2.evaluate(() => {
+    const g = id => document.getElementById(id), out = {};
+    document.body.style.width = '1200px';
+    GSServicePicker.mount('c1', 'a', { catalog: CAT, division: 'Janitorial', mode: 'levels', crossDivision: true, groupByCategory: true, categoryColumns: 1 });
+    GSServicePicker.mount('c2', 'b', { catalog: CAT, division: 'Janitorial', mode: 'levels', crossDivision: true, groupByCategory: true });
+    GSServicePicker.mount('c3', 'c', { catalog: CAT, division: 'Janitorial', mode: 'levels', crossDivision: true, groupByCategory: true, categoryColumns: 3 });
+    const cols = el => getComputedStyle(el.querySelector('.gs-sp-accordion')).gridTemplateColumns.split(' ').length;
+    out.one = cols(g('a')); out.two = cols(g('b')); out.other = cols(g('c'));
+    out.cls2 = g('b').querySelector('.gs-sp-accordion').className;
+    return out;
+  });
+  check('v1.69.0: categoryColumns:1 puts the categories in one column', cc.one === 1, cc);
+  check('v1.69.0: without it (or any other value) 2 columns as before, same class', cc.two === 2 && cc.other === 2 && cc.cls2 === 'gs-sp-accordion', cc);
   await p2.close();
   await b.close();
   console.log('\n' + ok + ' OK, ' + bad + ' FAIL');

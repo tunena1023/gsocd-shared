@@ -32,6 +32,9 @@ const picker = GSServicePicker.mount(pickerId, container, options);
     otro tipo; al picar uno el interruptor se pasa a ese tipo (16/10/2026).
   - `otherTypeSearch`: `false` apaga ese "Also in …" (la CFO lo descartó el 18/10; Admin y Orders lo pasan en
     `false`). Sin la opción queda prendido, como antes (v1.68.0).
+  - `categoryColumns`: `1` pone las categorías (`groupByCategory`) en una sola columna, para cuando el picker va en
+    una columna angosta (Developer › Package contents, 21/10/2026: en 2 se cortaban los botones L1 L2 L3). Sin la
+    opción, como antes: 2 columnas, y 1 a 640px o menos (v1.69.0).
   - v1.68.0 (21/10/2026, CFO: "todos los servicios los pueda ver todo mundo"): en Units ya salen los de Category
     "Common Areas" (antes v1.66.0 los quitaba). Van como la última categoría, cerrada; al buscar salen como cualquier
     otro. Recurring sigue igual (solo Commercial, tarjetas por área, sin paquetes).
