@@ -30,6 +30,11 @@ const picker = GSServicePicker.mount(pickerId, container, options);
   - `showPropertyToggle`: mostrar el interruptor Residential/Commercial (por defecto `true`).
     Con el interruptor, al buscar también salen abajo ("Also in Residential") los que coinciden del
     otro tipo; al picar uno el interruptor se pasa a ese tipo (16/10/2026).
+  - `otherTypeSearch`: `false` apaga ese "Also in …" (la CFO lo descartó el 18/10; Admin y Orders lo pasan en
+    `false`). Sin la opción queda prendido, como antes (v1.68.0).
+  - v1.68.0 (21/10/2026, CFO: "todos los servicios los pueda ver todo mundo"): en Units ya salen los de Category
+    "Common Areas" (antes v1.66.0 los quitaba). Van como la última categoría, cerrada; al buscar salen como cualquier
+    otro. Recurring sigue igual (solo Commercial, tarjetas por área, sin paquetes).
   - `showSelectAll`: mostrar el control "Select all L1/L2/L3" (por defecto `false`, típico solo en
     modo `'levels'`).
   - `initialSelected` / `initialLevels`: para pre-llenar (ej. al editar una orden que ya tiene

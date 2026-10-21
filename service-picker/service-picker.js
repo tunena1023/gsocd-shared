@@ -430,10 +430,10 @@
       if (!groups[cat]) { groups[cat] = []; order.push(cat); }
       groups[cat].push(s);
     });
+    /* v1.68.0: Common Areas al final (despues de Uncategorized), cerrada como las demas. */
+    var rank = function (c) { return c === 'Common Areas' ? 2 : c === 'Uncategorized' ? 1 : 0; };
     order.sort(function (a, b) {
-      if (a === 'Uncategorized') return 1;
-      if (b === 'Uncategorized') return -1;
-      return a.localeCompare(b);
+      return rank(a) - rank(b) || a.localeCompare(b);
     });
 
     grid.className = 'gs-sp-accordion';
@@ -1083,14 +1083,12 @@
   function otherTypeHits(inst, pickerId) {
     var q = inst.searchEl ? (inst.searchEl.value || '').trim().toLowerCase() : '';
     var rt = document.getElementById('gs-sp-restoggle-' + pickerId);
-    if (!q || !rt || rt.disabled) return { type: '', list: [] };
+    if (inst.otherTypeSearch === false || !q || !rt || rt.disabled) return { type: '', list: [] };
     var other = inst.propertyType === 'Residential' ? 'Commercial' : 'Residential';
     if (other === 'Residential' && inst.workMode === 'recurring' && inst.workToggle) return { type: other, list: [] };
-    var hideCA = inst.workMode === 'units' && (inst.workToggle || inst.showPackages);
     var list = inst.catalog.filter(function (s) {
       var divMatch = inst.crossDivision || String(s.division || '').toLowerCase() === String(inst.division || '').toLowerCase();
-      return divMatch && s.propertyType === other && String(s.serviceName || '').toLowerCase().indexOf(q) !== -1 &&
-        !(hideCA && String(s.category || '') === 'Common Areas');
+      return divMatch && s.propertyType === other && String(s.serviceName || '').toLowerCase().indexOf(q) !== -1;
     }).sort(function (a, b) { return a.serviceName.localeCompare(b.serviceName); });
     return { type: other, list: list };
   }
@@ -1125,13 +1123,9 @@
     var inst = instances[pickerId];
     var grid = inst.gridEl;
     var list = visibleList(inst);
-    /* v1.66.0 (24/09/2026, el dueño: "los servicios de Common Areas que no se
-       muestren en Unit"): en Units (donde hay switch o paquetes) no salen
-       los de la categoria Common Areas -- ni en las tarjetas por cuarto ni
-       al buscar. Siguen en Recurring. */
-    if (inst.workMode === 'units' && (inst.workToggle || inst.showPackages)) {
-      list = list.filter(function (s) { return String(s.category || '') !== 'Common Areas'; });
-    }
+    /* v1.68.0 (21/10/2026, CFO: "todos los servicios los pueda ver todo mundo"): en Units ya salen los de
+       Common Areas (antes v1.66.0 los quitaba y Ozone Machine no se encontraba en una orden de unidad). Van como la
+       ultima categoria, cerrada (renderGroupedGrid). */
 
     if (!list.length) {
       grid.className = '';
@@ -1359,6 +1353,9 @@
       svcLevel: options.initialLevels || {},
       svcQty: options.initialQuantities || {},
       notesOn: !!options.serviceNotes, notes: {}, noteOpen: null,
+      /* v1.68.0: false apaga "Also in Residential/Commercial" al buscar (la CFO la descarto el 18/10). Sin la opcion,
+         igual que antes (prendida). */
+      otherTypeSearch: options.otherTypeSearch !== false,
       /* v1.67.0: { sku: true } "not done" (el servicio se queda escogido, tachado); quien lo hizo por servicio;
          etiqueta por servicio; y los que no se pueden quitar (solo marcarlos not done). Todo opcional. */
       allowOff: !!options.allowOff, off: Object.assign({}, options.offList || {}),

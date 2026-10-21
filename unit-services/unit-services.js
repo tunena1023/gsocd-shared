@@ -13,7 +13,7 @@
    quien lo usa: getItems() regresa []).
 
    GSUnitServices.mount(container, {
-     catalog, division, crossDivision, propertyType, workMode: 'units' | 'recurring',
+     catalog, division, crossDivision, propertyType, workMode: 'units' | 'recurring' (desde 21/10 no cambia lo que sale),
      levelFor: sku => 'Level 2' (opcional: nivel con el que arranca),
      onChange: items => {}
    }) -> { getItems() -> [{ sku, level, qty }], setItems(items),
@@ -71,9 +71,8 @@
     function leveled(s) { return String(s.division || '').toLowerCase() === 'janitorial'; }
 
     /* Mismo criterio que el picker de la orden: division (o todas en Mixed),
-       tipo de propiedad, sin paquetes. Areas comunes solo se esconden en Units
-       (16/10/2026: en Recurring "Lobby Cleaning" no salia aqui aunque la barra
-       de la orden si lo encontraba; igual que el picker, v1.66.0). */
+       tipo de propiedad, sin paquetes. Common Areas sale en todos los modos (21/10/2026, CFO: "todos los servicios
+       los pueda ver todo mundo"; igual que el picker v1.68.0). */
     function matches(q) {
       q = q.trim().toLowerCase();
       if (!q) return [];
@@ -83,7 +82,6 @@
         if (have[String(s.sku)]) return false;
         if (!st.cross && String(s.division || '').toLowerCase() !== String(st.division || '').toLowerCase()) return false;
         if (s.propertyType && s.propertyType !== st.propertyType) return false;
-        if (st.workMode === 'units' && String(s.category || '') === 'Common Areas') return false;
         if (Array.isArray(s.packageItems) && s.packageItems.length) return false;
         return String(s.serviceName || '').toLowerCase().indexOf(q) !== -1;
       }).sort(function (a, b) { return String(a.serviceName).localeCompare(String(b.serviceName)); }).slice(0, 12);

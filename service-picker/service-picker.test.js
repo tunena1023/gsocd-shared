@@ -1,4 +1,4 @@
-/* node service-picker/service-picker.test.js -- GSServicePicker en Chromium (19/10/2026, v1.67.0).
+/* node service-picker/service-picker.test.js -- GSServicePicker en Chromium (19/10/2026, v1.67.0; 21/10 v1.68.0).
    - Lo de antes: sin las opciones nuevas, el picker pinta EXACTAMENTE lo mismo que la version anterior (git HEAD~ o
      OLD_PICKER=<archivo>), en modo niveles, chips, cantidad, con notas y con 'selected-plus-search'.
    - Lo nuevo (Admin "Correct this visit"): allowOff / offList, people, tagOf y keepSelected.
@@ -104,6 +104,57 @@ const OLD_CASES = async p => p.evaluate(() => {
   check('New: keepSelected cannot be removed by clicking its level; another level still changes it', r.kept && r.lvl === 'Level 3', r);
   check('New: an extra picked from the search shows its tag and can be taken off', r.extra && r.extraGone, r);
   check('New: onChange fires on each change', r.changes >= 8, r.changes);
+
+  /* ---- v1.68.0 (21/10/2026): Common Areas tambien en Units, al final y cerrada; "Also in" se apaga con otherTypeSearch ---- */
+  const CA = [
+    { sku: '111-54', serviceName: 'Ozone Machine', division: 'Janitorial', propertyType: 'Commercial', category: 'Common Areas', areas: ['Lobby & Entry'] },
+    { sku: '111-14b', serviceName: 'Lobby & reception', division: 'Janitorial', propertyType: 'Commercial', category: 'Common Areas', areas: ['Lobby & Entry'] },
+    { sku: '111-55', serviceName: 'Carpet Shampoo', division: 'Janitorial', propertyType: 'Commercial', category: 'Floors' },
+    { sku: '111-13', serviceName: 'Restroom cleaning', division: 'Janitorial', propertyType: 'Commercial', category: 'Kitchen & Bathrooms' },
+    { sku: '111-84', serviceName: 'Pet hair removal', division: 'Janitorial', propertyType: 'Commercial', category: '' },
+    { sku: '111-48', serviceName: 'Move-In Cleaning', division: 'Janitorial', propertyType: 'Commercial', category: 'Package', packageItems: [{ sku: '111-55' }] },
+    { sku: '110-58', serviceName: 'Ozone Machine', division: 'Janitorial', propertyType: 'Residential', category: 'Common Areas' }
+  ];
+  const p2 = await page(b, NEW);
+  const u = await p2.evaluate(ca => {
+    const out = {};
+    const g = id => document.getElementById(id);
+    /* Units como Orders / Create Order: switch Recurring/Units y paquetes. */
+    GSServicePicker.mount('u', 'a', { catalog: ca, division: 'Janitorial', mode: 'levels', groupByCategory: true, workToggle: true, workMode: 'units', showPackages: true });
+    const heads = Array.from(g('a').querySelectorAll('.gs-sp-cat-header')).map(h => h.dataset.cat);
+    out.heads = heads;
+    const caHead = g('a').querySelector('.gs-sp-cat-header[data-cat="Common Areas"]');
+    out.caClosed = !!caHead && !caHead.classList.contains('open') && !caHead.nextElementSibling.classList.contains('open');
+    out.ozoneInCA = !!caHead && !!caHead.nextElementSibling.querySelector('[data-sku="111-54"]');
+    if (caHead) caHead.click();
+    const caHead2 = g('a').querySelector('.gs-sp-cat-header[data-cat="Common Areas"]');
+    out.opens = !!caHead2 && caHead2.classList.contains('open');
+    const q = g('gs-sp-search-u'); q.value = 'ozone'; q.dispatchEvent(new Event('input'));
+    out.searchFinds = !!g('a').querySelector('[data-sku="111-54"]');
+    /* Por defecto (sin la opcion) "Also in Residential" sigue como antes. */
+    out.otherDefault = !!g('a').querySelector('.gs-sp-other');
+    /* Recurring: Common Areas en tarjetas por area y Residential bloqueado, sin cambio. */
+    GSServicePicker.mount('r', 'b', { catalog: ca, division: 'Janitorial', mode: 'levels', groupByCategory: true, workToggle: true, workMode: 'recurring' });
+    out.recCard = !!g('b').querySelector('.gs-sp-area-head') && /Lobby/.test(g('b').textContent) && /Ozone Machine/.test(g('b').textContent);
+    out.recNoPkg = !/Move-In Cleaning/.test(g('b').textContent);
+    /* otherTypeSearch: false apaga "Also in". */
+    GSServicePicker.mount('o', 'c', { catalog: ca, division: 'Janitorial', mode: 'levels', groupByCategory: true, workToggle: true, workMode: 'units', showPackages: true, otherTypeSearch: false });
+    const q2 = g('gs-sp-search-o'); q2.value = 'ozone'; q2.dispatchEvent(new Event('input'));
+    out.otherOff = !g('c').querySelector('.gs-sp-other') && !/Also in/.test(g('c').textContent);
+    out.stillFinds = !!g('c').querySelector('[data-sku="111-54"]');
+    /* Residential en Units: su Ozone tambien sale (antes no salia en ningun picker). */
+    GSServicePicker.mount('rr', 'd', { catalog: ca, division: 'Janitorial', mode: 'levels', groupByCategory: true, workToggle: true, workMode: 'units', showPackages: true, propertyType: 'Residential', otherTypeSearch: false });
+    out.resOzone = !!g('d').querySelector('[data-sku="110-58"]');
+    return out;
+  }, CA);
+  check('v1.68.0: Units shows Common Areas as the LAST category', u.heads[u.heads.length - 1] === 'Common Areas' && u.heads.indexOf('Uncategorized') === u.heads.length - 2, u.heads);
+  check('v1.68.0: Common Areas starts closed, has Ozone Machine, and opens on click', u.caClosed && u.ozoneInCA && u.opens, u);
+  check('v1.68.0: searching "ozone" in Units finds Ozone Machine', u.searchFinds, u);
+  check('v1.68.0: without otherTypeSearch, "Also in" stays as before', u.otherDefault, u);
+  check('v1.68.0: otherTypeSearch:false hides "Also in" and the search still finds it', u.otherOff && u.stillFinds, u);
+  check('v1.68.0: Recurring unchanged (area cards, no packages)', u.recCard && u.recNoPkg, u);
+  check('v1.68.0: Residential Common Areas (Ozone 110-58) shows in Units', u.resOzone, u);
+  await p2.close();
   await b.close();
   console.log('\n' + ok + ' OK, ' + bad + ' FAIL');
   process.exit(bad ? 1 : 0);
