@@ -182,6 +182,14 @@ const OLD_CASES = async p => p.evaluate(() => {
   });
   check('v1.70.0: the client package editor says the client name, never the id', /Custom for Maple Court Apartments/.test(pe.named) && /Only Maple Court Apartments gets this version/.test(pe.named) && /Save for Maple Court Apartments/.test(pe.named) && !/GS-1001/.test(pe.named) && !/GS-1001/.test(pe.noname) && /this client/.test(pe.noname), { named: pe.named.slice(0, 300), noname: pe.noname.slice(0, 300) });
   check('v1.69.0: without it (or any other value) 2 columns as before, same class', cc.two === 2 && cc.other === 2 && cc.cls2 === 'gs-sp-accordion', cc);
+  /* v1.71.0: categoryStyle 'soft' redondea las categorias; sin la opcion, igual. */
+  const cs = await p2.evaluate(() => {
+    GSServicePicker.mount('s1', 'a', { catalog: CAT, division: 'Janitorial', mode: 'levels', crossDivision: true, groupByCategory: true, categoryStyle: 'soft' });
+    GSServicePicker.mount('s2', 'b', { catalog: CAT, division: 'Janitorial', mode: 'levels', crossDivision: true, groupByCategory: true, categoryStyle: 'other' });
+    const r = el => getComputedStyle(document.getElementById(el).querySelector('.gs-sp-cat-group')).borderTopLeftRadius;
+    return { soft: r('a'), plain: r('b'), cls: document.getElementById('b').querySelector('.gs-sp-accordion').className };
+  });
+  check('v1.71.0: categoryStyle soft rounds the categories; any other value stays as before', cs.soft === '8px' && cs.plain === '4px' && cs.cls === 'gs-sp-accordion', cs);
   await p2.close();
   await b.close();
   console.log('\n' + ok + ' OK, ' + bad + ' FAIL');

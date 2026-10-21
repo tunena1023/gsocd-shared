@@ -34,6 +34,8 @@ const picker = GSServicePicker.mount(pickerId, container, options);
     `false`). Sin la opción queda prendido, como antes (v1.68.0).
   - `packageEdit.clientName` (v1.70.0, 21/10/2026): el nombre del cliente que sale en el editor de paquete por cliente
     ("Save for …", "Only … gets this version", "Custom for …"). Sin él dice "this client"; el `clientId` ya no se enseña.
+  - `categoryStyle`: `'soft'` redondea las categorías (`groupByCategory`) y les pone borde y fondo más suaves
+    (Developer › Package contents, variante A que escogió la CFO el 21/10/2026). Sin la opción, como antes (v1.71.0).
   - `categoryColumns`: `1` pone las categorías (`groupByCategory`) en una sola columna, para cuando el picker va en
     una columna angosta (Developer › Package contents, 21/10/2026: en 2 se cortaban los botones L1 L2 L3). Sin la
     opción, como antes: 2 columnas, y 1 a 640px o menos (v1.69.0).

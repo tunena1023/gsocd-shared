@@ -184,6 +184,10 @@
       '.gs-sp-note-text{display:block;width:100%;box-sizing:border-box;margin-top:4px;border:1.5px solid var(--gold,#C9A84C);border-radius:4px;padding:6px 8px;font-size:12px;font-family:inherit;background:#fff;color:var(--black,#111);outline:none;resize:vertical}' +
       '.gs-sp-note-show{display:block;margin-top:4px;padding:4px 8px;font-size:11.5px;line-height:1.4;color:var(--black,#111);background:#FBF6E9;border-left:2px solid var(--gold,#C9A84C);border-radius:0 3px 3px 0;cursor:pointer;white-space:pre-wrap;word-break:break-word}' +
       '.gs-sp-accordion.gs-sp-acc-1{grid-template-columns:1fr}' +
+      /* v1.71.0: categoryStyle 'soft' -- categorias redondeadas, borde y fondo mas suaves (Developer › Package contents, CFO 21/10 variante A). */
+      '.gs-sp-acc-soft .gs-sp-cat-group{border-color:#EFECE6;border-radius:8px;margin-bottom:6px}' +
+      '.gs-sp-acc-soft .gs-sp-cat-header{background:#FCFBF8;padding:11px 14px}' +
+      '.gs-sp-acc-soft .gs-sp-cat-body{border-top-color:#EFECE6}' +
       '@media (max-width:640px){.gs-sp-accordion{grid-template-columns:1fr}}';
     document.head.appendChild(style);
   }
@@ -442,7 +446,7 @@
 
     /* v1.69.0: categoryColumns: 1 = las categorias en una columna (cuando el picker va en una columna angosta, como
        Developer › Package contents; en 2 se cortaban L1 L2 L3). Sin la opcion, igual que antes (2, y 1 a <=640px). */
-    grid.className = 'gs-sp-accordion' + (inst.categoryColumns === 1 ? ' gs-sp-acc-1' : '');
+    grid.className = 'gs-sp-accordion' + (inst.categoryColumns === 1 ? ' gs-sp-acc-1' : '') + (inst.categoryStyle === 'soft' ? ' gs-sp-acc-soft' : '');
     grid.innerHTML = order.map(function (cat, i) {
       var items = groups[cat];
       var count = items.filter(function (s) { return isSelected(inst, s); }).length;
@@ -1365,6 +1369,8 @@
       otherTypeSearch: options.otherTypeSearch !== false,
       /* v1.69.0: 1 = categorias en una columna. Cualquier otra cosa (o sin la opcion) = como antes. */
       categoryColumns: options.categoryColumns === 1 ? 1 : 2,
+      /* v1.71.0: 'soft' = categorias redondeadas y mas suaves. Sin la opcion, como antes. */
+      categoryStyle: options.categoryStyle === 'soft' ? 'soft' : '',
       /* v1.67.0: { sku: true } "not done" (el servicio se queda escogido, tachado); quien lo hizo por servicio;
          etiqueta por servicio; y los que no se pueden quitar (solo marcarlos not done). Todo opcional. */
       allowOff: !!options.allowOff, off: Object.assign({}, options.offList || {}),
