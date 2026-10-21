@@ -6,6 +6,7 @@
 
    GSMultiSelect.mount(container, {
      options: ['A', 'B', ...], selected: ['A'], placeholder: 'Choose…',
+     allChips: true,   // opcional (21/10/2026): todas las elegidas como chips, sin el +N
      onChange: function (values) { ... }   // al cerrar, solo si cambio
    }) -> { get(), set(values), open(), close(), destroy() }
 
@@ -82,8 +83,11 @@
     function labelOf(v) { for (var i = 0; i < options.length; i++) { if (val(options[i]) === v) return lab(options[i]); } return v; }
     function drawBtn() {
       if (!sel.length) { btn.innerHTML = '<span class="gs-ms-ph">' + esc((opts && opts.placeholder) || 'Choose\u2026') + '</span>'; return; }
-      var shown = sel.slice(0, 2).map(function (v) { return '<span class="gs-ms-chip">' + esc(labelOf(v)) + '</span>'; }).join('');
-      btn.innerHTML = shown + (sel.length > 2 ? '<span class="gs-ms-more">+' + (sel.length - 2) + '</span>' : '');
+      /* allChips:true (21/10/2026, CFO: nada de "+N more"): todas las elegidas como chips, que bajan de renglon. Sin la
+         opcion, las 2 primeras y "+N" como siempre. */
+      var all = !!(opts && opts.allChips), n = all ? sel.length : 2;
+      var shown = sel.slice(0, n).map(function (v) { return '<span class="gs-ms-chip">' + esc(labelOf(v)) + '</span>'; }).join('');
+      btn.innerHTML = shown + (sel.length > n ? '<span class="gs-ms-more">+' + (sel.length - n) + '</span>' : '');
       btn.setAttribute('aria-label', sel.map(labelOf).join(', '));
     }
     var searchEl;

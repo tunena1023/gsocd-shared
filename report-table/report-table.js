@@ -230,7 +230,7 @@
         (d.note ? '<p class="gs-rt-note">' + esc(d.note) + '</p>' : '') + panel() + chips() + table(v) + '</div></div>';
       if (S.open === 'cols' && root.GSMultiSelect) {
         var c = document.getElementById(id + '-cols'), lab = function (k) { return colDef(d, k)[1]; };
-        if (c) GSMultiSelect.mount(c, { options: d.cols.map(function (x) { return x[1]; }), selected: S.cols.map(lab), placeholder: 'Pick the columns…', onChange: function (vals) {
+        if (c) GSMultiSelect.mount(c, { options: d.cols.map(function (x) { return x[1]; }), selected: S.cols.map(lab), placeholder: 'Pick the columns…', allChips: true, onChange: function (vals) {
           var keys = d.cols.filter(function (x) { return vals.indexOf(x[1]) >= 0; }).map(function (x) { return x[0]; });
           S.cols = S.cols.filter(function (k) { return keys.indexOf(k) >= 0; }).concat(keys.filter(function (k) { return S.cols.indexOf(k) < 0; }));
           if (!S.cols.length) S.cols = [d.cols[0][0]];
