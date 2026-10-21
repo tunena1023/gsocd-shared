@@ -167,6 +167,20 @@ const OLD_CASES = async p => p.evaluate(() => {
     return out;
   });
   check('v1.69.0: categoryColumns:1 puts the categories in one column', cc.one === 1, cc);
+  /* v1.70.0: el editor de paquete por cliente dice el nombre, nunca el clientId. */
+  const pe = await p2.evaluate(() => {
+    const cat = CAT.concat([{ sku: 'P-1', serviceName: 'Move-In Cleaning', division: 'Janitorial', propertyType: 'Commercial', category: 'Package', packageItems: [{ sku: '111-10', level: 'Level 1' }] }]);
+    const run = (el, pe) => {
+      GSServicePicker.mount('pe' + el, el, { catalog: cat, division: 'Janitorial', mode: 'levels', groupByCategory: true, workToggle: true, workMode: 'units', showPackages: true, packageEdit: pe });
+      const g = document.getElementById(el);
+      const head = g.querySelector('.gs-sp-area-head[data-pkg="P-1"]'); if (head) head.click();
+      const ed = g.querySelector('[data-pedit-open="P-1"]'); if (ed) ed.click();
+      return g.textContent;
+    };
+    return { named: run('d', { clientId: 'GS-1001', clientName: 'Maple Court Apartments', customSkus: { 'P-1': true }, onSave() {}, onReset() {} }),
+      noname: run('e', { clientId: 'GS-1001', customSkus: { 'P-1': true }, onSave() {}, onReset() {} }) };
+  });
+  check('v1.70.0: the client package editor says the client name, never the id', /Custom for Maple Court Apartments/.test(pe.named) && /Only Maple Court Apartments gets this version/.test(pe.named) && /Save for Maple Court Apartments/.test(pe.named) && !/GS-1001/.test(pe.named) && !/GS-1001/.test(pe.noname) && /this client/.test(pe.noname), { named: pe.named.slice(0, 300), noname: pe.noname.slice(0, 300) });
   check('v1.69.0: without it (or any other value) 2 columns as before, same class', cc.two === 2 && cc.other === 2 && cc.cls2 === 'gs-sp-accordion', cc);
   await p2.close();
   await b.close();

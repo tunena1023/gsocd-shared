@@ -32,6 +32,8 @@ const picker = GSServicePicker.mount(pickerId, container, options);
     otro tipo; al picar uno el interruptor se pasa a ese tipo (16/10/2026).
   - `otherTypeSearch`: `false` apaga ese "Also in …" (la CFO lo descartó el 18/10; Admin y Orders lo pasan en
     `false`). Sin la opción queda prendido, como antes (v1.68.0).
+  - `packageEdit.clientName` (v1.70.0, 21/10/2026): el nombre del cliente que sale en el editor de paquete por cliente
+    ("Save for …", "Only … gets this version", "Custom for …"). Sin él dice "this client"; el `clientId` ya no se enseña.
   - `categoryColumns`: `1` pone las categorías (`groupByCategory`) en una sola columna, para cuando el picker va en
     una columna angosta (Developer › Package contents, 21/10/2026: en 2 se cortaban los botones L1 L2 L3). Sin la
     opción, como antes: 2 columnas, y 1 a 640px o menos (v1.69.0).

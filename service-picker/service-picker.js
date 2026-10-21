@@ -240,6 +240,9 @@
      ventanas, persianas, etc. Se decide por servicio individual
      (igual que isLeveledItem), asi que puede convivir con toggles y
      niveles en el mismo picker sin problema. */
+  /* v1.70.0 (CFO 21/10/2026: ningun id en pantalla, solo nombres): el editor de paquete por cliente dice el NOMBRE del
+     cliente (packageEdit.clientName); sin nombre, "this client". Nunca el clientId. */
+  function peWho(pe) { return String((pe && pe.clientName) || '').trim() || 'this client'; }
   function isQuantityItem(s) {
     return !!s.requiresQuantity;
   }
@@ -622,8 +625,8 @@
           '<input type="text" data-pedit-q placeholder="Start your search here\u2026" autocomplete="off"></div>' +
           '<div class="gs-sp-pkg-results" data-pedit-results></div>' +
           '<div class="gs-sp-pkg-foot"><button type="button" class="gs-sp-pkg-cancel" data-pedit-cancel>Cancel</button>' +
-          '<button type="button" class="gs-sp-pkg-save" data-pedit-save' + (inst.pkgSaving ? ' disabled' : '') + '>' + (inst.pkgSaving ? 'Saving\u2026' : 'Save for ' + escapeHtml(pe.clientId)) + '</button></div>' +
-          '<p class="gs-sp-pkg-note">Only ' + escapeHtml(pe.clientId) + ' gets this version. Orders already created keep what they had.</p></div>';
+          '<button type="button" class="gs-sp-pkg-save" data-pedit-save' + (inst.pkgSaving ? ' disabled' : '') + '>' + (inst.pkgSaving ? 'Saving\u2026' : 'Save for ' + escapeHtml(peWho(pe))) + '</button></div>' +
+          '<p class="gs-sp-pkg-note">Only ' + escapeHtml(peWho(pe)) + ' gets this version. Orders already created keep what they had.</p></div>';
       } else if (open) {
         /* v1.59.0 (24/09/2026, pedido del dueño): lo que incluye el
            paquete en 2 columnas (3 si son muchos), y cada servicio con su
@@ -649,7 +652,7 @@
       return '<div class="gs-sp-area-card' + (open ? ' open' : '') + (used && !cEditing ? ' used' : '') + (isCustom ? ' custom' : '') + '">' +
         '<div class="gs-sp-area-head" data-pkg="' + escapeAttr(p.sku) + '"><div><div class="gs-sp-area-name">' + nameWithTip(p) + priceHtml(inst, p) +
         (used ? '<span class="gs-sp-area-sel">In use</span>' : '') +
-        (isCustom ? '<span class="gs-sp-pkg-cust">Custom for ' + escapeHtml(pe.clientId) + '</span>' : '') + '</div>' +
+        (isCustom ? '<span class="gs-sp-pkg-cust">Custom for ' + escapeHtml(peWho(pe)) + '</span>' : '') + '</div>' +
         '<div class="gs-sp-area-prev">' + (names.length ? 'Includes ' + names.length + (names.length === 1 ? ' service' : ' services') +
         (open ? '' : ': ' + escapeHtml(names.slice(0, 3).join(', ')) + (names.length > 3 ? '\u2026' : '')) : 'Contents not set yet') +
         (isCustom && open && !editing ? '<span class="gs-sp-pkg-reset" data-pedit-reset="' + escapeAttr(p.sku) + '">Reset to standard</span>' : '') + '</div></div>' +
@@ -1348,7 +1351,8 @@
       showOthers: false,
       onWorkModeChange: options.onWorkModeChange || null,
       packageItemLevels: options.packageItemLevels !== false, usualSets: options.usualSets || [], savedSets: options.savedSets || [], usualEdit: options.usualEdit || (options.place === 'template' ? { applyHere: true } : null), place: options.place || '', onGoMixed: options.onGoMixed || null, pkgDivision: null, openUsual: {}, openPkgs: {}, pkgItemLevels: (function (m) { var o = {}; Object.keys(m || {}).forEach(function (k) { var x = {}; (m[k] || []).forEach(function (i) { if (i && i.sku && i.level) x[String(i.sku)] = i.level; }); o[String(k)] = x; }); return o; })(options.initialPackageLevels),
-      /* v1.57.0: { clientId, customSkus: {sku:true}, onSave(sku, items), onReset(sku) } -- solo Admin */
+      /* v1.57.0: { clientId, customSkus: {sku:true}, onSave(sku, items), onReset(sku) } -- solo Admin.
+         v1.70.0: + clientName (lo que se ensena; el clientId ya no sale en pantalla). */
       packageEdit: options.packageEdit || null,
       pkgDraft: null,
       pkgSaving: false,
