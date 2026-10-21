@@ -44,6 +44,8 @@ Admin y Orders instalan este repo como dependencia de npm, fijado por SHA en su 
 const orderPdf = require('gsocd-shared/lib/order-pdf');
 ```
 
+`lib/phone.js` (21/10/2026) va por los dos lados: en el navegador por jsDelivr (`window.GSPhone`; un input con `data-gs-phone` se engancha solo) y en el servidor por npm (`normalize()`), para que pantalla y servidor revisen igual el telefono de 10 digitos.
+
 Por npm se usan `lib/order-pdf`, `lib/pdf`, `lib/push`, `lib/order-seq`, `lib/site-readiness`,
 `lib/schedule-entries`, `lib/service-notes`, `lib/submit-key` y `lib/order-rooms`. Para pasar a una versión nueva: cambiar el SHA en el `package.json` de
 Admin y Orders (Vercel instala solo en cada deploy).
