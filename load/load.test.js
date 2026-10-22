@@ -79,6 +79,83 @@ const err = (st, m) => Object.assign(new Error(m || 'boom'), { status: st });
   assert('y aun asi sigue intentando hasta que llega', r === 'finally', r);
   assert('al terminar no queda nada pendiente', !L.pending().length, L.pending());
 
+  /* ---- Lo ultimo que se vio (CFO 22/10/2026) ---- */
+  const store = {};
+  window.GSSaved = {
+    save: async (k, d) => { store[k] = { at: Date.now(), data: JSON.parse(JSON.stringify(d)) }; return true; },
+    read: async k => store[k] || null,
+    clear: async pre => { Object.keys(store).forEach(k => { if (k.startsWith(pre)) delete store[k]; }); }
+  };
+  L._reset();
+  L._cfg({ waits: [20, 20, 20, 20, 20], stuck: 1e9, memo: 1000 });
+  const fresh = [], shown = [];
+  let allFresh = 0;
+  L.init({ saved: { scope: 'cfo@x', fastMs: 30, onShowSaved: i => shown.push(i.key), onFresh: i => fresh.push([i.key, i.data]), onAllFresh: () => allFresh++ } });
+
+  r = await L.get('w', async () => ({ list: [1, 2] }), { label: 'Warehouse' });
+  assert('saved: rapida -> lo nuevo, y queda guardado por persona', r.list.length === 2 && store['gs-load|cfo@x|w'] && !L.isSaved(r), Object.keys(store));
+
+  /* Pagina nueva (otra pestaña): el servidor tarda -> lo guardado al momento, lo nuevo despues sin aviso a la pantalla */
+  L._reset(); L.init({ saved: { scope: 'cfo@x', fastMs: 30, onShowSaved: i => shown.push(i.key), onFresh: i => fresh.push([i.key, i.data]), onAllFresh: () => allFresh++ } });
+  let t0 = Date.now();
+  r = await L.get('w', () => wait(150).then(() => ({ list: [1, 2, 3] })), { label: 'Warehouse' });
+  assert('saved: servidor lento -> se enseña lo ultimo visto en ~fastMs', r.list.length === 2 && L.isSaved(r) && Date.now() - t0 < 120 && shown.includes('w'), { r, ms: Date.now() - t0 });
+  await wait(200);
+  assert('saved: cuando llega lo nuevo -> onFresh con los datos, y se guarda', fresh.length === 1 && fresh[0][1].list.length === 3 && store['gs-load|cfo@x|w'].data.list.length === 3 && allFresh === 1, { fresh, allFresh });
+  r = await L.get('w', async () => { throw new Error('no deberia llamarse'); });
+  assert('saved: repintar despues de onFresh da lo nuevo al momento (sin ir al servidor)', r.list.length === 3 && !L.isSaved(r), r);
+
+  /* Ya llego fresca en esta pagina (p. ej. despues de guardar): espera al servidor, nunca lo viejo */
+  t0 = Date.now();
+  r = await L.get('w', () => wait(100).then(() => ({ list: [9] })));
+  assert('saved: una carga ya fresca en esta pagina espera al servidor', r.list[0] === 9 && Date.now() - t0 >= 90 && !L.isSaved(r), { r, ms: Date.now() - t0 });
+
+  /* El servidor falla (504) -> lo guardado de inmediato, sin esperar fastMs; luego llega lo nuevo */
+  L._reset(); L.init({ saved: { scope: 'cfo@x', fastMs: 5000, onFresh: i => fresh.push([i.key, i.data]) } });
+  let n504 = 0; t0 = Date.now();
+  r = await L.get('w', async () => { n504++; if (n504 < 3) throw err(504); return { list: ['new'] }; });
+  assert('saved: si el servidor falla se enseña lo guardado sin esperar', r.list[0] === 9 && Date.now() - t0 < 60, { r, ms: Date.now() - t0 });
+  await wait(100);
+  assert('saved: y lo nuevo llega por detras', fresh.some(f => f[0] === 'w' && f[1].list[0] === 'new'), fresh);
+
+  /* onUpdate de la pantalla manda sobre onFresh del portal */
+  L._reset(); const fresh2 = []; L.init({ saved: { scope: 'cfo@x', fastMs: 20, onFresh: i => fresh2.push(i.key) } });
+  let upd = null;
+  r = await L.get('w', () => wait(80).then(() => ({ list: ['u'] })), { onUpdate: d => { upd = d; } });
+  await wait(120);
+  assert('saved: con onUpdate se repinta esa pantalla y no se llama onFresh', upd && upd.list[0] === 'u' && !fresh2.length, { upd, fresh2 });
+
+  /* Sin copia guardada: igual que antes (Loading hasta que llega) */
+  t0 = Date.now();
+  r = await L.get('nueva', () => wait(80).then(() => 'x'));
+  assert('saved: sin copia, espera al servidor como siempre', r === 'x' && Date.now() - t0 >= 70, Date.now() - t0);
+
+  /* saved:false y error de dato */
+  let n2 = 0;
+  r = await L.get('w2', () => { n2++; return wait(50).then(() => 'srv'); }, { saved: false });
+  assert('saved:false nunca usa lo guardado', r === 'srv', r);
+  L._reset(); L.init({ saved: { scope: 'cfo@x', fastMs: 1000 } });
+  let got403 = null;
+  try { await L.get('w', async () => { throw err(403, 'Developer only.'); }); } catch (e) { got403 = e; }
+  assert('saved: un error de dato se sigue diciendo (no se tapa con lo guardado)', got403 && got403.status === 403, got403 && got403.message);
+
+  /* Otra persona en el mismo navegador no ve lo de la otra; Sign out lo borra */
+  L._reset(); L.init({ saved: { scope: 'otra@x', fastMs: 20 } });
+  r = await L.get('w', () => wait(60).then(() => 'de otra'));
+  assert('saved: por persona (scope): otra persona no ve lo guardado de la primera', r === 'de otra', r);
+  L._reset(); L.init({ saved: { scope: 'cfo@x', fastMs: 20 } });
+  await L.clearSaved();
+  assert('saved: clearSaved borra lo de esa persona y deja lo de otra', !Object.keys(store).some(k => k.startsWith('gs-load|cfo@x|')) && Object.keys(store).some(k => k.startsWith('gs-load|otra@x|')), Object.keys(store));
+
+  /* Sin GSSaved o sin scope: como siempre */
+  L._reset(); L.init({});
+  t0 = Date.now(); r = await L.get('w', () => wait(60).then(() => 'srv2'));
+  assert('sin saved en init: como siempre', r === 'srv2' && Date.now() - t0 >= 50, r);
+
+  L._reset(); L.init({ saved: { prefix: 'gs-admin-load|cfo@x|', fastMs: 20 } });
+  await L.get('p', async () => 'v');
+  assert('saved.prefix: se guarda con el prefijo del portal (lo borra su Sign out)', store['gs-admin-load|cfo@x|p'] && store['gs-admin-load|cfo@x|p'].data === 'v', Object.keys(store));
+
   console.log('\n' + ok + ' OK, ' + fail + ' FAIL');
   process.exit(fail ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });
