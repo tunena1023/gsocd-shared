@@ -187,7 +187,12 @@
       var prev = hooks.saved;
       hooks = Object.assign({}, hooks, h || {});
       /* saved se junta tambien (el prefix al cargar la pagina y onFresh despues). */
-      if (prev && h && h.saved) hooks.saved = Object.assign({}, prev, h.saved);
+      /* Con sus getters (p. ej. prefix que depende de quien entro): no se copian como valor. */
+      if (prev && h && h.saved) {
+        var m = {};
+        [prev, h.saved].forEach(function (o) { Object.keys(o).forEach(function (k) { Object.defineProperty(m, k, Object.assign(Object.getOwnPropertyDescriptor(o, k), { configurable: true })); }); });
+        hooks.saved = m;
+      }
       if (inited) return;
       inited = true;
       try { window.addEventListener('online', wakeAll); } catch (e) { /* sin eventos */ }

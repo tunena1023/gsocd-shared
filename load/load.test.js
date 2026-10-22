@@ -180,6 +180,13 @@ const err = (st, m) => Object.assign(new Error(m || 'boom'), { status: st });
   r = await L.get('p', async () => { throw new Error('no deberia llamarse'); });
   assert('saved: y la pantalla recibe lo nuevo de memoria', r === 'v-new', r);
 
+  /* prefix con getter (quien entro se sabe despues): al juntar init no se congela */
+  L._reset(); let who = null;
+  L.init({ saved: { get prefix() { return who ? 'gs-admin-load|' + who + '|' : null; } } }); L.init({ saved: { fastMs: 20 } });
+  who = 'tarde@x';
+  await L.get('g', async () => 'gv');
+  assert('saved: un prefix con getter sigue vivo despues de juntar init', store['gs-admin-load|tarde@x|g'] && store['gs-admin-load|tarde@x|g'].data === 'gv', Object.keys(store));
+
   console.log('\n' + ok + ' OK, ' + fail + ' FAIL');
   process.exit(fail ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });
