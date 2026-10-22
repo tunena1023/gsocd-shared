@@ -152,8 +152,9 @@
   }
 
   var api = {
+    /* Se puede llamar mas de una vez (p. ej. saved al cargar la pagina y onStuck despues): se juntan. */
     init: function (h) {
-      hooks = h || {};
+      hooks = Object.assign({}, hooks, h || {});
       if (inited) return;
       inited = true;
       try { window.addEventListener('online', wakeAll); } catch (e) { /* sin eventos */ }

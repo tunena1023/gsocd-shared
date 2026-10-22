@@ -156,6 +156,10 @@ const err = (st, m) => Object.assign(new Error(m || 'boom'), { status: st });
   await L.get('p', async () => 'v');
   assert('saved.prefix: se guarda con el prefijo del portal (lo borra su Sign out)', store['gs-admin-load|cfo@x|p'] && store['gs-admin-load|cfo@x|p'].data === 'v', Object.keys(store));
 
+  L._reset(); L.init({ saved: { prefix: 'gs-admin-load|cfo@x|', fastMs: 20 } }); L.init({ onStuck: () => {} });
+  await L.get('p2', async () => 'v2');
+  assert('init dos veces (saved primero, onStuck despues): se juntan, saved sigue', store['gs-admin-load|cfo@x|p2'], Object.keys(store));
+
   console.log('\n' + ok + ' OK, ' + fail + ' FAIL');
   process.exit(fail ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });
