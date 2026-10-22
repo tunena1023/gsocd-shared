@@ -57,6 +57,13 @@ cambio; el encabezado de la copia dice "no editar aquí".
 Las piezas de backend son funciones **puras**: no hacen sus propias consultas a SharePoint/Graph; cada portal hace
 sus consultas y guarda sus datos. Se prueban con Node solo: `node lib/<pieza>.test.js`.
 
+**Excepción: `lib/sql-mirror` (CFO 22/10/2026)** sí escribe, en SQL (Postgres en Neon), no en SharePoint: envuelve el
+`graphFetch` de cada portal y copia a la tabla del mismo nombre cada guardado en una lista (crear, cambiar, borrar).
+SharePoint sigue siendo lo que se usa y se lee; si la copia falla, el guardado sigue normal y se escribe en el log.
+Sin la variable `SQL_MIRROR_URL` no hace nada. Su prueba usa un Postgres en memoria:
+`npm i --no-save @electric-sql/pglite && node lib/sql-mirror.test.js`. Es la única pieza con dependencia
+(`@neondatabase/serverless`).
+
 ## Reglas que siguen vigentes
 
 - **`camera-capture.html` va una copia por dominio** (vive en los 3 repos), porque IndexedDB no cruza dominios.
