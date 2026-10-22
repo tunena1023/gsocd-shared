@@ -81,5 +81,10 @@ la CFO ya había hecho. Para que no vuelva a pasar, **en cada cosa que hagas, en
 - **Algo se cancela o se suelta:** se quita o se marca así en el HANDOFF, no se deja como pendiente.
 - **El bloque "QUÉ FALTA DE VERDAD"** (HANDOFF §3) es la lista corta de lo pendiente: si lo terminas, lo
   quitas de ahí; si sale algo nuevo, lo agregas ahí.
+- **El HANDOFF solo tiene lo vigente, máximo 400 renglones (CFO 22/10).** Va ahí: cómo funciona lo correcto (reglas de la
+  CFO y lo no obvio de lo que está en producción), lo que se está trabajando (EN `preview`), problemas conocidos y lo que
+  falta o decide la CFO. **Cada vez que agregas algo, en el mismo push revisas tu tema y borras lo que ya no aplica**
+  (subido, cancelado, resuelto, la historia: eso queda en `git log`). Antes de subir: `wc -l HANDOFF.md`; si pasa de 400,
+  recortas lo viejo antes del push.
 - Antes de decirle a la CFO qué falta, compara con el código (`git diff origin/main origin/preview --stat` y
   `git log`), no solo con las notas.
