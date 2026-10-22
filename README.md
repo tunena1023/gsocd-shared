@@ -63,6 +63,14 @@ SharePoint sigue siendo lo que se usa y se lee; si la copia falla, el guardado s
 Sin la variable `SQL_MIRROR_URL` no hace nada. Su prueba usa un Postgres en memoria:
 `npm i --no-save @electric-sql/pglite && node lib/sql-mirror.test.js`. Es la única pieza con dependencia
 (`@neondatabase/serverless`).
+Con él va `lib/sql-read` (CFO 22/10/2026): las lecturas de listas (GET) según el switch Developer › SQL migration ›
+Read from (Settings `SqlReadMode`, uno para test y otro para producción): `sharepoint` (como siempre), `compare`
+(contesta SharePoint y anota en la tabla `_read_diffs` lo que SQL contestaría distinto) o `sql` (contesta SQL; si
+falla o tarda, SharePoint). Los crons (`context({ background: true })` en el ruteador de cada portal), la copia, el
+Compare, `Settings` y `EquipmentPieces` (candado If-Match) leen siempre de SharePoint. Prueba: `node lib/sql-read.test.js`.
+
+**`live-refresh`: modo idle (CFO 22/10/2026).** A los 10 min sin mover nada la pantalla se oscurece un poco y deja de
+revisar; con cualquier movimiento se aclara y revisa al momento. Prueba: `npm i --no-save jsdom && node live-refresh/live-refresh.test.js`.
 
 ## Reglas que siguen vigentes
 

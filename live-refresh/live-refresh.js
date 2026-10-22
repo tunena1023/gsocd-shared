@@ -21,9 +21,23 @@
    aplicar el cambio de verdad (onChange, normalmente: recargar todo
    y pintar un toast).
 
+   Modo "idle" (22/10/2026). CFO: "despues de 10 minutos sin mover
+   nada, la pantalla se oscurece un poco y deja de actualizarse; al
+   moverse se aclara y se actualiza". Si nadie mueve el mouse, toca,
+   teclea, usa la rueda o hace scroll en idleMs, las revisiones se
+   detienen (checkFn no se llama) y una sola capa negra al ~28% cubre
+   la pagina (se ve todo detras, sin texto ni boton). Con cualquier
+   movimiento la capa se quita y se revisa al momento (mismas reglas:
+   no si esta escribiendo, no si la pestana esta oculta). La capa
+   tiene pointer-events:none: el primer clic/toque llega a lo que esta
+   debajo. Una sola capa y un solo juego de listeners para toda la
+   pagina, compartidos por todos los watchers; se quitan cuando se
+   detiene el ultimo watcher con idle.
+
    Uso:
      const watcher = GSLiveRefresh.watch({
        intervalMs: 30000,                    // default 30000
+       idleMs: 600000,                       // default 600000 (10 min); 0 o idle:false = sin idle
        checkFn: async () => {                // trae un "estado" comparable
          const res = await api('/get-orders', { body: {...} });
          return buildSignature(res.orders);
@@ -82,6 +96,115 @@
     document.head.appendChild(style);
   }
 
+  /* Idle: una sola capa y un solo juego de listeners para toda la
+     pagina. Cada watcher con idle se anota en idleWatchers; la capa
+     sale cuando pasa el idleMs mas corto sin actividad, y cada watcher
+     deja de revisar cuando pasa su propio idleMs. */
+  var IDLE_EVENTS = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'wheel', 'scroll'];
+  var idleWatchers = [];
+  var lastActivity = 0;
+  var idleTimer = null;
+  var idleOverlay = null;
+  var pageIdle = false;
+
+  function ensureIdleCSS() {
+    if (document.getElementById('gs-live-refresh-idle-css')) return;
+    var style = document.createElement('style');
+    style.id = 'gs-live-refresh-idle-css';
+    style.textContent =
+      '.gs-live-refresh-idle{position:fixed;top:0;left:0;right:0;bottom:0;background:#000;' +
+      'opacity:0;pointer-events:none;z-index:2147483647;transition:opacity .6s ease}' +
+      '.gs-live-refresh-idle.gs-live-refresh-idle-on{opacity:.28}';
+    document.head.appendChild(style);
+  }
+
+  function minIdleMs() {
+    var m = Infinity;
+    for (var i = 0; i < idleWatchers.length; i++) m = Math.min(m, idleWatchers[i].idleMs);
+    return m;
+  }
+
+  function idleFor(ms) { return Date.now() - lastActivity >= ms; }
+
+  function showIdleOverlay() {
+    if (!document.body) return;
+    ensureIdleCSS();
+    if (!idleOverlay) {
+      idleOverlay = document.createElement('div');
+      idleOverlay.className = 'gs-live-refresh-idle';
+      idleOverlay.setAttribute('aria-hidden', 'true');
+    }
+    if (!idleOverlay.parentNode) {
+      document.body.appendChild(idleOverlay);
+      void idleOverlay.offsetWidth; // reflow -- sin esto no se ve el fade de entrada
+    }
+    idleOverlay.classList.add('gs-live-refresh-idle-on');
+  }
+
+  function hideIdleOverlay() {
+    if (idleOverlay) idleOverlay.classList.remove('gs-live-refresh-idle-on');
+  }
+
+  function scheduleIdle() {
+    clearTimeout(idleTimer);
+    idleTimer = null;
+    if (!idleWatchers.length || pageIdle) return;
+    var wait = lastActivity + minIdleMs() - Date.now();
+    if (wait <= 0) {
+      pageIdle = true;
+      showIdleOverlay();
+      return;
+    }
+    idleTimer = setTimeout(scheduleIdle, wait);
+  }
+
+  function onActivity() {
+    var toWake = [];
+    for (var i = 0; i < idleWatchers.length; i++) {
+      if (idleFor(idleWatchers[i].idleMs)) toWake.push(idleWatchers[i]);
+    }
+    lastActivity = Date.now();
+    if (pageIdle) {
+      pageIdle = false;
+      hideIdleOverlay();
+    }
+    if (!idleTimer) scheduleIdle();
+    for (var j = 0; j < toWake.length; j++) toWake[j].wake();
+  }
+
+  function addIdleWatcher(entry) {
+    if (!idleWatchers.length) {
+      lastActivity = Date.now();
+      for (var i = 0; i < IDLE_EVENTS.length; i++) {
+        document.addEventListener(IDLE_EVENTS[i], onActivity, { capture: true, passive: true });
+      }
+    }
+    idleWatchers.push(entry);
+    scheduleIdle();
+  }
+
+  function removeIdleWatcher(entry) {
+    var idx = idleWatchers.indexOf(entry);
+    if (idx === -1) return;
+    idleWatchers.splice(idx, 1);
+    if (idleWatchers.length) {
+      if (pageIdle && !idleFor(minIdleMs())) {
+        pageIdle = false;
+        hideIdleOverlay();
+      }
+      scheduleIdle();
+      return;
+    }
+    clearTimeout(idleTimer);
+    idleTimer = null;
+    pageIdle = false;
+    for (var i = 0; i < IDLE_EVENTS.length; i++) {
+      document.removeEventListener(IDLE_EVENTS[i], onActivity, { capture: true, passive: true });
+    }
+    if (idleOverlay && idleOverlay.parentNode) idleOverlay.parentNode.removeChild(idleOverlay);
+    idleOverlay = null;
+  }
+
   window.GSLiveRefresh = {
     flashElement: function (el) {
       if (!el) return;
@@ -103,9 +226,12 @@
       var timer = null;
       var stopped = false;
       var checking = false; // evita 2 revisiones encimadas si una tarda
+      var idleMs = cfg.idle === false ? 0 : (cfg.idleMs == null ? 600000 : Number(cfg.idleMs) || 0);
+      var idleEntry = idleMs > 0 ? { idleMs: idleMs, wake: function () { check(); } } : null;
 
       function check() {
         if (stopped || checking) return;
+        if (idleEntry && idleFor(idleMs)) return; // idle: no se revisa hasta que haya actividad
         if (document.visibilityState !== 'visible') return;
         if (isUserTyping()) return; // se reintenta solo el siguiente tick
         checking = true;
@@ -131,6 +257,7 @@
       document.addEventListener('visibilitychange', onVisible);
       window.addEventListener('online', check);
       timer = setInterval(check, cfg.intervalMs);
+      if (idleEntry) addIdleWatcher(idleEntry);
 
       /* Primera revision: solo establece la base para comparar --
          nunca dispara onChange en el arranque (no hay nada previo
@@ -143,6 +270,7 @@
           clearInterval(timer);
           document.removeEventListener('visibilitychange', onVisible);
           window.removeEventListener('online', check);
+          if (idleEntry) removeIdleWatcher(idleEntry);
         },
         checkNow: check
       };
