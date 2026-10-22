@@ -35,6 +35,10 @@
      - opts.onUpdate(data) si la pantalla lo dio (se repinta ella sola), o
      - saved.onFresh({ key, label, data }) del portal (repinta la pantalla
        que esta abierta).
+   Lo nuevo igual a lo guardado: no se hace nada (no se repinta). Distinto: onFresh se llama
+   cuando la persona NO esta escribiendo (input, textarea, select) y la pantalla se ve; asi el
+   repintado nunca le borra lo que lleva. La pantalla vuelve a pedir la misma carga y la recibe
+   al momento (se queda guardada en memoria 2 min o hasta que se pide).
    Una carga que ya llego fresca en esta pagina (p. ej. despues de guardar)
    espera al servidor: nunca enseña algo mas viejo de lo que ya se ve.
    opts.saved === false: esa carga nunca usa lo guardado.
@@ -49,7 +53,8 @@
 
   var WAITS = [2000, 5000, 10000, 20000, 30000, 60000, 120000, 300000];
   var STUCK_MS = 15 * 60000;
-  var MEMO_MS = 30000;
+  var MEMO_MS = 120000;
+  var TYPING_RETRY_MS = 2000;
   var hooks = {}, inited = false, jobs = {}, slots = {};
   var fresh = {};          /* key -> true: ya llego fresca en esta pagina */
   var memo = {};           /* key -> { at, data }: lo nuevo que llego despues de enseñar lo guardado */
@@ -65,6 +70,29 @@
   function savedPrefix(cfg) { return cfg.prefix != null ? String(cfg.prefix) : 'gs-load|' + cfg.scope + '|'; }
   function savedKey(key) { return savedPrefix(savedCfg()) + key; }
   function call(fn, a) { try { if (fn) fn(a); } catch (e) { /* la pantalla no tumba la carga */ } }
+  function same(a, b) { try { return JSON.stringify(a) === JSON.stringify(b); } catch (e) { return false; } }
+  /* Escribiendo o con la pantalla escondida: el repintado espera. */
+  function busy() {
+    try {
+      if (document.hidden) return true;
+      var el = document.activeElement;
+      if (!el || el === document.body) return false;
+      var tag = String(el.tagName || '').toUpperCase();
+      return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || !!el.isContentEditable;
+    } catch (e) { return false; }
+  }
+  var freshQueue = {}, freshTimer = null;
+  function flushFresh() {
+    freshTimer = null;
+    if (busy()) { freshTimer = setTimeout(flushFresh, TYPING_RETRY_MS); return; }
+    var q = freshQueue; freshQueue = {};
+    var cfg = savedCfg();
+    Object.keys(q).forEach(function (k) { if (q[k].onUpdate) call(q[k].onUpdate, q[k].data); else call(cfg && cfg.onFresh, q[k].info); });
+  }
+  function queueFresh(key, item) {
+    freshQueue[key] = item;
+    if (!freshTimer) freshTimer = setTimeout(flushFresh, 50);
+  }
 
   function get(key, fn, opts) {
     key = String(key);
@@ -102,7 +130,7 @@
         triedSaved = true;
         window.GSSaved.read(savedKey(key), cfg.maxAgeMs || 7 * 86400000).then(function (row) {
           if (!row || job.settled || job.cancelled) return;
-          job.settled = true; job.servedSaved = true;
+          job.settled = true; job.servedSaved = true; job.savedData = row.data;
           if (savedObjs && row.data && typeof row.data === 'object') savedObjs.add(row.data);
           showing[key] = true;
           call(cfg.onShowSaved, { key: key, label: job.label, at: row.at });
@@ -120,10 +148,12 @@
           fresh[key] = true;
           if (cfg) window.GSSaved.save(savedKey(key), data).then(null, function () {});
           if (!job.settled) { job.settled = true; resolve(data); return; }
-          /* Ya se enseño lo guardado: ahora lo nuevo. */
+          /* Ya se enseño lo guardado: ahora lo nuevo (solo si cambio algo). */
           delete showing[key];
-          if (job.onUpdate) call(job.onUpdate, data);
-          else { memo[key] = { at: Date.now(), data: data }; call(cfg && cfg.onFresh, { key: key, label: job.label, data: data }); }
+          if (!same(job.savedData, data)) {
+            if (!job.onUpdate) memo[key] = { at: Date.now(), data: data };
+            queueFresh(key, { onUpdate: job.onUpdate, data: data, info: { key: key, label: job.label, data: data } });
+          }
           if (!Object.keys(showing).length) call(cfg && cfg.onAllFresh);
         }, function (e) {
           if (job.cancelled) return;
@@ -154,7 +184,10 @@
   var api = {
     /* Se puede llamar mas de una vez (p. ej. saved al cargar la pagina y onStuck despues): se juntan. */
     init: function (h) {
+      var prev = hooks.saved;
       hooks = Object.assign({}, hooks, h || {});
+      /* saved se junta tambien (el prefix al cargar la pagina y onFresh despues). */
+      if (prev && h && h.saved) hooks.saved = Object.assign({}, prev, h.saved);
       if (inited) return;
       inited = true;
       try { window.addEventListener('online', wakeAll); } catch (e) { /* sin eventos */ }
@@ -174,10 +207,11 @@
     pending: function () { return Object.keys(jobs).map(function (k) { return { key: k, label: jobs[k].label, tries: jobs[k].tries, at: jobs[k].at }; }); },
     wake: wakeAll,
     /* Solo para pruebas */
-    _cfg: function (c) { if (c.waits) WAITS = c.waits; if (c.stuck != null) STUCK_MS = c.stuck; if (c.memo != null) MEMO_MS = c.memo; },
+    _cfg: function (c) { if (c.waits) WAITS = c.waits; if (c.stuck != null) STUCK_MS = c.stuck; if (c.memo != null) MEMO_MS = c.memo; if (c.typingRetry != null) TYPING_RETRY_MS = c.typingRetry; },
     _reset: function () {
       Object.keys(jobs).forEach(function (k) { clearTimeout(jobs[k].timer); clearTimeout(jobs[k].fastTimer); });
       jobs = {}; slots = {}; hooks = {}; fresh = {}; memo = {}; showing = {};
+      clearTimeout(freshTimer); freshTimer = null; freshQueue = {};
     }
   };
   window.GSLoad = api;

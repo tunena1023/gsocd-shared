@@ -160,6 +160,26 @@ const err = (st, m) => Object.assign(new Error(m || 'boom'), { status: st });
   await L.get('p2', async () => 'v2');
   assert('init dos veces (saved primero, onStuck despues): se juntan, saved sigue', store['gs-admin-load|cfo@x|p2'], Object.keys(store));
 
+  /* Lo nuevo igual a lo guardado: no se repinta */
+  L._reset(); L._cfg({ typingRetry: 20 }); const fresh3 = []; L.init({ saved: { prefix: 'gs-admin-load|cfo@x|', fastMs: 20, onFresh: i => fresh3.push(i.key) } });
+  r = await L.get('p', () => wait(60).then(() => 'v'));
+  await wait(120);
+  assert('saved: lo nuevo igual a lo guardado -> no se llama onFresh', r === 'v' && !fresh3.length, fresh3);
+
+  /* Escribiendo: el repintado espera a que deje el campo */
+  L._reset(); L._cfg({ typingRetry: 20 }); const fresh4 = [];
+  L.init({ saved: { prefix: 'gs-admin-load|cfo@x|' } }); L.init({ saved: { fastMs: 20, onFresh: i => fresh4.push(i.key) } });
+  document.activeElement = { tagName: 'INPUT' };
+  r = await L.get('p', () => wait(40).then(() => 'v-new'));
+  await wait(150);
+  assert('saved: init dos veces con saved -> se juntan (prefix + onFresh)', r === 'v', r);
+  assert('saved: escribiendo en un campo -> onFresh espera', !fresh4.length, fresh4);
+  document.activeElement = null;
+  await wait(80);
+  assert('saved: al dejar el campo -> onFresh una vez', fresh4.length === 1 && fresh4[0] === 'p', fresh4);
+  r = await L.get('p', async () => { throw new Error('no deberia llamarse'); });
+  assert('saved: y la pantalla recibe lo nuevo de memoria', r === 'v-new', r);
+
   console.log('\n' + ok + ' OK, ' + fail + ' FAIL');
   process.exit(fail ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });
