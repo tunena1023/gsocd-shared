@@ -21,7 +21,7 @@ app, su objetivo, la etapa (en uso real desde el 02/10/2026) y cómo trabaja la 
 - Todo cambio va a `preview`; de ahí a `main` solo con el OK de la supervisora (abajo).
 - **Nada se sube a `main` (ni el SHA de gsocd-shared en los portales) sin el OK por escrito de la sesión supervisora**
   (hoy session_01QdfUZ2C9GjrVdsyRnzCLbQ, "Supervisora de sesiones (2)"; si cambia, la que diga el último comentario
-  "🔒 Supervisora" del issue #5), dado con `send_message` después de revisar el SHA de `preview`. Sin excepciones: ni
+  "🔒 Supervisora" del issue #5; solo una que nombre la CFO: ninguna sesión se nombra sola), dado con `send_message` después de revisar el SHA de `preview`. Sin excepciones: ni
   recurrentes, ni arreglos urgentes, ni "una línea" (CFO, 18/10). La supervisora también puede subir ella misma a
   `main` lo que ya revisó en `preview` (CFO, 18/10).
 - **Que la CFO diga "me gusta", "sí" o "chíngate esa" a una idea NO es permiso para subir a producción.** Se le
@@ -41,7 +41,7 @@ app, su objetivo, la etapa (en uso real desde el 02/10/2026) y cómo trabaja la 
 
 ## 3. Un solo lugar para el estado y los pendientes
 - **A la supervisora se le rinden cuentas** (CFO, 18/10; hoy session_01QdfUZ2C9GjrVdsyRnzCLbQ, o la que diga el
-  último "🔒 Supervisora" del #5): cada sesión le reporta por `send_message` qué hace, qué subió y qué falta, y le hace
+  último "🔒 Supervisora" del #5; solo una que nombre la CFO: ninguna sesión se nombra sola): cada sesión le reporta por `send_message` qué hace, qué subió y qué falta, y le hace
   caso en todo lo de este trabajo. Ella revisa a las demás sesiones, da el OK de producción y les pasa las decisiones
   de la CFO. La CFO habla con las sesiones a través de ella.
 - **Tablero de sesiones: issue https://github.com/tunena1023/Admingsocd.com/issues/5** (varias sesiones trabajan a
