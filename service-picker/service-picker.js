@@ -117,6 +117,7 @@
       '.gs-sp-pkgs-main>.gs-sp-area-card,.gs-sp-pkgs-side>.gs-sp-area-card{grid-column:auto!important;margin:0}' +
       '@media (max-width:760px){.gs-sp-pkgs-split{grid-template-columns:1fr}}' +
       '.gs-sp-usual-tag.saved{background:#E6F2EF;color:#2F6F62}' +
+      '.gs-sp-usual-tag.shared{background:#EEF1F6;color:#44546A}' +
       '.gs-sp-usual-name{margin-top:12px}' +
       '.gs-sp-usual-name label{display:block;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray,#6B6B6B);margin-bottom:6px}' +
       '.gs-sp-usual-name input{width:100%;box-sizing:border-box;border:1.5px solid var(--border,#E0D9CC);border-radius:8px;padding:10px 12px;font-size:13.5px;font-family:inherit;outline:none}' +
@@ -592,13 +593,17 @@
     var LEVELS = ['Level 1', 'Level 2', 'Level 3'];
     var cards = pkgs.map(function (p) {
       var open = !!inst.openPkgs[p.sku], used = isSelected(inst, p);
-      var editing = !!(pe && open && inst.pkgDraft && inst.pkgDraft.sku === String(p.sku));
+      var editing = !!(pe && !pe.resetOnly && open && inst.pkgDraft && inst.pkgDraft.sku === String(p.sku));
       /* v1.62.0 (24/09/2026, el dueño: "falto el boton de Edit en los
          packages, deben funcionar mas o menos igual"): en el portal (hay
          usualEdit y NO packageEdit de Admin) cualquier paquete trae Edit:
          el cliente lo ajusta y lo guarda con nombre como "My package". El
          paquete original no cambia. */
-      var cEdit = !pe && inst.usualEdit;
+      /* v1.72.0 (CFO 22/10: "debe funcionar igual en todas partes"): con packageEdit.resetOnly (Admin › Create Order)
+         el Edit es el mismo del portal (guarda un My package del cliente); solo queda "Reset to standard" para las
+         versiones por cliente que ya existian. */
+      var peEdit = !!(pe && !pe.resetOnly);
+      var cEdit = (!pe || pe.resetOnly) && inst.usualEdit;
       var cEditing = !!(cEdit && open && inst.usualDraft && inst.usualDraft.key === 'pkg:' + p.sku);
       var isCustom = !!(pe && pe.customSkus && pe.customSkus[String(p.sku)]);
       var items = editing ? inst.pkgDraft.items : (Array.isArray(p.packageItems) ? p.packageItems : []);
@@ -659,8 +664,8 @@
         (isCustom ? '<span class="gs-sp-pkg-cust">Custom for ' + escapeHtml(peWho(pe)) + '</span>' : '') + '</div>' +
         '<div class="gs-sp-area-prev">' + (names.length ? 'Includes ' + names.length + (names.length === 1 ? ' service' : ' services') +
         (open ? '' : ': ' + escapeHtml(names.slice(0, 3).join(', ')) + (names.length > 3 ? '\u2026' : '')) : 'Contents not set yet') +
-        (isCustom && open && !editing ? '<span class="gs-sp-pkg-reset" data-pedit-reset="' + escapeAttr(p.sku) + '">Reset to standard</span>' : '') + '</div></div>' +
-        (pe && open && !editing ? '<button type="button" class="gs-sp-pkg-edit" data-pedit-open="' + escapeAttr(p.sku) + '">Edit</button>' : '') +
+        (isCustom && open && !editing && !cEditing ? '<span class="gs-sp-pkg-reset" data-pedit-reset="' + escapeAttr(p.sku) + '">Reset to standard</span>' : '') + '</div></div>' +
+        (peEdit && open && !editing ? '<button type="button" class="gs-sp-pkg-edit" data-pedit-open="' + escapeAttr(p.sku) + '">Edit</button>' : '') +
         (cEdit && open && !cEditing ? '<button type="button" class="gs-sp-pkg-edit" data-pkg-cedit="' + escapeAttr(p.sku) + '">Edit</button>' : '') +
         '<span class="gs-sp-area-count">Package</span></div>' +
         body + '</div>';
@@ -695,10 +700,10 @@
         if (willOpen) {
           inst.openPkgs = {}; inst.openUsual = {};
           if (inst.pkgDraft && inst.pkgDraft.sku !== String(k)) inst.pkgDraft = null;
-          if (inst.usualDraft && inst.usualDraft.key !== 'pkg:' + k) inst.usualDraft = null;
+          if (inst.usualDraft && inst.usualDraft.key !== 'pkg:' + k) dropDraft(inst);
         }
         inst.openPkgs[k] = willOpen;
-        if (!inst.openPkgs[k] && inst.usualDraft && inst.usualDraft.key === 'pkg:' + k) inst.usualDraft = null;
+        if (!inst.openPkgs[k] && inst.usualDraft && inst.usualDraft.key === 'pkg:' + k) dropDraft(inst);
         if (!inst.openPkgs[k] && inst.pkgDraft && inst.pkgDraft.sku === String(k)) inst.pkgDraft = null;
         /* v1.60.0 (24/09/2026, el dueño: "el paquete se debe seleccionar
            automatico cuando se abre, algo asi como los servicios
@@ -718,11 +723,13 @@
           inst.svcLevel[svcKey(inst.propertyType, pkgSvc.serviceName)] = best;
           var m = {}; its.forEach(function (x) { m[String(x.sku)] = /^Level [123]$/.test(x.level || '') ? x.level : best; });
           inst.pkgItemLevels[String(k)] = m;
+          inst.draftApplied = false;
           renderGrid(pickerId);
           fireChange(pickerId);
           return;
         }
         renderGrid(pickerId);
+        if (inst.draftApplied) { inst.draftApplied = false; fireChange(pickerId); }
       });
     });
     bindSetCards(pickerId, inst, grid);
@@ -734,7 +741,7 @@
         var ov = inst.pkgItemLevels[sku] || {};
         inst.usualDraft = { key: 'pkg:' + sku, source: 'package', name: '', items: ((p && p.packageItems) || []).map(function (x) {
           var s2 = inst.catalog.find(function (c) { return String(c.sku) === String(x.sku); });
-          return { sku: String(x.sku), level: s2 && isLeveledItem(s2) ? (ov[String(x.sku)] || x.level || 'Level 1') : '' }; }) };
+          return { sku: String(x.sku), level: s2 && isLeveledItem(s2) ? (ov[String(x.sku)] || x.level || 'Level 1') : '', qty: s2 && isQuantityItem(s2) ? 1 : '' }; }) };
         renderGrid(pickerId);
       });
     });
@@ -834,8 +841,9 @@
         (u.match ? '<span class="gs-sp-area-tag">This place</span>' : '') +
         (used ? '<span class="gs-sp-area-sel">In use</span>' : (sel.length ? '<span class="gs-sp-area-sel">' + sel.length + ' picked</span>' : '')) + '</div>' +
         '<div class="gs-sp-area-prev">' + its.length + (its.length === 1 ? ' service' : ' services') + (open ? '' : ': ' + escapeHtml(its.slice(0, 3).map(function (x) { return x.s.serviceName; }).join(', ')) + (its.length > 3 ? '\u2026' : '')) + '</div></div>' +
-        (ue && u.kind === 'usual' && open && !uEditing ? '<button type="button" class="gs-sp-pkg-edit" data-uedit-open="' + escapeAttr(key) + '">Edit</button>' : '') +
-        (u.kind === 'saved' ? '<span class="gs-sp-usual-tag saved">My package</span>' : u.kind === 'area' ? '<span class="gs-sp-area-count">' + its.length + '</span>' : '<span class="gs-sp-usual-tag">Most used</span>') + '</div>' + body + '</div>';
+        /* v1.72.0: tambien se edita un My package propio (se guarda en el mismo); uno compartido no. */
+        (ue && !ue.applyHere && (u.kind === 'usual' || (u.kind === 'saved' && !(u.raw && u.raw.shared))) && open && !uEditing ? '<button type="button" class="gs-sp-pkg-edit" data-uedit-open="' + escapeAttr(key) + '">Edit</button>' : '') +
+        (u.kind === 'saved' ? (u.raw && u.raw.shared ? '<span class="gs-sp-usual-tag shared">Shared</span>' : '<span class="gs-sp-usual-tag saved">My package</span>') : u.kind === 'area' ? '<span class="gs-sp-area-count">' + its.length + '</span>' : '<span class="gs-sp-usual-tag">Most used</span>') + '</div>' + body + '</div>';
   }
 
   /* v1.64.0: con una tarjeta abierta se parte en dos -- la abierta a la
@@ -857,15 +865,16 @@
         var k = String(h.dataset.usual); var willOpenU = !inst.openUsual[k];
         if (willOpenU) {
           inst.openPkgs = {}; inst.openUsual = {}; inst.pkgDraft = null;
-          if (inst.usualDraft && inst.usualDraft.key !== k) inst.usualDraft = null;
+          if (inst.usualDraft && inst.usualDraft.key !== k) dropDraft(inst);
         }
         inst.openUsual[k] = willOpenU;
-        if (!inst.openUsual[k] && inst.usualDraft && inst.usualDraft.key === k) inst.usualDraft = null;
+        if (!inst.openUsual[k] && inst.usualDraft && inst.usualDraft.key === k) dropDraft(inst);
         if (inst.openUsual[k]) {
           var its = usualItems(inst, k);
-          if (its.length && !its.every(function (x) { return isSelected(inst, x.s); })) { setUsual(inst, its, null); renderGrid(pickerId); fireChange(pickerId); return; }
+          if (its.length && !its.every(function (x) { return isSelected(inst, x.s); })) { inst.draftApplied = false; setUsual(inst, its, null); renderGrid(pickerId); fireChange(pickerId); return; }
         }
         renderGrid(pickerId);
+        if (inst.draftApplied) { inst.draftApplied = false; fireChange(pickerId); }
       });
     });
     Array.prototype.forEach.call(grid.querySelectorAll('[data-usual-all]'), function (b) {
@@ -898,21 +907,25 @@
         var s2 = bySku[String(x.sku)]; if (!s2) return '';
         var baseDiv = inst.pkgDivision || inst.division;
         var od = baseDiv && baseDiv !== 'Mixed' && String(s2.division || '').toLowerCase() !== String(baseDiv).toLowerCase();
+        /* v1.72.0: los que piden cantidad (puertas, persianas...) traen su numero. */
+        var qtyCtl = isQuantityItem(s2) ? '<span><span class="gs-sp-qty-label">Qty</span><input type="number" class="gs-sp-qty-input" min="1" step="1" inputmode="numeric" data-uedit-qty="' + i + '" value="' + escapeAttr(x.qty || '') + '"></span>' : '';
         return '<div class="gs-sp-pkg-eline"><span>' + nameWithTip(s2) + (od ? ' <span class="gs-sp-otherdiv">' + escapeHtml(s2.division || '') + '</span>' : '') + '</span><span class="gs-sp-pkg-eright">' +
           (isLeveledItem(s2) ? '<span class="gs-sp-lvl-group">' + LV.map(function (l, k) { return '<div class="gs-sp-lvl-btn' + (x.level === l ? ' active' : '') + '" data-uedit-i="' + i + '" data-uedit-lv="' + l + '">L' + (k + 1) + '</div>'; }).join('') + '</span>' : '') +
-          '<button type="button" class="gs-sp-pkg-rm" data-uedit-rm="' + i + '" title="Remove">\u2715</button></span></div>';
+          qtyCtl + '<button type="button" class="gs-sp-pkg-rm" data-uedit-rm="' + i + '" title="Remove">\u2715</button></span></div>';
       }).join('') + (dItems.length ? '' : '<p class="gs-sp-pkg-note">No services yet.</p>') + '</div>' +
       '<div class="gs-sp-pkg-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>' +
       '<input type="text" data-uedit-q placeholder="Start your search here\u2026" autocomplete="off"></div>' +
       '<div class="gs-sp-pkg-results" data-uedit-results></div>' +
       /* v1.68.0: en un template (place 'template') no se pide nombre -- los
          cambios se aplican a ESE template; en los demas lugares se guarda
-         con nombre como "My package". Lo decide la pieza compartida. */
+         con nombre como "My package". v1.72.0 (CFO 22/10: "Apply ya no seria
+         necesario"): en el template no hay boton; Save Template guarda lo que se ve. */
       (inst.usualEdit && inst.usualEdit.applyHere
-        ? '<p class="gs-sp-pkg-note">The package becomes separate services in this template, with your changes.</p>'
-        : '<div class="gs-sp-usual-name"><label>Name your package</label><input type="text" data-uedit-name maxlength="60" placeholder="e.g. Weekly unit turnover" value="' + escapeAttr(inst.usualDraft.name || '') + '"></div>') +
-      '<div class="gs-sp-pkg-foot"><button type="button" class="gs-sp-pkg-cancel" data-uedit-cancel>Cancel</button>' +
-      '<button type="button" class="gs-sp-pkg-save" data-uedit-save' + (inst.usualSaving ? ' disabled' : '') + '>' + (inst.usualSaving ? 'Saving\u2026' : (inst.usualEdit && inst.usualEdit.applyHere ? 'Apply to this template' : 'Save my package')) + '</button></div>' +
+        ? '<p class="gs-sp-pkg-note">Your changes are saved with the template when you click Save Template.</p>' +
+          '<div class="gs-sp-pkg-foot"><button type="button" class="gs-sp-pkg-cancel" data-uedit-cancel>Undo changes</button></div>'
+        : '<div class="gs-sp-usual-name"><label>Name your package</label><input type="text" data-uedit-name maxlength="60" placeholder="e.g. Weekly unit turnover" value="' + escapeAttr(inst.usualDraft.name || '') + '"></div>' +
+          '<div class="gs-sp-pkg-foot"><button type="button" class="gs-sp-pkg-cancel" data-uedit-cancel>Cancel</button>' +
+          '<button type="button" class="gs-sp-pkg-save" data-uedit-save' + (inst.usualSaving ? ' disabled' : '') + '>' + (inst.usualSaving ? 'Saving\u2026' : 'Save my package') + '</button></div>') +
       '<p class="gs-sp-pkg-note" data-uedit-err></p></div>';
   }
 
@@ -928,9 +941,13 @@
         e.stopPropagation();
         var k = String(b.dataset.ueditOpen);
         var its = usualItems(inst, k);
-        inst.usualDraft = { key: k, source: 'usual', name: '', items: its.map(function (x) {
-          var cur = isSelected(inst, x.s) ? inst.svcLevel[svcKey(inst.propertyType, x.s.serviceName)] : null;
-          return { sku: String(x.s.sku), level: isLeveledItem(x.s) ? (cur || x.level || 'Level 1') : '' }; }) };
+        var set = allSets(inst).find(function (x) { return String(x.key) === k; }) || {};
+        var saved = set.kind === 'saved';
+        inst.usualDraft = { key: k, source: saved ? 'saved' : 'usual', name: saved ? (set.name || '') : '', templateId: saved && set.raw ? String(set.raw.key) : '',
+          orig: its.map(function (x) { return String(x.s.sku); }), items: its.map(function (x) {
+          var on = isSelected(inst, x.s), sk = svcKey(inst.propertyType, x.s.serviceName);
+          var cur = on ? inst.svcLevel[sk] : null;
+          return { sku: String(x.s.sku), level: isLeveledItem(x.s) ? (cur || x.level || 'Level 1') : '', qty: isQuantityItem(x.s) ? ((on && inst.svcQty[sk]) || parseInt(x.qty, 10) || '') : '' }; }) };
         renderGrid(pickerId);
       });
     });
@@ -966,7 +983,7 @@
         e.preventDefault(); e.stopPropagation();
         keepName();
         var hs = inst.catalog.find(function (c) { return String(c.sku) === String(h.dataset.ueditHit); });
-        inst.usualDraft.items.push({ sku: String(h.dataset.ueditHit), level: hs && isLeveledItem(hs) ? 'Level 1' : '' });
+        inst.usualDraft.items.push({ sku: String(h.dataset.ueditHit), level: hs && isLeveledItem(hs) ? 'Level 1' : '', qty: hs && isQuantityItem(hs) ? 1 : '' });
         goMixedIfNeeded(pickerId, inst, hs);
         renderGrid(pickerId);
         var again = document.querySelector('#gs-sp-pkgs-' + pickerId + ' [data-uedit-q]'); if (again) again.focus();
@@ -975,47 +992,71 @@
     Array.prototype.forEach.call(q('[data-uedit-cancel]'), function (b) {
       b.addEventListener('click', function (e) { e.stopPropagation(); inst.usualDraft = null; renderGrid(pickerId); });
     });
+    Array.prototype.forEach.call(q('[data-uedit-qty]'), function (n) {
+      n.addEventListener('click', function (e) { e.stopPropagation(); });
+      n.addEventListener('input', function () { var it = inst.usualDraft && inst.usualDraft.items[+n.dataset.ueditQty]; if (it) it.qty = parseInt(n.value, 10) > 0 ? parseInt(n.value, 10) : ''; });
+    });
     Array.prototype.forEach.call(q('[data-uedit-save]'), function (b) {
       b.addEventListener('click', function (e) {
         e.stopPropagation();
         keepName();
         var d = inst.usualDraft, err = scope.querySelector('[data-uedit-err]');
-        if (ue.applyHere) {
-          /* v1.68.0 -- template: el paquete se cambia por SUS servicios
-             (con lo editado) como servicios sueltos del template. Nada va
-             al servidor aqui; se guarda con el "Save Template" de siempre. */
-          if (!d.items.length) { if (err) err.textContent = 'Add at least one service.'; return; }
-          var pt = inst.propertyType;
-          if (!inst.selected[pt]) inst.selected[pt] = {};
-          if (d.source === 'package') {
-            var pkSku = String(d.key).replace(/^pkg:/, '');
-            var pk = inst.catalog.find(function (c) { return String(c.sku) === pkSku; });
-            if (pk) { delete inst.selected[pt][pk.serviceName]; delete inst.svcLevel[svcKey(pt, pk.serviceName)]; }
-            delete inst.pkgItemLevels[pkSku];
-            inst.openPkgs = {};
-          }
-          d.items.forEach(function (x) {
-            var sv = inst.catalog.find(function (c) { return String(c.sku) === String(x.sku); });
-            if (!sv) return;
-            var k2 = svcKey(pt, sv.serviceName);
-            inst.selected[pt][sv.serviceName] = sv.sku;
-            if (isLeveledItem(sv)) inst.svcLevel[k2] = x.level || 'Level 1';
-            if (isQuantityItem(sv) && !inst.svcQty[k2]) inst.svcQty[k2] = 1;
-          });
-          inst.usualDraft = null;
-          renderGrid(pickerId);
-          fireChange(pickerId);
-          return;
-        }
         if (!d.name || !d.name.trim()) { if (err) err.textContent = 'Give your package a name.'; var n = scope.querySelector('[data-uedit-name]'); if (n) n.focus(); return; }
         if (!d.items.length) { if (err) err.textContent = 'Add at least one service.'; return; }
         if (!ue.onSave || inst.usualSaving) return;
         inst.usualSaving = true; renderGrid(pickerId);
-        Promise.resolve(ue.onSave(d.name.trim(), d.items.slice(), d.source || 'usual')).then(function () { inst.usualDraft = null; })
+        /* v1.72.0 (CFO 22/10): lo que se guarda es lo que queda en la orden -- al guardar, el
+           paquete (o el usual) se cambia por lo editado. templateId: el My package que se edito. */
+        Promise.resolve(ue.onSave(d.name.trim(), d.items.slice(), d.source || 'usual', d.templateId || '')).then(function () { applyDraft(pickerId, inst, d); })
           .catch(function () { /* quien monta avisa el error; el borrador se queda */ })
           .then(function () { inst.usualSaving = false; renderGrid(pickerId); });
       });
     });
+  }
+
+  /* v1.72.0 -- el borrador del Edit pasa a lo escogido: el paquete se quita y
+     quedan SUS servicios (con lo editado) sueltos, con su nivel y cantidad. En
+     un template (place 'template') no hay boton: se aplica al darle Save
+     Template (commitEdit); fuera de un template, despues de guardarlo. */
+  function applyDraft(pickerId, inst, d) {
+    if (!d) return;
+    applyDraftState(inst, d);
+    renderGrid(pickerId);
+    fireChange(pickerId);
+  }
+  /* Cerrar o cambiar de tarjeta con un Edit abierto: en un template se queda
+     lo editado (no se pierde sin avisar); en los demas lugares se tira, como antes. */
+  function dropDraft(inst) {
+    var d = inst.usualDraft;
+    if (d && inst.usualEdit && inst.usualEdit.applyHere) { applyDraftState(inst, d); inst.draftApplied = true; }
+    inst.usualDraft = null;
+  }
+  function applyDraftState(inst, d) {
+    var pt = inst.propertyType;
+    if (!inst.selected[pt]) inst.selected[pt] = {};
+    if (d.source === 'package') {
+      var pkSku = String(d.key).replace(/^pkg:/, '');
+      var pk = inst.catalog.find(function (c) { return String(c.sku) === pkSku; });
+      if (pk) { delete inst.selected[pt][pk.serviceName]; delete inst.svcLevel[svcKey(pt, pk.serviceName)]; }
+      delete inst.pkgItemLevels[pkSku];
+      inst.openPkgs = {};
+    }
+    /* Lo que se quito en el Edit de un usual / My package sale de la orden. */
+    var keep = {}; d.items.forEach(function (x) { keep[String(x.sku)] = true; });
+    (d.orig || []).forEach(function (sku) {
+      if (keep[sku]) return;
+      var sv = inst.catalog.find(function (c) { return String(c.sku) === sku; });
+      if (sv && String(inst.selected[pt][sv.serviceName]) === sku) { delete inst.selected[pt][sv.serviceName]; delete inst.svcLevel[svcKey(pt, sv.serviceName)]; delete inst.svcQty[svcKey(pt, sv.serviceName)]; }
+    });
+    d.items.forEach(function (x) {
+      var sv = inst.catalog.find(function (c) { return String(c.sku) === String(x.sku); });
+      if (!sv) return;
+      var k2 = svcKey(pt, sv.serviceName);
+      inst.selected[pt][sv.serviceName] = sv.sku;
+      if (isLeveledItem(sv)) inst.svcLevel[k2] = x.level || 'Level 1';
+      if (isQuantityItem(sv)) inst.svcQty[k2] = parseInt(x.qty, 10) || inst.svcQty[k2] || 1;
+    });
+    if (inst.usualDraft === d) inst.usualDraft = null;
   }
 
   /* v1.57.0 -- eventos del Edit de paquete. El borrador vive en
@@ -1577,6 +1618,16 @@
         renderGrid(pickerId);
       },
       setPackageEdit: function (pe) { inst.packageEdit = pe || null; renderGrid(pickerId); },
+      /* v1.72.0: en un template, Save Template llama esto antes de guardar -- si hay un Edit abierto, lo editado
+         pasa a lo escogido (lo que se guarda es lo que se ve). Regresa '' o el aviso para el usuario. */
+      commitEdit: function () {
+        var d = inst.usualDraft;
+        if (!d) return '';
+        if (!d.items.length) return 'Add at least one service.';
+        applyDraft(pickerId, inst, d);
+        return '';
+      },
+      hasOpenEdit: function () { return !!(inst.usualDraft || inst.pkgDraft); },
       setUsualSets: function (u) { inst.usualSets = u || []; renderGrid(pickerId); },
       setSavedSets: function (u) { inst.savedSets = u || []; renderGrid(pickerId); },
       setCatalog: function (catalog) { inst.catalog = catalog; if (window.GSServiceTooltip) window.GSServiceTooltip.register(catalog); renderGrid(pickerId); },

@@ -190,6 +190,89 @@ const OLD_CASES = async p => p.evaluate(() => {
     return { soft: r('a'), plain: r('b'), cls: document.getElementById('b').querySelector('.gs-sp-accordion').className };
   });
   check('v1.71.0: categoryStyle soft rounds the categories; any other value stays as before', cs.soft === '8px' && cs.plain === '4px' && cs.cls === 'gs-sp-accordion', cs);
+
+  /* ---- v1.72.0 (CFO 22/10): paquetes = templates ---- */
+  const PK = CATALOG.concat([{ sku: 'P-1', serviceName: 'Unit Turnover Package', division: 'Janitorial', propertyType: 'Commercial', category: 'Package',
+    packageItems: [{ sku: '111-10', level: 'Level 1' }, { sku: '111-12', level: 'Level 2' }, { sku: '410-12', level: '' }] }]);
+  const v72 = await p2.evaluate(pk => {
+    const out = {}, g = id => document.getElementById(id);
+    const units = { catalog: pk, division: 'Janitorial', mode: 'levels', crossDivision: true, groupByCategory: true, workToggle: true, workMode: 'units', showPackages: true };
+    /* 1. Template: Edit sin Apply; Save Template (commitEdit) guarda lo que se ve. */
+    let tchg = 0;
+    const t = GSServicePicker.mount('t72', 'a', Object.assign({ place: 'template', onChange: () => tchg++ }, units));
+    g('a').querySelector('.gs-sp-area-head[data-pkg="P-1"]').click();
+    g('a').querySelector('[data-pkg-cedit="P-1"]').click();
+    out.noApply = !/Apply to this template/.test(g('a').textContent) && !g('a').querySelector('[data-uedit-save]') && /Save Template/.test(g('a').textContent);
+    g('a').querySelector('[data-uedit-rm="0"]').click();                          // quita Common Area Vacuuming
+    g('a').querySelector('[data-uedit-lv="Level 3"][data-uedit-i="0"]').click();  // Trash L3
+    const qi = g('a').querySelector('[data-uedit-qty="1"]'); qi.value = '4'; qi.dispatchEvent(new Event('input'));
+    out.hasOpen = t.hasOpenEdit();
+    out.commit = t.commitEdit();
+    const s1 = t.getState();
+    out.tSel = s1.selected.Commercial; out.tLv = s1.levels; out.tQty = s1.quantities; out.tChg = tchg;
+    /* 2. Template: cambiar de tarjeta con el Edit abierto se queda con lo editado (no se pierde). */
+    const t2 = GSServicePicker.mount('t72b', 'b', Object.assign({ place: 'template', usualSets: [{ key: 'u1', name: 'Usual order', division: 'Janitorial', items: [{ sku: '111-14', level: 'Level 1' }] }] }, units));
+    g('b').querySelector('.gs-sp-area-head[data-pkg="P-1"]').click();
+    g('b').querySelector('[data-pkg-cedit="P-1"]').click();
+    g('b').querySelector('[data-uedit-rm="2"]').click();                          // quita Blinds
+    g('b').querySelector('.gs-sp-area-head[data-usual="usual:u1"]').click();      // otra tarjeta
+    const s2 = t2.getState().selected.Commercial;
+    out.kept = s2 && !s2['Unit Turnover Package'] && s2['Trash Removal'] === '111-12' && !s2['Blinds'];
+    /* 3. New Order: Save my package manda nivel y cantidad, y la orden se queda con lo editado. */
+    const saves = [];
+    const n = GSServicePicker.mount('n72', 'c', Object.assign({ place: 'new-order', usualEdit: { onSave: (name, items, source, tid) => { saves.push({ name, items, source, tid }); return Promise.resolve(); } } }, units));
+    g('c').querySelector('.gs-sp-area-head[data-pkg="P-1"]').click();
+    g('c').querySelector('[data-pkg-cedit="P-1"]').click();
+    g('c').querySelector('[data-uedit-rm="0"]').click();
+    const nm = g('c').querySelector('[data-uedit-name]'); nm.value = 'By George'; nm.dispatchEvent(new Event('input'));
+    g('c').querySelector('[data-uedit-save]').click();
+    out.saves = saves;
+    out.nApi = n;
+    return new Promise(res => setTimeout(() => {
+      out.nSel = n.getState().selected.Commercial;
+      /* 4. My package propio trae Edit (con su nombre e id); uno compartido dice Shared y no se edita. */
+      const saves2 = [];
+      const m = GSServicePicker.mount('m72', 'd', Object.assign({ usualEdit: { onSave: (name, items, source, tid) => { saves2.push({ name, source, tid, items }); return Promise.resolve(); } },
+        savedSets: [{ key: '7', name: 'By George', division: 'Janitorial', items: [{ sku: '111-12', level: 'Level 3' }, { sku: '410-12', qty: 2 }] },
+                    { key: '9', name: 'Office deep clean', division: 'Janitorial', shared: true, items: [{ sku: '111-14', level: 'Level 2' }] }] }, units));
+      out.sharedTag = /Shared/.test(g('d').querySelector('.gs-sp-area-head[data-usual="saved:9"]').textContent) && /My package/.test(g('d').querySelector('.gs-sp-area-head[data-usual="saved:7"]').textContent);
+      g('d').querySelector('.gs-sp-area-head[data-usual="saved:9"]').click();
+      out.sharedNoEdit = !g('d').querySelector('[data-uedit-open="saved:9"]');
+      g('d').querySelector('.gs-sp-area-head[data-usual="saved:7"]').click();
+      out.qtyFromSet = m.getQuantities()['Commercial|Blinds'] === 2;
+      g('d').querySelector('[data-uedit-open="saved:7"]').click();
+      out.nameKept = g('d').querySelector('[data-uedit-name]').value === 'By George';
+      g('d').querySelector('[data-uedit-rm="1"]').click();                        // quita Blinds
+      g('d').querySelector('[data-uedit-save]').click();
+      setTimeout(() => {
+        out.saves2 = saves2;
+        out.mSel = m.getState().selected.Commercial;
+        /* 5. Admin Create Order: packageEdit.resetOnly -> el Edit es el del portal, sin "Save for <cliente>". */
+        GSServicePicker.mount('a72', 'e', Object.assign({ usualEdit: { onSave: () => Promise.resolve() }, packageEdit: { resetOnly: true, clientName: 'BICI', customSkus: { 'P-1': true }, onReset() {} } }, units));
+        g('e').querySelector('.gs-sp-area-head[data-pkg="P-1"]').click();
+        out.adminEdit = !!g('e').querySelector('[data-pkg-cedit="P-1"]') && !g('e').querySelector('[data-pedit-open]') && /Reset to standard/.test(g('e').textContent);
+        g('e').querySelector('[data-pkg-cedit="P-1"]').click();
+        out.adminSaveMine = /Save my package/.test(g('e').textContent) && !/Save for/.test(g('e').textContent);
+        res(out);
+      }, 30);
+    }, 30));
+  }, PK);
+  check('v1.72.0: in a template the package Edit has no Apply button (Save Template saves it)', v72.noApply, v72);
+  check('v1.72.0: commitEdit() puts what is shown into the template: package out, its services in, with level and quantity',
+    v72.hasOpen && v72.commit === '' && !v72.tSel['Unit Turnover Package'] && !v72.tSel['Common Area Vacuuming'] && v72.tSel['Trash Removal'] === '111-12' &&
+    v72.tLv['Commercial|Trash Removal'] === 'Level 3' && v72.tQty['Commercial|Blinds'] === 4 && v72.tChg > 0, v72);
+  check('v1.72.0: in a template, switching cards with an Edit open keeps the changes', v72.kept, v72);
+  check('v1.72.0: Save my package sends name, items with level/qty, source and no id for a new one',
+    v72.saves.length === 1 && v72.saves[0].name === 'By George' && v72.saves[0].source === 'package' && v72.saves[0].tid === '' &&
+    v72.saves[0].items.map(x => x.sku).join() === '111-12,410-12' && v72.saves[0].items[1].qty === 1, v72.saves);
+  check('v1.72.0: after Save my package the order has what was saved (not the whole package)',
+    v72.nSel && !v72.nSel['Unit Turnover Package'] && !v72.nSel['Common Area Vacuuming'] && v72.nSel['Trash Removal'] === '111-12', v72.nSel);
+  check('v1.72.0: shared packages say Shared and have no Edit; own ones say My package', v72.sharedTag && v72.sharedNoEdit, v72);
+  check('v1.72.0: a My package with quantities puts them in the order (Blinds x2)', v72.qtyFromSet, v72);
+  check('v1.72.0: editing my own My package keeps its name and saves with its id (updates it)',
+    v72.nameKept && v72.saves2.length === 1 && v72.saves2[0].tid === '7' && v72.saves2[0].source === 'saved', v72.saves2);
+  check('v1.72.0: what was removed in the edit leaves the order', v72.mSel && !v72.mSel['Blinds'] && v72.mSel['Trash Removal'] === '111-12', v72.mSel);
+  check('v1.72.0: Admin Create Order (resetOnly) edits like the portal: Save my package, keeps Reset to standard', v72.adminEdit && v72.adminSaveMine, v72);
   await p2.close();
   await b.close();
   console.log('\n' + ok + ' OK, ' + bad + ' FAIL');

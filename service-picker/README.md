@@ -34,6 +34,16 @@ const picker = GSServicePicker.mount(pickerId, container, options);
     `false`). Sin la opción queda prendido, como antes (v1.68.0).
   - `packageEdit.clientName` (v1.70.0, 21/10/2026): el nombre del cliente que sale en el editor de paquete por cliente
     ("Save for …", "Only … gets this version", "Custom for …"). Sin él dice "this client"; el `clientId` ya no se enseña.
+  - v1.72.0 (22/10/2026, CFO: paquetes = templates, "debe funcionar igual en todas partes"):
+    - `place: 'template'`: el Edit de un paquete ya no tiene "Apply"; `commitEdit()` (lo llama Save Template) pasa
+      lo editado a lo escogido y regresa `''` o el aviso. Cambiar de tarjeta con un Edit abierto se queda con lo editado.
+      `hasOpenEdit()` dice si hay uno abierto.
+    - `usualEdit.onSave(name, items, source, templateId)`: `items` traen `qty` en los que piden cantidad; `source` es
+      `'usual'`, `'package'` o `'saved'` (un My package propio, con `templateId` para actualizarlo). Al guardar, la orden
+      se queda con lo editado (el paquete sale y quedan sus servicios; lo que se quitó sale).
+    - `savedSets[].shared: true` dice "Shared" y no trae Edit; los propios traen Edit.
+    - `packageEdit.resetOnly: true` (Admin › Create Order): el Edit es el del portal (Save my package); solo queda
+      "Reset to standard" para las versiones por cliente que ya existían.
   - `categoryStyle`: `'soft'` redondea las categorías (`groupByCategory`) y les pone borde y fondo más suaves
     (Developer › Package contents, variante A que escogió la CFO el 21/10/2026). Sin la opción, como antes (v1.71.0).
   - `categoryColumns`: `1` pone las categorías (`groupByCategory`) en una sola columna, para cuando el picker va en
