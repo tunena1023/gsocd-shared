@@ -72,6 +72,36 @@ Compare, `Settings` y `EquipmentPieces` (candado If-Match) leen siempre de Share
 **`live-refresh`: modo idle (CFO 22/10/2026).** A los 10 min sin mover nada la pantalla se oscurece un poco y deja de
 revisar; con cualquier movimiento se aclara y revisa al momento. Prueba: `npm i --no-save jsdom && node live-refresh/live-refresh.test.js`.
 
+### Lo del servidor que antes estaba copiado en los portales (Arreglo 30/10/2026)
+
+Cada portal lo carga con UNA linea desde su archivo de siempre (`lib/graph.js`, `site-image.js`, ...). Pruebas:
+`node lib/<pieza>.test.js`.
+
+- **`lib/graph-core`**: el cliente de Graph. `require('gsocd-shared/lib/graph-core')({ portal, catalog })`.
+  Antes 3 `lib/graph.js` (Admin 472, Orders 419, Tech 387 renglones). Lo que era distinto y como quedo:
+  1. sp-heal: Admin y Tech si, Orders no -> sigue igual (Orders sin `catalog`; prenderlo lo decide la CFO).
+  2. Catalogo: Admin `lib/sp-columns.js` tenia el SPEC y Tech una copia de 30 renglones -> uno solo, `lib/sp-catalog.js`;
+     los dos lo leen completo.
+  3. Error de Graph con `.status`: Admin y Tech si, Orders no -> los 3 si (en Orders `order-docs` ahora contesta el
+     status de SharePoint en vez de 500, como Admin y Tech).
+  4. `getSiteId`: Orders por el `graphFetch` envuelto, Admin/Tech directo -> directo (es un GET; no cambia nada).
+  5. `listChildren(path, { thumbs })`, `thumb` y `webUrl`: solo Admin -> los 3 (campos de mas, nadie los pierde).
+  6. `deleteDriveItemById` solo Admin; `geocodeAddress` Admin y Orders -> los 3.
+  7. Listas: cada uno exportaba las suyas -> la union (mismo SharePoint; `PromoCodes`/`RedeemedPromoCodes` de Orders).
+  Igual en los 3, como ya estaba: token con cache ~55 min por instancia, reintentos 429/503 (`lib/graph-retry`),
+  copia a SQL de cada guardado (`lib/sql-mirror.wrap`), `jsonResponse`.
+- **`lib/sp-catalog`**: las listas/columnas/indices que el codigo necesita (antes en Admin `lib/sp-columns.js`).
+- **`lib/list-query` `fetchByField(list, field, value, opts)`**: un valor exacto, con el apostrofo escapado ("O'Brien").
+  Reemplaza 35 copias en los endpoints (varias sin escapar, algunas sin paginar). Si falla, lanza (como las copias);
+  `opts.fallback` para leer la lista completa; `opts.fields` para regresar solo los fields.
+- **`lib/recurring-published`** (`audience: office | client | tech`): contratos sin publicar. Si la lista de
+  contratos no se puede leer: office no esconde nada (y lo anota en el log); client y tech contestan 503 (la pantalla
+  se queda con lo ultimo que vio y reintenta). Antes Admin ensenaba todo y Orders/Tech escondian sin avisar.
+- **`lib/history-dedupe`**, **`lib/photo-name`** (nombre de las fotos subidas), **`lib/site-image`** (proxy publico
+  de imagenes; `supply` solo Admin, Tech solo `name`), **`lib/order-document`** (get-order-document) y
+  **`lib/order-detail`** (get-order-detail; `audience: 'client'` es una lista cerrada de campos: lo de la oficina
+  nunca le llega al cliente).
+
 ## Reglas que siguen vigentes
 
 - **`camera-capture.html` va una copia por dominio** (vive en los 3 repos), porque IndexedDB no cruza dominios.
