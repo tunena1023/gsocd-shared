@@ -8,14 +8,14 @@
      atributo. Esta escapa siempre & < > " '.
 
        GSEscape.esc(s)     -> texto seguro para HTML y para atributos
-                              (null/undefined -> '')
+                              (null/undefined/false -> '', 0 -> '0')
        GSEscape.escAttr(s) -> lo mismo (se queda el nombre por costumbre)
        GSEscape.jsStr(s)   -> para un string de JS entre comillas simples
                               dentro de onclick="fn('...')"
      Prueba: node escape/escape.test.js
   ================================================================ */
   var MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-  function esc(s) { return s == null ? '' : String(s).replace(/[&<>"']/g, function (c) { return MAP[c]; }); }
+  function esc(s) { return s == null || s === false ? '' : String(s).replace(/[&<>"']/g, function (c) { return MAP[c]; }); }
   function escAttr(s) { return esc(s); }
   function jsStr(s) {
     return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\x22')

@@ -10,6 +10,7 @@ eq('esc comilla simple', E.esc("O'Brien"), 'O&#39;Brien');
 eq('esc null', E.esc(null), '');
 eq('esc undefined', E.esc(undefined), '');
 eq('esc 0 se ve', E.esc(0), '0');
+eq('esc false no sale como "false" (cond && texto)', E.esc(false), '');
 eq('escAttr = esc', E.escAttr('a"b\'c'), 'a&quot;b&#39;c');
 eq('jsStr comilla simple', E.jsStr("O'Brien"), "O\\'Brien");
 eq('jsStr comilla doble y salto', E.jsStr('12"\nx'), '12\\x22\\nx');
