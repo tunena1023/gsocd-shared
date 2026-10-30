@@ -40,7 +40,7 @@
    TechPhotoLog (Source / TakenAt, lib/photo-log.js). Las de la camara no
    llevan source.
 
-   Fuera de la camara (29/10/2026): GSCameraCapture.pastedPhotos(e) / stripHoles(s) para las fotos que vienen
+   Fuera de la camara (29/10/2026): GSCameraCapture.pastePhotos / drainPasted / stripHoles para las fotos que vienen
    pegadas junto con un texto (ver abajo), y fileToJpeg(file). Estas no necesitan start().
 
    Necesita en la pagina: gsocd-shared/camera-queue (GSCameraQueue).
@@ -251,16 +251,55 @@
 
   /* Fotos pegadas en un cuadro de texto (CFO 29/10/2026, caso real GS-1012-1175): quien escribe en las Notas del
      telefono con fotos entre los renglones y lo pega en las notas de la app solo pasaba el texto; cada foto quedaba
-     como un cuadrito (U+FFFC) y se perdia sin aviso. pastedPhotos(e), llamado DENTRO del evento paste (el portapapeles
-     solo se lee ahi), saca las imagenes: los archivos o, si el navegador no los da, las <img> del HTML pegado (blob:
-     o data:). Ya en JPEG como las de la galeria.
-     -> Promise<{ photos: [dataUrl], holes: n }>  (holes = cuadritos que traia el texto pegado). */
+     como un cuadrito (U+FFFC) y se perdia sin aviso.
+
+     pastePhotos(e, { db, scope, meta }), llamado DENTRO del evento paste (el portapapeles solo se lee ahi), saca las
+     imagenes (los archivos o, si el navegador no los da, las <img> blob:/data: del HTML pegado) y las GUARDA EN EL
+     TELEFONO tal cual (IndexedDB '<db>'), antes de convertirlas: si la persona se sale de la pantalla, siguen ahi y
+     drainPasted las termina la siguiente vez que abre la pagina (CFO 30/10: "pegar muchas y salirse rapido").
+     La misma foto (mismo contenido) en el mismo scope (la orden) no se guarda dos veces: cuenta como repeated, para
+     que la pagina lo diga (CFO 30/10: "pegar dos veces lo mismo").
+       -> Promise<{ saved, repeated, holes }>  (holes = cuadritos que traia el texto pegado)
+     drainPasted({ db, send(jpegDataUrl, item) }) convierte a JPEG lo guardado y lo entrega con send (la pagina lo
+     manda a la cola de fotos); lo entregado se borra. item = { meta, photoKey, scope }. photoKey se fija al pegar
+     (hora de la foto para antes/despues, y un reintento escribe el mismo archivo).
+       -> Promise<{ sent, failed }>  (failed = no era una imagen que se pueda leer; se quita) */
   var HOLE = /￼/g;
   /* Sin los cuadritos; un renglon que solo tenia cuadritos se va completo (no deja huecos en las notas). */
-  function stripHoles(s) { return String(s == null ? '' : s).replace(/^[ \t]*\uFFFC[\uFFFC \t]*(\r?\n|$)/gm, '').replace(HOLE, ''); }
-  function pastedPhotos(e) {
+  function stripHoles(s) { return String(s == null ? '' : s).replace(/^[ \t]*￼[￼ \t]*(\r?\n|$)/gm, '').replace(HOLE, ''); }
+  function photoKeyNow(i) {
+    var d = new Date(), pad = function (n) { return String(n).padStart(2, '0'); };
+    var rnd = Math.random().toString(36).slice(2, 7) + (i % 36).toString(36);
+    return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate()) + '_' +
+      pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + '-' + rnd;
+  }
+  function pasteDb(name) {
+    return new Promise(function (resolve, reject) {
+      var r = indexedDB.open(name, 1);
+      r.onupgradeneeded = function () {
+        r.result.createObjectStore('pending', { keyPath: 'id', autoIncrement: true });
+        r.result.createObjectStore('seen');
+      };
+      r.onsuccess = function () { resolve(r.result); };
+      r.onerror = function () { reject(r.error); };
+    });
+  }
+  function done(t) { return new Promise(function (resolve, reject) { t.oncomplete = resolve; t.onerror = t.onabort = function () { reject(t.error); }; }); }
+  function req(r) { return new Promise(function (resolve, reject) { r.onsuccess = function () { resolve(r.result); }; r.onerror = function () { reject(r.error); }; }); }
+  async function contentHash(blob) {
+    var buf = await new Response(blob).arrayBuffer();
+    if (window.crypto && crypto.subtle) {
+      var h = new Uint8Array(await crypto.subtle.digest('SHA-256', buf));
+      return Array.prototype.map.call(h, function (x) { return (x < 16 ? '0' : '') + x.toString(16); }).join('');
+    }
+    var v = new Uint8Array(buf), a = 2166136261 >>> 0; /* sin crypto.subtle (http): FNV-1a + tamaño */
+    for (var i = 0; i < v.length; i++) { a ^= v[i]; a = Math.imul(a, 16777619) >>> 0; }
+    return 'f' + a.toString(16) + '-' + v.length;
+  }
+  function pastePhotos(e, opts) {
+    opts = opts || {};
     var cd = e && e.clipboardData;
-    if (!cd) return Promise.resolve({ photos: [], holes: 0 });
+    if (!cd) return Promise.resolve({ saved: 0, repeated: 0, holes: 0 });
     var holes = ((cd.getData('text/plain') || '').match(HOLE) || []).length;
     var files = Array.prototype.filter.call(cd.files || [], function (f) { return /^image\//.test(f.type); });
     if (!files.length) {
@@ -268,19 +307,53 @@
         if (it.kind === 'file' && /^image\//.test(it.type)) { var f = it.getAsFile(); if (f) files.push(f); }
       });
     }
-    var html = files.length ? '' : (cd.getData('text/html') || '');
     var srcs = [];
-    html.replace(/<img\b[^>]*\bsrc\s*=\s*["']((?:blob:|data:image\/)[^"']+)["']/gi, function (m, s) { if (srcs.indexOf(s) < 0) srcs.push(s); return m; });
-    var blobs = files.length ? Promise.resolve(files)
-      : Promise.all(srcs.map(function (s) { return fetch(s).then(function (r) { return r.blob(); }, function () { return null; }); }))
-        .then(function (list) { return list.filter(function (b) { return b && /^image\//.test(b.type); }); });
-    return blobs.then(function (list) {
-      return list.reduce(function (p, b) {
-        return p.then(function (out) {
-          return fileToJpeg(b).then(function (j) { out.push(j); return out; }, function () { return out; });
-        });
-      }, Promise.resolve([]));
-    }).then(function (photos) { return { photos: photos, holes: holes }; });
+    if (!files.length) (cd.getData('text/html') || '').replace(/<img\b[^>]*\bsrc\s*=\s*["']((?:blob:|data:image\/)[^"']+)["']/gi, function (m, s) { srcs.push(s); return m; });
+    return (async function () {
+      var blobs = files.length ? files : (await Promise.all(srcs.map(function (s) {
+        return fetch(s).then(function (r) { return r.blob(); }, function () { return null; });
+      }))).filter(function (b) { return b && /^image\//.test(b.type); });
+      if (!blobs.length) return { saved: 0, repeated: 0, holes: holes };
+      var hashes = await Promise.all(blobs.map(contentHash));
+      var db = await pasteDb(opts.db), scope = String(opts.scope || '');
+      var t = db.transaction(['pending', 'seen'], 'readwrite'), seen = t.objectStore('seen'), pend = t.objectStore('pending');
+      var saved = 0, repeated = 0;
+      /* "seen" con add(): si la llave ya existe falla (ConstraintError) y es una repetida; sin awaits dentro de la
+         transaccion, asi no se cierra a medias y dos pegados seguidos no pasan los dos. */
+      blobs.forEach(function (b, i) {
+        var k = scope + '|' + hashes[i], r = seen.add(Date.now(), k);
+        r.onsuccess = function () {
+          pend.add({ blob: b, type: b.type, scope: scope, seenKey: k, meta: opts.meta || {}, photoKey: photoKeyNow(i), at: Date.now() });
+          saved++;
+        };
+        r.onerror = function (ev) { ev.preventDefault(); ev.stopPropagation(); repeated++; };
+      });
+      await done(t); db.close();
+      return { saved: saved, repeated: repeated, holes: holes };
+    })();
+  }
+  var draining = Promise.resolve();
+  function drainPasted(opts) {
+    var run = draining.then(function () { return drainOnce(opts); });
+    draining = run.catch(function () {});
+    return run;
+  }
+  async function drainOnce(opts) {
+    var db = await pasteDb(opts.db), sent = 0, failed = 0;
+    try {
+      var items = await req(db.transaction('pending').objectStore('pending').getAll());
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i], jpeg = null;
+        try { jpeg = await fileToJpeg(it.blob); } catch (x) { failed++; }
+        if (jpeg) await opts.send(jpeg, { meta: it.meta, photoKey: it.photoKey, scope: it.scope });
+        /* Una que no se pudo leer tampoco cuenta como "ya pegada": si la vuelven a pegar, se intenta otra vez. */
+        var t = db.transaction(['pending', 'seen'], 'readwrite'); t.objectStore('pending').delete(it.id);
+        if (!jpeg && it.seenKey) t.objectStore('seen').delete(it.seenKey);
+        await done(t);
+        if (jpeg) sent++;
+      }
+    } finally { db.close(); }
+    return { sent: sent, failed: failed };
   }
 
   function start(cfg) {
@@ -504,5 +577,5 @@
     }
   }
 
-  window.GSCameraCapture = { start: start, fileToJpeg: fileToJpeg, pastedPhotos: pastedPhotos, stripHoles: stripHoles };
+  window.GSCameraCapture = { start: start, fileToJpeg: fileToJpeg, pastePhotos: pastePhotos, drainPasted: drainPasted, stripHoles: stripHoles };
 })();
