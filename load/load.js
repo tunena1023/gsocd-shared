@@ -23,7 +23,21 @@
    la pantalla. Cuando llega, la promesa se cumple y la pantalla se pinta.
    Solo un error de dato (400, 403, 404, 409: sin permiso, no conectado, no
    existe) rechaza la promesa, para que la pantalla lo diga.
-   onStuck: lleva 15 min sin cargar (una vez por carga).
+   onStuck: lleva 15 min sin cargar (una vez por carga). Cuenta solo el
+   tiempo con la pantalla a la vista y despierta (CFO 30/10/2026: una pestaña
+   de Safari en segundo plano congelo la carga y al volver, 36-71 min despues,
+   salio la alerta con tries=1): lo escondido o dormido no cuenta. Si la falla
+   llega justo al despertar, primero se reintenta al momento sin contarla. Si
+   en pantalla ya esta lo ultimo que se vio (o esta carga ya llego antes en
+   esta pagina), no hay alerta: nadie esta esperando. info.kind = 'load' (el
+   aviso dice "not loaded", no "not saved").
+
+   TIEMPO LIMITE (CFO 30/10/2026): un intento que no contesta en timeoutMs
+   (60 s; opts.timeoutMs por carga, 0 = sin limite) se corta y se reintenta
+   solo, como una falla de señal. fn recibe { signal } (AbortSignal) por si
+   el portal quiere cancelar el fetch; si no lo usa, la respuesta tardia se
+   ignora. Solo LECTURAS: GSBackground (guardados) no tiene limite, porque un
+   guardado cortado y reintentado puede duplicar.
 
    LO ULTIMO QUE SE VIO (CFO 22/10/2026: "se supone que deberia de mostrar lo
    ultimo que se vio y cargar en segundo plano ... en shared y parejo para
@@ -55,11 +69,39 @@
   var STUCK_MS = 15 * 60000;
   var MEMO_MS = 120000;
   var TYPING_RETRY_MS = 2000;
+  var TIMEOUT_MS = 60000;          /* QuickBooks llega a ~30 s y la galeria a ~22 s (p95) */
+  var WAKE_GRACE_MS = 30000;       /* una falla en los 30 s despues de despertar: se reintenta ya */
+  var BEAT_MS = 10000;             /* latido mientras hay cargas: detecta que la compu/pestaña durmio */
+  var SLEEP_GAP_MS = 60000;        /* un latido que llega 60 s tarde = estuvo dormida */
   var hooks = {}, inited = false, jobs = {}, slots = {};
   var fresh = {};          /* key -> true: ya llego fresca en esta pagina */
   var memo = {};           /* key -> { at, data }: lo nuevo que llego despues de enseñar lo guardado */
   var savedObjs = (typeof WeakSet === 'function') ? new WeakSet() : null;
   var showing = {};        /* key -> true: en pantalla esta lo guardado de esta key */
+
+  /* Reloj "a la vista y despierta": solo avanza con la pantalla visible y sin dormir. */
+  var awake = { total: 0, last: Date.now(), on: true, beat: null }, lastWake = 0;
+  function isHidden() { try { return !!document.hidden; } catch (e) { return false; } }
+  function tick() {
+    var t = Date.now(), d = t - awake.last;
+    if (awake.on) {
+      if (d > SLEEP_GAP_MS) { awake.total += Math.min(BEAT_MS, d); lastWake = t; }
+      else if (d > 0) awake.total += d;
+    }
+    awake.last = t;
+  }
+  function awakeNow() { tick(); return awake.total; }
+  function startBeat() {
+    if (awake.beat) return;
+    tick();
+    awake.beat = setInterval(function () { tick(); if (!Object.keys(jobs).length) { clearInterval(awake.beat); awake.beat = null; } }, BEAT_MS);
+  }
+  function setVisible(v) {
+    tick();
+    if (v && !awake.on) lastWake = Date.now();
+    awake.on = v;
+  }
+  function justWoke() { tick(); return lastWake && Date.now() - lastWake < WAKE_GRACE_MS; }
 
   function retryable(e) { var st = e && e.status; return !st || st >= 500 || st === 401 || st === 408 || st === 429; }
 
@@ -108,14 +150,16 @@
     }
     if (opts.slot != null) {
       var old = jobs[slots[opts.slot]];
-      if (old && old.key !== key) { old.cancelled = true; clearTimeout(old.timer); clearTimeout(old.fastTimer); delete jobs[old.key]; }
+      if (old && old.key !== key) { old.cancelled = true; clearTimeout(old.timer); clearTimeout(old.fastTimer); clearTimeout(old.killTimer); delete jobs[old.key]; }
       slots[opts.slot] = key;
     }
     var cfg = opts.saved === false ? null : savedCfg();
     /* Solo al abrir: si esta key ya llego fresca en esta pagina, se espera al servidor. */
     var mayUseSaved = !!cfg && !fresh[key];
     var job = { key: key, fn: fn, label: opts.label || '', onUpdate: opts.onUpdate || null, tries: 0, at: Date.now(),
-      stuck: false, timer: null, fastTimer: null, next: null, cancelled: false, settled: false, servedSaved: false };
+      stuck: false, timer: null, fastTimer: null, next: null, cancelled: false, settled: false, servedSaved: false,
+      awakeAt: awakeNow(), seenBefore: !!fresh[key], wokeRetry: 0, run: 0, killTimer: null,
+      timeoutMs: opts.timeoutMs != null ? Number(opts.timeoutMs) || 0 : TIMEOUT_MS };
     /* Reintentar ya (volvio la señal, la pantalla, u otra carga de lo mismo). */
     job.kick = function () {
       if (!job.timer) return;
@@ -140,9 +184,19 @@
       if (mayUseSaved) job.fastTimer = setTimeout(useSaved, cfg.fastMs == null ? 2000 : cfg.fastMs);
 
       function attempt() {
-        var f = job.fn;
-        Promise.resolve().then(function () { return f(); }).then(function (data) {
-          if (job.cancelled) return;
+        var f = job.fn, run = ++job.run, ctrl = null;
+        try { ctrl = typeof AbortController === 'function' ? new AbortController() : null; } catch (x) { ctrl = null; }
+        var call1 = Promise.resolve().then(function () { return f({ signal: ctrl ? ctrl.signal : undefined }); });
+        /* Tiempo limite: el intento que no contesta se da por fallado (sin status = se reintenta). */
+        var raced = !job.timeoutMs ? call1 : Promise.race([call1, new Promise(function (_, rej) {
+          job.killTimer = setTimeout(function () {
+            try { if (ctrl) ctrl.abort(); } catch (x) { /* sigue */ }
+            var te = new Error('No answer after ' + Math.round(job.timeoutMs / 1000) + ' s'); te.timeout = true; rej(te);
+          }, job.timeoutMs);
+        })]);
+        raced.then(function (data) {
+          clearTimeout(job.killTimer);
+          if (job.cancelled || run !== job.run) return;
           clearTimeout(job.fastTimer);
           delete jobs[key];
           fresh[key] = true;
@@ -156,8 +210,9 @@
           }
           if (!Object.keys(showing).length) call(cfg && cfg.onAllFresh);
         }, function (e) {
-          if (job.cancelled) return;
-          if (!retryable(e)) {
+          clearTimeout(job.killTimer);
+          if (job.cancelled || run !== job.run) return;
+          if (!(e && e.timeout) && !retryable(e)) {
             clearTimeout(job.fastTimer);
             delete jobs[key];
             if (!job.settled) { job.settled = true; reject(e); }
@@ -166,10 +221,18 @@
           }
           /* El servidor falla: no se espera a fastMs para enseñar lo guardado. */
           useSaved();
+          /* Recien despierta (la falla suele ser del fetch que se congelo): se reintenta ya, sin contarla. */
+          if (justWoke() && job.wokeRetry !== lastWake) {
+            job.wokeRetry = lastWake;
+            job.next = attempt;
+            job.timer = setTimeout(function () { job.timer = null; job.next = null; attempt(); }, 300);
+            return;
+          }
           job.tries++;
-          if (!job.stuck && Date.now() - job.at >= STUCK_MS) {
+          /* 15 min a la vista y despierta, y solo si la persona esta esperando (no ve nada de esto). */
+          if (!job.stuck && awakeNow() - job.awakeAt >= STUCK_MS && !job.servedSaved && !job.seenBefore) {
             job.stuck = true;
-            try { if (hooks.onStuck) hooks.onStuck({ key: key, label: job.label, at: job.at, tries: job.tries }, e); } catch (x) { /* sigue */ }
+            try { if (hooks.onStuck) hooks.onStuck({ key: key, label: job.label, at: job.at, tries: job.tries, kind: 'load' }, e); } catch (x) { /* sigue */ }
           }
           job.next = attempt;
           job.timer = setTimeout(function () { job.timer = null; job.next = null; attempt(); }, WAITS[Math.min(job.tries - 1, WAITS.length - 1)]);
@@ -178,6 +241,7 @@
       attempt();
     });
     jobs[key] = job;
+    startBeat();
     return job.promise;
   }
 
@@ -196,7 +260,11 @@
       if (inited) return;
       inited = true;
       try { window.addEventListener('online', wakeAll); } catch (e) { /* sin eventos */ }
-      try { document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') wakeAll(); }); } catch (e) { /* sin eventos */ }
+      try { document.addEventListener('visibilitychange', function () { var v = document.visibilityState === 'visible'; setVisible(v); if (v) wakeAll(); }); } catch (e) { /* sin eventos */ }
+      /* Safari/iOS: la pagina vuelve del congelado (bfcache o pestaña dormida). */
+      try { window.addEventListener('pageshow', function () { lastWake = Date.now(); wakeAll(); }); } catch (e) { /* sin eventos */ }
+      try { document.addEventListener('resume', function () { lastWake = Date.now(); wakeAll(); }); } catch (e) { /* sin eventos */ }
+      setVisible(!isHidden());
     },
     get: get,
     retryable: retryable,
@@ -212,9 +280,16 @@
     pending: function () { return Object.keys(jobs).map(function (k) { return { key: k, label: jobs[k].label, tries: jobs[k].tries, at: jobs[k].at }; }); },
     wake: wakeAll,
     /* Solo para pruebas */
-    _cfg: function (c) { if (c.waits) WAITS = c.waits; if (c.stuck != null) STUCK_MS = c.stuck; if (c.memo != null) MEMO_MS = c.memo; if (c.typingRetry != null) TYPING_RETRY_MS = c.typingRetry; },
+    _cfg: function (c) {
+      if (c.waits) WAITS = c.waits; if (c.stuck != null) STUCK_MS = c.stuck; if (c.memo != null) MEMO_MS = c.memo; if (c.typingRetry != null) TYPING_RETRY_MS = c.typingRetry;
+      if (c.timeout != null) TIMEOUT_MS = c.timeout; if (c.wakeGrace != null) WAKE_GRACE_MS = c.wakeGrace;
+      if (c.beat != null) { BEAT_MS = c.beat; if (awake.beat) { clearInterval(awake.beat); awake.beat = null; } }
+      if (c.sleepGap != null) SLEEP_GAP_MS = c.sleepGap;
+    },
     _reset: function () {
-      Object.keys(jobs).forEach(function (k) { clearTimeout(jobs[k].timer); clearTimeout(jobs[k].fastTimer); });
+      Object.keys(jobs).forEach(function (k) { clearTimeout(jobs[k].timer); clearTimeout(jobs[k].fastTimer); clearTimeout(jobs[k].killTimer); });
+      if (awake.beat) clearInterval(awake.beat);
+      awake = { total: 0, last: Date.now(), on: !isHidden(), beat: null }; lastWake = 0;
       jobs = {}; slots = {}; hooks = {}; fresh = {}; memo = {}; showing = {};
       clearTimeout(freshTimer); freshTimer = null; freshQueue = {};
     }

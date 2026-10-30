@@ -2,7 +2,11 @@
 'use strict';
 const listeners = {};
 global.window = { addEventListener: (t, f) => { listeners[t] = f; } };
-global.document = { visibilityState: 'visible', addEventListener() {} };
+const docListeners = {};
+global.document = { visibilityState: 'visible', hidden: false, addEventListener: (t, f) => { docListeners[t] = f; } };
+/* Reloj de mentiras para simular una pestaña que se durmio 71 min */
+const realNow = Date.now; let clockSkew = 0; Date.now = () => realNow() + clockSkew;
+const setHidden = h => { document.hidden = h; document.visibilityState = h ? 'hidden' : 'visible'; docListeners.visibilitychange(); };
 require('./load.js');
 const L = window.GSLoad;
 L._cfg({ waits: [20, 20, 20], stuck: 50 });
@@ -79,7 +83,102 @@ const err = (st, m) => Object.assign(new Error(m || 'boom'), { status: st });
   assert('y aun asi sigue intentando hasta que llega', r === 'finally', r);
   assert('al terminar no queda nada pendiente', !L.pending().length, L.pending());
 
+  /* ---- Arreglo 30/10/2026: alerta de 15 min solo con la pantalla a la vista y despierta ---- */
+  L._reset(); const stuck2 = [];
+  L.init({ onStuck: (info, e) => stuck2.push([info.key, info.kind, info.tries, e.message]) });
+  L._cfg({ waits: [15], stuck: 120, beat: 10, sleepGap: 1e9, wakeGrace: 0, timeout: 0 });
+  let hOk = false;
+  const pH = L.get('hidden', async () => { if (hOk) return 'h'; throw err(503); }, { label: 'QuickBooks Clients' });
+  await wait(20);
+  setHidden(true);
+  await wait(300);
+  assert('escondida: el tiempo con la pestaña escondida no cuenta (sin alerta)', !stuck2.length, stuck2);
+  setHidden(false);
+  await wait(250);
+  assert('a la vista: a los 15 min de verdad si avisa, una vez, con kind=load', stuck2.length === 1 && stuck2[0][0] === 'hidden' && stuck2[0][1] === 'load', stuck2);
+  hOk = true; L.wake();
+  r = await pH;
+  assert('y la carga sigue hasta que llega', r === 'h', r);
+
+  /* El caso del 30/10: Safari congela la carga en segundo plano; al volver (71 min despues) el fetch truena con
+     "Load failed" justo al despertar. Se reintenta al momento sin contarlo y no hay alerta. */
+  L._reset(); const stuck3 = [];
+  L.init({ onStuck: (info, e) => stuck3.push([info.key, info.tries, e.message]) });
+  L._cfg({ waits: [100000], stuck: 15 * 60000, beat: 10, sleepGap: 1e9, wakeGrace: 30000, timeout: 0 });
+  let rejectFrozen = null, nW = 0;
+  const pW = L.get('qb-clients', () => { nW++; if (nW === 1) return new Promise((_, rej) => { rejectFrozen = rej; }); return Promise.resolve({ clients: [1] }); }, { label: 'QuickBooks Clients' });
+  await wait(10);
+  setHidden(true);
+  clockSkew += 71 * 60000;      /* 71 min con la pestaña escondida/congelada */
+  setHidden(false);
+  rejectFrozen(new TypeError('Load failed'));
+  const tW = Date.now();
+  r = await Promise.race([pW, wait(2000).then(() => 'timeout')]);
+  assert('al despertar: la falla del fetch congelado se reintenta ya (no espera el siguiente intento largo)', r && r.clients && nW === 2 && Date.now() - tW < 1500, { r, nW });
+  assert('al despertar: sin alerta (no conto los 71 min ni la falla)', !stuck3.length, stuck3);
+
+  /* Dormida sin evento de visibilidad (la compu se durmio): el latido llega tarde y no cuenta */
+  L._reset(); const stuck4 = [];
+  L.init({ onStuck: (info, e) => stuck4.push(info.key) });
+  L._cfg({ waits: [15], stuck: 200, beat: 10, sleepGap: 60000, wakeGrace: 0, timeout: 0 });
+  let sOk = false;
+  const pS = L.get('sleep', async () => { if (sOk) return 's'; throw err(500); });
+  await wait(30);
+  clockSkew += 40 * 60000;     /* 40 min dormida */
+  await wait(80);
+  assert('dormida: el hueco del latido no cuenta como tiempo esperando', !stuck4.length, stuck4);
+  sOk = true; L.wake(); await pS;
+
+  /* Si la persona ya ve algo de esto, nadie esta esperando: no hay alerta */
+  L._reset(); const stuck5 = [];
+  L.init({ onStuck: (info) => stuck5.push(info.key) });
+  L._cfg({ waits: [15], stuck: 60, beat: 10, sleepGap: 1e9, wakeGrace: 0, timeout: 0 });
+  await L.get('seen', async () => 'v1');
+  let bOk = false;
+  const pB = L.get('seen', async () => { if (bOk) return 'v2'; throw err(500); });
+  await wait(200);
+  assert('ya cargo antes en esta pagina (la pantalla tiene datos): sin alerta', !stuck5.length, stuck5);
+  bOk = true; L.wake(); await pB;
+
+  /* ---- Tiempo limite en las lecturas (Arreglo 30/10/2026) ---- */
+  L._reset(); L.init({});
+  L._cfg({ waits: [10], stuck: 1e9, timeout: 50, wakeGrace: 0 });
+  let nT = 0, sig1 = null;
+  r = await L.get('hang', (ctx) => { nT++; if (nT === 1) { sig1 = ctx && ctx.signal; return new Promise(() => {}); } return Promise.resolve('ok'); });
+  assert('tiempo limite: una lectura que no contesta se corta y se reintenta sola', r === 'ok' && nT === 2, { r, nT });
+  assert('tiempo limite: se le avisa al fetch con su AbortSignal', !sig1 || sig1.aborted === true, sig1 && sig1.aborted);
+  let nL = 0;
+  r = await L.get('late', () => { nL++; return wait(nL === 1 ? 100 : 30).then(() => 'answer-' + nL); });
+  await wait(120);
+  assert('tiempo limite: la respuesta tardia del intento cortado se ignora (gana el reintento)', r === 'answer-2' && nL === 2, { r, nL });
+  let nS = 0;
+  r = await L.get('slow-qb', () => { nS++; return wait(120).then(() => 'qb'); }, { timeoutMs: 400 });
+  assert('tiempo limite por carga (opts.timeoutMs): QuickBooks lento llega sin cortarse', r === 'qb' && nS === 1, { r, nS });
+  nS = 0;
+  r = await L.get('no-limit', () => { nS++; return wait(120).then(() => 'nl'); }, { timeoutMs: 0 });
+  assert('opts.timeoutMs = 0: sin limite', r === 'nl' && nS === 1, { r, nS });
+  L._cfg({ timeout: 60000 });
+
+  /* Los guardados (GSBackground) nunca se cortan, aunque tarden mas que el limite de lecturas */
+  {
+    const lsStore = {};
+    global.localStorage = { getItem: k => (k in lsStore ? lsStore[k] : null), setItem: (k, v) => { lsStore[k] = String(v); } };
+    Object.assign(document, { head: { appendChild() {} }, getElementById: () => null, createElement: () => ({}), querySelectorAll: () => [] });
+    window.crypto = require('crypto').webcrypto;
+    require('../background/background.js');
+    const B = window.GSBackground;
+    B._cfg({ waits: [20], stuck: 1e9 });
+    L._cfg({ timeout: 40 });
+    const sends = [], doneB = [];
+    B.init({ send: async e => { sends.push(e.id); await wait(200); return { ok: true }; }, onDone: e => doneB.push(e.id), onFail: () => {} });
+    const job = B.run({ group: 'G-1', kind: 'save', label: 'Save', path: '/x', body: { v: 1 } });
+    await wait(350);
+    assert('guardado: tarda 200 ms (mas que el limite de 40 ms de lecturas) y sale una sola vez, sin cortarse', sends.length === 1 && doneB.includes(job.id), { sends, doneB });
+    L._cfg({ timeout: 60000 });
+  }
+
   /* ---- Lo ultimo que se vio (CFO 22/10/2026) ---- */
+  L._reset(); L._cfg({ waits: [20, 20, 20], stuck: 1e9, beat: 10000, sleepGap: 60000, wakeGrace: 30000 });
   const store = {};
   window.GSSaved = {
     save: async (k, d) => { store[k] = { at: Date.now(), data: JSON.parse(JSON.stringify(d)) }; return true; },
