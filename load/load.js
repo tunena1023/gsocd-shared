@@ -56,6 +56,9 @@
    Una carga que ya llego fresca en esta pagina (p. ej. despues de guardar)
    espera al servidor: nunca enseña algo mas viejo de lo que ya se ve.
    opts.saved === false: esa carga nunca usa lo guardado.
+   opts.whenFresh(data, { changed }) (30/10/2026): despues de enseñar lo guardado, se llama
+   SIEMPRE que llega lo nuevo (cambie o no), sin esperar a que deje de escribir, para que la
+   pantalla quite su "Updating…". Con whenFresh no se guarda en memoria (la pantalla ya lo tiene).
      saved: { scope | prefix, fastMs = 2000, maxAgeMs = 7 dias, onShowSaved(info), onFresh(info), onAllFresh() }
      (prefix: la llave completa por persona, p. ej. 'gs-admin-load|cfo@gsocd.com|', para que el Sign out del portal la borre)
    GSLoad.isSaved(data) -> true si data es lo guardado (no lo nuevo).
@@ -145,6 +148,7 @@
     if (cur) {
       cur.fn = fn;
       if (opts.onUpdate) cur.onUpdate = opts.onUpdate;
+      if (opts.whenFresh) cur.whenFresh = opts.whenFresh;
       cur.kick();
       return cur.promise;
     }
@@ -156,7 +160,7 @@
     var cfg = opts.saved === false ? null : savedCfg();
     /* Solo al abrir: si esta key ya llego fresca en esta pagina, se espera al servidor. */
     var mayUseSaved = !!cfg && !fresh[key];
-    var job = { key: key, fn: fn, label: opts.label || '', onUpdate: opts.onUpdate || null, tries: 0, at: Date.now(),
+    var job = { key: key, fn: fn, label: opts.label || '', onUpdate: opts.onUpdate || null, whenFresh: opts.whenFresh || null, tries: 0, at: Date.now(),
       stuck: false, timer: null, fastTimer: null, next: null, cancelled: false, settled: false, servedSaved: false,
       awakeAt: awakeNow(), seenBefore: !!fresh[key], wokeRetry: 0, run: 0, killTimer: null,
       timeoutMs: opts.timeoutMs != null ? Number(opts.timeoutMs) || 0 : TIMEOUT_MS };
@@ -204,10 +208,12 @@
           if (!job.settled) { job.settled = true; resolve(data); return; }
           /* Ya se enseño lo guardado: ahora lo nuevo (solo si cambio algo). */
           delete showing[key];
-          if (!same(job.savedData, data)) {
+          var changed = !same(job.savedData, data);
+          if (changed && !job.whenFresh) {
             if (!job.onUpdate) memo[key] = { at: Date.now(), data: data };
             queueFresh(key, { onUpdate: job.onUpdate, data: data, info: { key: key, label: job.label, data: data } });
           }
+          if (job.whenFresh) call(function (d) { job.whenFresh(d, { changed: changed }); }, data);
           if (!Object.keys(showing).length) call(cfg && cfg.onAllFresh);
         }, function (e) {
           clearTimeout(job.killTimer);

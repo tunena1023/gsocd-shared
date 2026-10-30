@@ -224,6 +224,21 @@ const err = (st, m) => Object.assign(new Error(m || 'boom'), { status: st });
   await wait(120);
   assert('saved: con onUpdate se repinta esa pantalla y no se llama onFresh', upd && upd.list[0] === 'u' && !fresh2.length, { upd, fresh2 });
 
+  /* whenFresh (30/10/2026): llega lo nuevo despues de lo guardado -> se avisa siempre, cambie o no, y sin memoria */
+  L._reset(); const fresh5 = []; L.init({ saved: { scope: 'cfo@x', fastMs: 0, onFresh: i => fresh5.push(i.key) } });
+  store['gs-load|cfo@x|wf'] = { at: Date.now(), data: { v: 1 } };
+  const wf = [];
+  r = await L.get('wf', () => wait(40).then(() => ({ v: 1 })), { whenFresh: (d, i) => wf.push([d.v, i.changed]) });
+  await wait(80);
+  assert('whenFresh: lo nuevo igual a lo guardado -> se llama igual (changed:false) para quitar "Updating…"', L.isSaved(r) && wf.length === 1 && wf[0][1] === false && !fresh5.length, { wf, fresh5 });
+  r = await L.get('wf', () => wait(40).then(() => ({ v: 2 })), { whenFresh: (d, i) => wf.push([d.v, i.changed]) });
+  assert('whenFresh: sin memoria -> la siguiente carga va al servidor', r.v === 2 && !L.isSaved(r), r);
+  L._reset(); L.init({ saved: { scope: 'cfo@x', fastMs: 0 } });
+  const wf2 = [];
+  r = await L.get('wf', () => wait(40).then(() => ({ v: 3 })), { whenFresh: (d, i) => wf2.push([d.v, i.changed]) });
+  await wait(80);
+  assert('whenFresh: distinto -> changed:true con lo nuevo', L.isSaved(r) && r.v === 2 && wf2.length === 1 && wf2[0][0] === 3 && wf2[0][1] === true, wf2);
+
   /* Sin copia guardada: igual que antes (Loading hasta que llega) */
   t0 = Date.now();
   r = await L.get('nueva', () => wait(80).then(() => 'x'));
