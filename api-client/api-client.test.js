@@ -108,6 +108,15 @@ const tech = window.GSApiClient.create({ session, reads: ['/get-my-orders'], off
   threw = null; try { await tech.api('/get-x', { body: {}, load: 'X' }); } catch (e) { threw = e; }
   assert('opts.load: un error de dato (404) llega al catch', threw && threw.status === 404 && n === 1);
 
+  /* el tiempo limite de GSLoad cancela el fetch (signal) */
+  let gotSignal = null;
+  window.fetch = async (url, init) => { gotSignal = init.signal; return new Promise((res, rej) => { init.signal && init.signal.addEventListener('abort', () => rej(Object.assign(new Error('aborted'), { name: 'AbortError' }))); }); };
+  const pend = tech.api('/get-slow', { body: { z: 1 }, load: 'Slow', timeoutMs: 30 });
+  pend.catch(() => {});
+  await wait(80);
+  assert('opts.load: el signal de GSLoad llega al fetch y se cancela al pasar timeoutMs', !!gotSignal && gotSignal.aborted === true, { has: !!gotSignal, aborted: gotSignal && gotSignal.aborted });
+  window.fetch = async () => ({ status: 200, ok: true, json: async () => ({ fine: 1 }) });
+
   /* clear borra lo guardado de los dos lados */
   ls['gs_off:zzz'] = '1'; ls.other = '1';
   orders.offline.clear(); await wait(5);

@@ -20,8 +20,9 @@
        opts.body, opts.method ('POST'), opts.signal (cancelar)
        opts.load = nombre de la pantalla: pasa por GSLoad (gsocd-shared load/)
          con la misma llave de siempre: si falla por la señal o el sistema la
-         pantalla sigue en "Loading…" y se reintenta sola. opts.slot, opts.saved
-         igual que GSLoad.get.
+         pantalla sigue en "Loading…" y se reintenta sola. opts.slot, opts.saved,
+         opts.timeoutMs, opts.onUpdate, opts.whenFresh igual que GSLoad.get; el
+         signal de GSLoad (tiempo limite) llega al fetch.
        Sin red y es de `reads`: regresa lo guardado con __offline/__savedAt y
        enseña la barra. 401 con { signin } del servidor (cookie vencida):
        borra la sesion y regresa a index.html. Un error trae .status (y
@@ -70,9 +71,12 @@
     async function api(path, opts) {
       opts = opts || {};
       if (opts.load && root.GSLoad) {
-        var once = Object.assign({}, opts); delete once.load; delete once.slot;
+        var once = Object.assign({}, opts);
+        ['load', 'slot', 'saved', 'timeoutMs', 'onUpdate', 'whenFresh'].forEach(function (k) { delete once[k]; });
+        /* GSLoad llama con { signal }: la lectura que se pasa del tiempo se cancela de verdad. */
         return root.GSLoad.get(path + ' ' + JSON.stringify(once.body === undefined ? null : once.body) + ' ' + (once.method || ''),
-          function () { return api(path, once); }, { label: opts.load, slot: opts.slot, saved: opts.saved });
+          function (ctx) { return api(path, ctx && ctx.signal && !once.signal ? Object.assign({}, once, { signal: ctx.signal }) : once); },
+          { label: opts.load, slot: opts.slot, saved: opts.saved, timeoutMs: opts.timeoutMs, onUpdate: opts.onUpdate, whenFresh: opts.whenFresh });
       }
       var headers = { 'Content-Type': 'application/json' };
       try { Object.assign(headers, o.headers ? o.headers() || {} : {}); } catch (e) { /* sin headers de mas */ }
