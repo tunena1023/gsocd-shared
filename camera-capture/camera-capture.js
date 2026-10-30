@@ -40,6 +40,9 @@
    TechPhotoLog (Source / TakenAt, lib/photo-log.js). Las de la camara no
    llevan source.
 
+   Fuera de la camara (29/10/2026): GSCameraCapture.pastedPhotos(e) / stripHoles(s) para las fotos que vienen
+   pegadas junto con un texto (ver abajo), y fileToJpeg(file). Estas no necesitan start().
+
    Necesita en la pagina: gsocd-shared/camera-queue (GSCameraQueue).
 ============================================================ */
 (function () {
@@ -244,6 +247,40 @@
       };
       fr.readAsDataURL(file);
     });
+  }
+
+  /* Fotos pegadas en un cuadro de texto (CFO 29/10/2026, caso real GS-1012-1175): quien escribe en las Notas del
+     telefono con fotos entre los renglones y lo pega en las notas de la app solo pasaba el texto; cada foto quedaba
+     como un cuadrito (U+FFFC) y se perdia sin aviso. pastedPhotos(e), llamado DENTRO del evento paste (el portapapeles
+     solo se lee ahi), saca las imagenes: los archivos o, si el navegador no los da, las <img> del HTML pegado (blob:
+     o data:). Ya en JPEG como las de la galeria.
+     -> Promise<{ photos: [dataUrl], holes: n }>  (holes = cuadritos que traia el texto pegado). */
+  var HOLE = /￼/g;
+  /* Sin los cuadritos; un renglon que solo tenia cuadritos se va completo (no deja huecos en las notas). */
+  function stripHoles(s) { return String(s == null ? '' : s).replace(/^[ \t]*\uFFFC[\uFFFC \t]*(\r?\n|$)/gm, '').replace(HOLE, ''); }
+  function pastedPhotos(e) {
+    var cd = e && e.clipboardData;
+    if (!cd) return Promise.resolve({ photos: [], holes: 0 });
+    var holes = ((cd.getData('text/plain') || '').match(HOLE) || []).length;
+    var files = Array.prototype.filter.call(cd.files || [], function (f) { return /^image\//.test(f.type); });
+    if (!files.length) {
+      Array.prototype.forEach.call(cd.items || [], function (it) {
+        if (it.kind === 'file' && /^image\//.test(it.type)) { var f = it.getAsFile(); if (f) files.push(f); }
+      });
+    }
+    var html = files.length ? '' : (cd.getData('text/html') || '');
+    var srcs = [];
+    html.replace(/<img\b[^>]*\bsrc\s*=\s*["']((?:blob:|data:image\/)[^"']+)["']/gi, function (m, s) { if (srcs.indexOf(s) < 0) srcs.push(s); return m; });
+    var blobs = files.length ? Promise.resolve(files)
+      : Promise.all(srcs.map(function (s) { return fetch(s).then(function (r) { return r.blob(); }, function () { return null; }); }))
+        .then(function (list) { return list.filter(function (b) { return b && /^image\//.test(b.type); }); });
+    return blobs.then(function (list) {
+      return list.reduce(function (p, b) {
+        return p.then(function (out) {
+          return fileToJpeg(b).then(function (j) { out.push(j); return out; }, function () { return out; });
+        });
+      }, Promise.resolve([]));
+    }).then(function (photos) { return { photos: photos, holes: holes }; });
   }
 
   function start(cfg) {
@@ -467,5 +504,5 @@
     }
   }
 
-  window.GSCameraCapture = { start: start };
+  window.GSCameraCapture = { start: start, fileToJpeg: fileToJpeg, pastedPhotos: pastedPhotos, stripHoles: stripHoles };
 })();
