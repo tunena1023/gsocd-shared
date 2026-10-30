@@ -105,6 +105,16 @@
   'use strict';
   if (window.GSGalleryGroups) return;
 
+  /* Una foto con la liga del portal (/api/photo, gsocd-shared lib/photo-link) que no cargo por una falla de un momento
+     (SharePoint ocupado, sin señal) se vuelve a pedir sola a los 3 s, una vez por foto. En toda la pagina. */
+  document.addEventListener('error', function (e) {
+    var t = e.target;
+    if (!t || (t.tagName !== 'IMG' && t.tagName !== 'VIDEO')) return;
+    var src = t.getAttribute('src') || '';
+    if (!/\/api\/photo\?/.test(src) || /[?&]r=\d/.test(src)) return;
+    setTimeout(function () { if (t.getAttribute('src') === src) t.setAttribute('src', src + '&r=' + Date.now()); }, 3000);
+  }, true);
+
   var STYLE_ID = 'gs-gallery-groups-style';
   function styleTag() {
     if (document.getElementById(STYLE_ID)) return;
