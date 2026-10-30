@@ -89,7 +89,7 @@ Cada portal lo carga con UNA linea desde su archivo de siempre (`lib/graph.js`, 
 
 - **`lib/graph-core`**: el cliente de Graph. `require('gsocd-shared/lib/graph-core')({ portal, catalog })`.
   Antes 3 `lib/graph.js` (Admin 472, Orders 419, Tech 387 renglones). Lo que era distinto y como quedo:
-  1. sp-heal: Admin y Tech si, Orders no -> sigue igual (Orders sin `catalog`; prenderlo lo decide la CFO).
+  1. sp-heal: Admin y Tech si, Orders no (lo que faltaba lo creaba el cron de Admin) -> los 3 con el mismo catalogo.
   2. Catalogo: Admin `lib/sp-columns.js` tenia el SPEC y Tech una copia de 30 renglones -> uno solo, `lib/sp-catalog.js`;
      los dos lo leen completo.
   3. Error de Graph con `.status`: Admin y Tech si, Orders no -> los 3 si (en Orders `order-docs` ahora contesta el
