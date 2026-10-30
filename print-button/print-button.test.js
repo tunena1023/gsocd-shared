@@ -1,0 +1,22 @@
+/* Prueba de print-button.js: node print-button/print-button.test.js */
+'use strict';
+let ok = 0, fail = 0;
+const eq = (name, got, want) => { if (got === want) { ok++; console.log('OK   - ' + name); } else { fail++; console.log('FAIL - ' + name + ' got ' + JSON.stringify(got) + ' want ' + JSON.stringify(want)); } };
+const opened = [];
+global.window = { open: (u, t) => opened.push([u, t]) };
+global.document = { createElement: () => { const d = { set textContent(v) { this._t = v; }, get innerHTML() { return String(this._t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); } }; return d; } };
+require('./print-button.js');
+const P = window.GSPrintButton;
+P.open('GS-1042-7', 'Scheduled');
+eq('sin configure: la liga de siempre (Orders, cookie)', opened[0][0], '/api/get-order-document?orderId=GS-1042-7');
+P.open('GS-1042-7', 'Completed');
+eq('Completed pide el de completion', opened[1][0], '/api/get-order-document?orderId=GS-1042-7&kind=completion');
+P.configure({ query: () => 't=abc%2Fdef' });
+P.open('GS-1042-7', 'Completed');
+eq('con configure (Admin): lleva el token en la liga', opened[2][0], '/api/get-order-document?orderId=GS-1042-7&kind=completion&t=abc%2Fdef');
+eq('en otra pestaña', opened[2][1], '_blank');
+P.configure({ query: () => { throw new Error('x'); } });
+eq('si query truena, abre igual (el servidor dira si falta sesion)', P.url('A', 'Scheduled'), '/api/get-order-document?orderId=A');
+eq('html sigue llamando GSPrintButton.open', /GSPrintButton\.open\('GS-1'/.test(P.html({ OrderID: 'GS-1', Status: 'Scheduled' })), true);
+console.log(`\n${ok} OK, ${fail} FAIL`);
+process.exit(fail ? 1 : 0);

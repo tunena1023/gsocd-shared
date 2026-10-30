@@ -41,6 +41,12 @@
          .html() -- normalmente no hace falta llamarla a mano, pero
          esta disponible por si algun boton propio del portal
          necesita el mismo comportamiento sin usar .html().
+
+       GSPrintButton.configure({ query }) -- opcional. query() regresa
+         lo que se agrega a la liga (p. ej. 't=<token>' de GSAdminAuth):
+         Admin pide el ID token en cada peticion y una pestaña nueva no
+         puede mandar el header, asi que va en la liga. Orders (cookie) no
+         lo necesita. Antes admin.html reemplazaba open() con el suyo.
   ================================================================ */
 
   function esc(s) {
@@ -58,11 +64,19 @@
     return status === 'Completed' ? 'completion' : undefined;
   }
 
-  function open(orderId, status) {
+  var cfg = { query: null };
+  function configure(o) { if (o && 'query' in o) cfg.query = o.query; }
+
+  function url(orderId, status) {
     var kind = kindFor(status);
-    var url = '/api/get-order-document?orderId=' + encodeURIComponent(orderId)
-      + (kind ? '&kind=' + encodeURIComponent(kind) : '');
-    window.open(url, '_blank');
+    var extra = '';
+    try { extra = cfg.query ? String(cfg.query() || '') : ''; } catch (e) { extra = ''; }
+    return '/api/get-order-document?orderId=' + encodeURIComponent(orderId)
+      + (kind ? '&kind=' + encodeURIComponent(kind) : '') + (extra ? '&' + extra : '');
+  }
+
+  function open(orderId, status) {
+    window.open(url(orderId, status), '_blank');
   }
 
   function html(order, opts) {
@@ -87,5 +101,5 @@
       '</span>';
   }
 
-  window.GSPrintButton = { html: html, open: open };
+  window.GSPrintButton = { html: html, open: open, url: url, configure: configure };
 })();

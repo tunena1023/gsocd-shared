@@ -8,12 +8,18 @@
        GSPush.state()  'on' | 'off' | 'denied' | 'ios-install' | 'unsupported'
          ios-install: en iPhone solo funciona desde el icono en la
          pantalla de inicio (Compartir > Agregar a inicio).
-       GSPush.subscribe(vapidPublicKey) -> la suscripcion (JSON) o lanza
+       GSPush.VAPID_PUBLIC_KEY           -> la llave publica (UN solo lugar
+                                            para Orders y Tech; la privada
+                                            vive en Vercel de Admin)
+       GSPush.subscribe(vapidPublicKey?) -> la suscripcion (JSON) o lanza
+                                            (sin llave: VAPID_PUBLIC_KEY)
        GSPush.current()                  -> la suscripcion actual o null
        GSPush.unsubscribe()              -> la borra del navegador
      El service worker es /sw.js de cada portal (muestra el aviso y abre
      la url que trae).
   ================================================================ */
+  /* Publica, segura de exponer. Si se cambian las llaves, se cambia aqui y el SHA en los portales. */
+  var VAPID_PUBLIC_KEY = 'BPTEc5-PBN_Pe6aoRgvUawDVkeAEgJKlJAFtTgSaK1ROMlI2LqZQGNRm76jeYAtA9W8iY5XEk6Ao3kVUhZDYU-4';
   function isIOS() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }
@@ -47,7 +53,7 @@
     }
     const reg = await registration();
     let sub = await reg.pushManager.getSubscription();
-    const want = keyBytes(vapidPublicKey);
+    const want = keyBytes(vapidPublicKey || VAPID_PUBLIC_KEY);
     /* Si se cambiaron las llaves, la suscripcion vieja no sirve: se rehace. */
     if (sub && sub.options && sub.options.applicationServerKey) {
       const old = new Uint8Array(sub.options.applicationServerKey);
@@ -67,5 +73,5 @@
     const sub = reg ? await reg.pushManager.getSubscription() : null;
     if (sub) await sub.unsubscribe();
   }
-  window.GSPush = { isIOS: isIOS, isStandalone: isStandalone, state: state, subscribe: subscribe, current: current, unsubscribe: unsubscribe };
+  window.GSPush = { VAPID_PUBLIC_KEY: VAPID_PUBLIC_KEY, isIOS: isIOS, isStandalone: isStandalone, state: state, subscribe: subscribe, current: current, unsubscribe: unsubscribe };
 })();
