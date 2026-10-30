@@ -8,6 +8,7 @@
     '.gs-lightbox-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;align-items:center;justify-content:center}' +
     '.gs-lightbox-overlay.open{display:flex}' +
     '.gs-lightbox-img{max-width:90vw;max-height:82vh;object-fit:contain;border-radius:4px}' +
+    '.gs-lightbox-video{display:none;max-width:90vw;max-height:82vh;border-radius:4px;background:#000}' +
     '.gs-lightbox-close{position:absolute;top:max(18px,env(safe-area-inset-top));right:max(22px,env(safe-area-inset-right));z-index:2;background:none;border:none;color:#fff;font-size:28px;line-height:1;cursor:pointer;padding:6px}' +
     '.gs-lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:none;color:#fff;font-size:28px;line-height:1;cursor:pointer;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center}' +
     '.gs-lightbox-nav:disabled{opacity:.25;cursor:default}' +
@@ -23,11 +24,13 @@
     '<button type="button" class="gs-lightbox-close" aria-label="Close">\u2715</button>' +
     '<button type="button" class="gs-lightbox-nav gs-lightbox-prev" aria-label="Previous">\u2039</button>' +
     '<img class="gs-lightbox-img" id="gs-lightbox-img" src="" alt="Photo">' +
+    '<video class="gs-lightbox-video" id="gs-lightbox-video" controls playsinline preload="metadata"></video>' +
     '<button type="button" class="gs-lightbox-nav gs-lightbox-next" aria-label="Next">\u203a</button>' +
     '<div class="gs-lightbox-counter" id="gs-lightbox-counter"></div>';
   document.body.appendChild(overlay);
 
   var imgEl = overlay.querySelector('#gs-lightbox-img');
+  var videoEl = overlay.querySelector('#gs-lightbox-video');
   var counterEl = overlay.querySelector('#gs-lightbox-counter');
   var prevBtn = overlay.querySelector('.gs-lightbox-prev');
   var nextBtn = overlay.querySelector('.gs-lightbox-next');
@@ -49,7 +52,17 @@
   function render() {
     var photo = currentPhotos[currentIndex];
     if (!photo) return;
-    imgEl.src = photo.downloadUrl;
+    /* Video (CFO 30/10/2026): se reproduce aqui mismo (isVideo, o el nombre .mp4/.mov). */
+    var isVideo = !!photo.isVideo || /\.(mp4|mov|m4v|webm)$/i.test(String(photo.name || ''));
+    if (isVideo) {
+      imgEl.style.display = 'none'; imgEl.removeAttribute('src');
+      videoEl.style.display = 'block';
+      if (videoEl.getAttribute('src') !== photo.downloadUrl) videoEl.setAttribute('src', photo.downloadUrl);
+    } else {
+      stopVideo();
+      imgEl.style.display = '';
+      imgEl.src = photo.downloadUrl;
+    }
     imgEl.alt = photo.name || 'Photo';
     /* "From gallery" (17/10/2026): subida de la galeria o de la PC (nombre "-gal", gsocd-shared/camera-capture). */
     counterEl.textContent = counterOf(currentIndex) + (/-gal\.[a-z0-9]+$/i.test(String(photo.name || '')) ? ' · From gallery' + (photo.dateUnknown ? ' · date unknown' : '') : '');
@@ -70,7 +83,14 @@
     overlay.classList.add('open');
   }
 
+  function stopVideo() {
+    try { videoEl.pause(); } catch (e) { /* sin video */ }
+    videoEl.removeAttribute('src'); videoEl.style.display = 'none';
+    try { videoEl.load(); } catch (e) { /* sin video */ }
+  }
+
   function close() {
+    stopVideo();
     overlay.classList.remove('open');
     currentPhotos = [];
     currentIndex = null;
@@ -90,7 +110,7 @@
      ve, asi que tocar la foto no hacia nada. Ahora tocar CUALQUIER
      parte cierra, menos las flechas (siguen cambiando de foto). */
   overlay.addEventListener('click', function (e) {
-    if (e.target.closest && e.target.closest('.gs-lightbox-nav')) return;
+    if (e.target.closest && (e.target.closest('.gs-lightbox-nav') || e.target.closest('.gs-lightbox-video'))) return;
     close();
   });
   prevBtn.addEventListener('click', function () { nav(-1); });

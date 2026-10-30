@@ -69,6 +69,16 @@ Read from (Settings `SqlReadMode`, uno para test y otro para producción): `shar
 falla o tarda, SharePoint). Los crons (`context({ background: true })` en el ruteador de cada portal), la copia, el
 Compare, `Settings` y `EquipmentPieces` (candado If-Match) leen siempre de SharePoint. Prueba: `node lib/sql-read.test.js`.
 
+**Fotos: `lib/photo-link` y `lib/gallery-build` (CFO 30/10/2026).** Estas sí consultan Graph (con el `graph` del portal).
+`photo-link`: la liga de cada foto que regresan las galerías ya no es la de SharePoint (caduca en ~1 h) sino
+`/api/photo?i=<id>&e=<vence>&s=<firma>` (HMAC con `PHOTO_LINK_SECRET` o, si no hay, una llave sacada de
+`GRAPH_CLIENT_SECRET`; vence en 7–14 días, igual toda la semana) y el servidor contesta 302 a un downloadUrl fresco
+(memoria de 20 min por id; lo que trae el listado de la carpeta ya cuenta). `&k=t` = miniatura, `&f=1` = los bytes
+desde el mismo dominio (zip de "Download all"). Cada portal: `lib/photo-link.js` (una línea) y la ruta pública `photo`
+en `api/[...slug].js`. `gallery-build`: lo común de las 3 galerías (carpetas, pie por servicio, fechas en hora de
+Iowa, `photoFields` con la liga nueva, `photoMarker` = "llegó una foto" para `GSGalleryGroups.watch`).
+Pruebas: `node lib/photo-link.test.js`, `node lib/gallery-build.test.js`.
+
 **`live-refresh`: modo idle (CFO 22/10/2026).** A los 10 min sin mover nada la pantalla se oscurece un poco y deja de
 revisar; con cualquier movimiento se aclara y revisa al momento. Prueba: `npm i --no-save jsdom && node live-refresh/live-refresh.test.js`.
 

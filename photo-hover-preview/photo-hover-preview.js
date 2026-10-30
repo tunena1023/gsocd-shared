@@ -21,8 +21,16 @@
      GSPhotoHoverPreview.setup();               // una sola vez, al cargar la pagina
      GSPhotoHoverPreview.stripHtml(photosArray); // el HTML de la tira, dado un arreglo de fotos
    Picar una miniatura de la tira la abre en grande (necesita gsocd-shared/lightbox en la pagina), igual en
-   Admin y en Orders. Tech tiene su propia tira (tech-photos.js, por las fotos que se estan subiendo) y tambien
-   abre el lightbox al picar.
+   los 3 portales.
+     GSPhotoHoverPreview.stripHtml(photos, opts)   (30/10/2026, CFO: Tech usa esta tira, no la suya)
+       opts.max       -- cuantas miniaturas (3); las demas son "+N"
+       opts.more      -- false: sin "+N"
+       opts.className -- clase de mas en la tira (tamaño propio de cada pantalla)
+       opts.badge(p)  -- HTML encima de cada miniatura (Tech: ⏳ subiendo / ⚠️ no subio)
+       opts.dim(p)    -- true: la miniatura medio transparente (todavia subiendo)
+       opts.count     -- numero encima de la primera (Tech: fotos de ese servicio)
+       opts.key       -- (opcional) nombre fijo de la tira, si la pantalla arma un arreglo nuevo cada vez
+     Un video se enseña con su miniatura (p.thumbUrl) y no sale en la vista previa.
 
 ============================================================ */
 (function () {
@@ -47,6 +55,10 @@
       '.order-photo-thumb { width: 34px; height: 34px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; transition: border-color .15s; }' +
       '.order-photo-thumb:hover { border-color: var(--gold); }' +
       '.order-photo-more { font-size: 11px; color: var(--gold-dk, #8C6F2A); font-weight: 700; }' +
+      '.order-photo-wrap { position: relative; display: inline-flex; flex-shrink: 0; cursor: pointer; }' +
+      '.order-photo-wrap.dim .order-photo-thumb { opacity: .55; }' +
+      '.order-photo-badge { position: absolute; right: 1px; bottom: 1px; font-size: 9px; line-height: 1; background: rgba(255,255,255,.9); border-radius: 3px; padding: 1px 2px; pointer-events: none; }' +
+      '.order-photo-count { position: absolute; left: 1px; top: 1px; font-size: 9px; font-weight: 700; line-height: 1; background: var(--gold, #C9A84C); color: #111; border-radius: 3px; padding: 1px 3px; pointer-events: none; }' +
       '.gs-hover-preview-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0); z-index: 99999; display: flex; align-items: center; justify-content: center; pointer-events: none; opacity: 0; transition: opacity .15s ease, background .15s ease; }' +
       '.gs-hover-preview-overlay.show { opacity: 1; background: rgba(0,0,0,.82); }' +
       '.gs-hover-preview-overlay img { max-width: 94vw; max-height: 94vh; object-fit: contain; border-radius: 6px; }';
@@ -74,7 +86,7 @@
 
   function findThumb(target) {
     var direct = target.closest('.order-photo-thumb');
-    if (direct) return direct;
+    if (direct) return direct.classList.contains('video') ? null : direct;
     var galPh = target.closest('.gs-gal-ph');
     if (galPh && !galPh.classList.contains('video')) return galPh;
     return null;
@@ -90,7 +102,9 @@
      igual en todas partes"; Admin lo tenia escrito aparte y el cliente en Orders solo veia las miniaturas). La
      misma lista (el mismo arreglo) usa siempre el mismo numero, asi repintar no llena la memoria. */
   var lists = {}, seq = 0, idOf = typeof WeakMap === 'function' ? new WeakMap() : null;
-  function listId(photos) {
+  function listId(photos, key) {
+    /* key (opcional): la pantalla arma un arreglo nuevo en cada repintado (Tech) -> mismo lugar, sin llenar la memoria. */
+    if (key != null) { lists['k:' + key] = photos; return 'k:' + key; }
     var id = idOf && idOf.get(photos);
     if (!id) { id = String(++seq); if (idOf) idOf.set(photos, id); }
     lists[id] = photos;
@@ -105,7 +119,9 @@
     var photos = lists[strip.getAttribute('data-gs-photos')];
     if (!photos || !photos.length) return;
     var thumbs = Array.prototype.slice.call(strip.querySelectorAll('.order-photo-thumb'));
-    var i = e.target.closest('.order-photo-more') ? thumbs.length : thumbs.indexOf(e.target.closest('.order-photo-thumb'));
+    var wrap = e.target.closest('.order-photo-wrap');
+    var hit = e.target.closest('.order-photo-thumb') || (wrap && wrap.querySelector('.order-photo-thumb'));
+    var i = e.target.closest('.order-photo-more') ? thumbs.length : thumbs.indexOf(hit);
     e.stopPropagation();
     e.preventDefault();
     window.GSLightbox.open(photos, Math.max(0, i));
@@ -159,15 +175,23 @@
     return d.innerHTML;
   }
 
-  function stripHtml(photos) {
+  function isVideo(p) { return !!(p && (p.isVideo || /\.(mp4|mov|m4v|webm)$/i.test(String(p.name || '')))); }
+  function stripHtml(photos, opts) {
     if (!photos || !photos.length) return '';
-    var shown = photos.slice(0, 3);
+    opts = opts || {};
+    var shown = photos.slice(0, opts.max || 3);
     var extra = photos.length - shown.length;
-    var thumbsHtml = shown.map(function (p) {
-      return '<img class="order-photo-thumb" src="' + esc(p.downloadUrl) + '" loading="lazy">';
+    var thumbsHtml = shown.map(function (p, i) {
+      var v = isVideo(p);
+      var img = '<img class="order-photo-thumb' + (v ? ' video' : '') + '" src="' + esc((v && p.thumbUrl) || p.downloadUrl) + '" loading="lazy" alt="">';
+      var badge = opts.badge ? (opts.badge(p) || '') : '';
+      var count = opts.count && i === 0 && opts.count > 1 ? '<span class="order-photo-count">' + Number(opts.count) + '</span>' : '';
+      var dim = opts.dim && opts.dim(p);
+      if (!badge && !count && !dim && !v) return img;
+      return '<span class="order-photo-wrap' + (dim ? ' dim' : '') + '">' + img + (v ? '<span class="order-photo-badge">▶</span>' : '') + badge + count + '</span>';
     }).join('');
-    var moreHtml = extra > 0 ? '<span class="order-photo-more">+' + extra + '</span>' : '';
-    return '<div class="order-photo-strip" data-gs-photos="' + listId(photos) + '" title="View photos" style="cursor:pointer">' + thumbsHtml + moreHtml + '</div>';
+    var moreHtml = extra > 0 && opts.more !== false ? '<span class="order-photo-more">+' + extra + '</span>' : '';
+    return '<div class="order-photo-strip' + (opts.className ? ' ' + esc(opts.className) : '') + '" data-gs-photos="' + esc(listId(photos, opts.key)) + '" title="View photos" style="cursor:pointer">' + thumbsHtml + moreHtml + '</div>';
   }
 
   window.GSPhotoHoverPreview = { setup: setup, stripHtml: stripHtml };

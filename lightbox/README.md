@@ -22,6 +22,9 @@ GSLightbox.open(photos, index);
 - `photos`: arreglo de objetos `{ downloadUrl, name }` — todas las fotos del grupo donde vive la
   que se apretó (para que las flechas tengan entre qué moverse).
 - `index`: posición (empezando en 0) de la foto que se apretó, dentro de ese arreglo.
+- Video (30/10/2026): con `isVideo: true` (o el nombre `.mp4/.mov/.m4v/.webm`) se reproduce ahí mismo con sus
+  controles; tocar el video no cierra el visor.
+- `downloadUrl` puede ser la liga del portal (`/api/photo?...`, gsocd-shared `lib/photo-link`), que no caduca.
 - `opts.sections` (opcional, 21/10/2026): `[{ label, start, count }]`. El contador dice "Before 2 / 4" en vez de
   "2 / 10". Lo usa gallery-groups para que antes y después no se mezclen.
 

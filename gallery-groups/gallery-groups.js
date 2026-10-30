@@ -242,6 +242,11 @@
     used[n.toLowerCase()] = true;
     return n + '.' + ext.toLowerCase();
   }
+  /* Un video se enseña con su miniatura (thumbUrl); una foto, la foto. */
+  function imgSrc(p) { return (p.isVideo && p.thumbUrl) || p.downloadUrl; }
+  /* Para el zip: la liga del portal (gsocd-shared lib/photo-link) da los bytes desde el mismo dominio con &f=1
+     (la de SharePoint depende de su CORS). */
+  function fileUrl(p) { var u = String(p.downloadUrl || ''); return /\/api\/photo\?/.test(u) ? u + '&f=1' : u; }
   function downloadAll(group, btn) {
     if (btn.dataset.busy) return;   // doble clic: una sola descarga
     var photos = (group.photos || []).filter(function (p) { return p && p.downloadUrl; });
@@ -256,7 +261,7 @@
       return Promise.all(photos.map(function (p) {
         var folder = both ? (p.stage === 'inspection' ? 'Before/' : 'After/') : '';
         var name = folder + fileNameOf(p, used);
-        return fetch(p.downloadUrl).then(function (r) { if (!r.ok) throw new Error(r.status); return r.blob(); })
+        return fetch(fileUrl(p)).then(function (r) { if (!r.ok) throw new Error(r.status); return r.blob(); })
           .then(function (b) { zip.file(name, b); }, function () { failed++; })
           .then(function () { done++; btn.textContent = 'Preparing… ' + done + '/' + photos.length; });
       })).then(function () {
@@ -290,7 +295,11 @@
     /* Por grupo (CFO 22/10): filtros que se prenden y se apagan. stageState = Before/After ('inspection' | 'work' |
        nada = todas), whoState = la persona (nada = todas), posState = cual de las filtradas esta en grande. Sin
        ningun filtro salen todas, de la mas nueva a la mas vieja. Vive en closure de render(). */
-    var stageState = {}, whoState = {}, posState = {};
+    /* Por orden (no por posicion) y guardado en el contenedor: al repintar con datos nuevos (llego una foto, lo
+       guardado se cambio por lo fresco) la tarjeta abierta, sus filtros y la foto en grande se quedan igual. */
+    var keep = container.__gsGalKeep || (container.__gsGalKeep = { open: {}, stage: {}, who: {}, pos: {} });
+    var stageState = keep.stage, whoState = keep.who, posState = keep.pos;
+    function K(gi) { return String((groups[gi] && groups[gi].orderId) || ('#' + gi)); }
     function stageOf(p) { return p && p.stage === 'inspection' ? 'inspection' : 'work'; }
     function whoOf(p) { return (p && p.takenBy) || 'Not recorded'; }
     function sortedIdx(gi) {
@@ -298,11 +307,11 @@
       return photos.map(function (_, i) { return i; }).sort(function (a, b) { return dateSortKey(photos[b]).localeCompare(dateSortKey(photos[a])); });
     }
     function filtered(gi) {
-      var photos = groups[gi].photos || [], st = stageState[gi], who = whoState[gi];
+      var photos = groups[gi].photos || [], st = stageState[K(gi)], who = whoState[K(gi)];
       return sortedIdx(gi).filter(function (i) { return (!st || stageOf(photos[i]) === st) && (!who || whoOf(photos[i]) === who); });
     }
     function curPos(gi, list) {
-      var p = posState[gi] || 0;
+      var p = posState[K(gi)] || 0;
       return list.length ? ((p % list.length) + list.length) % list.length : 0;
     }
 
@@ -313,7 +322,7 @@
       var pos = curPos(gi, list);
       var heroIdx = list[pos];
       var hero = photos[heroIdx];
-      var st = stageState[gi], who = whoState[gi];
+      var st = stageState[K(gi)], who = whoState[K(gi)];
 
       /* Before/After solo si la orden tiene fotos de antes (la mayoria no tiene inspeccion). Los numeros respetan
          el filtro de persona, y los de las personas el de Before/After. */
@@ -343,7 +352,7 @@
       /* La foto grande en 3 zonas: izquierda = la anterior, en medio = el visor, derecha = la que sigue. */
       var heroHtml = !hero ? '<p class="gs-gal-empty">No photos.</p>' : (
         '<div class="gs-gal-hero' + (hero.isVideo ? ' video' : '') + ' gs-gal-ph" data-pi="' + heroIdx + '">' +
-          '<img src="' + escAttr(hero.downloadUrl) + '" loading="lazy" alt="">' +
+          '<img src="' + escAttr(imgSrc(hero)) + '" loading="lazy" alt="">' +
           (list.length > 1 ? '<span class="gs-gal-nav prev" aria-hidden="true">‹</span><span class="gs-gal-nav next" aria-hidden="true">›</span>' : '') +
         '</div>' +
         '<div class="gs-gal-hero-cap">' + photoCapHtml(hero) + '</div>'
@@ -352,7 +361,7 @@
         var p = photos[pi];
         return '<div class="gs-gal-thumb-wrap">' +
           '<div class="gs-gal-thumb' + (p.isVideo ? ' video' : '') + (k === pos ? ' cur' : '') + ' gs-gal-ph" data-pi="' + pi + '" data-pos="' + k + '">' +
-            '<img src="' + escAttr(p.downloadUrl) + '" loading="lazy" alt="">' +
+            '<img src="' + escAttr(imgSrc(p)) + '" loading="lazy" alt="">' +
           '</div>' +
           (p.serviceName ? '<div class="gs-gal-thumb-cap">' + esc(p.serviceName) + '</div>' : '') +
         '</div>';
@@ -363,7 +372,7 @@
 
     container.innerHTML = groups.map(function (g, gi) {
       var count = (g.photos || []).length;
-      var isOpen = opts.openOrderId && g.orderId === opts.openOrderId;
+      var isOpen = (opts.openOrderId && g.orderId === opts.openOrderId) || !!keep.open[K(gi)];
 
       /* El bloque de nombre + renglones de detalle vive en
          gsocd-shared/order-card-header -- se comparte con
@@ -424,8 +433,8 @@
           ev.stopPropagation();
           var list = filtered(gi);
           var r = heroEl.getBoundingClientRect(), x = r.width ? (ev.clientX - r.left) / r.width : 0.5;
-          if (list.length > 1 && x < 1 / 3) { posState[gi] = curPos(gi, list) - 1; repaint(); return; }
-          if (list.length > 1 && x > 2 / 3) { posState[gi] = curPos(gi, list) + 1; repaint(); return; }
+          if (list.length > 1 && x < 1 / 3) { posState[K(gi)] = curPos(gi, list) - 1; repaint(); return; }
+          if (list.length > 1 && x > 2 / 3) { posState[K(gi)] = curPos(gi, list) + 1; repaint(); return; }
           var pi = parseInt(heroEl.dataset.pi, 10);
           var group = groups[gi];
           if (opts.onPhotoClick) {
@@ -450,23 +459,23 @@
       body.querySelectorAll('.gs-gal-stage[data-stage]').forEach(function (el) {
         el.addEventListener('click', function (ev) {
           ev.stopPropagation();
-          stageState[gi] = stageState[gi] === el.dataset.stage ? null : el.dataset.stage;
-          posState[gi] = 0;
+          stageState[K(gi)] = stageState[K(gi)] === el.dataset.stage ? null : el.dataset.stage;
+          posState[K(gi)] = 0;
           repaint();
         });
       });
       body.querySelectorAll('.gs-gal-stage[data-who]').forEach(function (el) {
         el.addEventListener('click', function (ev) {
           ev.stopPropagation();
-          whoState[gi] = whoState[gi] === el.dataset.who ? null : el.dataset.who;
-          posState[gi] = 0;
+          whoState[K(gi)] = whoState[K(gi)] === el.dataset.who ? null : el.dataset.who;
+          posState[K(gi)] = 0;
           repaint();
         });
       });
       body.querySelectorAll('.gs-gal-thumb').forEach(function (el) {
         el.addEventListener('click', function (ev) {
           ev.stopPropagation();
-          posState[gi] = parseInt(el.dataset.pos, 10) || 0;
+          posState[K(gi)] = parseInt(el.dataset.pos, 10) || 0;
           repaint();
         });
       });
@@ -476,7 +485,8 @@
 
     container.querySelectorAll('[data-grp-header]').forEach(function (header) {
       header.addEventListener('click', function () {
-        header.parentElement.classList.toggle('open');
+        var open = header.parentElement.classList.toggle('open');
+        keep.open[K(parseInt(header.dataset.grpHeader, 10))] = open;
       });
     });
 
@@ -490,5 +500,38 @@
       '</div>';
   }
 
-  window.GSGalleryGroups = { render: render, searchHtml: searchHtml };
+  /* Una foto subida mientras la galeria esta abierta aparece sola (CFO 30/10/2026). Cada everyMs (3 min) con la
+     pantalla a la vista, al volver a ella y al volver la señal, check() pregunta la marca de fotos del servidor (una
+     llamada chica: el endpoint de la galeria con onlyMarker, gsocd-shared lib/gallery-build photoMarker). Si cambio
+     contra la de lo que se ve, onChange() vuelve a cargar y repinta. Si check falla, la siguiente vuelta.
+       var w = GSGalleryGroups.watch({ check: () => api(...onlyMarker...).then(r => r.photoMarker), onChange: reload });
+       w.seen(marker)   -- la marca de lo que se acaba de pintar
+       w.stop()                                                                                                  */
+  function watch(o) {
+    var seen = '', busy = false, stopped = false, last = Date.now();
+    var every = o.everyMs || 180000;
+    function tick(force) {
+      if (stopped || busy || (typeof document !== 'undefined' && document.hidden)) return;
+      if (!force && Date.now() - last < every) return;
+      if (o.active && !o.active()) return;
+      busy = true; last = Date.now();
+      Promise.resolve().then(function () { return o.check(); }).then(function (m) {
+        m = m == null ? '' : String(m);
+        if (m && seen && m !== seen) { seen = m; return o.onChange(m); }
+        if (m && !seen) seen = m;
+      }).catch(function () { /* la siguiente vuelta */ }).then(function () { busy = false; });
+    }
+    var timer = setInterval(function () { tick(false); }, Math.min(every, 60000));
+    function onVis() { if (!document.hidden) tick(true); }
+    function onOnline() { tick(true); }
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('online', onOnline);
+    return {
+      seen: function (m) { if (m) seen = String(m); },
+      check: function () { tick(true); },
+      stop: function () { stopped = true; clearInterval(timer); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('online', onOnline); }
+    };
+  }
+
+  window.GSGalleryGroups = { render: render, searchHtml: searchHtml, watch: watch };
 })();
