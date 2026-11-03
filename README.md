@@ -68,8 +68,8 @@ Read from (Settings `SqlReadMode`, uno para test y otro para producción): `shar
 (contesta SharePoint y anota en la tabla `_read_diffs` lo que SQL contestaría distinto) o `sql` (contesta SQL; si
 falla o tarda, SharePoint). Los procesos de fondo marcados (`context({ background: true })` en el ruteador de cada portal:
 los crons de una vez al día), la copia y el Compare leen siempre de SharePoint. `Settings` y `EquipmentPieces` (candado
-If-Match, `LOCKED`, CFO 03/11): en modo `sql`, de SQL solo si SQL está al día (la hora del último cambio de la lista en
-SharePoint contra el renglón más nuevo en SQL); si no, SharePoint. Guardar sigue con If-Match contra SharePoint.
+If-Match, `LOCKED`, CFO 03/11): en modo `sql` también de SQL; guardar sigue con If-Match contra SharePoint (un 412 = vuelve a
+leer de SharePoint). El switch mismo se lee de la copia en SQL (si SQL no contesta, de SharePoint).
 Prueba: `node lib/sql-read.test.js`.
 
 **Fotos: `lib/photo-link` y `lib/gallery-build` (CFO 30/10/2026).** Estas sí consultan Graph (con el `graph` del portal).
