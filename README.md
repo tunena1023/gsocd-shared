@@ -66,8 +66,11 @@ Sin la variable `SQL_MIRROR_URL` no hace nada. Su prueba usa un Postgres en memo
 Con él va `lib/sql-read` (CFO 22/10/2026): las lecturas de listas (GET) según el switch Developer › SQL migration ›
 Read from (Settings `SqlReadMode`, uno para test y otro para producción): `sharepoint` (como siempre), `compare`
 (contesta SharePoint y anota en la tabla `_read_diffs` lo que SQL contestaría distinto) o `sql` (contesta SQL; si
-falla o tarda, SharePoint). Los crons (`context({ background: true })` en el ruteador de cada portal), la copia, el
-Compare, `Settings` y `EquipmentPieces` (candado If-Match) leen siempre de SharePoint. Prueba: `node lib/sql-read.test.js`.
+falla o tarda, SharePoint). Los procesos de fondo marcados (`context({ background: true })` en el ruteador de cada portal:
+los crons de una vez al día), la copia y el Compare leen siempre de SharePoint. `Settings` y `EquipmentPieces` (candado
+If-Match, `LOCKED`, CFO 03/11): en modo `sql`, de SQL solo si SQL está al día (la hora del último cambio de la lista en
+SharePoint contra el renglón más nuevo en SQL); si no, SharePoint. Guardar sigue con If-Match contra SharePoint.
+Prueba: `node lib/sql-read.test.js`.
 
 **Fotos: `lib/photo-link` y `lib/gallery-build` (CFO 30/10/2026).** Estas sí consultan Graph (con el `graph` del portal).
 `photo-link`: la liga de cada foto que regresan las galerías ya no es la de SharePoint (caduca en ~1 h) sino
