@@ -53,6 +53,9 @@ le dice "dueña", "dueño" ni "owner". Las secciones se citan por su nombre, no 
   la vez). Al empezar, lee todos sus comentarios; antes de tocar algo, comenta "🔒 Tomo: ..." (qué, repos, archivos,
   tu sesión); si otra sesión ya lo tomó, no lo toques. Al terminar, "✅ Listo: ..." o "🔓 Suelto: ...". Avisos para
   las demás sesiones, ahí mismo ("⚠️ Aviso: ..."). Con la herramienta de GitHub (issue #5 del repo Admingsocd.com).
+- **Cada vez que la CFO te hable (y al empezar), lee TODO lo nuevo del #5 desde tu último comentario leído (CFO 03/11).** Si hay un
+  pedido, pregunta o aviso de algo que tú sabes o que toca tu trabajo, contéstalo ahí o habla con esa sesión. Si varias saben del tema, se ponen
+  de acuerdo y **lo toma la que más sabe** (🔒); las demás no lo tocan y le pasan lo que sepan. Nada se queda sin contestar "porque no era mío".
 - **Ahorrar tokens (CFO, 28/09):** no quedarse suscrito a PRs (`subscribe_pr_activity`) salvo una prueba corta, y
   no programar check-ins (`send_later`, triggers) ni scripts en segundo plano para "vigilar". Una sesión trabaja cuando
   la CFO le habla; para coordinarse basta el tablero #5 (se lee al empezar y antes de cada push).
