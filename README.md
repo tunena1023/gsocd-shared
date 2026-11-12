@@ -79,7 +79,10 @@ por renglón, con reintentos; SQL gana si algo no cuadra (se anota en `note`); l
 Lecturas de esa lista: solo SQL (si falla, error; nunca SharePoint). ids nuevos desde el máximo + 1,000,000 (`_sp_seq`);
 todo id ≥ 1,000,000 nació en SQL, siempre se guarda/lee de SQL y su id de SharePoint va en `sp_id`. Columnas que apuntan a
 otra lista (`REFS`) se traducen a `sp_id` antes de mandar. `context({ backup: true })` = leer el SharePoint de verdad
-(Compare / Copy all). Prueba: `node lib/sql-first.test.js`.
+(Compare / Copy all). Antes de guardar se rechaza (400, como SharePoint) lo que SharePoint no aceptaría: columna desconocida,
+texto de una línea largo, valor fuera de una choice (columnas de SharePoint en `_sp_columns`, el cron de Admin las lee una vez al
+día). Marca "¿cambió algo?" de la lista desde `_sp_list_mod`. Fecha sin hora o con hora sin zona: zona del sitio, como SharePoint.
+Prueba: `node lib/sql-first.test.js`.
 
 **Correos que esperan a Microsoft: `lib/mail-outbox` (CFO 12/11/2026, caída de Outlook TM1550488).** Apagado por
 default: sin `MAIL_OUTBOX=on` en el proyecto de Vercel todo sale (o falla) igual que antes. Prendido: un correo automático
