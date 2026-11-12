@@ -71,6 +71,15 @@ los crons de una vez al día), la copia y el Compare leen siempre de SharePoint.
 If-Match, `LOCKED`, CFO 03/11): en modo `sql` también de SQL; guardar sigue con If-Match contra SharePoint (un 412 = vuelve a
 leer de SharePoint). El switch mismo se lee de la copia en SQL (si SQL no contesta, de SharePoint).
 Prueba: `node lib/sql-read.test.js`.
+**Guardar en SQL primero: `lib/sql-first` (CFO 12/11/2026), APAGADO por default.** Switch por lista y ambiente: Settings
+`SqlWriteMode` = `{"preview": {"Orders": "sql-first"}, "production": {}}`. Lista en `sql-first`: crear/cambiar/borrar van a
+SQL (misma respuesta que SharePoint; If-Match contra la versión de SQL, 412 igual), con su renglón en `_sp_outbox` en el
+mismo comando; SharePoint se llena por detrás (al final de cada guardado y con el cron `cron-sp-outbox` de Admin), en orden
+por renglón, con reintentos; SQL gana si algo no cuadra (se anota en `note`); lo que no sale en 6 h se avisa una vez.
+Lecturas de esa lista: solo SQL (si falla, error; nunca SharePoint). ids nuevos desde el máximo + 1,000,000 (`_sp_seq`);
+todo id ≥ 1,000,000 nació en SQL, siempre se guarda/lee de SQL y su id de SharePoint va en `sp_id`. Columnas que apuntan a
+otra lista (`REFS`) se traducen a `sp_id` antes de mandar. `context({ backup: true })` = leer el SharePoint de verdad
+(Compare / Copy all). Prueba: `node lib/sql-first.test.js`.
 
 **Correos que esperan a Microsoft: `lib/mail-outbox` (CFO 12/11/2026, caída de Outlook TM1550488).** Apagado por
 default: sin `MAIL_OUTBOX=on` en el proyecto de Vercel todo sale (o falla) igual que antes. Prendido: un correo automático
