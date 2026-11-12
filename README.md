@@ -72,6 +72,16 @@ If-Match, `LOCKED`, CFO 03/11): en modo `sql` también de SQL; guardar sigue con
 leer de SharePoint). El switch mismo se lee de la copia en SQL (si SQL no contesta, de SharePoint).
 Prueba: `node lib/sql-read.test.js`.
 
+**Correos que esperan a Microsoft: `lib/mail-outbox` (CFO 12/11/2026, caída de Outlook TM1550488).** Apagado por
+default: sin `MAIL_OUTBOX=on` en el proyecto de Vercel todo sale (o falla) igual que antes. Prendido: un correo automático
+ya armado (`notifyClient`, `notifyOffice`; no los que pide una persona con un botón ni los avisos `app-error`) que Microsoft
+no acepta por algo suyo (5xx, 429, 408, red) entra a la tabla `_mail_outbox` (la crea el código) y se manda solo cuando
+Microsoft regresa: `kick()` al final de cada petición (`vercel-adapter`, máx. 1/min por instancia) y el cron de Admin
+`cron-mail-outbox` (5 min). Sin duplicados: llave por contenido + día de Iowa, candado por renglón y, antes de reintentar,
+búsqueda en Enviados por la marca escondida `GSOutboxKey`. Correo al cliente de una orden cancelada o borrada: no sale
+(`skipped` + porqué). 24 h sin salir: `gave_up` y aviso `app-error` a `NOTIFY_ALERT_TO`. Un 4xx no entra.
+Prueba: `node lib/mail-outbox.test.js` (PGlite).
+
 **Fotos: `lib/photo-link` y `lib/gallery-build` (CFO 30/10/2026).** Estas sí consultan Graph (con el `graph` del portal).
 `photo-link`: la liga de cada foto que regresan las galerías ya no es la de SharePoint (caduca en ~1 h) sino
 `/api/photo?i=<id>&e=<vence>&s=<firma>` (HMAC con `PHOTO_LINK_SECRET` o, si no hay, una llave sacada de
