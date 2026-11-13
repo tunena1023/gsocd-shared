@@ -65,9 +65,11 @@
           (b.addr ? '<div class="bldg-opt-addr">' + esc(b.addr) + '</div>' : '') + '</div>';
       }).join('');
       var r = input.getBoundingClientRect();
-      m.style.left = Math.max(8, r.left + window.scrollX) + 'px';
+      /* En celular un campo angosto: la lista no se sale de la pantalla por la derecha. */
+      var w = Math.min(Math.max(r.width, 260), window.innerWidth - 16);
+      m.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 8 - w) + window.scrollX) + 'px';
       m.style.top = (r.bottom + window.scrollY + 4) + 'px';
-      m.style.width = Math.min(Math.max(r.width, 260), window.innerWidth - 16) + 'px';
+      m.style.width = w + 'px';
       m.style.display = 'block';
     }
     function pick(val) {
