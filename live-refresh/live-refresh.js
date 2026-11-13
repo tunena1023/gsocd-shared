@@ -53,6 +53,16 @@
      watcher.stop();       // dejar de revisar (ej. al salir de la pagina)
      watcher.checkNow();   // forzar una revision inmediata
 
+   Relojes que no son watchers (CFO 12/11/2026: "¿para que demonios se
+   pone en negro?" si siguen preguntando). Mientras la capa esta puesta
+   NADA pregunta, y al moverse se pone al dia solo:
+     GSLiveRefresh.isIdle()            true con la capa puesta
+     GSLiveRefresh.onWake(fn)          fn al quitarse la capa; regresa off()
+     GSLiveRefresh.whenAwake(fn)       ya, o una vez al despertar
+     GSLiveRefresh.every(ms, fn, opts) en lugar de setInterval: no corre
+       con la capa ni con la pestana oculta, corre una vez al despertar y
+       pone la capa en la pantalla aunque no tenga watcher. { stop, now }
+
    GSLiveRefresh.flashElement(el):
      Le pone un destello dorado breve (~900ms) a un elemento del DOM --
      pensado para usarse dentro de onChange, justo despues de repintar
@@ -106,6 +116,8 @@
   var idleTimer = null;
   var idleOverlay = null;
   var pageIdle = false;
+  /* Quien quiere saber cuando se quita la capa (onWake / whenAwake). */
+  var wakeFns = [];
 
   function ensureIdleCSS() {
     if (document.getElementById('gs-live-refresh-idle-css')) return;
@@ -164,12 +176,17 @@
       if (idleFor(idleWatchers[i].idleMs)) toWake.push(idleWatchers[i]);
     }
     lastActivity = Date.now();
+    var woke = pageIdle;
     if (pageIdle) {
       pageIdle = false;
       hideIdleOverlay();
     }
     if (!idleTimer) scheduleIdle();
-    for (var j = 0; j < toWake.length; j++) toWake[j].wake();
+    for (var j = 0; j < toWake.length; j++) { try { toWake[j].wake(); } catch (e) { /* uno que truena no frena a los demas */ } }
+    if (woke) {
+      var fns = wakeFns.slice();
+      for (var k = 0; k < fns.length; k++) { try { fns[k](); } catch (e) { /* idem */ } }
+    }
   }
 
   function addIdleWatcher(entry) {
@@ -205,7 +222,47 @@
     idleOverlay = null;
   }
 
+  function onWake(fn) {
+    wakeFns.push(fn);
+    return function () { var i = wakeFns.indexOf(fn); if (i !== -1) wakeFns.splice(i, 1); };
+  }
+
   window.GSLiveRefresh = {
+    /* true mientras la capa negra esta puesta (nadie se ha movido en idleMs). Los relojes de cada pantalla no
+       preguntan nada mientras tanto (CFO 12/11/2026: "si esta en negro, NADA pregunta"). */
+    isIdle: function () { return pageIdle; },
+    /* fn() cada vez que se quita la capa (una sola vez por despertada). Regresa la funcion para darse de baja. */
+    onWake: onWake,
+    /* fn() ya si no esta en negro; si lo esta, una sola vez al despertar (para un setTimeout que se encadena). */
+    whenAwake: function (fn) {
+      if (!pageIdle) { fn(); return; }
+      var off = onWake(function () { off(); fn(); });
+    },
+    /* Reloj que respeta la pausa: fn() cada ms, pero no con la capa puesta ni con la pestana oculta (opts.whenHidden:
+       true para correr oculta); al despertar, una vez enseguida (opts.onWake: false para no). Anota la pantalla para
+       la capa aunque no tenga watcher (opts.idleMs, 10 min por default; idle: false = sin capa ni pausa). Si fn
+       regresa una promesa, no se encima la siguiente vuelta. -> { stop(), now() } */
+    every: function (ms, fn, opts) {
+      opts = opts || {};
+      var idleMs = opts.idle === false ? 0 : (opts.idleMs == null ? 600000 : Number(opts.idleMs) || 0);
+      var running = false, stopped = false;
+      function run(why) {
+        if (stopped || running) return;
+        if (idleMs && (pageIdle || idleFor(idleMs))) return;
+        if (!opts.whenHidden && document.visibilityState !== 'visible') return;
+        running = true;
+        var p;
+        try { p = fn(why); } catch (e) { p = null; }
+        Promise.resolve(p).catch(function () {}).then(function () { running = false; });
+      }
+      var timer = setInterval(function () { run('tick'); }, ms);
+      var entry = idleMs > 0 ? { idleMs: idleMs, wake: function () { if (opts.onWake !== false) run('wake'); } } : null;
+      if (entry) addIdleWatcher(entry);
+      return {
+        stop: function () { if (stopped) return; stopped = true; clearInterval(timer); if (entry) removeIdleWatcher(entry); },
+        now: function () { run('now'); }
+      };
+    },
     flashElement: function (el) {
       if (!el) return;
       ensureFlashCSS();

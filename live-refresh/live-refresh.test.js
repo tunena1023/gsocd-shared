@@ -171,6 +171,86 @@ const move = w => w.document.dispatchEvent(new w.MouseEvent('mousemove', { bubbl
     h.stop();
   }
 
+  /* ---- relojes que no son watchers (CFO 12/11/2026: si esta en negro, NADA pregunta) ---- */
+  {
+    const w = page();
+    const L = w.GSLiveRefresh;
+    let n = 0, wakes = 0, later = 0;
+    const t = L.every(50, () => { n++; }, { idleMs: 200 });
+    check('every sin watcher: no hay capa al empezar e isIdle() es false', overlays(w).length === 0 && L.isIdle() === false);
+    await wait(150);
+    check('every: corre en cada intervalo mientras alguien usa la pantalla', n >= 2, n);
+    await wait(150);
+    check('every sin watcher: a los idleMs sale la capa negra e isIdle() es true', dimmed(w) && L.isIdle() === true);
+    L.onWake(() => { wakes++; });
+    L.whenAwake(() => { later++; });
+    const atIdle = n;
+    await wait(300);
+    check('pausa: mientras esta en negro el reloj NO corre', n === atIdle, { atIdle, n });
+    check('whenAwake en pausa: espera a despertar', later === 0);
+    move(w);
+    check('despertar: se quita la capa y el reloj corre UNA vez enseguida', !dimmed(w) && n === atIdle + 1 && !L.isIdle(), { atIdle, n });
+    check('despertar: onWake y whenAwake una vez', wakes === 1 && later === 1, { wakes, later });
+    move(w); move(w); w.document.dispatchEvent(new w.KeyboardEvent('keydown', { bubbles: true, key: 'a' }));
+    check('doble despertar: moverse otra vez no repite la revision ni el aviso', n === atIdle + 1 && wakes === 1 && later === 1, { n, wakes, later });
+    await wait(120);
+    check('despues de despertar sigue con su intervalo', n >= atIdle + 3, n);
+    let now2 = 0; L.whenAwake(() => { now2++; });
+    check('whenAwake despierto: corre ya', now2 === 1);
+    t.stop();
+    check('stop del unico reloj: quita la capa y no corre mas', overlays(w).length === 0 && (await wait(150), n) === n);
+  }
+
+  {
+    /* Una vuelta lenta (promesa) no se encima con la siguiente ni con la de despertar. */
+    const w = page();
+    const L = w.GSLiveRefresh;
+    let starts = 0, done;
+    const t = L.every(30, () => { starts++; return new Promise(r => { done = r; }); }, { idleMs: 0 });
+    await wait(150);
+    check('every: no se encima mientras la vuelta anterior sigue', starts === 1, starts);
+    done(); await wait(60);
+    check('every: al terminar sigue la siguiente', starts === 2, starts);
+    done(); t.stop();
+  }
+
+  {
+    /* Pestana oculta y error en fn. */
+    const w = page();
+    let vis = 'visible';
+    Object.defineProperty(w.document, 'visibilityState', { configurable: true, get: () => vis });
+    const L = w.GSLiveRefresh;
+    let n = 0, h = 0, bad2 = 0;
+    const a = L.every(40, () => { n++; });
+    const b = L.every(40, () => { h++; }, { whenHidden: true });
+    const c = L.every(40, () => { bad2++; throw new Error('boom'); });
+    vis = 'hidden';
+    const n0 = n, h0 = h;
+    await wait(150);
+    check('pestana oculta: no corre (salvo whenHidden)', n === n0 && h > h0, { n, n0, h, h0 });
+    vis = 'visible';
+    await wait(100);
+    check('una vuelta que truena no frena el reloj', bad2 >= 3 && n > n0, { bad2, n });
+    a.stop(); b.stop(); c.stop();
+  }
+
+  {
+    /* Watcher y reloj juntos: una sola capa; con la capa nada pregunta; al despertar cada uno una vez. */
+    const w = page();
+    const L = w.GSLiveRefresh;
+    const wa = watcher(w);
+    let n = 0;
+    const t = L.every(50, () => { n++; }, { idleMs: 200 });
+    await wait(300);
+    check('watcher + reloj: una sola capa', overlays(w).length === 1 && dimmed(w));
+    const a0 = wa.calls.n, n0 = n;
+    await wait(200);
+    check('watcher + reloj: ninguno pregunta en negro', wa.calls.n === a0 && n === n0);
+    move(w);
+    check('watcher + reloj: al despertar cada uno revisa una vez', wa.calls.n === a0 + 1 && n === n0 + 1, { a: wa.calls.n - a0, n: n - n0 });
+    wa.h.stop(); t.stop();
+  }
+
   console.log('\n' + ok + ' OK, ' + bad + ' FAIL');
   process.exitCode = bad ? 1 : 0;
 })();

@@ -19,6 +19,8 @@
    - si esta escribiendo (el cursor en un campo), en cuanto termine --
      la misma regla que ya usa Admin para refrescarse solo cada 30 s
      (gsocd-shared/live-refresh).
+   Con la pantalla en negro (gsocd-shared/live-refresh, cargado antes que
+   este) no pregunta ni se recarga; al moverse revisa una vez.
    Al recargar regresa a la misma altura de la pagina; beforeReload()
    deja que cada pagina guarde lo demas (Tech: pestaña, tarjetas
    abiertas, panel de cambios).
@@ -75,9 +77,13 @@
     [800, 2000].forEach(function (ms) { setTimeout(function () { if (st.y > (window.scrollY || 0)) window.scrollTo(0, st.y); }, ms); });
   }
 
+  /* Pantalla en negro (gsocd-shared/live-refresh, CFO 12/11/2026): nada pregunta ni se recarga hasta que alguien se mueva. */
+  function idle() { try { return !!(window.GSLiveRefresh && GSLiveRefresh.isIdle && GSLiveRefresh.isIdle()); } catch (e) { return false; } }
+
   function decide() {
     if (!pendingNew) return;
     if (busy()) return; /* se vuelve a revisar cada 2 s hasta que termine */
+    if (idle()) return;
     /* Una pestaña que nadie esta viendo se recarga cuando la vuelven a ver (17/10/2026: cada version nueva recargaba
        todas las ventanas abiertas a la vez, tambien las de fondo, y cada recarga vuelve a pedir todo al servidor). */
     if (document.visibilityState === 'hidden') return;
@@ -85,7 +91,7 @@
   }
 
   function check(resumed) {
-    if (checking) return;
+    if (checking || idle()) return;
     checking = true;
     fetch(cfg.url + (cfg.url.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now(), { cache: 'no-store', credentials: 'same-origin' })
       .then(function (r) { return r.ok ? r.json() : null; })
@@ -107,7 +113,10 @@
     });
     window.addEventListener('pageshow', function (e) { if (e.persisted) check(true); });
     window.addEventListener('focus', function () { check(true); });
-    setInterval(function () { check(false); }, cfg.intervalMs);
+    /* Con live-refresh en la pagina: su reloj (no pregunta en negro, una vez al despertar, y la pantalla se pone en
+       negro a los 10 min aunque no tenga otro reloj). Sin el: como antes. */
+    if (window.GSLiveRefresh && GSLiveRefresh.every) GSLiveRefresh.every(cfg.intervalMs, function () { check(false); }, { whenHidden: true });
+    else setInterval(function () { check(false); }, cfg.intervalMs);
     /* Version nueva pendiente porque estaba escribiendo: en cuanto termine. */
     setInterval(function () { if (pendingNew) decide(); }, 2000);
     check(false);

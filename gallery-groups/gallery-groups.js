@@ -520,8 +520,10 @@
   function watch(o) {
     var seen = '', busy = false, stopped = false, last = Date.now();
     var every = o.everyMs || 180000;
+    /* Pantalla en negro (gsocd-shared/live-refresh, CFO 12/11/2026): no pregunta; al despertar revisa una vez. */
+    function idle() { try { return !!(window.GSLiveRefresh && GSLiveRefresh.isIdle && GSLiveRefresh.isIdle()); } catch (e) { return false; } }
     function tick(force) {
-      if (stopped || busy || (typeof document !== 'undefined' && document.hidden)) return;
+      if (stopped || busy || (typeof document !== 'undefined' && document.hidden) || idle()) return;
       if (!force && Date.now() - last < every) return;
       if (o.active && !o.active()) return;
       busy = true; last = Date.now();
@@ -531,7 +533,9 @@
         if (m && !seen) seen = m;
       }).catch(function () { /* la siguiente vuelta */ }).then(function () { busy = false; });
     }
-    var timer = setInterval(function () { tick(false); }, Math.min(every, 60000));
+    var lr = window.GSLiveRefresh && GSLiveRefresh.every ? GSLiveRefresh.every(Math.min(every, 60000), function () { tick(false); }, { onWake: false }) : null;
+    var timer = lr ? null : setInterval(function () { tick(false); }, Math.min(every, 60000));
+    var offWake = window.GSLiveRefresh && GSLiveRefresh.onWake ? GSLiveRefresh.onWake(function () { tick(true); }) : null;
     function onVis() { if (!document.hidden) tick(true); }
     function onOnline() { tick(true); }
     document.addEventListener('visibilitychange', onVis);
@@ -539,7 +543,7 @@
     return {
       seen: function (m) { if (m) seen = String(m); },
       check: function () { tick(true); },
-      stop: function () { stopped = true; clearInterval(timer); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('online', onOnline); }
+      stop: function () { stopped = true; if (lr) lr.stop(); else clearInterval(timer); if (offWake) offWake(); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('online', onOnline); }
     };
   }
 
