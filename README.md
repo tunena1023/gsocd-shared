@@ -94,6 +94,15 @@ búsqueda en Enviados por la marca escondida `GSOutboxKey`. Correo al cliente de
 (`skipped` + porqué). 24 h sin salir: `gave_up` y aviso `app-error` a `NOTIFY_ALERT_TO`. Un 4xx no entra.
 Prueba: `node lib/mail-outbox.test.js` (PGlite).
 
+**Que la base solo se prenda cuando hay trabajo: `lib/db-wake` (CFO 12/11/2026).** Apagado por default: sin `DB_WAKE=on`
+en el proyecto de Vercel (los 3 a la vez) `touch()` no hace nada y `due()` siempre dice "corre". Prendido: quien encola o
+guarda deja una marca chica en el drive de SharePoint (`App Data/DB wake/flag-<nombre>.json`: `saves` en cada guardado de
+una lista vía `sql-mirror.wrap`, `sp-outbox`, `mail-<ambiente>`, `keys`), máx. 1 escritura/min por instancia; cada cron
+pregunta `due(g, cron, { flags, safety })` antes de tocar SQL y al terminar bien deja `done-<cron>.json` (`at`, `until` =
+cuándo vence algo aunque nadie marque, `info`). Si una marca no se puede leer o escribir: camino seguro (revisar la base).
+`quiet(['saves'], fn)`: lo que guarda ese cron no lo despierta a él mismo. Revisión de seguridad: `safetyHourly(min)` (la
+primera vuelta de cada hora de 7 a 19 h de Iowa y a las 5:00). Prueba: `node lib/db-wake.test.js`.
+
 **Fotos: `lib/photo-link` y `lib/gallery-build` (CFO 30/10/2026).** Estas sí consultan Graph (con el `graph` del portal).
 `photo-link`: la liga de cada foto que regresan las galerías ya no es la de SharePoint (caduca en ~1 h) sino
 `/api/photo?i=<id>&e=<vence>&s=<firma>` (HMAC con `PHOTO_LINK_SECRET` o, si no hay, una llave sacada de
