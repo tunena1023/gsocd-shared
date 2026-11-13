@@ -54,6 +54,13 @@
                                     Processing y el dueño pidio
                                     igualarlo en todos lados)
      3) Assigned · Completed
+
+   Opcional (CFO 12/11/2026, Tech; sin estas opciones sale igual que antes):
+     buildingNumber: '3'            -> "Building 3 · Unit 214 · 2bd/1ba"
+     addressLines: ['2618 28th Ave SW', 'Altoona, IA 50009']
+                                    -> la direccion en sus dos renglones,
+                                       despues de Assigned (GSAddress.lines)
+     whenLine: 'Sep 26 · 8:00 AM'   -> fecha y hora en su renglon, al final
 ============================================================ */
 (function () {
   'use strict';
@@ -68,7 +75,9 @@
       '.gs-ordhdr-top { display: flex; align-items: center; gap: 12px; min-width: 0; }' +
       '.gs-ordhdr-name { font-weight: 700; font-size: 14px; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex-shrink: 1; }' +
       '.gs-ordhdr-trailing { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; }' +
-      '.gs-ordhdr-sub { font-size: 11px; color: #6B6B6B; margin-top: 5px; }';
+      '.gs-ordhdr-sub { font-size: 11px; color: #6B6B6B; margin-top: 5px; }' +
+      '.gs-ordhdr-addr { font-size: 13px; color: #111; line-height: 1.35; margin-top: 8px; overflow-wrap: anywhere; }' +
+      '.gs-ordhdr-when { font-size: 12px; font-weight: 600; color: #111; margin-top: 6px; }';
     document.head.appendChild(tag);
   }
 
@@ -93,6 +102,7 @@
     if (o.division) l1.push(o.division);
 
     var l2 = [];
+    if (o.buildingNumber) l2.push('Building ' + o.buildingNumber);
     if (o.unitNumber) l2.push('Unit ' + o.unitNumber);
     if (o.bedrooms || o.bathrooms) l2.push((o.bedrooms || '—') + 'bd/' + (o.bathrooms || '—') + 'ba');
 
@@ -110,7 +120,11 @@
        Assigned/Completed -- ej. Approvals quiere "submitted <fecha>"
        (la orden todavia no tiene supervisor ni fecha de completado).
        Se agrega como renglon aparte, siempre al final. */
+    if (o.addressLines && o.addressLines.length) {
+      subLines += '<div class="gs-ordhdr-addr">' + o.addressLines.filter(Boolean).map(esc).join('<br>') + '</div>';
+    }
     if (o.extraLine) subLines += '<div class="gs-ordhdr-sub">' + esc(o.extraLine) + '</div>';
+    if (o.whenLine) subLines += '<div class="gs-ordhdr-when">' + esc(o.whenLine) + '</div>';
 
     return top + subLines;
   }
