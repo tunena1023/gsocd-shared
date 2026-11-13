@@ -76,13 +76,29 @@ Prueba: `node lib/sql-read.test.js`.
 SQL (misma respuesta que SharePoint; If-Match contra la versión de SQL, 412 igual), con su renglón en `_sp_outbox` en el
 mismo comando; SharePoint se llena por detrás (al final de cada guardado y con el cron `cron-sp-outbox` de Admin), en orden
 por renglón, con reintentos; SQL gana si algo no cuadra (se anota en `note`); lo que no sale en 6 h se avisa una vez.
-Lecturas de esa lista: solo SQL (si falla, error; nunca SharePoint). ids nuevos desde el máximo + 1,000,000 (`_sp_seq`);
+Lecturas de esa lista: de SQL (si SQL no contesta: el hibrido, abajo). ids nuevos desde el máximo + 1,000,000 (`_sp_seq`);
 todo id ≥ 1,000,000 nació en SQL, siempre se guarda/lee de SQL y su id de SharePoint va en `sp_id`. Columnas que apuntan a
 otra lista (`REFS`) se traducen a `sp_id` antes de mandar. `context({ backup: true })` = leer el SharePoint de verdad
 (Compare / Copy all). Antes de guardar se rechaza (400, como SharePoint) lo que SharePoint no aceptaría: columna desconocida,
 texto de una línea largo, valor fuera de una choice (columnas de SharePoint en `_sp_columns`, el cron de Admin las lee una vez al
 día). Marca "¿cambió algo?" de la lista desde `_sp_list_mod`. Fecha sin hora o con hora sin zona: zona del sitio, como SharePoint.
 Prueba: `node lib/sql-first.test.js`.
+**Hibrido, si Neon no contesta (CFO 12/11/2026; solo con listas en sql-first, `SQL_FIRST_HYBRID=off` = como antes).**
+Lectura: si SQL no contesta en 2 s (`SQL_FIRST_HYBRID_MS`) sale de SharePoint en ese momento; 3 fallas seguidas = el freno de
+`sql-read` (1 min todo de SharePoint, cada minuto un intento). Guardar: un "estas?" de 2 s si hace 30 s que no se habla con SQL;
+si no contesta, a SharePoint y cada cambio al diario `lib/sql-journal` (lista `SqlOutageLog`, SPEC): hora, lista, renglon y los
+campos exactos, anotado ANTES del guardado. Renglon nacido en SQL: al renglon de SharePoint si este servidor ya sabe su id; si no,
+solo al diario y la persona ve "Saved". Cuando SQL vuelve (por detras en cada servidor que lo sabe y en el cron de Admin, antes de
+la fila): en orden y campo por campo, cada cambio con su llave en `_sql_journal` en el mismo comando (reanuda sin duplicar); un
+campo que SQL cambio despues gana; los cambios viejos de la fila pierden los campos que el diario cambio despues
+(`_sql_journal_state.open` frena la fila mientras tanto). Lo que no se pudo pasar: anotado y el aviso de errores del cron.
+La respuesta lleva `X-GS-Data` (`lib/vercel-adapter`) para `reconnecting/`. Prueba: `node lib/sql-hybrid.test.js` (PGlite).
+
+**Aviso "Reconnecting…": `reconnecting/reconnecting.js` (CFO 12/11/2026).** Un `<script>` en cada pantalla, nada que llamar.
+Con `X-GS-Data: sharepoint` o `down` enseña arriba un aviso chiquito "Reconnecting…" y se quita solo con `sql`. Con `down` y
+`X-GS-Replay: 1` (Neon y Microsoft caidos, nada guardado antes en esa peticion) el guardado se queda en el telefono o la
+computadora (`localStorage`, en orden), la pantalla recibe 202 `{ ok, queued }` y sale solo cuando alguno vuelve (token nuevo en
+Admin, `X-GS-Replayed`). Sin el header (switch apagado) no hace nada. Prueba: `node reconnecting/reconnecting.test.js` (jsdom).
 
 **Correos que esperan a Microsoft: `lib/mail-outbox` (CFO 12/11/2026, caída de Outlook TM1550488).** Apagado por
 default: sin `MAIL_OUTBOX=on` en el proyecto de Vercel todo sale (o falla) igual que antes. Prendido: un correo automático
