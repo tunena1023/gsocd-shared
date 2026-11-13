@@ -31,8 +31,16 @@
     if (t.normalize) t = t.normalize('NFD').replace(MARKS, '');
     return t.replace(NOT_ALNUM, '');
   }
+  /* La ultima busqueda queda partida: filtrar miles de renglones con la misma no la vuelve a partir. */
+  var lastQ = null, lastT = null;
   function tokens(q) {
     if (Array.isArray(q)) return q;
+    if (typeof q === 'string' && q === lastQ) return lastT;
+    var t = splitQ(q);
+    if (typeof q === 'string') { lastQ = q; lastT = t; }
+    return t;
+  }
+  function splitQ(q) {
     var out = [], seen = {};
     String(q == null ? '' : q).split(/[\s,;]+/).forEach(function (w) {
       var t = norm(w);

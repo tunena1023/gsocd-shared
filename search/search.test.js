@@ -55,6 +55,11 @@ const t0 = Date.now();
 for (let i = 0; i < 50; i++) S.filter(rows, 'client 49 meadow', idx2);
 const ms = (Date.now() - t0) / 50;
 check('a search over 5000 indexed rows takes under 10 ms (' + ms.toFixed(2) + ' ms)', ms < 10, ms);
+const t1 = Date.now();
+for (let i = 0; i < 50; i++) rows.filter(r => S.match(idx2(r), 'client 49 meadow'));
+const ms2 = (Date.now() - t1) / 50;
+check('match row by row with the same text query is just as fast (' + ms2.toFixed(2) + ' ms)', ms2 < 10, ms2);
+check('tokens of the same query are reused, a new query is split again', S.tokens('a b') === S.tokens('a b') && S.tokens('a c').join() === 'a,c');
 let thrown = null;
 try { S.indexer(() => { throw new Error('boom'); })({}); } catch (e) { thrown = e; }
 check('an error in the row builder is not swallowed silently', thrown && thrown.message === 'boom');
