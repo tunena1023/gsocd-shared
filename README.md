@@ -134,6 +134,15 @@ Pruebas: `node lib/photo-link.test.js`, `node lib/gallery-build.test.js`.
 **`live-refresh`: modo idle (CFO 22/10/2026).** A los 10 min sin mover nada la pantalla se oscurece un poco y deja de
 revisar; con cualquier movimiento se aclara y revisa al momento. Prueba: `npm i --no-save jsdom && node live-refresh/live-refresh.test.js`.
 
+**`lib/price-for` + `lib/price-data`: precios por cliente (CFO 15/11/2026).** `price-for` (puro) da el precio de un
+servicio para un cliente en un día de Iowa: cotización de Marketing → especial del cliente → especial de su
+administradora (`MasterClientID`) → estándar con fecha (`StandardPrices.EffectiveFrom`; `NewClientsOnly` = los clientes
+de antes se quedan con el catálogo de hoy) → catálogo (`ServicesCatalog.Price` con su nivel); nunca 0 (sin precio =
+null). Pausa: `Clients.PriceStatus` Paused/Restarted + `PriceStatusDate`. `price-data` lee eso por cliente
+(`SpecialPrices` por `TargetID`, nunca de otro cliente) y, si una lectura falla, usa la última buena o dice que no hay
+datos (`ok:false`). Lo usan Orders `get-services` y `submit-order`, y Admin `submit-order` y
+`quickbooks-import-estimates` (`OrderServices.UnitPrice` + `PriceSource`). Prueba: `node lib/price-for.test.js`.
+
 ### Lo del servidor que antes estaba copiado en los portales (Arreglo 30/10/2026)
 
 Cada portal lo carga con UNA linea desde su archivo de siempre (`lib/graph.js`, `site-image.js`, ...). Pruebas:
