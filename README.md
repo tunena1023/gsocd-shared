@@ -59,7 +59,8 @@ sus consultas y guarda sus datos. Se prueban con Node solo: `node lib/<pieza>.te
 
 **Excepción: `lib/sql-mirror` (CFO 22/10/2026)** sí escribe, en SQL (Postgres en Neon), no en SharePoint: envuelve el
 `graphFetch` de cada portal y copia a la tabla del mismo nombre cada guardado en una lista (crear, cambiar, borrar).
-SharePoint sigue siendo lo que se usa y se lee; si la copia falla, el guardado sigue normal y se escribe en el log.
+Así empezó (22/10). Hoy (15/11/2026) Neon es la base principal y SharePoint solo respaldo: ver `lib/sql-first` y el
+híbrido abajo. Si la copia falla, el guardado sigue normal y se escribe en el log.
 Sin la variable `SQL_MIRROR_URL` no hace nada. Su prueba usa un Postgres en memoria:
 `npm i --no-save @electric-sql/pglite && node lib/sql-mirror.test.js`. Es la única pieza con dependencia
 (`@neondatabase/serverless`).
@@ -71,7 +72,8 @@ los crons de una vez al día), la copia y el Compare leen siempre de SharePoint.
 If-Match, `LOCKED`, CFO 03/11): en modo `sql` también de SQL; guardar sigue con If-Match contra SharePoint (un 412 = vuelve a
 leer de SharePoint). El switch mismo se lee de la copia en SQL (si SQL no contesta, de SharePoint).
 Prueba: `node lib/sql-read.test.js`.
-**Guardar en SQL primero: `lib/sql-first` (CFO 12/11/2026), APAGADO por default.** Switch por lista y ambiente: Settings
+**Guardar en SQL primero: `lib/sql-first` (CFO 12/11/2026), APAGADO por default en el código; en Test y Production está
+PRENDIDO para todas las listas desde el 13/11 (Settings `SqlWriteMode` `*`).** Switch por lista y ambiente: Settings
 `SqlWriteMode` = `{"preview": {"Orders": "sql-first"}, "production": {}}`. Lista en `sql-first`: crear/cambiar/borrar van a
 SQL (misma respuesta que SharePoint; If-Match contra la versión de SQL, 412 igual), con su renglón en `_sp_outbox` en el
 mismo comando; SharePoint se llena por detrás (al final de cada guardado y con el cron `cron-sp-outbox` de Admin), en orden
