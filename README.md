@@ -161,6 +161,9 @@ Cada portal lo carga con UNA linea desde su archivo de siempre (`lib/graph.js`, 
   de imagenes; `supply` solo Admin, Tech solo `name`), **`lib/order-document`** (get-order-document) y
   **`lib/order-detail`** (get-order-detail; `audience: 'client'` es una lista cerrada de campos: lo de la oficina
   nunca le llega al cliente).
+- **`lib/site-visits`** (CFO 14/11/2026, drive mode de Tech): llegada y salida por orden y dia (`Orders.SiteVisits` +
+  ArrivedAt…SiteSeenAt). Tech las escribe (`site-visit.js`, Done); Admin las lee (vista de la orden, Calendar).
+  Llegada una vez por dia; salida = Done, 10 min fuera o la ultima vez visto. Pruebas: `node lib/site-visits.test.js`.
 
 ## Reglas que siguen vigentes
 
