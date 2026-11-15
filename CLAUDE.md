@@ -1,4 +1,4 @@
-# Reglas para TODA sesión que trabaje en GS Solutions (CFO, 28/09/2026; repasadas el 30/10)
+# Reglas para TODA sesión que trabaje en GS Solutions (CFO, 28/09/2026; repasadas el 30/10 y el 15/11)
 
 Esto lo carga cualquier sesión al empezar. Es instrucción de la CFO y manda sobre la rama que te haya dado tu entorno.
 Las sesiones trabajan con la CFO (cfo@gsocd.com). El dueño de la empresa es Jorge (info@gsocd.com). A la CFO nunca se
@@ -51,7 +51,8 @@ le dice "dueña", "dueño" ni "owner". Las secciones se citan por su nombre, no 
   pasa las decisiones de la CFO. Mientras esté vacante, se le reporta a la CFO o a la sesión que te mandó.
 - **Tablero de sesiones: issue https://github.com/tunena1023/Admingsocd.com/issues/5** (varias sesiones trabajan a
   la vez). Al empezar, lee todos sus comentarios; antes de tocar algo, comenta "🔒 Tomo: ..." (qué, repos, archivos,
-  tu sesión); si otra sesión ya lo tomó, no lo toques. Al terminar, "✅ Listo: ..." o "🔓 Suelto: ...". Avisos para
+  tu sesión); si otra sesión ya lo tomó, no lo toques. Al terminar, "✅ Listo: ..." (qué hizo y por qué) o "🔓 Suelto: ...".
+  Así nadie deja nada a medias ni agarra lo de otra (CFO 15/11: es al tomar y al terminar, no cada 30 min). Avisos para
   las demás sesiones, ahí mismo ("⚠️ Aviso: ..."). Con la herramienta de GitHub (issue #5 del repo Admingsocd.com).
 - **Cada vez que la CFO te hable (y al empezar), lee TODO lo nuevo del #5 desde tu último comentario leído (CFO 03/11).** Si hay un
   pedido, pregunta o aviso de algo que tú sabes o que toca tu trabajo, contéstalo ahí o habla con esa sesión. Si varias saben del tema, se ponen
@@ -75,7 +76,8 @@ le dice "dueña", "dueño" ni "owner". Las secciones se citan por su nombre, no 
 - Reglas fijas de trabajo: `WORKFLOW.md` de Admin. Lo no obvio del código: HANDOFF "Cómo funciona" y "Reglas del código".
 
 ## 4. Reglas que no se brincan (una línea cada una; el detalle, en la sección del HANDOFF que se nombra)
-- **Con la CFO:** español casual, nada técnico (ni archivos, funciones, columnas ni siglas) y sin tablas (usa texto a voz).
+- **Con la CFO:** español casual y palabras sencillas desde la primera palabra, nada técnico (ni archivos, funciones, columnas ni
+  siglas) y sin tablas (usa texto a voz).
 - **"Hablemos" = plática: no se toca nada.** Se hace solo lo que pidió, sin nada de más (HANDOFF "Cómo trabajar con la CFO").
 - **Toda la interfaz (UI) en inglés.**
 - **Pantalla nueva o no está claro qué quiere: mock primero** (captura en `tools/`, 390 px y escritorio); no se construye
@@ -84,11 +86,19 @@ le dice "dueña", "dueño" ni "owner". Las secciones se citan por su nombre, no 
   le falta algo, opción nueva en shared con su prueba. El SHA nuevo va en los 3 portales en la misma subida.
 - **Ninguna pantalla se queda en "Loading…":** abre con lo último que se vio y actualiza por detrás. Si un dato guardado
   no sirve (por ejemplo, ligas que caducan), se arregla el dato; nunca se apaga lo guardado.
-- **Nada inesperado se descarta en silencio (CFO, 18/10).** Lo que no cuadra (un lugar de uAttend, una persona, un
-  cliente, una fecha o un artículo que no se encuentra) sale como pendiente ("Needs a match") con opción en pantalla para
-  ligar, corregir o marcar "no aplica"; lo que el usuario escoge manda y se guarda. Si una carga falla, no se enseña "0".
-- **Columnas e índices de SharePoint: solo vía `SPEC`** de `lib/sp-columns.js`; la app los crea sola. Nunca se le piden a la CFO.
-- **test-admin escribe en el SharePoint y en el Outlook de producción:** probar ahí mueve datos reales.
+- **Nada inesperado se descarta en silencio (CFO 18/10, actualizada 15/11).** Lo que no cuadra (un lugar de uAttend, una
+  persona, un cliente, una fecha o un artículo) la app lo busca por todos lados y lo resuelve sola con la mejor estimación;
+  el personal no rellena ni liga a mano. "Needs a match" solo como último recurso, cuando de plano no hay forma. Lo que el
+  usuario escoge manda y se guarda. Si una carga falla, no se enseña "0".
+- **Datos:** Neon es la base principal y SharePoint solo respaldo (HANDOFF "Datos" de Admin).
+- **Marketing** vive dentro de Admin (`marketing.html` + `marketing/`) y se sube con Admin.
+- **Subidas juntas (CFO):** una subida a `preview` por paquete de trabajo terminado, no por cada cambio: cada subida es un
+  build de Vercel que paga la CFO. El avance a medias se guarda en local, no se sube.
+- **Agentes ayudantes (CFO):** la sesión que reparte trabajo vigila a sus agentes y vuelve a mandar a los que se paran, sin
+  preguntarle a la CFO.
+- **Capturas para la CFO:** siempre computadora y teléfono (390 px).
+- **Columnas e índices de SharePoint: solo vía `SPEC`** (catálogo en gsocd-shared `lib/sp-catalog.js`, Admin lo lee con `lib/sp-columns.js`); la app los crea sola. Nunca se le piden a la CFO.
+- **test-admin escribe en los datos de producción (Neon y su respaldo en SharePoint) y en el Outlook de producción:** probar ahí mueve datos reales.
 - **`Orders.InternalNotes` y los renglones internos nunca le llegan al cliente** (HANDOFF "Reglas del código").
 - **Fechas = día de Iowa** (`iowaDay`/`dayOf`; nunca `.slice(0,10)` ni `toISOString()` para sacar el día).
 - **En QuickBooks nada cambia solo:** las diferencias las escoge una persona (HANDOFF "QuickBooks").
