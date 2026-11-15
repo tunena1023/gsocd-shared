@@ -43,5 +43,41 @@ check('per 1,000 sq ft with no quantity = the whole unit', U.lineMinutes('111-53
 check('coveredSkus: the tasks a unit package already covers', JSON.stringify(Object.keys(U.coveredSkus(svcs, { PackageContents: { '111-48': items } })).sort()) === JSON.stringify(items.map(i => i.sku).sort()));
 check('a cleaning task in an order with no bed / bath (common areas) keeps its Service Times minutes', U.orderMinutes([{ SubOption: '111-51', Level: 'Level 1' }], {}, { perTask: () => 35 }).totalMinutes === 35);
 check('the same task in a unit order takes the catalog (whole unit)', U.orderMinutes([{ SubOption: '111-51', Level: 'Level 1' }], { Bedrooms: '2', Bathrooms: '1' }, { perTask: () => 35 }).totalMinutes === Math.round(opt('111-51', 'A') * 900 / 1000));
+
+/* ---- per technician (CFO 15/11/2026): only what is assigned to each one, today and after today ---- */
+const T0 = '2026-11-16', T1 = '2026-11-17';
+const order = { Bedrooms: '2', Bathrooms: '1', PackageContents: { '111-48': items } };
+const job = svcs.map(s => Object.assign({ Category: 'Move-in', Division: 'Janitorial' }, s))
+  .concat([{ Category: 'Paint', ServiceName: 'Wall painting', SubOption: '222-10', Division: 'Renovations' }, { Category: 'Paint', ServiceName: 'Door painting', SubOption: '222-11', Quantity: '9', Division: 'Renovations' }]);
+const X_MOVEIN = opt('111-48', 'C · L1'), X_WALLS = opt('222-10', 'C · 1 coat'), X_DOORS = 9 * opt('222-11', 'B');
+const pp = (r, who) => r.people.find(p => p.who === who) || { today: 0, remaining: 0 };
+/* by service: Ana does the move-in today, Luis walls today and doors tomorrow */
+const asg = svcs.map(s => ({ Category: 'Move-in', ServiceName: s.ServiceName, AssignedTo: 'Ana Ruiz', ScheduledDate: T0, WorkStatus: 'Not Started' }))
+  .concat([{ Category: 'Paint', ServiceName: 'Wall painting', AssignedTo: 'Luis Diaz', ScheduledDate: T0 }, { Category: 'Paint', ServiceName: 'Door painting', AssignedTo: 'Luis Diaz', ScheduledDate: T1 }]);
+let sp = U.techSplit(job, order, { today: T0, perTask, assignments: asg });
+check('per tech: Ana sees only the move-in (today), not the whole order', sp.mode === 'assigned' && Math.abs(pp(sp, 'Ana Ruiz').today - X_MOVEIN) <= 1 && pp(sp, 'Ana Ruiz').remaining === 0, sp);
+check('today vs remaining: Luis walls today, doors after today', pp(sp, 'Luis Diaz').today === X_WALLS && pp(sp, 'Luis Diaz').remaining === X_DOORS, sp);
+check('each range = X to X x 1.15', sp.people.every(p => p.todayTo === Math.round(p.today * 1.15) && p.remainingTo === Math.round(p.remaining * 1.15)));
+check('nobody sees the order total', sp.people.every(p => p.today + p.remaining < X_MOVEIN + X_WALLS + X_DOORS));
+/* returning tech on day 2: the walls were done yesterday, today is the doors */
+const day2 = asg.map(a => a.ServiceName === 'Wall painting' ? Object.assign({}, a, { WorkStatus: 'Completed' }) : a);
+sp = U.techSplit(job, order, { today: T1, perTask, assignments: day2 });
+check('returning tech on day 2: done work counts nowhere, today = the doors', pp(sp, 'Luis Diaz').today === X_DOORS && pp(sp, 'Luis Diaz').remaining === 0, sp);
+check('day 2: Ana\'s unfinished move-in from yesterday is still remaining (not today)', Math.abs(pp(sp, 'Ana Ruiz').remaining - X_MOVEIN) <= 1 && pp(sp, 'Ana Ruiz').today === 0, sp);
+/* 2-person crew on one service row: split between them */
+sp = U.techSplit(job, order, { today: T0, perTask, assignments: [{ Category: 'Paint', ServiceName: 'Wall painting', AssignedTo: 'Ana Ruiz, Luis Diaz', ScheduledDate: T0 }] });
+check('2-person crew on a service: half each', pp(sp, 'Ana Ruiz').today === Math.round(X_WALLS / 2) && pp(sp, 'Luis Diaz').today === Math.round(X_WALLS / 2), sp);
+/* whole order (Scheduling): 2 people today, 1 of them back tomorrow -> 3 person-days of the per-day share */
+const total = X_MOVEIN + X_WALLS + X_DOORS;
+sp = U.techSplit(job, order, { today: T0, perTask, scheduling: [{ who: 'P1', date: T0 }, { who: 'P2', date: T0 }, { who: 'P1', date: T1 + 'T00:00:00Z' }] });
+check('whole order, 2-person crew: today half of a day each (share mode)', sp.mode === 'share' && Math.abs(pp(sp, 'P1').today - total / 2 / 2) <= 1 && Math.abs(pp(sp, 'P2').today - total / 2 / 2) <= 1, sp);
+check('whole order, returning tech: P1 has day 2 after today, P2 nothing more', Math.abs(pp(sp, 'P1').remaining - total / 2) <= 1 && pp(sp, 'P2').remaining === 0, sp);
+sp = U.techSplit(job, order, { today: T1, perTask, scheduling: [{ who: 'P1', date: T0 }, { who: 'P2', date: T0 }, { who: 'P1', date: T1 }] });
+check('whole order on day 2: past days count nowhere, P1 today = the second day', Math.abs(pp(sp, 'P1').today - total / 2) <= 1 && !sp.people.some(p => p.who === 'P2'), sp);
+sp = U.techSplit(job, order, { today: T0, perTask, scheduling: [{ who: 'J1', date: T0, division: 'Janitorial' }, { who: 'R1', date: T0, division: 'Renovations' }] });
+check('mixed order by division: the cleaner gets the cleaning, the painter the painting', Math.abs(pp(sp, 'J1').today - X_MOVEIN) <= 1 && pp(sp, 'R1').today === X_WALLS + X_DOORS, sp);
+check('package minutes spread over its tasks add up to the package', Math.abs(U.techSplit(job.slice(0, 8), order, { today: T0, perTask, assignments: asg.slice(0, 8) }).people[0].today - X_MOVEIN) <= 1);
+check('dayOf: date, midnight UTC and a time of day in Iowa', U.dayOf('2026-11-16') === '2026-11-16' && U.dayOf('2026-11-16T00:00:00Z') === '2026-11-16' && U.dayOf('2026-11-17T03:00:00Z') === '2026-11-16');
+check('nothing assigned: no mode, nobody', U.techSplit(job, order, { today: T0 }).mode === '' && U.techSplit(job, order, { today: T0 }).people.length === 0);
 console.log('\nunit-time: ' + ok + ' OK, ' + bad + ' FAIL');
 process.exit(bad ? 1 : 0);

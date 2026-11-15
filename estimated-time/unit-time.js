@@ -93,11 +93,13 @@
   function nc(s) { var v = s && s.NotCompleted; return v === true || v === 'true' || v === 'Yes' || v === 1; }
   /* services: [{ ServiceName, SubOption, Level, Quantity, NotCompleted }]
      order: { Bedrooms, Bathrooms, PackageContents }   opts: { perTask(sku, level, qty) -> minutes | null }
-     -> { totalMinutes, toMinutes, lines: [{ sku, label, minutes, from }], band, bandAssumed, unknown } | null */
-  function orderMinutes(services, order, opts) {
+     -> { per: minutes of each service (same index; a unit package's time spread over its tasks by their Service Times
+          minutes, else evenly), lines, total, band, unknown } */
+  function compute(services, order, opts) {
     order = order || {}; opts = opts || {};
     var band = bandOf(order.Bedrooms, order.Bathrooms), ctx = { band: band, unit: true };
-    var list = (services || []).filter(function (s) { return s && !nc(s); });
+    var all = services || [], per = all.map(function () { return 0; });
+    var live = []; all.forEach(function (s, i) { if (s && !nc(s)) live.push(i); });
     var used = {}, lines = [], total = 0, unknown = 0;
     var pk = packagesOf(order.PackageContents);
     Object.keys(pk).forEach(function (psku) {
@@ -105,20 +107,22 @@
       var items = (Array.isArray(pk[psku]) ? pk[psku] : []).map(function (x) { return String((x && x.sku) || '').trim(); }).filter(Boolean);
       if (!items.length) return;
       var set = {}; items.forEach(function (k) { set[k] = 1; });
-      var idx = []; list.forEach(function (s, i) { if (!used[i] && set[String(s.SubOption || '').trim()]) idx.push(i); });
+      var idx = live.filter(function (i) { return !used[i] && set[String(all[i].SubOption || '').trim()]; });
       if (!idx.length) return;
-      var cnt = {}; idx.forEach(function (i) { var lv = levelOf(list[i].Level); cnt[lv] = (cnt[lv] || 0) + 1; });
+      var cnt = {}; idx.forEach(function (i) { var lv = levelOf(all[i].Level); cnt[lv] = (cnt[lv] || 0) + 1; });
       var lv = [3, 2, 1].reduce(function (best, l) { return (cnt[l] || 0) > (cnt[best] || 0) ? l : best; }, 3);
       var r = lineMinutes(psku, 'Level ' + lv, 1, ctx); if (!r) return;
       var share = Math.min(1, idx.length / items.length);
-      idx.forEach(function (i) { used[i] = 1; });
       var m = Math.round(r.minutes * share);
+      var w = idx.map(function (i) { var t = opts.perTask ? opts.perTask(String(all[i].SubOption || '').trim(), all[i].Level, 1) : null; return t > 0 ? Number(t) : 0; });
+      var wsum = w.reduce(function (a, b) { return a + b; }, 0);
+      idx.forEach(function (i, k) { used[i] = 1; per[i] = wsum > 0 ? m * w[k] / wsum : m / idx.length; });
       total += m;
       lines.push({ sku: psku, label: e.n + ' (' + BAND_TEXT[band || 'B'] + ', Level ' + lv + (share < 1 ? ', ' + idx.length + ' of ' + items.length + ' tasks' : '') + ')', minutes: m, from: 'unit', note: r.note });
     });
-    list.forEach(function (s, i) {
+    live.forEach(function (i) {
       if (used[i]) return;
-      var sku = String(s.SubOption || '').trim(), e = entry(sku), m = null, from = 'unit', r = null;
+      var s = all[i], sku = String(s.SubOption || '').trim(), e = entry(sku), m = null, from = 'unit', r = null;
       /* a cleaning task outside a unit (no bed / bath: common areas, offices) keeps its Service Times minutes */
       var task = opts.perTask && !band && /^11/.test(sku) && !sized(e) ? opts.perTask(sku, s.Level, s.Quantity) : null;
       if (task != null) { m = task; from = 'task'; }
@@ -128,13 +132,81 @@
         else if (opts.perTask) { m = opts.perTask(sku, s.Level, s.Quantity); from = 'task'; }
       }
       if (m == null) { unknown++; return; }
-      total += Number(m) || 0;
+      per[i] = Number(m) || 0;
+      total += per[i];
       var q = num(s.Quantity);
-      lines.push({ sku: String(s.SubOption || ''), label: (s.ServiceName || s.SubOption) + (q > 1 ? ' x' + q : ''), minutes: Math.round(Number(m) || 0), from: from, note: r ? r.note : '' });
+      lines.push({ sku: sku, label: (s.ServiceName || s.SubOption) + (q > 1 ? ' x' + q : ''), minutes: Math.round(per[i]), from: from, note: r ? r.note : '' });
     });
-    if (!lines.length) return null;
-    total = Math.round(total);
-    return { totalMinutes: total, toMinutes: rangeTo(total), lines: lines, band: band || 'B', bandAssumed: !band, unknown: unknown };
+    return { per: per, lines: lines, total: Math.round(total), band: band, unknown: unknown };
+  }
+  /* -> { totalMinutes, toMinutes, lines: [{ sku, label, minutes, from }], band, bandAssumed, unknown } | null */
+  function orderMinutes(services, order, opts) {
+    var c = compute(services, order, opts);
+    if (!c.lines.length) return null;
+    return { totalMinutes: c.total, toMinutes: rangeTo(c.total), lines: c.lines, band: c.band || 'B', bandAssumed: !c.band, unknown: c.unknown };
+  }
+  /* The day of a date (date only or midnight UTC = that day; with a time, its Iowa day). */
+  function dayOf(v) {
+    var s = String(v || '').trim();
+    if (/^\d{4}-\d{2}-\d{2}(T00:00(:00(\.0+)?)?Z?)?$/.test(s)) return s.slice(0, 10);
+    var d = new Date(s); if (isNaN(d.getTime())) return '';
+    try { return d.toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }); } catch (e) { return ''; }
+  }
+  var DONE = { Completed: 1, 'Pending Review': 1 };
+  /* Per technician, only what is assigned to each one (CFO 15/11/2026): the same person can come back on other days
+     and different people do different parts, so nobody sees the whole order's time.
+     o: { today: 'YYYY-MM-DD', perTask, assignments: [{ Category, ServiceName, AssignedTo (names, comma), ScheduledDate, WorkStatus }]
+          (Assign by service), scheduling: [{ who, date, division }] (the whole order by day: Admin Scheduling) }
+     - assigned (by service): each service's minutes go to the names on its row (split between them); a row of
+       today -> today; not done and not today -> remaining. Done (Completed / Pending Review) counts nowhere.
+     - share (whole order): the minutes of each division (or the whole order) per day of work, split between the
+       people of that day; today -> today, a later day -> remaining, a past day -> nothing.
+     -> { mode: 'assigned' | 'share' | '', people: [{ who, today, todayTo, remaining, remainingTo }] } */
+  function techSplit(services, order, o) {
+    o = o || {};
+    var all = services || [], per = compute(all, order, o).per, today = String(o.today || '');
+    var acc = {};
+    var add = function (who, k, m) { who = String(who || '').trim(); if (!who || !(m > 0)) return; var p = acc[who] = acc[who] || { who: who, today: 0, remaining: 0 }; p[k] += m; };
+    var key = function (x) { return String(x.Category || '') + '|' + String(x.ServiceName || ''); };
+    var mode = '';
+    var asg = (o.assignments || []).filter(function (a) { return a && String(a.AssignedTo || '').trim(); });
+    if (asg.length) {
+      mode = 'assigned';
+      var minByKey = {}, rowsByKey = {};
+      all.forEach(function (s, i) { if (s && !nc(s)) minByKey[key(s)] = (minByKey[key(s)] || 0) + per[i]; });
+      asg.forEach(function (a) { rowsByKey[key(a)] = (rowsByKey[key(a)] || 0) + 1; });
+      asg.forEach(function (a) {
+        if (DONE[a.WorkStatus]) return;
+        var m = (minByKey[key(a)] || 0) / rowsByKey[key(a)];
+        var names = String(a.AssignedTo).split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+        var k = dayOf(a.ScheduledDate) === today ? 'today' : 'remaining';
+        names.forEach(function (n) { add(n, k, m / names.length); });
+      });
+    } else if ((o.scheduling || []).length) {
+      mode = 'share';
+      var divs = {}; all.forEach(function (s) { if (s && s.Division) divs[s.Division] = 1; });
+      var pools = {};
+      o.scheduling.forEach(function (r) {
+        var d = r && r.division && divs[r.division] && /^(Janitorial|Renovations|Exteriors)$/.test(r.division) ? r.division : '*';
+        var day = dayOf(r && r.date); if (!day || !r.who) return;
+        (pools[d] = pools[d] || []).push({ who: r.who, day: day });
+      });
+      Object.keys(pools).forEach(function (d) {
+        var min = 0; all.forEach(function (s, i) { if (s && !nc(s) && (d === '*' || s.Division === d)) min += per[i]; });
+        var byDay = {}; pools[d].forEach(function (r) { (byDay[r.day] = byDay[r.day] || {})[r.who] = 1; });
+        var days = Object.keys(byDay), perDay = days.length ? min / days.length : 0;
+        days.forEach(function (day) {
+          var ppl = Object.keys(byDay[day]), k = day === today ? 'today' : day > today ? 'remaining' : '';
+          if (!k) return;
+          ppl.forEach(function (w) { add(w, k, perDay / ppl.length); });
+        });
+      });
+    }
+    var people = Object.keys(acc).sort().map(function (w) {
+      var p = acc[w], t = Math.round(p.today), r = Math.round(p.remaining);
+      return { who: w, today: t, todayTo: rangeTo(t), remaining: r, remainingTo: rangeTo(r) };
+    }).filter(function (p) { return p.today > 0 || p.remaining > 0; });
+    return { mode: mode, people: people };
   }
   /* skus of the services that a unit package of the order already covers (their own time is not added) */
   function coveredSkus(services, order) {
@@ -156,7 +228,9 @@
     return m + 'min';
   }
   function fmtRange(x) { var r = range(x); return fmt(r.from) + ' – ' + fmt(r.to); }
+  /* a range already split (from, to) */
+  function fmtFromTo(a, b) { return fmt(a) + ' – ' + fmt(b); }
 
   return { MARGIN: MARGIN, DATA: DATA, BAND_SQFT: BAND_SQFT, BAND_TEXT: BAND_TEXT, bandOf: bandOf, levelOf: levelOf, entry: entry, isUnitSku: function (s) { return sized(entry(s)); },
-    hasSku: function (s) { return !!entry(s); }, lineMinutes: lineMinutes, orderMinutes: orderMinutes, coveredSkus: coveredSkus, range: range, rangeTo: rangeTo, fmt: fmt, fmtRange: fmtRange };
+    hasSku: function (s) { return !!entry(s); }, lineMinutes: lineMinutes, orderMinutes: orderMinutes, techSplit: techSplit, dayOf: dayOf, coveredSkus: coveredSkus, range: range, rangeTo: rangeTo, fmt: fmt, fmtRange: fmtRange, fmtFromTo: fmtFromTo };
 });
