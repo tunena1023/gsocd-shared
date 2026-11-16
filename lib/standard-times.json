@@ -1,0 +1,7292 @@
+[
+ {
+  "sku": "222-10",
+  "name": "Wall painting - Full Unit",
+  "catalogTitle": "Wall Painting - Full Unit",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per unit, by size option A-E",
+  "options": [
+   {
+    "key": "A · 1 coat",
+    "label": "Up to 600 sq ft (studio) · 1 coat",
+    "minutes": 318.0
+   },
+   {
+    "key": "B · 1 coat",
+    "label": "601-800 sq ft (1 bed / 1 bath) · 1 coat",
+    "minutes": 396.0
+   },
+   {
+    "key": "C · 1 coat",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · 1 coat",
+    "minutes": 480.0
+   },
+   {
+    "key": "D · 1 coat",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · 1 coat",
+    "minutes": 618.0
+   },
+   {
+    "key": "E · 1 coat",
+    "label": "1,251 sq ft and up (3 bed / 2 bath) · 1 coat",
+    "minutes": 720.0
+   },
+   {
+    "key": "A · 2 coats",
+    "label": "Up to 600 sq ft (studio) · 2 coats",
+    "minutes": 486.0
+   },
+   {
+    "key": "B · 2 coats",
+    "label": "601-800 sq ft (1 bed / 1 bath) · 2 coats",
+    "minutes": 606.0
+   },
+   {
+    "key": "C · 2 coats",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · 2 coats",
+    "minutes": 744.0
+   },
+   {
+    "key": "D · 2 coats",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · 2 coats",
+    "minutes": 966.0
+   },
+   {
+    "key": "E · 2 coats",
+    "label": "1,251 sq ft and up (3 bed / 2 bath) · 2 coats",
+    "minutes": 1128.0
+   }
+  ],
+  "source": "222 catalog p.2",
+  "notes": "Lofts or ceilings over 9 ft: add 30%"
+ },
+ {
+  "sku": "222-13",
+  "name": "Unit Full paint- PRIMER",
+  "catalogTitle": "Full Paint with Primer - Color Change",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per unit, by size option A-E",
+  "options": [
+   {
+    "key": "A · Primer + 2 coats",
+    "label": "Up to 600 sq ft (studio) · Primer + 2 coats",
+    "minutes": 804.0
+   },
+   {
+    "key": "B · Primer + 2 coats",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Primer + 2 coats",
+    "minutes": 1002.0
+   },
+   {
+    "key": "C · Primer + 2 coats",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Primer + 2 coats",
+    "minutes": 1224.0
+   },
+   {
+    "key": "D · Primer + 2 coats",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Primer + 2 coats",
+    "minutes": 1584.0
+   },
+   {
+    "key": "E · Primer + 2 coats",
+    "label": "1,251 sq ft and up (3 bed / 2 bath) · Primer + 2 coats",
+    "minutes": 1848.0
+   }
+  ],
+  "source": "222 catalog p.3",
+  "notes": "Lofts or ceilings over 9 ft: add 30%"
+ },
+ {
+  "sku": "222-19",
+  "name": "Ceiling Paint",
+  "catalogTitle": "Ceiling Paint",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per unit, by size option A-E",
+  "options": [
+   {
+    "key": "A · 1 coat",
+    "label": "Up to 600 sq ft (studio) · 1 coat",
+    "minutes": 162.0
+   },
+   {
+    "key": "B · 1 coat",
+    "label": "601-800 sq ft (1 bed / 1 bath) · 1 coat",
+    "minutes": 198.0
+   },
+   {
+    "key": "C · 1 coat",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · 1 coat",
+    "minutes": 240.0
+   },
+   {
+    "key": "D · 1 coat",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · 1 coat",
+    "minutes": 306.0
+   },
+   {
+    "key": "E · 1 coat",
+    "label": "1,251 sq ft and up (3 bed / 2 bath) · 1 coat",
+    "minutes": 354.0
+   }
+  ],
+  "source": "222 catalog p.4",
+  "notes": "Lofts or ceilings over 9 ft: add 30%"
+ },
+ {
+  "sku": "222-48",
+  "name": "Touch-Up Paint",
+  "catalogTitle": "Touch-Up Paint",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per job, by scope option",
+  "options": [
+   {
+    "key": "A",
+    "label": "Single wall or spots",
+    "minutes": 47.0
+   },
+   {
+    "key": "B",
+    "label": "One room",
+    "minutes": 75.0
+   },
+   {
+    "key": "C",
+    "label": "Kitchen or bathroom ceiling",
+    "minutes": 39.0
+   },
+   {
+    "key": "D · A",
+    "label": "Full unit touch-up (all rooms) · Up to 600 sq ft (studio) (50% of 222-10, 1 coat)",
+    "minutes": 159.0
+   },
+   {
+    "key": "D · B",
+    "label": "Full unit touch-up (all rooms) · 601-800 sq ft (1 bed / 1 bath) (50% of 222-10, 1 coat)",
+    "minutes": 198.0
+   },
+   {
+    "key": "D · C",
+    "label": "Full unit touch-up (all rooms) · 801-1,000 sq ft (2 bed / 1 bath) (50% of 222-10, 1 coat)",
+    "minutes": 240.0
+   },
+   {
+    "key": "D · D",
+    "label": "Full unit touch-up (all rooms) · 1,001-1,250 sq ft (2 bed / 2 bath) (50% of 222-10, 1 coat)",
+    "minutes": 309.0
+   },
+   {
+    "key": "D · E",
+    "label": "Full unit touch-up (all rooms) · 1,251 sq ft and up (3 bed / 2 bath) (50% of 222-10, 1 coat)",
+    "minutes": 360.0
+   }
+  ],
+  "source": "222 catalog p.5",
+  "notes": "Option D is written as '50% of 222-10, 1 coat'; minutes here = half of 222-10 1-coat by unit size"
+ },
+ {
+  "sku": "222-52",
+  "name": "Prime Patches",
+  "catalogTitle": "Prime Patches",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per job, by number of patches",
+  "options": [
+   {
+    "key": "A",
+    "label": "Up to 25 patches",
+    "minutes": 30.0
+   },
+   {
+    "key": "B",
+    "label": "26 or more patches",
+    "minutes": 55.0
+   }
+  ],
+  "source": "222 catalog p.5"
+ },
+ {
+  "sku": "222-57",
+  "name": "Paint Per Gallon",
+  "catalogTitle": "Paint per Gallon (Material)",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per gallon (material, no labor time)",
+  "options": [],
+  "source": "222 catalog p.6",
+  "notes": "Material only; catalog gives gallons per size (walls per coat A4 B5 C6.5 D8.5 E10; ceilings A1.5 B2 C2.5 D3.5 E4), no time",
+  "noStandardTime": true
+ },
+ {
+  "sku": "222-103",
+  "name": "Common Area & Office Painting",
+  "catalogTitle": "Common Area & Office Painting",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per 100 sq ft of wall or ceiling",
+  "options": [
+   {
+    "key": "A",
+    "label": "Walls - 1 coat",
+    "minutes": 30.0
+   },
+   {
+    "key": "B",
+    "label": "Walls - 2 coats",
+    "minutes": 51.0
+   },
+   {
+    "key": "C",
+    "label": "Walls - primer + 2 coats (color change)",
+    "minutes": 75.0
+   },
+   {
+    "key": "D",
+    "label": "Ceilings - 1 coat",
+    "minutes": 36.0
+   }
+  ],
+  "source": "222 catalog p.7",
+  "notes": "Add 1 hour per job for setup and cleanup; stairwells or walls over 9 ft: add 30%"
+ },
+ {
+  "sku": "222-11",
+  "name": "Door painting",
+  "catalogTitle": "Door Painting",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per door",
+  "options": [
+   {
+    "key": "A",
+    "label": "One side",
+    "minutes": 25.0
+   },
+   {
+    "key": "B",
+    "label": "Both sides",
+    "minutes": 45.0
+   }
+  ],
+  "source": "222 catalog p.8"
+ },
+ {
+  "sku": "222-95",
+  "name": "Door trim painting",
+  "catalogTitle": "Door trim painting",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Door frame / casing",
+    "minutes": 24.0
+   }
+  ],
+  "source": "222 catalog p.8",
+  "notes": "Catalog block 222-95 · 222-96 · 222-39"
+ },
+ {
+  "sku": "222-96",
+  "name": "Window trim painting",
+  "catalogTitle": "Window trim painting",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Window frame",
+    "minutes": 30.0
+   }
+  ],
+  "source": "222 catalog p.8",
+  "notes": "Catalog block 222-95 · 222-96 · 222-39"
+ },
+ {
+  "sku": "222-39",
+  "name": "Trim painting (door and window)",
+  "catalogTitle": "Trim painting (door and window)",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Door frame / casing",
+    "minutes": 24.0
+   },
+   {
+    "key": "B",
+    "label": "Window frame",
+    "minutes": 30.0
+   }
+  ],
+  "source": "222 catalog p.8",
+  "notes": "Catalog block 222-95 · 222-96 · 222-39"
+ },
+ {
+  "sku": "222-49",
+  "name": "Baseboard Painting",
+  "catalogTitle": "Baseboard Painting",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per unit, by size option A-E",
+  "options": [
+   {
+    "key": "A",
+    "label": "Up to 600 sq ft (studio)",
+    "minutes": 96.0
+   },
+   {
+    "key": "B",
+    "label": "601-800 sq ft (1 bed / 1 bath)",
+    "minutes": 120.0
+   },
+   {
+    "key": "C",
+    "label": "801-1,000 sq ft (2 bed / 1 bath)",
+    "minutes": 150.0
+   },
+   {
+    "key": "D",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
+    "minutes": 180.0
+   },
+   {
+    "key": "E",
+    "label": "1,251 sq ft and up (3 bed / 2 bath)",
+    "minutes": 210.0
+   }
+  ],
+  "source": "222 catalog p.9",
+  "notes": "Lofts or ceilings over 9 ft: add 30%"
+ },
+ {
+  "sku": "222-14",
+  "name": "Caulking",
+  "catalogTitle": "Caulking",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per area",
+  "options": [
+   {
+    "key": "A",
+    "label": "Tub or shower surround",
+    "minutes": 55.0
+   },
+   {
+    "key": "B",
+    "label": "Kitchen counter and backsplash",
+    "minutes": 30.0
+   },
+   {
+    "key": "C",
+    "label": "Trim in one room",
+    "minutes": 30.0
+   }
+  ],
+  "source": "222 catalog p.9"
+ },
+ {
+  "sku": "222-97",
+  "name": "Kitchen cabinet painting",
+  "catalogTitle": "Kitchen cabinet painting",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per kitchen / vanity, by scope",
+  "options": [
+   {
+    "key": "A",
+    "label": "Kitchen - outside",
+    "minutes": 375.0
+   },
+   {
+    "key": "B",
+    "label": "Kitchen - inside (added to outside)",
+    "minutes": 180.0
+   }
+  ],
+  "source": "222 catalog p.10",
+  "notes": "Catalog block 222-97 · 222-98 · 222-28"
+ },
+ {
+  "sku": "222-98",
+  "name": "Bathroom cabinet painting",
+  "catalogTitle": "Bathroom cabinet painting",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per vanity",
+  "options": [
+   {
+    "key": "C",
+    "label": "Bathroom vanity - outside",
+    "minutes": 83.0
+   }
+  ],
+  "source": "222 catalog p.10",
+  "notes": "Catalog block 222-97 · 222-98 · 222-28"
+ },
+ {
+  "sku": "222-28",
+  "name": "Cabinet touch-up / repaint",
+  "catalogTitle": "Cabinet touch-up / repaint",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per job, by scope",
+  "options": [
+   {
+    "key": "D",
+    "label": "Touch-up (marks and chips)",
+    "minutes": 60.0
+   },
+   {
+    "key": "A",
+    "label": "Kitchen - outside",
+    "minutes": 375.0
+   },
+   {
+    "key": "B",
+    "label": "Kitchen - inside (added to outside)",
+    "minutes": 180.0
+   },
+   {
+    "key": "C",
+    "label": "Bathroom vanity - outside",
+    "minutes": 83.0
+   }
+  ],
+  "source": "222 catalog p.10",
+  "notes": "Catalog block 222-97 · 222-98 · 222-28; touch-up is option D"
+ },
+ {
+  "sku": "222-27",
+  "name": "Drywall & wall repair - minor to moderate",
+  "catalogTitle": "Drywall & Wall Repair",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per job, by level",
+  "options": [
+   {
+    "key": "A",
+    "label": "Medium - up to 25 patches, each up to 12 in",
+    "minutes": 150.0
+   },
+   {
+    "key": "B",
+    "label": "Large - 26+ patches or any patch over 1 sq ft",
+    "minutes": 270.0
+   },
+   {
+    "key": "C",
+    "label": "Section replacement (per hour)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "222 catalog p.11"
+ },
+ {
+  "sku": "222-30",
+  "name": "Drywall sanding & finishing",
+  "catalogTitle": "Drywall Sanding & Finishing",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per job, by scope",
+  "options": [
+   {
+    "key": "A",
+    "label": "One wall",
+    "minutes": 95.0
+   },
+   {
+    "key": "B",
+    "label": "One room",
+    "minutes": 350.0
+   }
+  ],
+  "source": "222 catalog p.11"
+ },
+ {
+  "sku": "222-44",
+  "name": "Ceiling Repair",
+  "catalogTitle": "Ceiling Repair",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per job, by level",
+  "options": [
+   {
+    "key": "A",
+    "label": "Medium - cracks or patches up to 1 sq ft",
+    "minutes": 150.0
+   },
+   {
+    "key": "B",
+    "label": "Large - patches over 1 sq ft or water-damaged area",
+    "minutes": 270.0
+   },
+   {
+    "key": "C",
+    "label": "Section replacement (per hour)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "222 catalog p.12"
+ },
+ {
+  "sku": "222-90",
+  "name": "Ceiling texture removal",
+  "catalogTitle": "Ceiling texture removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per unit, by size option A-E",
+  "options": [
+   {
+    "key": "A",
+    "label": "Up to 600 sq ft (studio)",
+    "minutes": 675.0
+   },
+   {
+    "key": "B",
+    "label": "601-800 sq ft (1 bed / 1 bath)",
+    "minutes": 940.0
+   },
+   {
+    "key": "C",
+    "label": "801-1,000 sq ft (2 bed / 1 bath)",
+    "minutes": 1205.0
+   },
+   {
+    "key": "D",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
+    "minutes": 1500.0
+   },
+   {
+    "key": "E",
+    "label": "1,251 sq ft and up (3 bed / 2 bath)",
+    "minutes": 1855.0
+   }
+  ],
+  "source": "222 catalog p.12",
+  "notes": "Catalog block 222-90 · 222-91 (Removal column); lofts/ceilings over 9 ft: add 30%"
+ },
+ {
+  "sku": "222-91",
+  "name": "Ceiling texture application",
+  "catalogTitle": "Ceiling texture application",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per unit, by size option A-E",
+  "options": [
+   {
+    "key": "A",
+    "label": "Up to 600 sq ft (studio)",
+    "minutes": 210.0
+   },
+   {
+    "key": "B",
+    "label": "601-800 sq ft (1 bed / 1 bath)",
+    "minutes": 270.0
+   },
+   {
+    "key": "C",
+    "label": "801-1,000 sq ft (2 bed / 1 bath)",
+    "minutes": 330.0
+   },
+   {
+    "key": "D",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
+    "minutes": 420.0
+   },
+   {
+    "key": "E",
+    "label": "1,251 sq ft and up (3 bed / 2 bath)",
+    "minutes": 480.0
+   }
+  ],
+  "source": "222 catalog p.12",
+  "notes": "Catalog block 222-90 · 222-91 (Application column); lofts/ceilings over 9 ft: add 30%"
+ },
+ {
+  "sku": "222-46",
+  "name": "Treat Mold",
+  "catalogTitle": "Mold Treatment",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per job, by scope",
+  "options": [
+   {
+    "key": "A",
+    "label": "Spot (up to 10 sq ft)",
+    "minutes": 60.0
+   },
+   {
+    "key": "B",
+    "label": "Larger area (per hour)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "222 catalog p.13"
+ },
+ {
+  "sku": "222-105",
+  "name": "Plaster Repair & Skim Coat",
+  "catalogTitle": "Plaster Repair & Skim Coat",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per job / per area",
+  "options": [
+   {
+    "key": "A",
+    "label": "Small plaster patch (up to 1 sq ft)",
+    "minutes": 120.0
+   },
+   {
+    "key": "B",
+    "label": "Scrape and new plaster coat (per 25 sq ft)",
+    "minutes": 60.0,
+    "per": "per 25 sq ft"
+   },
+   {
+    "key": "C",
+    "label": "Plaster ceiling area (per 20 sq ft)",
+    "minutes": 60.0,
+    "per": "per 20 sq ft"
+   }
+  ],
+  "source": "222 catalog p.13"
+ },
+ {
+  "sku": "222-56",
+  "name": "Bathtub Resurfacing",
+  "catalogTitle": "Bathtub Resurfacing",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per tub",
+  "options": [
+   {
+    "key": "A",
+    "label": "Standard tub",
+    "minutes": 270.0
+   },
+   {
+    "key": "B",
+    "label": "Tub and surround",
+    "minutes": 360.0
+   }
+  ],
+  "source": "222 catalog p.14"
+ },
+ {
+  "sku": "222-21",
+  "name": "Bathtub Paint",
+  "catalogTitle": "Bathtub Paint",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per tub",
+  "options": [
+   {
+    "key": "A",
+    "label": "Standard tub",
+    "minutes": 150.0
+   }
+  ],
+  "source": "222 catalog p.14"
+ },
+ {
+  "sku": "222-51",
+  "name": "Bath Tub Repair",
+  "catalogTitle": "Bathtub Repair",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per tub, by scope",
+  "options": [
+   {
+    "key": "A",
+    "label": "Chips or small cracks",
+    "minutes": 90.0
+   },
+   {
+    "key": "B",
+    "label": "Large crack or hole",
+    "minutes": 180.0
+   }
+  ],
+  "source": "222 catalog p.15"
+ },
+ {
+  "sku": "222-38",
+  "name": "Stove Resurfacing",
+  "catalogTitle": "Stove Resurfacing",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per stove",
+  "options": [
+   {
+    "key": "A",
+    "label": "Stove top and front",
+    "minutes": 75.0
+   }
+  ],
+  "source": "222 catalog p.15"
+ },
+ {
+  "sku": "222-22",
+  "name": "Faucet replacement",
+  "catalogTitle": "Faucet replacement",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Faucet replacement (kitchen or bathroom)",
+    "minutes": 75.0
+   }
+  ],
+  "source": "222 catalog p.16",
+  "notes": "Catalog block 222-22 · 222-23 · 222-53 · 222-63 (Plumbing Fixtures)"
+ },
+ {
+  "sku": "222-23",
+  "name": "Toilet replacement",
+  "catalogTitle": "Toilet replacement",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Toilet replacement - install, toilet on site, straight swap",
+    "minutes": 120.0
+   },
+   {
+    "key": "G",
+    "label": "Add-on: haul away and dispose of the old toilet",
+    "minutes": 25.0
+   }
+  ],
+  "source": "222 catalog p.16",
+  "notes": "Catalog block 222-22 · 222-23 · 222-53 · 222-63 (Plumbing Fixtures) || Base = remove the old toilet, set the new one (on site) with wax ring and bolts, connect and test. Add-on G: haul away and dispose of the old toilet. Shut-off valve, flange repair and supply parts are extra. (CFO 15/11/2026 14:15)"
+ },
+ {
+  "sku": "222-53",
+  "name": "Toilet- Remove and install wax ring",
+  "catalogTitle": "Toilet - Remove and install wax ring",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "C",
+    "label": "Toilet - remove and reinstall with new wax ring",
+    "minutes": 60.0
+   }
+  ],
+  "source": "222 catalog p.16",
+  "notes": "Catalog block 222-22 · 222-23 · 222-53 · 222-63 (Plumbing Fixtures)"
+ },
+ {
+  "sku": "222-63",
+  "name": "Drain",
+  "catalogTitle": "Drain",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "D",
+    "label": "Drain clearing (sink, tub)",
+    "minutes": 60.0
+   },
+   {
+    "key": "E",
+    "label": "Toilet clog (snake)",
+    "minutes": 45.0
+   },
+   {
+    "key": "F",
+    "label": "Tub surround replacement (kit)",
+    "minutes": 240.0
+   }
+  ],
+  "source": "222 catalog p.16",
+  "notes": "Catalog block 222-22 · 222-23 · 222-53 · 222-63 (Plumbing Fixtures); options D-F (drain clearing, toilet clog, tub surround kit)"
+ },
+ {
+  "sku": "222-24",
+  "name": "Vanity installation",
+  "catalogTitle": "Vanity installation",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Vanity installation",
+    "minutes": 215.0
+   }
+  ],
+  "source": "222 catalog p.16",
+  "notes": "Catalog block 222-24 · 222-25 · 222-29"
+ },
+ {
+  "sku": "222-25",
+  "name": "Mirror installation",
+  "catalogTitle": "Mirror installation",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Mirror installation",
+    "minutes": 45.0
+   }
+  ],
+  "source": "222 catalog p.16",
+  "notes": "Catalog block 222-24 · 222-25 · 222-29"
+ },
+ {
+  "sku": "222-29",
+  "name": "Closet shelf installation",
+  "catalogTitle": "Closet shelf installation",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "C",
+    "label": "Closet shelf installation",
+    "minutes": 60.0
+   }
+  ],
+  "source": "222 catalog p.16",
+  "notes": "Catalog block 222-24 · 222-25 · 222-29"
+ },
+ {
+  "sku": "222-33",
+  "name": "Tile repair & Install",
+  "catalogTitle": "Tile repair & Install",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per tile / per 10 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Replace broken tile (per tile)",
+    "minutes": 35.0,
+    "per": "per tile"
+   },
+   {
+    "key": "B",
+    "label": "Regrout an area (per 10 sq ft)",
+    "minutes": 60.0,
+    "per": "per 10 sq ft"
+   }
+  ],
+  "source": "222 catalog p.17",
+  "notes": "Catalog block 222-33 · 222-31"
+ },
+ {
+  "sku": "222-31",
+  "name": "Backsplash installation",
+  "catalogTitle": "Backsplash installation",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per 10 sq ft",
+  "options": [
+   {
+    "key": "C",
+    "label": "Backsplash installation (per 10 sq ft)",
+    "minutes": 75.0,
+    "per": "per 10 sq ft"
+   }
+  ],
+  "source": "222 catalog p.17",
+  "notes": "Catalog block 222-33 · 222-31"
+ },
+ {
+  "sku": "222-36",
+  "name": "Garbage Disposal Install & Replacement",
+  "catalogTitle": "Garbage Disposal Install & Replacement",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Garbage disposal",
+    "minutes": 120.0
+   }
+  ],
+  "source": "222 catalog p.17",
+  "notes": "Catalog block 222-36 · 222-60"
+ },
+ {
+  "sku": "222-60",
+  "name": "Dishwasher Replacement",
+  "catalogTitle": "Dishwasher Replacement",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Dishwasher replacement",
+    "minutes": 105.0
+   }
+  ],
+  "source": "222 catalog p.17",
+  "notes": "Catalog block 222-36 · 222-60"
+ },
+ {
+  "sku": "222-106",
+  "name": "Appliance Installation",
+  "catalogTitle": "Appliance Installation",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per appliance",
+  "options": [
+   {
+    "key": "A",
+    "label": "Over-the-range microwave",
+    "minutes": 120.0
+   },
+   {
+    "key": "B",
+    "label": "Range - gas (existing line and valve)",
+    "minutes": 60.0
+   },
+   {
+    "key": "C",
+    "label": "Range - electric",
+    "minutes": 35.0
+   },
+   {
+    "key": "D",
+    "label": "Refrigerator with water line",
+    "minutes": 60.0
+   },
+   {
+    "key": "E",
+    "label": "Appliance reset and diagnostic",
+    "minutes": 60.0
+   }
+  ],
+  "source": "222 catalog p.18"
+ },
+ {
+  "sku": "222-58",
+  "name": "Cabinet Repair",
+  "catalogTitle": "Cabinet Repair",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Hinge, door or drawer repair (per piece)",
+    "minutes": 30.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "222 catalog p.18",
+  "notes": "Catalog block 222-58 · 222-80 · 222-81"
+ },
+ {
+  "sku": "222-80",
+  "name": "Kitchen cabinet removal",
+  "catalogTitle": "Kitchen cabinet removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per kitchen",
+  "options": [
+   {
+    "key": "B",
+    "label": "Kitchen cabinet removal",
+    "minutes": 180.0
+   }
+  ],
+  "source": "222 catalog p.18",
+  "notes": "Catalog block 222-58 · 222-80 · 222-81"
+ },
+ {
+  "sku": "222-81",
+  "name": "Bathroom cabinet removal",
+  "catalogTitle": "Bathroom cabinet removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per vanity",
+  "options": [
+   {
+    "key": "C",
+    "label": "Bathroom cabinet removal",
+    "minutes": 45.0
+   }
+  ],
+  "source": "222 catalog p.18",
+  "notes": "Catalog block 222-58 · 222-80 · 222-81"
+ },
+ {
+  "sku": "222-26",
+  "name": "Flooring installation & Repair",
+  "catalogTitle": "Flooring installation & Repair",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per 100 sq ft / per hour",
+  "options": [
+   {
+    "key": "A",
+    "label": "New vinyl / laminate plank (per 100 sq ft)",
+    "minutes": 150.0,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "B",
+    "label": "Repair of damaged planks (per hour)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "222 catalog p.19",
+  "notes": "Catalog block 222-26 · 222-61 · 222-67"
+ },
+ {
+  "sku": "222-61",
+  "name": "Install New Floor",
+  "catalogTitle": "Install New Floor",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per 100 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "New vinyl / laminate plank (per 100 sq ft)",
+    "minutes": 150.0,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "222 catalog p.19",
+  "notes": "Catalog block 222-26 · 222-61 · 222-67"
+ },
+ {
+  "sku": "222-67",
+  "name": "New Vinyl Floor",
+  "catalogTitle": "New Vinyl Floor",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per 100 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "New vinyl / laminate plank (per 100 sq ft)",
+    "minutes": 150.0,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "222 catalog p.19",
+  "notes": "Catalog block 222-26 · 222-61 · 222-67"
+ },
+ {
+  "sku": "222-16",
+  "name": "Carpet Installation",
+  "catalogTitle": "Carpet installation, repair & stretch",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per room / per piece / per 50 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Carpet stretch (per room)",
+    "minutes": 45.0,
+    "per": "per room"
+   },
+   {
+    "key": "B",
+    "label": "Carpet repair / patch",
+    "minutes": 60.0
+   },
+   {
+    "key": "C",
+    "label": "Carpet installation with pad, install only (per 50 sq ft)",
+    "minutes": 40.0,
+    "per": "per 50 sq ft"
+   }
+  ],
+  "source": "222 catalog p.19",
+  "notes": "Catalog block 222-16 · 222-88 · 222-89 || C = lay pad and carpet only. Removal of the old carpet is its own line (222-89 / 210-89). Extras: furniture moving, new tack strip, stairs per flight, minimum charge for small rooms. (CFO 15/11/2026 14:15)"
+ },
+ {
+  "sku": "222-88",
+  "name": "Floor removal",
+  "catalogTitle": "Floor removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per 100 sq ft",
+  "options": [
+   {
+    "key": "E",
+    "label": "Hard floor removal (per 100 sq ft)",
+    "minutes": 36.0,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "222 catalog p.19",
+  "notes": "Catalog block 222-16 · 222-88 · 222-89"
+ },
+ {
+  "sku": "222-89",
+  "name": "Carpet removal",
+  "catalogTitle": "Carpet removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per 100 sq ft",
+  "options": [
+   {
+    "key": "D",
+    "label": "Carpet removal - carpet, pad, tack strip (per 100 sq ft)",
+    "minutes": 20.0,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "222 catalog p.19",
+  "notes": "Catalog block 222-16 · 222-88 · 222-89"
+ },
+ {
+  "sku": "222-78",
+  "name": "Baseboard installation",
+  "catalogTitle": "Baseboard installation",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per 25 linear ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Installation (per 25 linear ft)",
+    "minutes": 65.0,
+    "per": "per 25 linear ft"
+   }
+  ],
+  "source": "222 catalog p.20",
+  "notes": "Catalog block 222-78 · 222-77 · 222-79 · 222-15"
+ },
+ {
+  "sku": "222-77",
+  "name": "Baseboard removal",
+  "catalogTitle": "Baseboard removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per 50 linear ft",
+  "options": [
+   {
+    "key": "B",
+    "label": "Removal (per 50 linear ft)",
+    "minutes": 40.0,
+    "per": "per 50 linear ft"
+   }
+  ],
+  "source": "222 catalog p.20",
+  "notes": "Catalog block 222-78 · 222-77 · 222-79 · 222-15"
+ },
+ {
+  "sku": "222-79",
+  "name": "Baseboard repair",
+  "catalogTitle": "Baseboard repair",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "C",
+    "label": "Repair (per piece)",
+    "minutes": 30.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "222 catalog p.20",
+  "notes": "Catalog block 222-78 · 222-77 · 222-79 · 222-15"
+ },
+ {
+  "sku": "222-15",
+  "name": "Baseboard installation, repair & Removal",
+  "catalogTitle": "Baseboard installation, removal & repair",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per linear ft / per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Installation (per 25 linear ft)",
+    "minutes": 65.0,
+    "per": "per 25 linear ft"
+   },
+   {
+    "key": "B",
+    "label": "Removal (per 50 linear ft)",
+    "minutes": 40.0,
+    "per": "per 50 linear ft"
+   },
+   {
+    "key": "C",
+    "label": "Repair (per piece)",
+    "minutes": 30.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "222 catalog p.20",
+  "notes": "Catalog block 222-78 · 222-77 · 222-79 · 222-15"
+ },
+ {
+  "sku": "222-66",
+  "name": "Trim Repair",
+  "catalogTitle": "Trim Repair",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Trim repair (per piece)",
+    "minutes": 30.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "222 catalog p.20",
+  "notes": "Catalog block 222-66 · 222-93 · 222-94"
+ },
+ {
+  "sku": "222-93",
+  "name": "Trim removal",
+  "catalogTitle": "Trim removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Trim removal (per piece)",
+    "minutes": 15.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "222 catalog p.20",
+  "notes": "Catalog block 222-66 · 222-93 · 222-94"
+ },
+ {
+  "sku": "222-94",
+  "name": "Crown molding",
+  "catalogTitle": "Crown molding",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per 12 linear ft",
+  "options": [
+   {
+    "key": "C",
+    "label": "Crown molding (per 12 linear ft)",
+    "minutes": 60.0,
+    "per": "per 12 linear ft"
+   }
+  ],
+  "source": "222 catalog p.20",
+  "notes": "Catalog block 222-66 · 222-93 · 222-94"
+ },
+ {
+  "sku": "222-17",
+  "name": "Interior door replacement",
+  "catalogTitle": "Door replacement",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per door",
+  "options": [
+   {
+    "key": "A",
+    "label": "Interior door replacement (slab)",
+    "minutes": 95.0
+   }
+  ],
+  "source": "222 catalog p.21",
+  "notes": "Catalog block 222-17 · 222-86 · 222-87 · 222-40"
+ },
+ {
+  "sku": "222-86",
+  "name": "Door removal",
+  "catalogTitle": "Door removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per door",
+  "options": [
+   {
+    "key": "C",
+    "label": "Door removal",
+    "minutes": 30.0
+   }
+  ],
+  "source": "222 catalog p.21",
+  "notes": "Catalog block 222-17 · 222-86 · 222-87 · 222-40"
+ },
+ {
+  "sku": "222-87",
+  "name": "Door frame removal",
+  "catalogTitle": "Door frame removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per frame",
+  "options": [
+   {
+    "key": "D",
+    "label": "Door frame removal",
+    "minutes": 45.0
+   }
+  ],
+  "source": "222 catalog p.21",
+  "notes": "Catalog block 222-17 · 222-86 · 222-87 · 222-40"
+ },
+ {
+  "sku": "222-40",
+  "name": "Storm Door Installation",
+  "catalogTitle": "Storm Door Installation",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per door",
+  "options": [
+   {
+    "key": "B",
+    "label": "Storm door installation",
+    "minutes": 180.0
+   }
+  ],
+  "source": "222 catalog p.21",
+  "notes": "Catalog block 222-17 · 222-86 · 222-87 · 222-40"
+ },
+ {
+  "sku": "222-18",
+  "name": "Hardware replacement",
+  "catalogTitle": "Hardware replacement",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Door knob or lock",
+    "minutes": 30.0
+   },
+   {
+    "key": "B",
+    "label": "Hinge, pull or small hardware (per piece)",
+    "minutes": 10.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "222 catalog p.21",
+  "notes": "Catalog block 222-18 · 222-68"
+ },
+ {
+  "sku": "222-68",
+  "name": "Door Knob",
+  "catalogTitle": "Door Knob",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per knob / lock",
+  "options": [
+   {
+    "key": "A",
+    "label": "Door knob or lock",
+    "minutes": 30.0
+   }
+  ],
+  "source": "222 catalog p.21",
+  "notes": "Catalog block 222-18 · 222-68"
+ },
+ {
+  "sku": "222-12",
+  "name": "Blind Installation and Removal",
+  "catalogTitle": "Blind Installation and Removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per window",
+  "options": [
+   {
+    "key": "A",
+    "label": "Blind installation or replacement (per window)",
+    "minutes": 20.0,
+    "per": "per window"
+   }
+  ],
+  "source": "222 catalog p.22",
+  "notes": "Catalog block 222-12 · 222-75 · 222-55 · 222-45"
+ },
+ {
+  "sku": "222-75",
+  "name": "New Blinds Install & Removal",
+  "catalogTitle": "New Blinds Install & Removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per window",
+  "options": [
+   {
+    "key": "A",
+    "label": "Blind installation or replacement (per window)",
+    "minutes": 20.0,
+    "per": "per window"
+   }
+  ],
+  "source": "222 catalog p.22",
+  "notes": "Catalog block 222-12 · 222-75 · 222-55 · 222-45"
+ },
+ {
+  "sku": "222-55",
+  "name": "Blinds Bracket Removal",
+  "catalogTitle": "Blinds Bracket Removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per window",
+  "options": [
+   {
+    "key": "B",
+    "label": "Bracket removal (per window)",
+    "minutes": 10.0,
+    "per": "per window"
+   }
+  ],
+  "source": "222 catalog p.22",
+  "notes": "Catalog block 222-12 · 222-75 · 222-55 · 222-45"
+ },
+ {
+  "sku": "222-45",
+  "name": "Curtain Rods and Hooks Removal & Install",
+  "catalogTitle": "Curtain Rods and Hooks Removal & Install",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per window",
+  "options": [
+   {
+    "key": "C",
+    "label": "Curtain rod and hooks (per window)",
+    "minutes": 20.0,
+    "per": "per window"
+   }
+  ],
+  "source": "222 catalog p.22",
+  "notes": "Catalog block 222-12 · 222-75 · 222-55 · 222-45"
+ },
+ {
+  "sku": "222-74",
+  "name": "Windows repair",
+  "catalogTitle": "Windows repair",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per window",
+  "options": [
+   {
+    "key": "A",
+    "label": "Window repair - balance, lock, latch (per window)",
+    "minutes": 60.0,
+    "per": "per window"
+   }
+  ],
+  "source": "222 catalog p.22",
+  "notes": "Catalog block 222-74 · 222-72 · 222-42"
+ },
+ {
+  "sku": "222-72",
+  "name": "Window Screen",
+  "catalogTitle": "Window Screen",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per screen",
+  "options": [
+   {
+    "key": "B",
+    "label": "Window screen (per screen)",
+    "minutes": 30.0,
+    "per": "per screen"
+   }
+  ],
+  "source": "222 catalog p.22",
+  "notes": "Catalog block 222-74 · 222-72 · 222-42"
+ },
+ {
+  "sku": "222-42",
+  "name": "Exterior Window track detailing",
+  "catalogTitle": "Exterior Window track detailing",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per track",
+  "options": [
+   {
+    "key": "C",
+    "label": "Track detailing (per track)",
+    "minutes": 15.0,
+    "per": "per track"
+   }
+  ],
+  "source": "222 catalog p.22",
+  "notes": "Catalog block 222-74 · 222-72 · 222-42"
+ },
+ {
+  "sku": "222-20",
+  "name": "Ceiling fan & light fixture installation",
+  "catalogTitle": "Ceiling fan & light fixture installation",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Light fixture installation",
+    "minutes": 60.0
+   },
+   {
+    "key": "B",
+    "label": "Ceiling fan installation",
+    "minutes": 90.0
+   }
+  ],
+  "source": "222 catalog p.23",
+  "notes": "Catalog block 222-20 · 222-83 · 222-82 · 222-84; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-83",
+  "name": "Handyman - Ceiling fan installation",
+  "catalogTitle": "Handyman - Ceiling fan installation",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Ceiling fan installation",
+    "minutes": 90.0
+   }
+  ],
+  "source": "222 catalog p.23",
+  "notes": "Catalog block 222-20 · 222-83 · 222-82 · 222-84; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-82",
+  "name": "Handyman - Ceiling fan removal",
+  "catalogTitle": "Handyman - Ceiling fan removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "C",
+    "label": "Ceiling fan removal",
+    "minutes": 30.0
+   }
+  ],
+  "source": "222 catalog p.23",
+  "notes": "Catalog block 222-20 · 222-83 · 222-82 · 222-84; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-84",
+  "name": "Handyman - Light fixture installation",
+  "catalogTitle": "Handyman - Light fixture installation",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Light fixture installation",
+    "minutes": 60.0
+   }
+  ],
+  "source": "222 catalog p.23",
+  "notes": "Catalog block 222-20 · 222-83 · 222-82 · 222-84; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-104",
+  "name": "Bathroom Exhaust Fan Replacement",
+  "catalogTitle": "Bathroom Exhaust Fan Replacement",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per fan",
+  "options": [
+   {
+    "key": "A",
+    "label": "Same-size replacement (motor or full unit)",
+    "minutes": 90.0
+   },
+   {
+    "key": "B",
+    "label": "Larger housing (ceiling cut and patch)",
+    "minutes": 180.0
+   }
+  ],
+  "source": "222 catalog p.23",
+  "notes": "Handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-76",
+  "name": "Switches, Outlets & Covers",
+  "catalogTitle": "Switches, Outlets & Covers",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Switch, outlet or cover (per piece)",
+    "minutes": 15.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "222 catalog p.24",
+  "notes": "Catalog block 222-76 · 222-41 · 222-32 · 222-59 · 222-62 (Small Installs); handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-41",
+  "name": "Smoke Detector Installatiion and Removal",
+  "catalogTitle": "Smoke Detector Installation and Removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Smoke detector (per piece)",
+    "minutes": 15.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "222 catalog p.24",
+  "notes": "Catalog block 222-76 · 222-41 · 222-32 · 222-59 · 222-62 (Small Installs); handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-32",
+  "name": "Fire extinguisher Installation and Removal",
+  "catalogTitle": "Fire extinguisher Installation and Removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "C",
+    "label": "Fire extinguisher - mount or replace (per piece)",
+    "minutes": 15.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "222 catalog p.24",
+  "notes": "Catalog block 222-76 · 222-41 · 222-32 · 222-59 · 222-62 (Small Installs); handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-59",
+  "name": "Fire Extinguisher install",
+  "catalogTitle": "Fire Extinguisher install",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "C",
+    "label": "Fire extinguisher - mount or replace (per piece)",
+    "minutes": 15.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "222 catalog p.24",
+  "notes": "Catalog block 222-76 · 222-41 · 222-32 · 222-59 · 222-62 (Small Installs); handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-62",
+  "name": "A/C Filter",
+  "catalogTitle": "A/C Filter",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per filter",
+  "options": [
+   {
+    "key": "D",
+    "label": "A/C filter (per filter)",
+    "minutes": 10.0,
+    "per": "per filter"
+   }
+  ],
+  "source": "222 catalog p.24",
+  "notes": "Catalog block 222-76 · 222-41 · 222-32 · 222-59 · 222-62 (Small Installs); handyman minimum 1.5 h per visit; options E-G (thermostat, door stopper, dryer vent) are in the same block with no SKU of their own"
+ },
+ {
+  "sku": "222-100",
+  "name": "Dispenser installation",
+  "catalogTitle": "Dispenser installation",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per dispenser",
+  "options": [
+   {
+    "key": "A",
+    "label": "Installation (per dispenser)",
+    "minutes": 30.0,
+    "per": "per dispenser"
+   }
+  ],
+  "source": "222 catalog p.24",
+  "notes": "Catalog block 222-100 · 222-101 · 222-102; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-101",
+  "name": "Dispenser replacement",
+  "catalogTitle": "Dispenser replacement",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per dispenser",
+  "options": [
+   {
+    "key": "B",
+    "label": "Replacement (per dispenser)",
+    "minutes": 24.0,
+    "per": "per dispenser"
+   }
+  ],
+  "source": "222 catalog p.24",
+  "notes": "Catalog block 222-100 · 222-101 · 222-102; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-102",
+  "name": "Dispenser repair",
+  "catalogTitle": "Dispenser repair",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per dispenser",
+  "options": [
+   {
+    "key": "C",
+    "label": "Repair (per dispenser)",
+    "minutes": 18.0,
+    "per": "per dispenser"
+   }
+  ],
+  "source": "222 catalog p.24",
+  "notes": "Catalog block 222-100 · 222-101 · 222-102; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-107",
+  "name": "Furnace & A/C Preventive Maintenance",
+  "catalogTitle": "Furnace & A/C Preventive Maintenance",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per system",
+  "options": [
+   {
+    "key": "A",
+    "label": "Furnace and A/C check, clean and new filters (per system)",
+    "minutes": 90.0,
+    "per": "per system"
+   },
+   {
+    "key": "B",
+    "label": "Furnace only or A/C only",
+    "minutes": 60.0
+   }
+  ],
+  "source": "222 catalog p.25",
+  "notes": "Handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-85",
+  "name": "Handyman - Appliance removal",
+  "catalogTitle": "Handyman - Appliance removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per appliance",
+  "options": [
+   {
+    "key": "A",
+    "label": "Appliance removal (per appliance)",
+    "minutes": 60.0,
+    "per": "per appliance"
+   }
+  ],
+  "source": "222 catalog p.25",
+  "notes": "Catalog block 222-85 · 222-92; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-92",
+  "name": "Trash-out",
+  "catalogTitle": "Trash-out",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per unit, by scope",
+  "options": [
+   {
+    "key": "B",
+    "label": "Trash-out - light (few items)",
+    "minutes": 120.0
+   },
+   {
+    "key": "C",
+    "label": "Trash-out - full unit",
+    "minutes": 240.0
+   }
+  ],
+  "source": "222 catalog p.25",
+  "notes": "Catalog block 222-85 · 222-92; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-69",
+  "name": "Remove Cable & Wires",
+  "catalogTitle": "Remove Cable & Wires",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per room",
+  "options": [
+   {
+    "key": "A",
+    "label": "Cable and wires (per room)",
+    "minutes": 30.0,
+    "per": "per room"
+   }
+  ],
+  "source": "222 catalog p.26",
+  "notes": "Catalog block 222-69 · 222-43 · 222-70; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-43",
+  "name": "Internet Anthena or Plate Removing",
+  "catalogTitle": "Internet Antenna or Plate Removing",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Dish or antenna",
+    "minutes": 60.0
+   }
+  ],
+  "source": "222 catalog p.26",
+  "notes": "Catalog block 222-69 · 222-43 · 222-70; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-70",
+  "name": "Dish Antena Removal",
+  "catalogTitle": "Dish Antenna Removal",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Dish or antenna",
+    "minutes": 60.0
+   }
+  ],
+  "source": "222 catalog p.26",
+  "notes": "Catalog block 222-69 · 222-43 · 222-70; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "222-54",
+  "name": "Misc Repairs & Requests (Handyman - Hourly)",
+  "catalogTitle": "Misc Repairs & Requests (Handyman - Hourly)",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per hour (1.5 h minimum per visit)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Handyman labor (per hour, 1.5 hour minimum per visit)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "222 catalog p.26",
+  "notes": "Catalog block 222-54 · 222-73 · 222-65 · 222-71 · 222-64 (Handyman - Hourly): timed by the hour, minimum 1.5 h (90 min) per visit"
+ },
+ {
+  "sku": "222-73",
+  "name": "Garage Repair",
+  "catalogTitle": "Garage Repair",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per hour (1.5 h minimum per visit)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Handyman labor (per hour, 1.5 hour minimum per visit)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "222 catalog p.26",
+  "notes": "Catalog block 222-54 · 222-73 · 222-65 · 222-71 · 222-64 (Handyman - Hourly): timed by the hour, minimum 1.5 h (90 min) per visit"
+ },
+ {
+  "sku": "222-65",
+  "name": "Inspect Roofing",
+  "catalogTitle": "Inspect Roofing",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per hour (1.5 h minimum per visit)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Handyman labor (per hour, 1.5 hour minimum per visit)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "222 catalog p.26",
+  "notes": "Catalog block 222-54 · 222-73 · 222-65 · 222-71 · 222-64 (Handyman - Hourly): timed by the hour, minimum 1.5 h (90 min) per visit"
+ },
+ {
+  "sku": "222-71",
+  "name": "Skirting",
+  "catalogTitle": "Skirting",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per hour (1.5 h minimum per visit)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Handyman labor (per hour, 1.5 hour minimum per visit)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "222 catalog p.26",
+  "notes": "Catalog block 222-54 · 222-73 · 222-65 · 222-71 · 222-64 (Handyman - Hourly): timed by the hour, minimum 1.5 h (90 min) per visit"
+ },
+ {
+  "sku": "222-64",
+  "name": "A/C",
+  "catalogTitle": "A/C",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per hour (1.5 h minimum per visit)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Handyman labor (per hour, 1.5 hour minimum per visit)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "222 catalog p.26",
+  "notes": "Catalog block 222-54 · 222-73 · 222-65 · 222-71 · 222-64 (Handyman - Hourly): timed by the hour, minimum 1.5 h (90 min) per visit"
+ },
+ {
+  "sku": "222-99",
+  "name": "Emergency Fee",
+  "catalogTitle": "Emergency Fee",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per visit (fee, no labor time)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Emergency response (per visit)",
+    "minutes": null
+   }
+  ],
+  "source": "222 catalog p.26",
+  "notes": "Fee per visit; the catalog gives no time",
+  "noStandardTime": true
+ },
+ {
+  "sku": "222-35",
+  "name": "Make-ready / rental turnover package",
+  "catalogTitle": "Make-Ready / Rental Turnover Package",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per unit, by size option A-E",
+  "options": [
+   {
+    "key": "A · Renovation hours",
+    "label": "Up to 600 sq ft (studio) · Renovation hours",
+    "minutes": 583.0
+   },
+   {
+    "key": "B · Renovation hours",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Renovation hours",
+    "minutes": 661.0
+   },
+   {
+    "key": "C · Renovation hours",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Renovation hours",
+    "minutes": 745.0
+   },
+   {
+    "key": "D · Renovation hours",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Renovation hours",
+    "minutes": 883.0
+   },
+   {
+    "key": "E · Renovation hours",
+    "label": "1,251 sq ft and up (3 bed / 2 bath) · Renovation hours",
+    "minutes": 985.0
+   }
+  ],
+  "source": "222 catalog p.28",
+  "notes": "Includes 222-10 (1 coat), 222-27 Medium, 222-52, 222-14 tub+kitchen; Move-in cleaning 111-48 is added at its own time; lofts/ceilings over 9 ft: add 30%"
+ },
+ {
+  "sku": "222-34",
+  "name": "Kitchen Refresh Package",
+  "catalogTitle": "Kitchen Refresh Package",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per kitchen",
+  "options": [
+   {
+    "key": "A",
+    "label": "Standard kitchen",
+    "minutes": 530.0
+   }
+  ],
+  "source": "222 catalog p.28",
+  "notes": "Includes 222-97 outside, 222-18 up to 5 pieces, 222-14 counter + backsplash, 222-38"
+ },
+ {
+  "sku": "222-37",
+  "name": "Pre-Sale Renovation Package",
+  "catalogTitle": "Pre-Sale Renovation Package",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per property (quoted per project)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Per property - quoted per project",
+    "minutes": null
+   }
+  ],
+  "source": "222 catalog p.29",
+  "notes": "No standard time: built from the other catalog services after a walk-through",
+  "noStandardTime": true
+ },
+ {
+  "sku": "333-20",
+  "name": "Pressure Washing",
+  "catalogTitle": "Pressure Washing",
+  "division": "Exteriors",
+  "market": "Commercial",
+  "unit": "per area",
+  "options": [
+   {
+    "key": "A",
+    "label": "Flat surfaces (per 500 sq ft)",
+    "minutes": 35.0,
+    "per": "per 500 sq ft"
+   },
+   {
+    "key": "B",
+    "label": "Siding or walls (per 300 sq ft)",
+    "minutes": 30.0,
+    "per": "per 300 sq ft"
+   }
+  ],
+  "source": "222 catalog p.30"
+ },
+ {
+  "sku": "333-22",
+  "name": "Deck cleaning & sealing",
+  "catalogTitle": "Deck cleaning & sealing",
+  "division": "Exteriors",
+  "market": "Commercial",
+  "unit": "per 100 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Cleaning and sealing (per 100 sq ft)",
+    "minutes": 60.0,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "222 catalog p.30",
+  "notes": "Catalog block 333-22 · 222-50"
+ },
+ {
+  "sku": "222-50",
+  "name": "Deck Repair",
+  "catalogTitle": "Deck Repair",
+  "division": "Renovations",
+  "market": "Commercial",
+  "unit": "per hour",
+  "options": [
+   {
+    "key": "B",
+    "label": "Board or railing repair (per hour)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "222 catalog p.30",
+  "notes": "Catalog block 333-22 · 222-50"
+ },
+ {
+  "sku": "333-10",
+  "name": "Trash pick up",
+  "catalogTitle": "Trash pick up",
+  "division": "Exteriors",
+  "market": "Commercial",
+  "unit": "per visit",
+  "options": [
+   {
+    "key": "A",
+    "label": "Grounds trash pick-up (per visit)",
+    "minutes": 60.0,
+    "per": "per visit"
+   }
+  ],
+  "source": "222 catalog p.31",
+  "notes": "Catalog block 333-10 · 333-18 · 333-21"
+ },
+ {
+  "sku": "333-18",
+  "name": "Gutter cleaning",
+  "catalogTitle": "Gutter cleaning",
+  "division": "Exteriors",
+  "market": "Commercial",
+  "unit": "per 100 linear ft",
+  "options": [
+   {
+    "key": "B",
+    "label": "Gutter cleaning (per 100 linear ft)",
+    "minutes": 65.0,
+    "per": "per 100 linear ft"
+   }
+  ],
+  "source": "222 catalog p.31",
+  "notes": "Catalog block 333-10 · 333-18 · 333-21"
+ },
+ {
+  "sku": "333-21",
+  "name": "Fence cleaning & staining",
+  "catalogTitle": "Fence cleaning & staining",
+  "division": "Exteriors",
+  "market": "Commercial",
+  "unit": "per 50 linear ft",
+  "options": [
+   {
+    "key": "C",
+    "label": "Fence cleaning and staining (per 50 linear ft)",
+    "minutes": 130.0,
+    "per": "per 50 linear ft"
+   }
+  ],
+  "source": "222 catalog p.31",
+  "notes": "Catalog block 333-10 · 333-18 · 333-21"
+ },
+ {
+  "sku": "333-17",
+  "name": "Grass Mowing",
+  "catalogTitle": "Grass Mowing",
+  "division": "Exteriors",
+  "market": "Commercial",
+  "unit": "per acre",
+  "options": [
+   {
+    "key": "A",
+    "label": "Mowing, mulch, weeds, trimming, fall cleanup - per hour or per visit",
+    "minutes": 70.0,
+    "per": "per acre"
+   }
+  ],
+  "source": "222 catalog p.31",
+  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
+  "noStandardTime": true
+ },
+ {
+  "sku": "333-11",
+  "name": "Mulch installation",
+  "catalogTitle": "Mulch installation",
+  "division": "Exteriors",
+  "market": "Commercial",
+  "unit": "per cubic yard",
+  "options": [
+   {
+    "key": "A",
+    "label": "Mowing, mulch, weeds, trimming, fall cleanup - per hour or per visit",
+    "minutes": 42.0,
+    "per": "per cubic yard"
+   }
+  ],
+  "source": "222 catalog p.31",
+  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
+  "noStandardTime": true
+ },
+ {
+  "sku": "333-12",
+  "name": "Weed control",
+  "catalogTitle": "Weed control",
+  "division": "Exteriors",
+  "market": "Commercial",
+  "unit": "per 1,000 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Mowing, mulch, weeds, trimming, fall cleanup - per hour or per visit",
+    "minutes": 16.0,
+    "per": "per 1,000 sq ft"
+   }
+  ],
+  "source": "222 catalog p.31",
+  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
+  "noStandardTime": true
+ },
+ {
+  "sku": "333-13",
+  "name": "Bush trimming & shaping",
+  "catalogTitle": "Bush trimming & shaping",
+  "division": "Exteriors",
+  "market": "Commercial",
+  "unit": "per shrub",
+  "options": [
+   {
+    "key": "A",
+    "label": "Mowing, mulch, weeds, trimming, fall cleanup - per hour or per visit",
+    "minutes": 8.0,
+    "per": "per shrub"
+   }
+  ],
+  "source": "222 catalog p.31",
+  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
+  "noStandardTime": true
+ },
+ {
+  "sku": "333-14",
+  "name": "Fall cleanup",
+  "catalogTitle": "Fall cleanup",
+  "division": "Exteriors",
+  "market": "Commercial",
+  "unit": "per 1,000 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Mowing, mulch, weeds, trimming, fall cleanup - per hour or per visit",
+    "minutes": 20.0,
+    "per": "per 1,000 sq ft"
+   }
+  ],
+  "source": "222 catalog p.31",
+  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
+  "noStandardTime": true
+ },
+ {
+  "sku": "333-16",
+  "name": "Landscaping",
+  "catalogTitle": "Landscaping",
+  "division": "Exteriors",
+  "market": "Commercial",
+  "unit": "quoted per project",
+  "options": [
+   {
+    "key": "B",
+    "label": "Tree removal, landscaping projects, roof cleaning - quoted per project",
+    "minutes": null
+   }
+  ],
+  "source": "222 catalog p.31",
+  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
+  "noStandardTime": true
+ },
+ {
+  "sku": "333-27",
+  "name": "Tree Removal",
+  "catalogTitle": "Tree Removal",
+  "division": "Exteriors",
+  "market": "Commercial",
+  "unit": "quoted per project",
+  "options": [
+   {
+    "key": "B",
+    "label": "Tree removal, landscaping projects, roof cleaning - quoted per project",
+    "minutes": null
+   }
+  ],
+  "source": "222 catalog p.31",
+  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
+  "noStandardTime": true
+ },
+ {
+  "sku": "333-19",
+  "name": "Roof cleaning",
+  "catalogTitle": "Roof cleaning",
+  "division": "Exteriors",
+  "market": "Commercial",
+  "unit": "quoted per project",
+  "options": [
+   {
+    "key": "B",
+    "label": "Tree removal, landscaping projects, roof cleaning - quoted per project",
+    "minutes": null
+   }
+  ],
+  "source": "222 catalog p.31",
+  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
+  "noStandardTime": true
+ },
+ {
+  "sku": "333-15",
+  "name": "Snow Removal",
+  "catalogTitle": "Snow Removal",
+  "division": "Exteriors",
+  "market": "Commercial",
+  "unit": "per visit",
+  "options": [
+   {
+    "key": "C",
+    "label": "Snow removal - per visit",
+    "minutes": null
+   }
+  ],
+  "source": "222 catalog p.31",
+  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
+  "noStandardTime": true
+ },
+ {
+  "sku": "111-48",
+  "name": "Move-In Cleaning",
+  "catalogTitle": "Move-In Cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per unit, by size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 120.0,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 156.0,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 210.0,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 150.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 192.0,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 270.0,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 180.0,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 234.0,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 330.0,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 228.0,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 294.0,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 408.0,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 264.0,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 342.0,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 480.0,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 21.1,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 27.4,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 38.4,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "111 catalog p.2 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Size F (1,601 sq ft and up) is per 100 sq ft; from 1,251 sq ft the time and the price are size E x sq ft / 1,250 || Included: kitchen (counters, sink, cabinets and drawers inside and out, appliance outsides), bathrooms, baseboards, doors and frames, light fixtures and fans, window sills, closets, cobwebs, wall spots, all floors. Not included (add-ons, each with its own price by unit size): blinds dusted (111-76), window tracks vacuumed and wiped (111-79), inside window glass (111-36). Other extras: blinds washed slat by slat, moving appliances to clean under them, carpet shampoo, wall washing. (CFO 15/11/2026 14:15)"
+ },
+ {
+  "sku": "111-50",
+  "name": "Move-out cleaning",
+  "catalogTitle": "Move-Out Cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per unit, by size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 156.0,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 210.0,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 312.0,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 186.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 252.0,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 372.0,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 216.0,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 294.0,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 426.0,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 264.0,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 354.0,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 510.0,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 300.0,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 402.0,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 576.0,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 24.0,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 32.2,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 46.1,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "111 catalog p.3 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Size F (1,601 sq ft and up) is per 100 sq ft; from 1,251 sq ft the time and the price are size E x sq ft / 1,250 || Everything in the move-in cleaning plus appliance interiors (refrigerator, oven, microwave, dishwasher). Included: kitchen (counters, sink, cabinets and drawers inside and out, appliance outsides), bathrooms, baseboards, doors and frames, light fixtures and fans, window sills, closets, cobwebs, wall spots, all floors. Not included (add-ons, each with its own price by unit size): blinds dusted (111-76), window tracks vacuumed and wiped (111-79), inside window glass (111-36). Other extras: blinds washed slat by slat, moving appliances to clean under them, carpet shampoo, wall washing. (CFO 15/11/2026 14:15)"
+ },
+ {
+  "sku": "111-42",
+  "name": "Touch-Up Cleaning",
+  "catalogTitle": "Touch-Up Cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per unit, by size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 48.0,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 84.0,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 108.0,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 60.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 96.0,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 126.0,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 72.0,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 96.0,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 126.0,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 90.0,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 144.0,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 192.0,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 108.0,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 162.0,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 222.0,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 7.2,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 9.0,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 12.0,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "111 catalog p.4 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Option F (over 1,600 sq ft) is per 100 sq ft of floor area, confirmed at walk-through"
+ },
+ {
+  "sku": "111-43",
+  "name": "Regular Cleaning",
+  "catalogTitle": "Regular Cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per visit, by unit size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 90.0,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 120.0,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 186.0,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 120.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 198.0,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 264.0,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 150.0,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 252.0,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 336.0,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 210.0,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 318.0,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 420.0,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 264.0,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 396.0,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 528.0,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 19.0,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 28.0,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 38.0,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "111 catalog p.5 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Option F (over 1,600 sq ft) is per 100 sq ft of floor area, confirmed at walk-through; hours per visit"
+ },
+ {
+  "sku": "111-10",
+  "name": "Post-construction cleaning",
+  "catalogTitle": "Post-Construction Cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per unit, by size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 180.0,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 234.0,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 306.0,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 240.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 312.0,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 408.0,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 300.0,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 390.0,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 510.0,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 330.0,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 432.0,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 558.0,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 420.0,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 546.0,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 714.0,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 28.2,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 36.6,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 47.4,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "111 catalog p.6 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Option F (over 1,600 sq ft) is per 100 sq ft of floor area, confirmed at walk-through"
+ },
+ {
+  "sku": "111-85",
+  "name": "Detail Package",
+  "catalogTitle": "Detail Package",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per unit, by size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 42.0,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 66.0,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 108.0,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 60.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 96.0,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 150.0,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 78.0,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 126.0,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 204.0,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 96.0,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 150.0,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 234.0,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 114.0,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 186.0,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 294.0,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 9.1,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 14.9,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 23.5,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "111 catalog p.7 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Option F (over 1,600 sq ft) is per 100 sq ft of floor area, confirmed at walk-through || Add-on for Regular (111-43) and Touch-Up (111-42) only: the detail items a move-in / move-out already includes (cabinets inside and out, baseboards, doors, lights and fans, interior windows, closets, cobwebs). Not added to Move-In or Move-Out. (CFO 15/11/2026)"
+ },
+ {
+  "sku": "111-75",
+  "name": "Interior appliance deep cleaning",
+  "catalogTitle": "Interior appliance deep cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per appliance",
+  "options": [
+   {
+    "key": "Refrigerator",
+    "label": "Refrigerator, inside and out",
+    "minutes": 20,
+    "per": "per appliance"
+   },
+   {
+    "key": "Oven",
+    "label": "Oven or range, inside",
+    "minutes": 30,
+    "per": "per appliance"
+   },
+   {
+    "key": "Microwave",
+    "label": "Microwave, inside",
+    "minutes": 5,
+    "per": "per appliance"
+   }
+  ],
+  "source": "111 catalog p.8 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)"
+ },
+ {
+  "sku": "111-27",
+  "name": "Restroom deep scrub",
+  "catalogTitle": "Restroom deep scrub",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per bathroom",
+  "options": [
+   {
+    "key": "A",
+    "label": "Restroom deep scrub",
+    "minutes": 27,
+    "per": "per bathroom"
+   }
+  ],
+  "source": "111 catalog p.8 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)"
+ },
+ {
+  "sku": "111-74",
+  "name": "Tile & grout cleaning",
+  "catalogTitle": "Tile & grout cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per bathroom",
+  "options": [
+   {
+    "key": "A",
+    "label": "Tile and grout cleaning",
+    "minutes": 30,
+    "per": "per bathroom"
+   }
+  ],
+  "source": "111 catalog p.8 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)"
+ },
+ {
+  "sku": "111-78",
+  "name": "Wall washing",
+  "catalogTitle": "Wall washing",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per room",
+  "options": [
+   {
+    "key": "A",
+    "label": "Wall washing",
+    "minutes": 40.0,
+    "per": "per room"
+   }
+  ],
+  "source": "111 catalog p.8 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)"
+ },
+ {
+  "sku": "111-56",
+  "name": "Clean Balcony",
+  "catalogTitle": "Clean Balcony",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per balcony",
+  "options": [
+   {
+    "key": "A",
+    "label": "Balcony or patio",
+    "minutes": 10,
+    "per": "per balcony"
+   }
+  ],
+  "source": "111 catalog p.8 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)"
+ },
+ {
+  "sku": "111-84",
+  "name": "Pet hair removal",
+  "catalogTitle": "Pet hair removal",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per room",
+  "options": [
+   {
+    "key": "A",
+    "label": "Pet hair removal",
+    "minutes": 10,
+    "per": "per room"
+   }
+  ],
+  "source": "111 catalog p.8 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)"
+ },
+ {
+  "sku": "111-46",
+  "name": "Odor Treatment",
+  "catalogTitle": "Odor Treatment",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per room",
+  "options": [
+   {
+    "key": "A",
+    "label": "Odor treatment",
+    "minutes": 15,
+    "per": "per room"
+   }
+  ],
+  "source": "111 catalog p.8 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)"
+ },
+ {
+  "sku": "111-54",
+  "name": "Ozone Machine",
+  "catalogTitle": "Ozone Machine",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per unit",
+  "options": [
+   {
+    "key": "A",
+    "label": "Ozone machine (unit must stay empty)",
+    "minutes": 20,
+    "per": "per unit"
+   }
+  ],
+  "source": "111 catalog p.8 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)"
+ },
+ {
+  "sku": "111-37",
+  "name": "Common Area Cleaning",
+  "catalogTitle": "Common Area Cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per visit, by number of apartments (option A-E) and package (Essential / Standard)",
+  "options": [
+   {
+    "key": "A · Essential",
+    "label": "Up to 24 apartments (1 building, 2-3 floors) · Essential",
+    "minutes": 54.0
+   },
+   {
+    "key": "B · Essential",
+    "label": "25-50 apartments (1-2 buildings, 3 floors) · Essential",
+    "minutes": 108.0
+   },
+   {
+    "key": "C · Essential",
+    "label": "51-100 apartments (3-4 buildings or 1 mid-rise) · Essential",
+    "minutes": 180.0
+   },
+   {
+    "key": "D · Essential",
+    "label": "101-200 apartments (garden community or high-rise) · Essential",
+    "minutes": 348.0
+   },
+   {
+    "key": "E · Essential",
+    "label": "201 apartments and up (large community) · Essential",
+    "minutes": 540.0
+   },
+   {
+    "key": "A · Standard",
+    "label": "Up to 24 apartments (1 building, 2-3 floors) · Standard",
+    "minutes": 72.0
+   },
+   {
+    "key": "B · Standard",
+    "label": "25-50 apartments (1-2 buildings, 3 floors) · Standard",
+    "minutes": 138.0
+   },
+   {
+    "key": "C · Standard",
+    "label": "51-100 apartments (3-4 buildings or 1 mid-rise) · Standard",
+    "minutes": 258.0
+   },
+   {
+    "key": "D · Standard",
+    "label": "101-200 apartments (garden community or high-rise) · Standard",
+    "minutes": 498.0
+   },
+   {
+    "key": "E · Standard",
+    "label": "201 apartments and up (large community) · Standard",
+    "minutes": 780.0
+   }
+  ],
+  "source": "111 catalog p.9 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Buildings with more elevators, stairwells or laundry rooms than usual move up one option"
+ },
+ {
+  "sku": "111-41",
+  "name": "Clubhouse Cleaning",
+  "catalogTitle": "Clubhouse Cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per visit, per clubhouse (Amenity Package)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Office & Clubhouse (leasing office, community room, restrooms)",
+    "minutes": 66.0
+   },
+   {
+    "key": "B",
+    "label": "Office, Clubhouse & Fitness (option A plus fitness center and kitchenette)",
+    "minutes": 120.0
+   }
+  ],
+  "source": "111 catalog p.10 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Amenity Package time covers the whole package (leasing office + clubhouse [+ fitness]); each additional clubhouse is one more package",
+  "packageBlock": [
+   "111-41",
+   "111-60",
+   "111-39"
+  ],
+  "timeCoversWholeBlock": true
+ },
+ {
+  "sku": "111-39",
+  "name": "Fitness Center Cleaning",
+  "catalogTitle": "Fitness Center Cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per visit, per clubhouse (Amenity Package option B)",
+  "options": [
+   {
+    "key": "B",
+    "label": "Office, Clubhouse & Fitness (option A plus fitness center and kitchenette)",
+    "minutes": 120.0
+   }
+  ],
+  "source": "111 catalog p.10 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Fitness is only timed inside Amenity Package option B (covers office + clubhouse + fitness)",
+  "packageBlock": [
+   "111-41",
+   "111-60",
+   "111-39"
+  ],
+  "timeCoversWholeBlock": true
+ },
+ {
+  "sku": "111-44",
+  "name": "Trash Pick-Up",
+  "catalogTitle": "Trash Pick-Up",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per visit, by number of apartments (Trash & Grounds Package)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Up to 50 apartments: trash pick-up, 1 trash room, grounds litter",
+    "minutes": 60.0
+   },
+   {
+    "key": "B",
+    "label": "51-150 apartments: trash pick-up, up to 3 trash rooms, grounds litter",
+    "minutes": 90.0
+   },
+   {
+    "key": "C",
+    "label": "151 apartments and up: trash pick-up, up to 6 trash rooms, grounds litter",
+    "minutes": 150.0
+   }
+  ],
+  "source": "111 catalog p.10 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Trash & Grounds Package: the time covers trash pick-up + trash room upkeep + grounds litter together (no separate time per SKU)",
+  "packageBlock": [
+   "111-44",
+   "111-62",
+   "111-63"
+  ],
+  "timeCoversWholeBlock": true
+ },
+ {
+  "sku": "111-62",
+  "name": "Trash room & chute cleaning",
+  "catalogTitle": "Trash room & chute cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per visit, by number of apartments (Trash & Grounds Package)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Up to 50 apartments: trash pick-up, 1 trash room, grounds litter",
+    "minutes": 60.0
+   },
+   {
+    "key": "B",
+    "label": "51-150 apartments: trash pick-up, up to 3 trash rooms, grounds litter",
+    "minutes": 90.0
+   },
+   {
+    "key": "C",
+    "label": "151 apartments and up: trash pick-up, up to 6 trash rooms, grounds litter",
+    "minutes": 150.0
+   }
+  ],
+  "source": "111 catalog p.10 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Trash & Grounds Package: the time covers trash pick-up + trash room upkeep + grounds litter together (no separate time per SKU)",
+  "packageBlock": [
+   "111-44",
+   "111-62",
+   "111-63"
+  ],
+  "timeCoversWholeBlock": true
+ },
+ {
+  "sku": "111-63",
+  "name": "Litter pick-up (grounds & parking)",
+  "catalogTitle": "Litter pick-up (grounds & parking)",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per visit, by number of apartments (Trash & Grounds Package)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Up to 50 apartments: trash pick-up, 1 trash room, grounds litter",
+    "minutes": 60.0
+   },
+   {
+    "key": "B",
+    "label": "51-150 apartments: trash pick-up, up to 3 trash rooms, grounds litter",
+    "minutes": 90.0
+   },
+   {
+    "key": "C",
+    "label": "151 apartments and up: trash pick-up, up to 6 trash rooms, grounds litter",
+    "minutes": 150.0
+   }
+  ],
+  "source": "111 catalog p.10 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Trash & Grounds Package: the time covers trash pick-up + trash room upkeep + grounds litter together (no separate time per SKU)",
+  "packageBlock": [
+   "111-44",
+   "111-62",
+   "111-63"
+  ],
+  "timeCoversWholeBlock": true
+ },
+ {
+  "sku": "111-60",
+  "name": "Office cleaning",
+  "catalogTitle": "Office cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per visit, by office size option A-D (Office Cleaning Package)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Up to 2,000 sq ft (small office or clinic)",
+    "minutes": 78.0
+   },
+   {
+    "key": "B",
+    "label": "2,001-5,000 sq ft (office suite)",
+    "minutes": 144.0
+   },
+   {
+    "key": "C",
+    "label": "5,001-10,000 sq ft (office floor or dealership)",
+    "minutes": 282.0
+   },
+   {
+    "key": "D",
+    "label": "10,001 sq ft and up (large building) - quoted after walk-through",
+    "minutes": null
+   }
+  ],
+  "source": "111 catalog p.11 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Office Cleaning Package: the time covers offices + restrooms + breakroom + trash + floors together. 111-60 is also named in the Amenity Package block (p.10, options A 1.1 h / B 2.0 h per visit)",
+  "packageBlock": [
+   "111-60",
+   "111-13",
+   "111-12"
+  ],
+  "timeCoversWholeBlock": true
+ },
+ {
+  "sku": "111-13",
+  "name": "Restroom cleaning",
+  "catalogTitle": "Restroom cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per visit, by office size (Office Cleaning Package)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Up to 2,000 sq ft (small office or clinic)",
+    "minutes": 78.0
+   },
+   {
+    "key": "B",
+    "label": "2,001-5,000 sq ft (office suite)",
+    "minutes": 144.0
+   },
+   {
+    "key": "C",
+    "label": "5,001-10,000 sq ft (office floor or dealership)",
+    "minutes": 282.0
+   },
+   {
+    "key": "D",
+    "label": "10,001 sq ft and up (large building) - quoted after walk-through",
+    "minutes": null
+   }
+  ],
+  "source": "111 catalog p.11 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Named in the Office Cleaning Package block only; no time of its own in the catalog — package time covers the whole office visit",
+  "packageBlock": [
+   "111-60",
+   "111-13",
+   "111-12"
+  ],
+  "timeCoversWholeBlock": true
+ },
+ {
+  "sku": "111-12",
+  "name": "Breakroom cleaning",
+  "catalogTitle": "Breakroom cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per visit, by office size (Office Cleaning Package)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Up to 2,000 sq ft (small office or clinic)",
+    "minutes": 78.0
+   },
+   {
+    "key": "B",
+    "label": "2,001-5,000 sq ft (office suite)",
+    "minutes": 144.0
+   },
+   {
+    "key": "C",
+    "label": "5,001-10,000 sq ft (office floor or dealership)",
+    "minutes": 282.0
+   },
+   {
+    "key": "D",
+    "label": "10,001 sq ft and up (large building) - quoted after walk-through",
+    "minutes": null
+   }
+  ],
+  "source": "111 catalog p.11 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Named in the Office Cleaning Package block only; no time of its own in the catalog — package time covers the whole office visit",
+  "packageBlock": [
+   "111-60",
+   "111-13",
+   "111-12"
+  ],
+  "timeCoversWholeBlock": true
+ },
+ {
+  "sku": "111-51",
+  "name": "Regular Floor Cleaning",
+  "catalogTitle": "Regular Floor Cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per 1,000 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Regular floor cleaning",
+    "minutes": 18.0,
+    "per": "per 1,000 sq ft"
+   }
+  ],
+  "source": "111 catalog p.12 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)"
+ },
+ {
+  "sku": "111-20",
+  "name": "Floor machine scrubbing",
+  "catalogTitle": "Floor machine scrubbing",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per 1,000 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Floor machine scrubbing",
+    "minutes": 8,
+    "per": "per 1,000 sq ft"
+   }
+  ],
+  "source": "111 catalog p.12 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)"
+ },
+ {
+  "sku": "111-52",
+  "name": "Floor Polishing",
+  "catalogTitle": "Floor Polishing",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per 1,000 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Floor polishing",
+    "minutes": 6,
+    "per": "per 1,000 sq ft"
+   }
+  ],
+  "source": "111 catalog p.12 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)"
+ },
+ {
+  "sku": "111-53",
+  "name": "Strip And Wax",
+  "catalogTitle": "Strip And Wax",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per 1,000 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Strip and wax",
+    "minutes": 135.0,
+    "per": "per 1,000 sq ft"
+   }
+  ],
+  "source": "111 catalog p.12 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)"
+ },
+ {
+  "sku": "111-55",
+  "name": "Carpet Shampoo",
+  "catalogTitle": "Carpet Shampoo",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per room / per hallway / per 1,000 sq ft",
+  "options": [
+   {
+    "key": "Room",
+    "label": "Carpet shampoo - unit (hot-water extraction)",
+    "minutes": 20,
+    "per": "per room"
+   },
+   {
+    "key": "Hallway",
+    "label": "Carpet shampoo - unit hallway",
+    "minutes": 10,
+    "per": "per hallway"
+   },
+   {
+    "key": "Offices",
+    "label": "Carpet shampoo - offices and corridors",
+    "minutes": 85.0,
+    "per": "per 1,000 sq ft"
+   },
+   {
+    "key": "Setup",
+    "label": "Setup per visit",
+    "minutes": 15,
+    "per": "per visit"
+   }
+  ],
+  "source": "111 catalog p.12 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Carpet shampoo adds 15 minutes of setup per visit"
+ },
+ {
+  "sku": "111-22",
+  "name": "Carpet spot cleaning",
+  "catalogTitle": "Carpet spot cleaning",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per spot",
+  "options": [
+   {
+    "key": "A",
+    "label": "Carpet spot cleaning",
+    "minutes": 4.0,
+    "per": "per spot"
+   }
+  ],
+  "source": "111 catalog p.12 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)"
+ },
+ {
+  "sku": "111-86",
+  "name": "Water extraction (flooded carpet)",
+  "catalogTitle": "Water extraction (flooded carpet)",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per hour, per cleaner",
+  "options": [
+   {
+    "key": "A",
+    "label": "Water extraction (flooded carpet)",
+    "minutes": 60,
+    "per": "per hour"
+   }
+  ],
+  "source": "111 catalog p.12 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "Measured by time on site; NOTE: SKU 111-86 does not exist in ServicesCatalog / quote-catalog.json"
+ },
+ {
+  "sku": "111-70",
+  "name": "Extra cleaning request (hourly)",
+  "catalogTitle": "Extra cleaning request (hourly)",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per hour, per cleaner",
+  "options": [
+   {
+    "key": "A",
+    "label": "Extra cleaning (per hour, per cleaner)",
+    "minutes": 60,
+    "per": "per hour"
+   }
+  ],
+  "source": "111 catalog p.12 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)"
+ },
+ {
+  "sku": "110-10",
+  "name": "Move-In Cleaning",
+  "catalogTitle": "Move-In Cleaning",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per unit, by size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 120.0,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 156.0,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 210.0,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 150.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 192.0,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 270.0,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 180.0,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 234.0,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 330.0,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 228.0,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 294.0,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 408.0,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 264.0,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 342.0,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 480.0,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 21.1,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 27.4,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 38.4,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "twin of 111-48",
+  "twinOf": "111-48",
+  "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Size F (1,601 sq ft and up) is per 100 sq ft; from 1,251 sq ft the time and the price are size E x sq ft / 1,250 || Included: kitchen (counters, sink, cabinets and drawers inside and out, appliance outsides), bathrooms, baseboards, doors and frames, light fixtures and fans, window sills, closets, cobwebs, wall spots, all floors. Not included (add-ons, each with its own price by unit size): blinds dusted (110-28), window tracks vacuumed and wiped (110-17), inside window glass (110-51). Other extras: blinds washed slat by slat, moving appliances to clean under them, carpet shampoo, wall washing. (CFO 15/11/2026 14:15)"
+ },
+ {
+  "sku": "110-13",
+  "name": "Carpet cleaning (Shampoo)",
+  "catalogTitle": "Carpet Shampoo",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per room / per hallway / per 1,000 sq ft",
+  "options": [
+   {
+    "key": "Room",
+    "label": "Carpet shampoo - unit (hot-water extraction)",
+    "minutes": 20,
+    "per": "per room"
+   },
+   {
+    "key": "Hallway",
+    "label": "Carpet shampoo - unit hallway",
+    "minutes": 10,
+    "per": "per hallway"
+   },
+   {
+    "key": "Offices",
+    "label": "Carpet shampoo - offices and corridors",
+    "minutes": 85.0,
+    "per": "per 1,000 sq ft"
+   },
+   {
+    "key": "Setup",
+    "label": "Setup per visit",
+    "minutes": 15,
+    "per": "per visit"
+   }
+  ],
+  "source": "twin of 111-55",
+  "twinOf": "111-55",
+  "notes": "Carpet shampoo adds 15 minutes of setup per visit"
+ },
+ {
+  "sku": "110-18",
+  "name": "Wall washing",
+  "catalogTitle": "Wall washing",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per room",
+  "options": [
+   {
+    "key": "A",
+    "label": "Wall washing",
+    "minutes": 40.0,
+    "per": "per room"
+   }
+  ],
+  "source": "twin of 111-78",
+  "twinOf": "111-78"
+ },
+ {
+  "sku": "110-23",
+  "name": "Post-construction cleaning",
+  "catalogTitle": "Post-Construction Cleaning",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per unit, by size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 180.0,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 234.0,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 306.0,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 240.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 312.0,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 408.0,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 300.0,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 390.0,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 510.0,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 330.0,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 432.0,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 558.0,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 420.0,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 546.0,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 714.0,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 28.2,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 36.6,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 47.4,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "twin of 111-10",
+  "twinOf": "111-10",
+  "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Option F (over 1,600 sq ft) is per 100 sq ft of floor area, confirmed at walk-through"
+ },
+ {
+  "sku": "110-24",
+  "name": "Move-out cleaning",
+  "catalogTitle": "Move-Out Cleaning",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per unit, by size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 156.0,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 210.0,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 312.0,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 186.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 252.0,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 372.0,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 216.0,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 294.0,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 426.0,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 264.0,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 354.0,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 510.0,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 300.0,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 402.0,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 576.0,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 24.0,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 32.2,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 46.1,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "twin of 111-50",
+  "twinOf": "111-50",
+  "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Size F (1,601 sq ft and up) is per 100 sq ft; from 1,251 sq ft the time and the price are size E x sq ft / 1,250 || Everything in the move-in cleaning plus appliance interiors (refrigerator, oven, microwave, dishwasher). Included: kitchen (counters, sink, cabinets and drawers inside and out, appliance outsides), bathrooms, baseboards, doors and frames, light fixtures and fans, window sills, closets, cobwebs, wall spots, all floors. Not included (add-ons, each with its own price by unit size): blinds dusted (110-28), window tracks vacuumed and wiped (110-17), inside window glass (110-51). Other extras: blinds washed slat by slat, moving appliances to clean under them, carpet shampoo, wall washing. (CFO 15/11/2026 14:15)"
+ },
+ {
+  "sku": "110-29",
+  "name": "Interior appliance deep cleaning",
+  "catalogTitle": "Interior appliance deep cleaning",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per appliance",
+  "options": [
+   {
+    "key": "Refrigerator",
+    "label": "Refrigerator, inside and out",
+    "minutes": 20,
+    "per": "per appliance"
+   },
+   {
+    "key": "Oven",
+    "label": "Oven or range, inside",
+    "minutes": 30,
+    "per": "per appliance"
+   },
+   {
+    "key": "Microwave",
+    "label": "Microwave, inside",
+    "minutes": 5,
+    "per": "per appliance"
+   }
+  ],
+  "source": "twin of 111-75",
+  "twinOf": "111-75"
+ },
+ {
+  "sku": "110-30",
+  "name": "Tile & grout cleaning",
+  "catalogTitle": "Tile & grout cleaning",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per bathroom",
+  "options": [
+   {
+    "key": "A",
+    "label": "Tile and grout cleaning",
+    "minutes": 30,
+    "per": "per bathroom"
+   }
+  ],
+  "source": "twin of 111-74",
+  "twinOf": "111-74"
+ },
+ {
+  "sku": "110-35",
+  "name": "Clean Balcony",
+  "catalogTitle": "Clean Balcony",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per balcony",
+  "options": [
+   {
+    "key": "A",
+    "label": "Balcony or patio",
+    "minutes": 10,
+    "per": "per balcony"
+   }
+  ],
+  "source": "twin of 111-56",
+  "twinOf": "111-56"
+ },
+ {
+  "sku": "110-37",
+  "name": "Odor Treatment",
+  "catalogTitle": "Odor Treatment",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per room",
+  "options": [
+   {
+    "key": "A",
+    "label": "Odor treatment",
+    "minutes": 15,
+    "per": "per room"
+   }
+  ],
+  "source": "twin of 111-46",
+  "twinOf": "111-46"
+ },
+ {
+  "sku": "110-38",
+  "name": "Carpet Cleaning (Spot)",
+  "catalogTitle": "Carpet spot cleaning",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per spot",
+  "options": [
+   {
+    "key": "A",
+    "label": "Carpet spot cleaning",
+    "minutes": 4.0,
+    "per": "per spot"
+   }
+  ],
+  "source": "twin of 111-22",
+  "twinOf": "111-22"
+ },
+ {
+  "sku": "110-39",
+  "name": "Regular Cleaning",
+  "catalogTitle": "Regular Cleaning",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per visit, by unit size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 90.0,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 120.0,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 186.0,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 120.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 198.0,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 264.0,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 150.0,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 252.0,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 336.0,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 210.0,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 318.0,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 420.0,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 264.0,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 396.0,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 528.0,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 19.0,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 28.0,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 38.0,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "twin of 111-43",
+  "twinOf": "111-43",
+  "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Option F (over 1,600 sq ft) is per 100 sq ft of floor area, confirmed at walk-through; hours per visit"
+ },
+ {
+  "sku": "110-40",
+  "name": "Touch-Up Cleaning",
+  "catalogTitle": "Touch-Up Cleaning",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per unit, by size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 48.0,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 84.0,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 108.0,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 60.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 96.0,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 126.0,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 72.0,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 96.0,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 126.0,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 90.0,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 144.0,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 192.0,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 108.0,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 162.0,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 222.0,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 7.2,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 9.0,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 12.0,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "twin of 111-42",
+  "twinOf": "111-42",
+  "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Option F (over 1,600 sq ft) is per 100 sq ft of floor area, confirmed at walk-through"
+ },
+ {
+  "sku": "110-43",
+  "name": "Extra cleaning request (hourly)",
+  "catalogTitle": "Extra cleaning request (hourly)",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per hour, per cleaner",
+  "options": [
+   {
+    "key": "A",
+    "label": "Extra cleaning (per hour, per cleaner)",
+    "minutes": 60,
+    "per": "per hour"
+   }
+  ],
+  "source": "twin of 111-70",
+  "twinOf": "111-70"
+ },
+ {
+  "sku": "110-48",
+  "name": "Restroom deep scrub",
+  "catalogTitle": "Restroom deep scrub",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per bathroom",
+  "options": [
+   {
+    "key": "A",
+    "label": "Restroom deep scrub",
+    "minutes": 27,
+    "per": "per bathroom"
+   }
+  ],
+  "source": "twin of 111-27",
+  "twinOf": "111-27"
+ },
+ {
+  "sku": "110-54",
+  "name": "Regular Floor Cleaning",
+  "catalogTitle": "Regular Floor Cleaning",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per 1,000 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Regular floor cleaning",
+    "minutes": 18.0,
+    "per": "per 1,000 sq ft"
+   }
+  ],
+  "source": "twin of 111-51",
+  "twinOf": "111-51"
+ },
+ {
+  "sku": "110-55",
+  "name": "Floor machine scrubbing",
+  "catalogTitle": "Floor machine scrubbing",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per 1,000 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Floor machine scrubbing",
+    "minutes": 8,
+    "per": "per 1,000 sq ft"
+   }
+  ],
+  "source": "twin of 111-20",
+  "twinOf": "111-20"
+ },
+ {
+  "sku": "110-56",
+  "name": "Floor Polishing",
+  "catalogTitle": "Floor Polishing",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per 1,000 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Floor polishing",
+    "minutes": 6,
+    "per": "per 1,000 sq ft"
+   }
+  ],
+  "source": "twin of 111-52",
+  "twinOf": "111-52"
+ },
+ {
+  "sku": "110-57",
+  "name": "Strip and Wax",
+  "catalogTitle": "Strip And Wax",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per 1,000 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Strip and wax",
+    "minutes": 135.0,
+    "per": "per 1,000 sq ft"
+   }
+  ],
+  "source": "twin of 111-53",
+  "twinOf": "111-53"
+ },
+ {
+  "sku": "110-58",
+  "name": "Ozone Machine",
+  "catalogTitle": "Ozone Machine",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per unit",
+  "options": [
+   {
+    "key": "A",
+    "label": "Ozone machine (unit must stay empty)",
+    "minutes": 20,
+    "per": "per unit"
+   }
+  ],
+  "source": "twin of 111-54",
+  "twinOf": "111-54"
+ },
+ {
+  "sku": "110-59",
+  "name": "Pet hair removal",
+  "catalogTitle": "Pet hair removal",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per room",
+  "options": [
+   {
+    "key": "A",
+    "label": "Pet hair removal",
+    "minutes": 10,
+    "per": "per room"
+   }
+  ],
+  "source": "twin of 111-84",
+  "twinOf": "111-84"
+ },
+ {
+  "sku": "210-10",
+  "name": "Wall painting",
+  "catalogTitle": "Wall Painting - Full Unit",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per unit, by size option A-E",
+  "options": [
+   {
+    "key": "A · 1 coat",
+    "label": "Up to 600 sq ft (studio) · 1 coat",
+    "minutes": 318.0
+   },
+   {
+    "key": "B · 1 coat",
+    "label": "601-800 sq ft (1 bed / 1 bath) · 1 coat",
+    "minutes": 396.0
+   },
+   {
+    "key": "C · 1 coat",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · 1 coat",
+    "minutes": 480.0
+   },
+   {
+    "key": "D · 1 coat",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · 1 coat",
+    "minutes": 618.0
+   },
+   {
+    "key": "E · 1 coat",
+    "label": "1,251 sq ft and up (3 bed / 2 bath) · 1 coat",
+    "minutes": 720.0
+   },
+   {
+    "key": "A · 2 coats",
+    "label": "Up to 600 sq ft (studio) · 2 coats",
+    "minutes": 486.0
+   },
+   {
+    "key": "B · 2 coats",
+    "label": "601-800 sq ft (1 bed / 1 bath) · 2 coats",
+    "minutes": 606.0
+   },
+   {
+    "key": "C · 2 coats",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · 2 coats",
+    "minutes": 744.0
+   },
+   {
+    "key": "D · 2 coats",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · 2 coats",
+    "minutes": 966.0
+   },
+   {
+    "key": "E · 2 coats",
+    "label": "1,251 sq ft and up (3 bed / 2 bath) · 2 coats",
+    "minutes": 1128.0
+   }
+  ],
+  "source": "twin of 222-10",
+  "twinOf": "222-10",
+  "notes": "Lofts or ceilings over 9 ft: add 30%"
+ },
+ {
+  "sku": "210-11",
+  "name": "Door painting",
+  "catalogTitle": "Door Painting",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per door",
+  "options": [
+   {
+    "key": "A",
+    "label": "One side",
+    "minutes": 25.0
+   },
+   {
+    "key": "B",
+    "label": "Both sides",
+    "minutes": 45.0
+   }
+  ],
+  "source": "twin of 222-11",
+  "twinOf": "222-11"
+ },
+ {
+  "sku": "210-12",
+  "name": "Blind Installation and Removal",
+  "catalogTitle": "Blind Installation and Removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per window",
+  "options": [
+   {
+    "key": "A",
+    "label": "Blind installation or replacement (per window)",
+    "minutes": 20.0,
+    "per": "per window"
+   }
+  ],
+  "source": "twin of 222-12",
+  "twinOf": "222-12",
+  "notes": "Catalog block 222-12 · 222-75 · 222-55 · 222-45"
+ },
+ {
+  "sku": "210-13",
+  "name": "Unit Full paint- PRIMER",
+  "catalogTitle": "Full Paint with Primer - Color Change",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per unit, by size option A-E",
+  "options": [
+   {
+    "key": "A · Primer + 2 coats",
+    "label": "Up to 600 sq ft (studio) · Primer + 2 coats",
+    "minutes": 804.0
+   },
+   {
+    "key": "B · Primer + 2 coats",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Primer + 2 coats",
+    "minutes": 1002.0
+   },
+   {
+    "key": "C · Primer + 2 coats",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Primer + 2 coats",
+    "minutes": 1224.0
+   },
+   {
+    "key": "D · Primer + 2 coats",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Primer + 2 coats",
+    "minutes": 1584.0
+   },
+   {
+    "key": "E · Primer + 2 coats",
+    "label": "1,251 sq ft and up (3 bed / 2 bath) · Primer + 2 coats",
+    "minutes": 1848.0
+   }
+  ],
+  "source": "twin of 222-13",
+  "twinOf": "222-13",
+  "notes": "Lofts or ceilings over 9 ft: add 30%"
+ },
+ {
+  "sku": "210-14",
+  "name": "Caulking",
+  "catalogTitle": "Caulking",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per area",
+  "options": [
+   {
+    "key": "A",
+    "label": "Tub or shower surround",
+    "minutes": 55.0
+   },
+   {
+    "key": "B",
+    "label": "Kitchen counter and backsplash",
+    "minutes": 30.0
+   },
+   {
+    "key": "C",
+    "label": "Trim in one room",
+    "minutes": 30.0
+   }
+  ],
+  "source": "twin of 222-14",
+  "twinOf": "222-14"
+ },
+ {
+  "sku": "210-15",
+  "name": "Baseboard installation, repair & Removal",
+  "catalogTitle": "Baseboard installation, removal & repair",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per linear ft / per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Installation (per 25 linear ft)",
+    "minutes": 65.0,
+    "per": "per 25 linear ft"
+   },
+   {
+    "key": "B",
+    "label": "Removal (per 50 linear ft)",
+    "minutes": 40.0,
+    "per": "per 50 linear ft"
+   },
+   {
+    "key": "C",
+    "label": "Repair (per piece)",
+    "minutes": 30.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "twin of 222-15",
+  "twinOf": "222-15",
+  "notes": "Catalog block 222-78 · 222-77 · 222-79 · 222-15"
+ },
+ {
+  "sku": "210-16",
+  "name": "Carpet Installation",
+  "catalogTitle": "Carpet installation, repair & stretch",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per room / per piece / per 50 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Carpet stretch (per room)",
+    "minutes": 45.0,
+    "per": "per room"
+   },
+   {
+    "key": "B",
+    "label": "Carpet repair / patch",
+    "minutes": 60.0
+   },
+   {
+    "key": "C",
+    "label": "Carpet installation with pad, install only (per 50 sq ft)",
+    "minutes": 40.0,
+    "per": "per 50 sq ft"
+   }
+  ],
+  "source": "twin of 222-16",
+  "twinOf": "222-16",
+  "notes": "Catalog block 222-16 · 222-88 · 222-89 || C = lay pad and carpet only. Removal of the old carpet is its own line (222-89 / 210-89). Extras: furniture moving, new tack strip, stairs per flight, minimum charge for small rooms. (CFO 15/11/2026 14:15)"
+ },
+ {
+  "sku": "210-17",
+  "name": "Interior door replacement",
+  "catalogTitle": "Door replacement",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per door",
+  "options": [
+   {
+    "key": "A",
+    "label": "Interior door replacement (slab)",
+    "minutes": 95.0
+   }
+  ],
+  "source": "twin of 222-17",
+  "twinOf": "222-17",
+  "notes": "Catalog block 222-17 · 222-86 · 222-87 · 222-40"
+ },
+ {
+  "sku": "210-18",
+  "name": "Hardware replacement",
+  "catalogTitle": "Hardware replacement",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Door knob or lock",
+    "minutes": 30.0
+   },
+   {
+    "key": "B",
+    "label": "Hinge, pull or small hardware (per piece)",
+    "minutes": 10.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "twin of 222-18",
+  "twinOf": "222-18",
+  "notes": "Catalog block 222-18 · 222-68"
+ },
+ {
+  "sku": "210-19",
+  "name": "Ceiling Paint",
+  "catalogTitle": "Ceiling Paint",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per unit, by size option A-E",
+  "options": [
+   {
+    "key": "A · 1 coat",
+    "label": "Up to 600 sq ft (studio) · 1 coat",
+    "minutes": 162.0
+   },
+   {
+    "key": "B · 1 coat",
+    "label": "601-800 sq ft (1 bed / 1 bath) · 1 coat",
+    "minutes": 198.0
+   },
+   {
+    "key": "C · 1 coat",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · 1 coat",
+    "minutes": 240.0
+   },
+   {
+    "key": "D · 1 coat",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · 1 coat",
+    "minutes": 306.0
+   },
+   {
+    "key": "E · 1 coat",
+    "label": "1,251 sq ft and up (3 bed / 2 bath) · 1 coat",
+    "minutes": 354.0
+   }
+  ],
+  "source": "twin of 222-19",
+  "twinOf": "222-19",
+  "notes": "Lofts or ceilings over 9 ft: add 30%"
+ },
+ {
+  "sku": "210-20",
+  "name": "Ceiling fan & light fixture installation",
+  "catalogTitle": "Ceiling fan & light fixture installation",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Light fixture installation",
+    "minutes": 60.0
+   },
+   {
+    "key": "B",
+    "label": "Ceiling fan installation",
+    "minutes": 90.0
+   }
+  ],
+  "source": "twin of 222-20",
+  "twinOf": "222-20",
+  "notes": "Catalog block 222-20 · 222-83 · 222-82 · 222-84; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "210-21",
+  "name": "Bathtub Paint",
+  "catalogTitle": "Bathtub Paint",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per tub",
+  "options": [
+   {
+    "key": "A",
+    "label": "Standard tub",
+    "minutes": 150.0
+   }
+  ],
+  "source": "twin of 222-21",
+  "twinOf": "222-21"
+ },
+ {
+  "sku": "210-22",
+  "name": "Faucet replacement",
+  "catalogTitle": "Faucet replacement",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Faucet replacement (kitchen or bathroom)",
+    "minutes": 75.0
+   }
+  ],
+  "source": "twin of 222-22",
+  "twinOf": "222-22",
+  "notes": "Catalog block 222-22 · 222-23 · 222-53 · 222-63 (Plumbing Fixtures)"
+ },
+ {
+  "sku": "210-23",
+  "name": "Toilet replacement",
+  "catalogTitle": "Toilet replacement",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Toilet replacement - install, toilet on site, straight swap",
+    "minutes": 120.0
+   },
+   {
+    "key": "G",
+    "label": "Add-on: haul away and dispose of the old toilet",
+    "minutes": 25.0
+   }
+  ],
+  "source": "twin of 222-23",
+  "twinOf": "222-23",
+  "notes": "Catalog block 222-22 · 222-23 · 222-53 · 222-63 (Plumbing Fixtures) || Base = remove the old toilet, set the new one (on site) with wax ring and bolts, connect and test. Add-on G: haul away and dispose of the old toilet. Shut-off valve, flange repair and supply parts are extra. (CFO 15/11/2026 14:15)"
+ },
+ {
+  "sku": "210-24",
+  "name": "Vanity installation",
+  "catalogTitle": "Vanity installation",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Vanity installation",
+    "minutes": 215.0
+   }
+  ],
+  "source": "twin of 222-24",
+  "twinOf": "222-24",
+  "notes": "Catalog block 222-24 · 222-25 · 222-29"
+ },
+ {
+  "sku": "210-25",
+  "name": "Mirror installation",
+  "catalogTitle": "Mirror installation",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Mirror installation",
+    "minutes": 45.0
+   }
+  ],
+  "source": "twin of 222-25",
+  "twinOf": "222-25",
+  "notes": "Catalog block 222-24 · 222-25 · 222-29"
+ },
+ {
+  "sku": "210-26",
+  "name": "Flooring installation & Repair",
+  "catalogTitle": "Flooring installation & Repair",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per 100 sq ft / per hour",
+  "options": [
+   {
+    "key": "A",
+    "label": "New vinyl / laminate plank (per 100 sq ft)",
+    "minutes": 150.0,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "B",
+    "label": "Repair of damaged planks (per hour)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "twin of 222-26",
+  "twinOf": "222-26",
+  "notes": "Catalog block 222-26 · 222-61 · 222-67"
+ },
+ {
+  "sku": "210-27",
+  "name": "Drywall & wall repair - minor to moderate",
+  "catalogTitle": "Drywall & Wall Repair",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per job, by level",
+  "options": [
+   {
+    "key": "A",
+    "label": "Medium - up to 25 patches, each up to 12 in",
+    "minutes": 150.0
+   },
+   {
+    "key": "B",
+    "label": "Large - 26+ patches or any patch over 1 sq ft",
+    "minutes": 270.0
+   },
+   {
+    "key": "C",
+    "label": "Section replacement (per hour)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "twin of 222-27",
+  "twinOf": "222-27"
+ },
+ {
+  "sku": "210-28",
+  "name": "Cabinet touch-up / repaint",
+  "catalogTitle": "Cabinet touch-up / repaint",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per job, by scope",
+  "options": [
+   {
+    "key": "D",
+    "label": "Touch-up (marks and chips)",
+    "minutes": 60.0
+   },
+   {
+    "key": "A",
+    "label": "Kitchen - outside",
+    "minutes": 375.0
+   },
+   {
+    "key": "B",
+    "label": "Kitchen - inside (added to outside)",
+    "minutes": 180.0
+   },
+   {
+    "key": "C",
+    "label": "Bathroom vanity - outside",
+    "minutes": 83.0
+   }
+  ],
+  "source": "twin of 222-28",
+  "twinOf": "222-28",
+  "notes": "Catalog block 222-97 · 222-98 · 222-28; touch-up is option D"
+ },
+ {
+  "sku": "210-29",
+  "name": "Closet shelf installation",
+  "catalogTitle": "Closet shelf installation",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "C",
+    "label": "Closet shelf installation",
+    "minutes": 60.0
+   }
+  ],
+  "source": "twin of 222-29",
+  "twinOf": "222-29",
+  "notes": "Catalog block 222-24 · 222-25 · 222-29"
+ },
+ {
+  "sku": "210-30",
+  "name": "Drywall sanding & finishing",
+  "catalogTitle": "Drywall Sanding & Finishing",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per job, by scope",
+  "options": [
+   {
+    "key": "A",
+    "label": "One wall",
+    "minutes": 95.0
+   },
+   {
+    "key": "B",
+    "label": "One room",
+    "minutes": 350.0
+   }
+  ],
+  "source": "twin of 222-30",
+  "twinOf": "222-30"
+ },
+ {
+  "sku": "210-31",
+  "name": "Backsplash installation",
+  "catalogTitle": "Backsplash installation",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per 10 sq ft",
+  "options": [
+   {
+    "key": "C",
+    "label": "Backsplash installation (per 10 sq ft)",
+    "minutes": 75.0,
+    "per": "per 10 sq ft"
+   }
+  ],
+  "source": "twin of 222-31",
+  "twinOf": "222-31",
+  "notes": "Catalog block 222-33 · 222-31"
+ },
+ {
+  "sku": "210-32",
+  "name": "Fire extinguisher Installation and Removal",
+  "catalogTitle": "Fire extinguisher Installation and Removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "C",
+    "label": "Fire extinguisher - mount or replace (per piece)",
+    "minutes": 15.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "twin of 222-32",
+  "twinOf": "222-32",
+  "notes": "Catalog block 222-76 · 222-41 · 222-32 · 222-59 · 222-62 (Small Installs); handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "210-33",
+  "name": "Tile repair & Install",
+  "catalogTitle": "Tile repair & Install",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per tile / per 10 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Replace broken tile (per tile)",
+    "minutes": 35.0,
+    "per": "per tile"
+   },
+   {
+    "key": "B",
+    "label": "Regrout an area (per 10 sq ft)",
+    "minutes": 60.0,
+    "per": "per 10 sq ft"
+   }
+  ],
+  "source": "twin of 222-33",
+  "twinOf": "222-33",
+  "notes": "Catalog block 222-33 · 222-31"
+ },
+ {
+  "sku": "210-34",
+  "name": "Kitchen refresh package",
+  "catalogTitle": "Kitchen Refresh Package",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per kitchen",
+  "options": [
+   {
+    "key": "A",
+    "label": "Standard kitchen",
+    "minutes": 530.0
+   }
+  ],
+  "source": "twin of 222-34",
+  "twinOf": "222-34",
+  "notes": "Includes 222-97 outside, 222-18 up to 5 pieces, 222-14 counter + backsplash, 222-38"
+ },
+ {
+  "sku": "210-35",
+  "name": "Make-ready / rental turnover package",
+  "catalogTitle": "Make-Ready / Rental Turnover Package",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per unit, by size option A-E",
+  "options": [
+   {
+    "key": "A · Renovation hours",
+    "label": "Up to 600 sq ft (studio) · Renovation hours",
+    "minutes": 583.0
+   },
+   {
+    "key": "B · Renovation hours",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Renovation hours",
+    "minutes": 661.0
+   },
+   {
+    "key": "C · Renovation hours",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Renovation hours",
+    "minutes": 745.0
+   },
+   {
+    "key": "D · Renovation hours",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Renovation hours",
+    "minutes": 883.0
+   },
+   {
+    "key": "E · Renovation hours",
+    "label": "1,251 sq ft and up (3 bed / 2 bath) · Renovation hours",
+    "minutes": 985.0
+   }
+  ],
+  "source": "twin of 222-35",
+  "twinOf": "222-35",
+  "notes": "Includes 222-10 (1 coat), 222-27 Medium, 222-52, 222-14 tub+kitchen; Move-in cleaning 111-48 is added at its own time; lofts/ceilings over 9 ft: add 30%"
+ },
+ {
+  "sku": "210-36",
+  "name": "Garbage Disposal Install & Replacement",
+  "catalogTitle": "Garbage Disposal Install & Replacement",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Garbage disposal",
+    "minutes": 120.0
+   }
+  ],
+  "source": "twin of 222-36",
+  "twinOf": "222-36",
+  "notes": "Catalog block 222-36 · 222-60"
+ },
+ {
+  "sku": "210-38",
+  "name": "Stove Resurfacing",
+  "catalogTitle": "Stove Resurfacing",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per stove",
+  "options": [
+   {
+    "key": "A",
+    "label": "Stove top and front",
+    "minutes": 75.0
+   }
+  ],
+  "source": "twin of 222-38",
+  "twinOf": "222-38"
+ },
+ {
+  "sku": "210-39",
+  "name": "Trim painting (door and window)",
+  "catalogTitle": "Trim painting (door and window)",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Door frame / casing",
+    "minutes": 24.0
+   },
+   {
+    "key": "B",
+    "label": "Window frame",
+    "minutes": 30.0
+   }
+  ],
+  "source": "twin of 222-39",
+  "twinOf": "222-39",
+  "notes": "Catalog block 222-95 · 222-96 · 222-39"
+ },
+ {
+  "sku": "210-40",
+  "name": "Storm Door Installation",
+  "catalogTitle": "Storm Door Installation",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per door",
+  "options": [
+   {
+    "key": "B",
+    "label": "Storm door installation",
+    "minutes": 180.0
+   }
+  ],
+  "source": "twin of 222-40",
+  "twinOf": "222-40",
+  "notes": "Catalog block 222-17 · 222-86 · 222-87 · 222-40"
+ },
+ {
+  "sku": "210-41",
+  "name": "Smoke Detector Installatiion and Removal",
+  "catalogTitle": "Smoke Detector Installation and Removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Smoke detector (per piece)",
+    "minutes": 15.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "twin of 222-41",
+  "twinOf": "222-41",
+  "notes": "Catalog block 222-76 · 222-41 · 222-32 · 222-59 · 222-62 (Small Installs); handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "210-42",
+  "name": "Exterior Window track detailing",
+  "catalogTitle": "Exterior Window track detailing",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per track",
+  "options": [
+   {
+    "key": "C",
+    "label": "Track detailing (per track)",
+    "minutes": 15.0,
+    "per": "per track"
+   }
+  ],
+  "source": "twin of 222-42",
+  "twinOf": "222-42",
+  "notes": "Catalog block 222-74 · 222-72 · 222-42"
+ },
+ {
+  "sku": "210-43",
+  "name": "Internet Anthena or Plate Removing",
+  "catalogTitle": "Internet Antenna or Plate Removing",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Dish or antenna",
+    "minutes": 60.0
+   }
+  ],
+  "source": "twin of 222-43",
+  "twinOf": "222-43",
+  "notes": "Catalog block 222-69 · 222-43 · 222-70; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "210-44",
+  "name": "Ceiling Repair",
+  "catalogTitle": "Ceiling Repair",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per job, by level",
+  "options": [
+   {
+    "key": "A",
+    "label": "Medium - cracks or patches up to 1 sq ft",
+    "minutes": 150.0
+   },
+   {
+    "key": "B",
+    "label": "Large - patches over 1 sq ft or water-damaged area",
+    "minutes": 270.0
+   },
+   {
+    "key": "C",
+    "label": "Section replacement (per hour)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "twin of 222-44",
+  "twinOf": "222-44"
+ },
+ {
+  "sku": "210-45",
+  "name": "Curtain Rods and Hooks Removal & Install",
+  "catalogTitle": "Curtain Rods and Hooks Removal & Install",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per window",
+  "options": [
+   {
+    "key": "C",
+    "label": "Curtain rod and hooks (per window)",
+    "minutes": 20.0,
+    "per": "per window"
+   }
+  ],
+  "source": "twin of 222-45",
+  "twinOf": "222-45",
+  "notes": "Catalog block 222-12 · 222-75 · 222-55 · 222-45"
+ },
+ {
+  "sku": "210-46",
+  "name": "Treat Mold",
+  "catalogTitle": "Mold Treatment",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per job, by scope",
+  "options": [
+   {
+    "key": "A",
+    "label": "Spot (up to 10 sq ft)",
+    "minutes": 60.0
+   },
+   {
+    "key": "B",
+    "label": "Larger area (per hour)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "twin of 222-46",
+  "twinOf": "222-46"
+ },
+ {
+  "sku": "210-48",
+  "name": "Touch-Up Paint",
+  "catalogTitle": "Touch-Up Paint",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per job, by scope option",
+  "options": [
+   {
+    "key": "A",
+    "label": "Single wall or spots",
+    "minutes": 47.0
+   },
+   {
+    "key": "B",
+    "label": "One room",
+    "minutes": 75.0
+   },
+   {
+    "key": "C",
+    "label": "Kitchen or bathroom ceiling",
+    "minutes": 39.0
+   },
+   {
+    "key": "D · A",
+    "label": "Full unit touch-up (all rooms) · Up to 600 sq ft (studio) (50% of 222-10, 1 coat)",
+    "minutes": 159.0
+   },
+   {
+    "key": "D · B",
+    "label": "Full unit touch-up (all rooms) · 601-800 sq ft (1 bed / 1 bath) (50% of 222-10, 1 coat)",
+    "minutes": 198.0
+   },
+   {
+    "key": "D · C",
+    "label": "Full unit touch-up (all rooms) · 801-1,000 sq ft (2 bed / 1 bath) (50% of 222-10, 1 coat)",
+    "minutes": 240.0
+   },
+   {
+    "key": "D · D",
+    "label": "Full unit touch-up (all rooms) · 1,001-1,250 sq ft (2 bed / 2 bath) (50% of 222-10, 1 coat)",
+    "minutes": 309.0
+   },
+   {
+    "key": "D · E",
+    "label": "Full unit touch-up (all rooms) · 1,251 sq ft and up (3 bed / 2 bath) (50% of 222-10, 1 coat)",
+    "minutes": 360.0
+   }
+  ],
+  "source": "twin of 222-48",
+  "twinOf": "222-48",
+  "notes": "Option D is written as '50% of 222-10, 1 coat'; minutes here = half of 222-10 1-coat by unit size"
+ },
+ {
+  "sku": "210-49",
+  "name": "Baseboard Painting",
+  "catalogTitle": "Baseboard Painting",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per unit, by size option A-E",
+  "options": [
+   {
+    "key": "A",
+    "label": "Up to 600 sq ft (studio)",
+    "minutes": 96.0
+   },
+   {
+    "key": "B",
+    "label": "601-800 sq ft (1 bed / 1 bath)",
+    "minutes": 120.0
+   },
+   {
+    "key": "C",
+    "label": "801-1,000 sq ft (2 bed / 1 bath)",
+    "minutes": 150.0
+   },
+   {
+    "key": "D",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
+    "minutes": 180.0
+   },
+   {
+    "key": "E",
+    "label": "1,251 sq ft and up (3 bed / 2 bath)",
+    "minutes": 210.0
+   }
+  ],
+  "source": "twin of 222-49",
+  "twinOf": "222-49",
+  "notes": "Lofts or ceilings over 9 ft: add 30%"
+ },
+ {
+  "sku": "210-50",
+  "name": "Deck Repair",
+  "catalogTitle": "Deck Repair",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per hour",
+  "options": [
+   {
+    "key": "B",
+    "label": "Board or railing repair (per hour)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "twin of 222-50",
+  "twinOf": "222-50",
+  "notes": "Catalog block 333-22 · 222-50"
+ },
+ {
+  "sku": "210-51",
+  "name": "Bathtub Repair",
+  "catalogTitle": "Bathtub Repair",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per tub, by scope",
+  "options": [
+   {
+    "key": "A",
+    "label": "Chips or small cracks",
+    "minutes": 90.0
+   },
+   {
+    "key": "B",
+    "label": "Large crack or hole",
+    "minutes": 180.0
+   }
+  ],
+  "source": "twin of 222-51",
+  "twinOf": "222-51"
+ },
+ {
+  "sku": "210-52",
+  "name": "Prime Patches",
+  "catalogTitle": "Prime Patches",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per job, by number of patches",
+  "options": [
+   {
+    "key": "A",
+    "label": "Up to 25 patches",
+    "minutes": 30.0
+   },
+   {
+    "key": "B",
+    "label": "26 or more patches",
+    "minutes": 55.0
+   }
+  ],
+  "source": "twin of 222-52",
+  "twinOf": "222-52"
+ },
+ {
+  "sku": "210-53",
+  "name": "Toilet - Remove and install wax ring",
+  "catalogTitle": "Toilet - Remove and install wax ring",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "C",
+    "label": "Toilet - remove and reinstall with new wax ring",
+    "minutes": 60.0
+   }
+  ],
+  "source": "twin of 222-53",
+  "twinOf": "222-53",
+  "notes": "Catalog block 222-22 · 222-23 · 222-53 · 222-63 (Plumbing Fixtures)"
+ },
+ {
+  "sku": "210-54",
+  "name": "Misc Repairs & Requests",
+  "catalogTitle": "Misc Repairs & Requests (Handyman - Hourly)",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per hour (1.5 h minimum per visit)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Handyman labor (per hour, 1.5 hour minimum per visit)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "twin of 222-54",
+  "twinOf": "222-54",
+  "notes": "Catalog block 222-54 · 222-73 · 222-65 · 222-71 · 222-64 (Handyman - Hourly): timed by the hour, minimum 1.5 h (90 min) per visit"
+ },
+ {
+  "sku": "210-55",
+  "name": "Blinds Bracket Removal",
+  "catalogTitle": "Blinds Bracket Removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per window",
+  "options": [
+   {
+    "key": "B",
+    "label": "Bracket removal (per window)",
+    "minutes": 10.0,
+    "per": "per window"
+   }
+  ],
+  "source": "twin of 222-55",
+  "twinOf": "222-55",
+  "notes": "Catalog block 222-12 · 222-75 · 222-55 · 222-45"
+ },
+ {
+  "sku": "210-56",
+  "name": "Bathtub Resurfacing",
+  "catalogTitle": "Bathtub Resurfacing",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per tub",
+  "options": [
+   {
+    "key": "A",
+    "label": "Standard tub",
+    "minutes": 270.0
+   },
+   {
+    "key": "B",
+    "label": "Tub and surround",
+    "minutes": 360.0
+   }
+  ],
+  "source": "twin of 222-56",
+  "twinOf": "222-56"
+ },
+ {
+  "sku": "210-58",
+  "name": "Cabinet Repair",
+  "catalogTitle": "Cabinet Repair",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Hinge, door or drawer repair (per piece)",
+    "minutes": 30.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "twin of 222-58",
+  "twinOf": "222-58",
+  "notes": "Catalog block 222-58 · 222-80 · 222-81"
+ },
+ {
+  "sku": "210-60",
+  "name": "Dishwasher Replacement",
+  "catalogTitle": "Dishwasher Replacement",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Dishwasher replacement",
+    "minutes": 105.0
+   }
+  ],
+  "source": "twin of 222-60",
+  "twinOf": "222-60",
+  "notes": "Catalog block 222-36 · 222-60"
+ },
+ {
+  "sku": "210-61",
+  "name": "Install New Floor",
+  "catalogTitle": "Install New Floor",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per 100 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "New vinyl / laminate plank (per 100 sq ft)",
+    "minutes": 150.0,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "twin of 222-61",
+  "twinOf": "222-61",
+  "notes": "Catalog block 222-26 · 222-61 · 222-67"
+ },
+ {
+  "sku": "210-62",
+  "name": "A/C Filter",
+  "catalogTitle": "A/C Filter",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per filter",
+  "options": [
+   {
+    "key": "D",
+    "label": "A/C filter (per filter)",
+    "minutes": 10.0,
+    "per": "per filter"
+   }
+  ],
+  "source": "twin of 222-62",
+  "twinOf": "222-62",
+  "notes": "Catalog block 222-76 · 222-41 · 222-32 · 222-59 · 222-62 (Small Installs); handyman minimum 1.5 h per visit; options E-G (thermostat, door stopper, dryer vent) are in the same block with no SKU of their own"
+ },
+ {
+  "sku": "210-63",
+  "name": "Drain",
+  "catalogTitle": "Drain",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "D",
+    "label": "Drain clearing (sink, tub)",
+    "minutes": 60.0
+   },
+   {
+    "key": "E",
+    "label": "Toilet clog (snake)",
+    "minutes": 45.0
+   },
+   {
+    "key": "F",
+    "label": "Tub surround replacement (kit)",
+    "minutes": 240.0
+   }
+  ],
+  "source": "twin of 222-63",
+  "twinOf": "222-63",
+  "notes": "Catalog block 222-22 · 222-23 · 222-53 · 222-63 (Plumbing Fixtures); options D-F (drain clearing, toilet clog, tub surround kit)"
+ },
+ {
+  "sku": "210-64",
+  "name": "A/C",
+  "catalogTitle": "A/C",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per hour (1.5 h minimum per visit)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Handyman labor (per hour, 1.5 hour minimum per visit)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "twin of 222-64",
+  "twinOf": "222-64",
+  "notes": "Catalog block 222-54 · 222-73 · 222-65 · 222-71 · 222-64 (Handyman - Hourly): timed by the hour, minimum 1.5 h (90 min) per visit"
+ },
+ {
+  "sku": "210-65",
+  "name": "Inspect Roofing",
+  "catalogTitle": "Inspect Roofing",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per hour (1.5 h minimum per visit)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Handyman labor (per hour, 1.5 hour minimum per visit)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "twin of 222-65",
+  "twinOf": "222-65",
+  "notes": "Catalog block 222-54 · 222-73 · 222-65 · 222-71 · 222-64 (Handyman - Hourly): timed by the hour, minimum 1.5 h (90 min) per visit"
+ },
+ {
+  "sku": "210-66",
+  "name": "Trim Repair",
+  "catalogTitle": "Trim Repair",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Trim repair (per piece)",
+    "minutes": 30.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "twin of 222-66",
+  "twinOf": "222-66",
+  "notes": "Catalog block 222-66 · 222-93 · 222-94"
+ },
+ {
+  "sku": "210-67",
+  "name": "New Vinyl Floor",
+  "catalogTitle": "New Vinyl Floor",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per 100 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "New vinyl / laminate plank (per 100 sq ft)",
+    "minutes": 150.0,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "twin of 222-67",
+  "twinOf": "222-67",
+  "notes": "Catalog block 222-26 · 222-61 · 222-67"
+ },
+ {
+  "sku": "210-68",
+  "name": "Door Knob",
+  "catalogTitle": "Door Knob",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per knob / lock",
+  "options": [
+   {
+    "key": "A",
+    "label": "Door knob or lock",
+    "minutes": 30.0
+   }
+  ],
+  "source": "twin of 222-68",
+  "twinOf": "222-68",
+  "notes": "Catalog block 222-18 · 222-68"
+ },
+ {
+  "sku": "210-69",
+  "name": "Remove Cable & Wires",
+  "catalogTitle": "Remove Cable & Wires",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per room",
+  "options": [
+   {
+    "key": "A",
+    "label": "Cable and wires (per room)",
+    "minutes": 30.0,
+    "per": "per room"
+   }
+  ],
+  "source": "twin of 222-69",
+  "twinOf": "222-69",
+  "notes": "Catalog block 222-69 · 222-43 · 222-70; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "210-70",
+  "name": "Dish Antenna Removal",
+  "catalogTitle": "Dish Antenna Removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Dish or antenna",
+    "minutes": 60.0
+   }
+  ],
+  "source": "twin of 222-70",
+  "twinOf": "222-70",
+  "notes": "Catalog block 222-69 · 222-43 · 222-70; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "210-71",
+  "name": "Skirting",
+  "catalogTitle": "Skirting",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per hour (1.5 h minimum per visit)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Handyman labor (per hour, 1.5 hour minimum per visit)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "twin of 222-71",
+  "twinOf": "222-71",
+  "notes": "Catalog block 222-54 · 222-73 · 222-65 · 222-71 · 222-64 (Handyman - Hourly): timed by the hour, minimum 1.5 h (90 min) per visit"
+ },
+ {
+  "sku": "210-72",
+  "name": "Window Screen",
+  "catalogTitle": "Window Screen",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per screen",
+  "options": [
+   {
+    "key": "B",
+    "label": "Window screen (per screen)",
+    "minutes": 30.0,
+    "per": "per screen"
+   }
+  ],
+  "source": "twin of 222-72",
+  "twinOf": "222-72",
+  "notes": "Catalog block 222-74 · 222-72 · 222-42"
+ },
+ {
+  "sku": "210-73",
+  "name": "Garage Repair",
+  "catalogTitle": "Garage Repair",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per hour (1.5 h minimum per visit)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Handyman labor (per hour, 1.5 hour minimum per visit)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "twin of 222-73",
+  "twinOf": "222-73",
+  "notes": "Catalog block 222-54 · 222-73 · 222-65 · 222-71 · 222-64 (Handyman - Hourly): timed by the hour, minimum 1.5 h (90 min) per visit"
+ },
+ {
+  "sku": "210-74",
+  "name": "Window Repair",
+  "catalogTitle": "Windows repair",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per window",
+  "options": [
+   {
+    "key": "A",
+    "label": "Window repair - balance, lock, latch (per window)",
+    "minutes": 60.0,
+    "per": "per window"
+   }
+  ],
+  "source": "twin of 222-74",
+  "twinOf": "222-74",
+  "notes": "Catalog block 222-74 · 222-72 · 222-42"
+ },
+ {
+  "sku": "210-75",
+  "name": "New Blinds Install & Removal",
+  "catalogTitle": "New Blinds Install & Removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per window",
+  "options": [
+   {
+    "key": "A",
+    "label": "Blind installation or replacement (per window)",
+    "minutes": 20.0,
+    "per": "per window"
+   }
+  ],
+  "source": "twin of 222-75",
+  "twinOf": "222-75",
+  "notes": "Catalog block 222-12 · 222-75 · 222-55 · 222-45"
+ },
+ {
+  "sku": "210-76",
+  "name": "Switches, Outlets & Covers",
+  "catalogTitle": "Switches, Outlets & Covers",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Switch, outlet or cover (per piece)",
+    "minutes": 15.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "twin of 222-76",
+  "twinOf": "222-76",
+  "notes": "Catalog block 222-76 · 222-41 · 222-32 · 222-59 · 222-62 (Small Installs); handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "210-77",
+  "name": "Baseboard removal",
+  "catalogTitle": "Baseboard removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per 50 linear ft",
+  "options": [
+   {
+    "key": "B",
+    "label": "Removal (per 50 linear ft)",
+    "minutes": 40.0,
+    "per": "per 50 linear ft"
+   }
+  ],
+  "source": "twin of 222-77",
+  "twinOf": "222-77",
+  "notes": "Catalog block 222-78 · 222-77 · 222-79 · 222-15"
+ },
+ {
+  "sku": "210-78",
+  "name": "Baseboard installation",
+  "catalogTitle": "Baseboard installation",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per 25 linear ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Installation (per 25 linear ft)",
+    "minutes": 65.0,
+    "per": "per 25 linear ft"
+   }
+  ],
+  "source": "twin of 222-78",
+  "twinOf": "222-78",
+  "notes": "Catalog block 222-78 · 222-77 · 222-79 · 222-15"
+ },
+ {
+  "sku": "210-79",
+  "name": "Baseboard repair",
+  "catalogTitle": "Baseboard repair",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "C",
+    "label": "Repair (per piece)",
+    "minutes": 30.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "twin of 222-79",
+  "twinOf": "222-79",
+  "notes": "Catalog block 222-78 · 222-77 · 222-79 · 222-15"
+ },
+ {
+  "sku": "210-80",
+  "name": "Kitchen cabinet removal",
+  "catalogTitle": "Kitchen cabinet removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per kitchen",
+  "options": [
+   {
+    "key": "B",
+    "label": "Kitchen cabinet removal",
+    "minutes": 180.0
+   }
+  ],
+  "source": "twin of 222-80",
+  "twinOf": "222-80",
+  "notes": "Catalog block 222-58 · 222-80 · 222-81"
+ },
+ {
+  "sku": "210-81",
+  "name": "Bathroom cabinet removal",
+  "catalogTitle": "Bathroom cabinet removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per vanity",
+  "options": [
+   {
+    "key": "C",
+    "label": "Bathroom cabinet removal",
+    "minutes": 45.0
+   }
+  ],
+  "source": "twin of 222-81",
+  "twinOf": "222-81",
+  "notes": "Catalog block 222-58 · 222-80 · 222-81"
+ },
+ {
+  "sku": "210-82",
+  "name": "Handyman - Ceiling fan removal",
+  "catalogTitle": "Handyman - Ceiling fan removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "C",
+    "label": "Ceiling fan removal",
+    "minutes": 30.0
+   }
+  ],
+  "source": "twin of 222-82",
+  "twinOf": "222-82",
+  "notes": "Catalog block 222-20 · 222-83 · 222-82 · 222-84; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "210-83",
+  "name": "Handyman - Ceiling fan installation",
+  "catalogTitle": "Handyman - Ceiling fan installation",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Ceiling fan installation",
+    "minutes": 90.0
+   }
+  ],
+  "source": "twin of 222-83",
+  "twinOf": "222-83",
+  "notes": "Catalog block 222-20 · 222-83 · 222-82 · 222-84; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "210-84",
+  "name": "Handyman - Light fixture installation",
+  "catalogTitle": "Handyman - Light fixture installation",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Light fixture installation",
+    "minutes": 60.0
+   }
+  ],
+  "source": "twin of 222-84",
+  "twinOf": "222-84",
+  "notes": "Catalog block 222-20 · 222-83 · 222-82 · 222-84; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "210-85",
+  "name": "Handyman - Appliance removal",
+  "catalogTitle": "Handyman - Appliance removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per appliance",
+  "options": [
+   {
+    "key": "A",
+    "label": "Appliance removal (per appliance)",
+    "minutes": 60.0,
+    "per": "per appliance"
+   }
+  ],
+  "source": "twin of 222-85",
+  "twinOf": "222-85",
+  "notes": "Catalog block 222-85 · 222-92; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "210-86",
+  "name": "Door removal",
+  "catalogTitle": "Door removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per door",
+  "options": [
+   {
+    "key": "C",
+    "label": "Door removal",
+    "minutes": 30.0
+   }
+  ],
+  "source": "twin of 222-86",
+  "twinOf": "222-86",
+  "notes": "Catalog block 222-17 · 222-86 · 222-87 · 222-40"
+ },
+ {
+  "sku": "210-87",
+  "name": "Door frame removal",
+  "catalogTitle": "Door frame removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per frame",
+  "options": [
+   {
+    "key": "D",
+    "label": "Door frame removal",
+    "minutes": 45.0
+   }
+  ],
+  "source": "twin of 222-87",
+  "twinOf": "222-87",
+  "notes": "Catalog block 222-17 · 222-86 · 222-87 · 222-40"
+ },
+ {
+  "sku": "210-88",
+  "name": "Floor removal",
+  "catalogTitle": "Floor removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per 100 sq ft",
+  "options": [
+   {
+    "key": "E",
+    "label": "Hard floor removal (per 100 sq ft)",
+    "minutes": 36.0,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "twin of 222-88",
+  "twinOf": "222-88",
+  "notes": "Catalog block 222-16 · 222-88 · 222-89"
+ },
+ {
+  "sku": "210-89",
+  "name": "Carpet removal",
+  "catalogTitle": "Carpet removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per 100 sq ft",
+  "options": [
+   {
+    "key": "D",
+    "label": "Carpet removal - carpet, pad, tack strip (per 100 sq ft)",
+    "minutes": 20.0,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "twin of 222-89",
+  "twinOf": "222-89",
+  "notes": "Catalog block 222-16 · 222-88 · 222-89"
+ },
+ {
+  "sku": "210-90",
+  "name": "Ceiling texture removal",
+  "catalogTitle": "Ceiling texture removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per unit, by size option A-E",
+  "options": [
+   {
+    "key": "A",
+    "label": "Up to 600 sq ft (studio)",
+    "minutes": 675.0
+   },
+   {
+    "key": "B",
+    "label": "601-800 sq ft (1 bed / 1 bath)",
+    "minutes": 940.0
+   },
+   {
+    "key": "C",
+    "label": "801-1,000 sq ft (2 bed / 1 bath)",
+    "minutes": 1205.0
+   },
+   {
+    "key": "D",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
+    "minutes": 1500.0
+   },
+   {
+    "key": "E",
+    "label": "1,251 sq ft and up (3 bed / 2 bath)",
+    "minutes": 1855.0
+   }
+  ],
+  "source": "twin of 222-90",
+  "twinOf": "222-90",
+  "notes": "Catalog block 222-90 · 222-91 (Removal column); lofts/ceilings over 9 ft: add 30%"
+ },
+ {
+  "sku": "210-91",
+  "name": "Ceiling texture application",
+  "catalogTitle": "Ceiling texture application",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per unit, by size option A-E",
+  "options": [
+   {
+    "key": "A",
+    "label": "Up to 600 sq ft (studio)",
+    "minutes": 210.0
+   },
+   {
+    "key": "B",
+    "label": "601-800 sq ft (1 bed / 1 bath)",
+    "minutes": 270.0
+   },
+   {
+    "key": "C",
+    "label": "801-1,000 sq ft (2 bed / 1 bath)",
+    "minutes": 330.0
+   },
+   {
+    "key": "D",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
+    "minutes": 420.0
+   },
+   {
+    "key": "E",
+    "label": "1,251 sq ft and up (3 bed / 2 bath)",
+    "minutes": 480.0
+   }
+  ],
+  "source": "twin of 222-91",
+  "twinOf": "222-91",
+  "notes": "Catalog block 222-90 · 222-91 (Application column); lofts/ceilings over 9 ft: add 30%"
+ },
+ {
+  "sku": "210-92",
+  "name": "Trash-out",
+  "catalogTitle": "Trash-out",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per unit, by scope",
+  "options": [
+   {
+    "key": "B",
+    "label": "Trash-out - light (few items)",
+    "minutes": 120.0
+   },
+   {
+    "key": "C",
+    "label": "Trash-out - full unit",
+    "minutes": 240.0
+   }
+  ],
+  "source": "twin of 222-92",
+  "twinOf": "222-92",
+  "notes": "Catalog block 222-85 · 222-92; handyman minimum 1.5 h per visit"
+ },
+ {
+  "sku": "210-93",
+  "name": "Trim removal",
+  "catalogTitle": "Trim removal",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Trim removal (per piece)",
+    "minutes": 15.0,
+    "per": "per piece"
+   }
+  ],
+  "source": "twin of 222-93",
+  "twinOf": "222-93",
+  "notes": "Catalog block 222-66 · 222-93 · 222-94"
+ },
+ {
+  "sku": "210-94",
+  "name": "Crown molding",
+  "catalogTitle": "Crown molding",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per 12 linear ft",
+  "options": [
+   {
+    "key": "C",
+    "label": "Crown molding (per 12 linear ft)",
+    "minutes": 60.0,
+    "per": "per 12 linear ft"
+   }
+  ],
+  "source": "twin of 222-94",
+  "twinOf": "222-94",
+  "notes": "Catalog block 222-66 · 222-93 · 222-94"
+ },
+ {
+  "sku": "210-95",
+  "name": "Door trim painting",
+  "catalogTitle": "Door trim painting",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "A",
+    "label": "Door frame / casing",
+    "minutes": 24.0
+   }
+  ],
+  "source": "twin of 222-95",
+  "twinOf": "222-95",
+  "notes": "Catalog block 222-95 · 222-96 · 222-39"
+ },
+ {
+  "sku": "210-96",
+  "name": "Window trim painting",
+  "catalogTitle": "Window trim painting",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per piece",
+  "options": [
+   {
+    "key": "B",
+    "label": "Window frame",
+    "minutes": 30.0
+   }
+  ],
+  "source": "twin of 222-96",
+  "twinOf": "222-96",
+  "notes": "Catalog block 222-95 · 222-96 · 222-39"
+ },
+ {
+  "sku": "210-97",
+  "name": "Kitchen cabinet painting",
+  "catalogTitle": "Kitchen cabinet painting",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per kitchen / vanity, by scope",
+  "options": [
+   {
+    "key": "A",
+    "label": "Kitchen - outside",
+    "minutes": 375.0
+   },
+   {
+    "key": "B",
+    "label": "Kitchen - inside (added to outside)",
+    "minutes": 180.0
+   }
+  ],
+  "source": "twin of 222-97",
+  "twinOf": "222-97",
+  "notes": "Catalog block 222-97 · 222-98 · 222-28"
+ },
+ {
+  "sku": "210-98",
+  "name": "Bathroom cabinet painting",
+  "catalogTitle": "Bathroom cabinet painting",
+  "division": "Renovations",
+  "market": "Residential",
+  "unit": "per vanity",
+  "options": [
+   {
+    "key": "C",
+    "label": "Bathroom vanity - outside",
+    "minutes": 83.0
+   }
+  ],
+  "source": "twin of 222-98",
+  "twinOf": "222-98",
+  "notes": "Catalog block 222-97 · 222-98 · 222-28"
+ },
+ {
+  "sku": "111-76",
+  "name": "Blinds dusted (unit add-on)",
+  "catalogTitle": "Blinds dusted (unit add-on)",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per unit, by size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 5.2,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 8.4,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 13.1,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 7.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 11.2,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 17.5,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 10.5,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 16.8,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 26.2,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 12.2,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 19.6,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 30.6,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 15.8,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 25.2,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 39.4,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 1.3,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 2.0,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 3.2,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "CFO 15/11/2026 14:15: unit add-on, minutes from the item times of the unit-cleaning review",
+  "notes": "Add-on to Move-In / Move-Out: blinds dusted, per unit by size and level. Washing blinds slat by slat is a separate extra.",
+  "addOn": true
+ },
+ {
+  "sku": "110-28",
+  "name": "Blinds dusted (unit add-on)",
+  "catalogTitle": "Blinds dusted (unit add-on)",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per unit, by size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 5.2,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 8.4,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 13.1,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 7.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 11.2,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 17.5,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 10.5,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 16.8,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 26.2,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 12.2,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 19.6,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 30.6,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 15.8,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 25.2,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 39.4,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 1.3,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 2.0,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 3.2,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "CFO 15/11/2026 14:15: unit add-on, minutes from the item times of the unit-cleaning review",
+  "notes": "Add-on to Move-In / Move-Out: blinds dusted, per unit by size and level. Washing blinds slat by slat is a separate extra.",
+  "addOn": true,
+  "twinOf": "111-76"
+ },
+ {
+  "sku": "111-79",
+  "name": "Window tracks vacuumed and wiped (unit add-on)",
+  "catalogTitle": "Window tracks vacuumed and wiped (unit add-on)",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per unit, by size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 5.2,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 8.4,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 13.1,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 7.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 11.2,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 17.5,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 10.5,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 16.8,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 26.2,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 12.2,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 19.6,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 30.6,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 15.8,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 25.2,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 39.4,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 1.3,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 2.0,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 3.2,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "CFO 15/11/2026 14:15: unit add-on, minutes from the item times of the unit-cleaning review",
+  "notes": "Add-on to Move-In / Move-Out: window tracks vacuumed and wiped, per unit by size and level. Scrubbing tracks in detail is a separate extra.",
+  "addOn": true
+ },
+ {
+  "sku": "110-17",
+  "name": "Window tracks vacuumed and wiped (unit add-on)",
+  "catalogTitle": "Window tracks vacuumed and wiped (unit add-on)",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per unit, by size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 5.2,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 8.4,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 13.1,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 7.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 11.2,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 17.5,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 10.5,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 16.8,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 26.2,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 12.2,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 19.6,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 30.6,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 15.8,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 25.2,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 39.4,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 1.3,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 2.0,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 3.2,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "CFO 15/11/2026 14:15: unit add-on, minutes from the item times of the unit-cleaning review",
+  "notes": "Add-on to Move-In / Move-Out: window tracks vacuumed and wiped, per unit by size and level. Scrubbing tracks in detail is a separate extra.",
+  "addOn": true,
+  "twinOf": "111-79"
+ },
+ {
+  "sku": "111-36",
+  "name": "Inside window glass (unit add-on)",
+  "catalogTitle": "Inside window glass (unit add-on)",
+  "division": "Janitorial",
+  "market": "Commercial",
+  "unit": "per unit, by size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 7.5,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 12.0,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 18.8,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 10.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 16.0,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 25.0,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 15.0,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 24.0,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 37.5,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 17.5,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 28.0,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 43.8,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 22.5,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 36.0,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 56.2,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 1.8,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 2.9,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 4.5,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "CFO 15/11/2026 14:15: unit add-on, minutes from the item times of the unit-cleaning review",
+  "notes": "Add-on to Move-In / Move-Out: inside window glass of the unit, per unit by size and level. Sills are in the base cleaning; outside glass is quoted separately.",
+  "addOn": true
+ },
+ {
+  "sku": "110-51",
+  "name": "Inside window glass (unit add-on)",
+  "catalogTitle": "Inside window glass (unit add-on)",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per unit, by size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 7.5,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 12.0,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 18.8,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 10.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 16.0,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 25.0,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 15.0,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 24.0,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 37.5,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 17.5,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 28.0,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 43.8,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 22.5,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 36.0,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 56.2,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 1.8,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 2.9,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 4.5,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "CFO 15/11/2026 14:15: unit add-on, minutes from the item times of the unit-cleaning review",
+  "notes": "Add-on to Move-In / Move-Out: inside window glass of the unit, per unit by size and level. Sills are in the base cleaning; outside glass is quoted separately.",
+  "addOn": true,
+  "twinOf": "111-36"
+ }
+]
