@@ -549,31 +549,31 @@
    {
     "key": "A",
     "label": "Up to 600 sq ft (studio)",
-    "minutes": 675.0
+    "minutes": 1440.0
    },
    {
     "key": "B",
     "label": "601-800 sq ft (1 bed / 1 bath)",
-    "minutes": 940.0
+    "minutes": 1920.0
    },
    {
     "key": "C",
     "label": "801-1,000 sq ft (2 bed / 1 bath)",
-    "minutes": 1205.0
+    "minutes": 2400.0
    },
    {
     "key": "D",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
-    "minutes": 1500.0
+    "minutes": 3000.0
    },
    {
     "key": "E",
     "label": "1,251 sq ft and up (3 bed / 2 bath)",
-    "minutes": 1855.0
+    "minutes": 3000.0
    }
   ],
   "source": "222 catalog p.12",
-  "notes": "Catalog block 222-90 · 222-91 (Removal column); lofts/ceilings over 9 ft: add 30%"
+  "notes": "Catalog block 222-90 · 222-91 (Removal column); lofts/ceilings over 9 ft: add 30% || Minutes = 2.4 min per sq ft at the band top (A 600, B 800, C 1,000, D 1,250; E = 1,250, above it E x sq ft / 1,250). Industry: 20 h for 500 sq ft (HomeGuide popcorn ceiling removal cost; ContractorPlus Des Moines remove popcorn ceiling, 20.0 h minimum job 500 sq ft). CFO 16/11: times follow the final prices; old catalog minutes were 675/940/1,205/1,500/1,855"
  },
  {
   "sku": "222-91",
@@ -586,31 +586,31 @@
    {
     "key": "A",
     "label": "Up to 600 sq ft (studio)",
-    "minutes": 210.0
+    "minutes": 720.0
    },
    {
     "key": "B",
     "label": "601-800 sq ft (1 bed / 1 bath)",
-    "minutes": 270.0
+    "minutes": 960.0
    },
    {
     "key": "C",
     "label": "801-1,000 sq ft (2 bed / 1 bath)",
-    "minutes": 330.0
+    "minutes": 1200.0
    },
    {
     "key": "D",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
-    "minutes": 420.0
+    "minutes": 1500.0
    },
    {
     "key": "E",
     "label": "1,251 sq ft and up (3 bed / 2 bath)",
-    "minutes": 480.0
+    "minutes": 1500.0
    }
   ],
   "source": "222 catalog p.12",
-  "notes": "Catalog block 222-90 · 222-91 (Application column); lofts/ceilings over 9 ft: add 30%"
+  "notes": "Catalog block 222-90 · 222-91 (Application column); lofts/ceilings over 9 ft: add 30% || Minutes = 1.2 min per sq ft at the band top (A 600, B 800, C 1,000, D 1,250; E = 1,250, above it E x sq ft / 1,250). Industry: 10 h for 500 sq ft (ContractorPlus Des Moines texture ceiling, 10.0 h minimum job 500 sq ft; Dallas same 10.0 h). CFO 16/11: times follow the final prices; old catalog minutes were 210/270/330/420/480"
  },
  {
   "sku": "222-46",
@@ -1134,12 +1134,12 @@
    {
     "key": "E",
     "label": "Hard floor removal (per 100 sq ft)",
-    "minutes": 36.0,
+    "minutes": 120.0,
     "per": "per 100 sq ft"
    }
   ],
   "source": "222 catalog p.19",
-  "notes": "Catalog block 222-16 · 222-88 · 222-89"
+  "notes": "Catalog block 222-16 · 222-88 · 222-89 || Hard floor removal E = 120 min per 100 sq ft: HomeAdvisor remove a tile floor, 1-2 h per 100 sq ft with heavy machinery, 4-6 h with power tools (engineerfix: 4-6 h power, 8-12 h by hand). CFO 16/11: time follows the final price; old catalog minutes were 36"
  },
  {
   "sku": "222-89",
@@ -6301,13 +6301,13 @@
    {
     "key": "E",
     "label": "Hard floor removal (per 100 sq ft)",
-    "minutes": 36.0,
+    "minutes": 120.0,
     "per": "per 100 sq ft"
    }
   ],
   "source": "twin of 222-88",
   "twinOf": "222-88",
-  "notes": "Catalog block 222-16 · 222-88 · 222-89"
+  "notes": "Catalog block 222-16 · 222-88 · 222-89 || Hard floor removal E = 120 min per 100 sq ft: HomeAdvisor remove a tile floor, 1-2 h per 100 sq ft with heavy machinery, 4-6 h with power tools (engineerfix: 4-6 h power, 8-12 h by hand). CFO 16/11: time follows the final price; old catalog minutes were 36"
  },
  {
   "sku": "210-89",
@@ -6339,32 +6339,32 @@
    {
     "key": "A",
     "label": "Up to 600 sq ft (studio)",
-    "minutes": 675.0
+    "minutes": 1440.0
    },
    {
     "key": "B",
     "label": "601-800 sq ft (1 bed / 1 bath)",
-    "minutes": 940.0
+    "minutes": 1920.0
    },
    {
     "key": "C",
     "label": "801-1,000 sq ft (2 bed / 1 bath)",
-    "minutes": 1205.0
+    "minutes": 2400.0
    },
    {
     "key": "D",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
-    "minutes": 1500.0
+    "minutes": 3000.0
    },
    {
     "key": "E",
     "label": "1,251 sq ft and up (3 bed / 2 bath)",
-    "minutes": 1855.0
+    "minutes": 3000.0
    }
   ],
   "source": "twin of 222-90",
   "twinOf": "222-90",
-  "notes": "Catalog block 222-90 · 222-91 (Removal column); lofts/ceilings over 9 ft: add 30%"
+  "notes": "Catalog block 222-90 · 222-91 (Removal column); lofts/ceilings over 9 ft: add 30% || Minutes = 2.4 min per sq ft at the band top (A 600, B 800, C 1,000, D 1,250; E = 1,250, above it E x sq ft / 1,250). Industry: 20 h for 500 sq ft (HomeGuide popcorn ceiling removal cost; ContractorPlus Des Moines remove popcorn ceiling, 20.0 h minimum job 500 sq ft). CFO 16/11: times follow the final prices; old catalog minutes were 675/940/1,205/1,500/1,855"
  },
  {
   "sku": "210-91",
@@ -6377,32 +6377,32 @@
    {
     "key": "A",
     "label": "Up to 600 sq ft (studio)",
-    "minutes": 210.0
+    "minutes": 720.0
    },
    {
     "key": "B",
     "label": "601-800 sq ft (1 bed / 1 bath)",
-    "minutes": 270.0
+    "minutes": 960.0
    },
    {
     "key": "C",
     "label": "801-1,000 sq ft (2 bed / 1 bath)",
-    "minutes": 330.0
+    "minutes": 1200.0
    },
    {
     "key": "D",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
-    "minutes": 420.0
+    "minutes": 1500.0
    },
    {
     "key": "E",
     "label": "1,251 sq ft and up (3 bed / 2 bath)",
-    "minutes": 480.0
+    "minutes": 1500.0
    }
   ],
   "source": "twin of 222-91",
   "twinOf": "222-91",
-  "notes": "Catalog block 222-90 · 222-91 (Application column); lofts/ceilings over 9 ft: add 30%"
+  "notes": "Catalog block 222-90 · 222-91 (Application column); lofts/ceilings over 9 ft: add 30% || Minutes = 1.2 min per sq ft at the band top (A 600, B 800, C 1,000, D 1,250; E = 1,250, above it E x sq ft / 1,250). Industry: 10 h for 500 sq ft (ContractorPlus Des Moines texture ceiling, 10.0 h minimum job 500 sq ft; Dallas same 10.0 h). CFO 16/11: times follow the final prices; old catalog minutes were 210/270/330/420/480"
  },
  {
   "sku": "210-92",
