@@ -340,31 +340,31 @@
    {
     "key": "A",
     "label": "Up to 600 sq ft (studio)",
-    "minutes": 96.0
+    "minutes": 160.0
    },
    {
     "key": "B",
     "label": "601-800 sq ft (1 bed / 1 bath)",
-    "minutes": 120.0
+    "minutes": 200.0
    },
    {
     "key": "C",
     "label": "801-1,000 sq ft (2 bed / 1 bath)",
-    "minutes": 150.0
+    "minutes": 250.0
    },
    {
     "key": "D",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
-    "minutes": 180.0
+    "minutes": 300.0
    },
    {
     "key": "E",
     "label": "1,251 sq ft and up (3 bed / 2 bath)",
-    "minutes": 210.0
+    "minutes": 350.0
    }
   ],
   "source": "222 catalog p.9",
-  "notes": "Lofts or ceilings over 9 ft: add 30%"
+  "notes": "Lofts or ceilings over 9 ft: add 30% || CFO 16/11/2026 23:26: about 60 linear ft per hour painted in place (industry 50-70 for vacant turnover; was ~100), prep inside: x5/3"
  },
  {
   "sku": "222-14",
@@ -549,31 +549,31 @@
    {
     "key": "A",
     "label": "Up to 600 sq ft (studio)",
-    "minutes": 1440.0
+    "minutes": 780.0
    },
    {
     "key": "B",
     "label": "601-800 sq ft (1 bed / 1 bath)",
-    "minutes": 1920.0
+    "minutes": 1040.0
    },
    {
     "key": "C",
     "label": "801-1,000 sq ft (2 bed / 1 bath)",
-    "minutes": 2400.0
+    "minutes": 1300.0
    },
    {
     "key": "D",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
-    "minutes": 3000.0
+    "minutes": 1625.0
    },
    {
     "key": "E",
     "label": "1,251 sq ft and up (3 bed / 2 bath)",
-    "minutes": 3000.0
+    "minutes": 1625.0
    }
   ],
   "source": "222 catalog p.12",
-  "notes": "Catalog block 222-90 · 222-91 (Removal column); lofts/ceilings over 9 ft: add 30% || Minutes = 2.4 min per sq ft at the band top (A 600, B 800, C 1,000, D 1,250; E = 1,250, above it E x sq ft / 1,250). Industry: 20 h for 500 sq ft (HomeGuide popcorn ceiling removal cost; ContractorPlus Des Moines remove popcorn ceiling, 20.0 h minimum job 500 sq ft). CFO 16/11: times follow the final prices; old catalog minutes were 675/940/1,205/1,500/1,855"
+  "notes": "Catalog block 222-90 · 222-91 (Removal column); lofts/ceilings over 9 ft: add 30% || Minutes = 1.3 min per sq ft at the band top (A 600, B 800, C 1,000, D 1,250; E = 1,250, above it E x sq ft / 1,250). Industry: 20 h for 500 sq ft (HomeGuide popcorn ceiling removal cost; ContractorPlus Des Moines remove popcorn ceiling, 20.0 h minimum job 500 sq ft). CFO 16/11: times follow the final prices; old catalog minutes were 675/940/1,205/1,500/1,855 || CFO 16/11/2026 23:26: production rate (was 2.4, worked back from a price): removal ~45 sq ft per person-hour incl. cover, scrape, skim, sand; spray application mostly masking"
  },
  {
   "sku": "222-91",
@@ -586,31 +586,31 @@
    {
     "key": "A",
     "label": "Up to 600 sq ft (studio)",
-    "minutes": 720.0
+    "minutes": 360.0
    },
    {
     "key": "B",
     "label": "601-800 sq ft (1 bed / 1 bath)",
-    "minutes": 960.0
+    "minutes": 480.0
    },
    {
     "key": "C",
     "label": "801-1,000 sq ft (2 bed / 1 bath)",
-    "minutes": 1200.0
+    "minutes": 600.0
    },
    {
     "key": "D",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
-    "minutes": 1500.0
+    "minutes": 750.0
    },
    {
     "key": "E",
     "label": "1,251 sq ft and up (3 bed / 2 bath)",
-    "minutes": 1500.0
+    "minutes": 750.0
    }
   ],
   "source": "222 catalog p.12",
-  "notes": "Catalog block 222-90 · 222-91 (Application column); lofts/ceilings over 9 ft: add 30% || Minutes = 1.2 min per sq ft at the band top (A 600, B 800, C 1,000, D 1,250; E = 1,250, above it E x sq ft / 1,250). Industry: 10 h for 500 sq ft (ContractorPlus Des Moines texture ceiling, 10.0 h minimum job 500 sq ft; Dallas same 10.0 h). CFO 16/11: times follow the final prices; old catalog minutes were 210/270/330/420/480"
+  "notes": "Catalog block 222-90 · 222-91 (Application column); lofts/ceilings over 9 ft: add 30% || Minutes = 0.6 min per sq ft at the band top (A 600, B 800, C 1,000, D 1,250; E = 1,250, above it E x sq ft / 1,250). Industry: 10 h for 500 sq ft (ContractorPlus Des Moines texture ceiling, 10.0 h minimum job 500 sq ft; Dallas same 10.0 h). CFO 16/11: times follow the final prices; old catalog minutes were 210/270/330/420/480 || CFO 16/11/2026 23:26: production rate (was 1.2, worked back from a price): spray application, time is mostly masking"
  },
  {
   "sku": "222-46",
@@ -2644,13 +2644,13 @@
    {
     "key": "C · L2",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
-    "minutes": 96.0,
+    "minutes": 114.0,
     "level": 2
    },
    {
     "key": "C · L3",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
-    "minutes": 126.0,
+    "minutes": 150.0,
     "level": 3
    },
    {
@@ -2712,7 +2712,7 @@
    }
   ],
   "source": "111 catalog p.4 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
-  "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Option F (over 1,600 sq ft) is per 100 sq ft of floor area, confirmed at walk-through"
+  "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Option F (over 1,600 sq ft) is per 100 sq ft of floor area, confirmed at walk-through || CFO 16/11/2026 23:26: size C Levels 2-3 were a copy of size B (96/126); now 114/150, scaled like Level 1 (C = B x 1.2)"
  },
  {
   "sku": "111-43",
@@ -3094,13 +3094,13 @@
    {
     "key": "Refrigerator",
     "label": "Refrigerator, inside and out",
-    "minutes": 20,
+    "minutes": 30,
     "per": "per appliance"
    },
    {
     "key": "Oven",
     "label": "Oven or range, inside",
-    "minutes": 30,
+    "minutes": 45,
     "per": "per appliance"
    },
    {
@@ -3110,7 +3110,8 @@
     "per": "per appliance"
    }
   ],
-  "source": "111 catalog p.8 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)"
+  "source": "111 catalog p.8 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
+  "notes": "CFO 16/11/2026 23:26: oven 45 min (degreaser dwell), fridge 30 min, industry times"
  },
  {
   "sku": "111-27",
@@ -3459,12 +3460,12 @@
    {
     "key": "B",
     "label": "2,001-5,000 sq ft (office suite)",
-    "minutes": 144.0
+    "minutes": 96.0
    },
    {
     "key": "C",
     "label": "5,001-10,000 sq ft (office floor or dealership)",
-    "minutes": 282.0
+    "minutes": 186.0
    },
    {
     "key": "D",
@@ -3473,7 +3474,7 @@
    }
   ],
   "source": "111 catalog p.11 (GS_Service_Catalog_111_Commercial_Cleaning 1.pdf, newer edition)",
-  "notes": "Office Cleaning Package: the time covers offices + restrooms + breakroom + trash + floors together. 111-60 is also named in the Amenity Package block (p.10, options A 1.1 h / B 2.0 h per visit)",
+  "notes": "Office Cleaning Package: the time covers offices + restrooms + breakroom + trash + floors together. 111-60 is also named in the Amenity Package block (p.10, options A 1.1 h / B 2.0 h per visit) || CFO 16/11/2026 23:26: B and C at about 3,100-3,200 sq ft per hour (ISSA routine office cleaning 3,000-4,000); A unchanged (small offices: more restrooms and setup per sq ft)",
   "packageBlock": [
    "111-60",
    "111-13",
@@ -3497,12 +3498,12 @@
    {
     "key": "B",
     "label": "2,001-5,000 sq ft (office suite)",
-    "minutes": 144.0
+    "minutes": 96.0
    },
    {
     "key": "C",
     "label": "5,001-10,000 sq ft (office floor or dealership)",
-    "minutes": 282.0
+    "minutes": 186.0
    },
    {
     "key": "D",
@@ -3535,12 +3536,12 @@
    {
     "key": "B",
     "label": "2,001-5,000 sq ft (office suite)",
-    "minutes": 144.0
+    "minutes": 96.0
    },
    {
     "key": "C",
     "label": "5,001-10,000 sq ft (office floor or dealership)",
-    "minutes": 282.0
+    "minutes": 186.0
    },
    {
     "key": "D",
@@ -4151,13 +4152,13 @@
    {
     "key": "Refrigerator",
     "label": "Refrigerator, inside and out",
-    "minutes": 20,
+    "minutes": 30,
     "per": "per appliance"
    },
    {
     "key": "Oven",
     "label": "Oven or range, inside",
-    "minutes": 30,
+    "minutes": 45,
     "per": "per appliance"
    },
    {
@@ -4419,13 +4420,13 @@
    {
     "key": "C · L2",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
-    "minutes": 96.0,
+    "minutes": 114.0,
     "level": 2
    },
    {
     "key": "C · L3",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
-    "minutes": 126.0,
+    "minutes": 150.0,
     "level": 3
    },
    {
@@ -4488,7 +4489,7 @@
   ],
   "source": "twin of 111-42",
   "twinOf": "111-42",
-  "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Option F (over 1,600 sq ft) is per 100 sq ft of floor area, confirmed at walk-through"
+  "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Option F (over 1,600 sq ft) is per 100 sq ft of floor area, confirmed at walk-through || CFO 16/11/2026 23:26: size C Levels 2-3 were a copy of size B (96/126); now 114/150, scaled like Level 1 (C = B x 1.2)"
  },
  {
   "sku": "110-43",
@@ -5572,27 +5573,27 @@
    {
     "key": "A",
     "label": "Up to 600 sq ft (studio)",
-    "minutes": 96.0
+    "minutes": 160.0
    },
    {
     "key": "B",
     "label": "601-800 sq ft (1 bed / 1 bath)",
-    "minutes": 120.0
+    "minutes": 200.0
    },
    {
     "key": "C",
     "label": "801-1,000 sq ft (2 bed / 1 bath)",
-    "minutes": 150.0
+    "minutes": 250.0
    },
    {
     "key": "D",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
-    "minutes": 180.0
+    "minutes": 300.0
    },
    {
     "key": "E",
     "label": "1,251 sq ft and up (3 bed / 2 bath)",
-    "minutes": 210.0
+    "minutes": 350.0
    }
   ],
   "source": "twin of 222-49",
@@ -6339,32 +6340,32 @@
    {
     "key": "A",
     "label": "Up to 600 sq ft (studio)",
-    "minutes": 1440.0
+    "minutes": 780.0
    },
    {
     "key": "B",
     "label": "601-800 sq ft (1 bed / 1 bath)",
-    "minutes": 1920.0
+    "minutes": 1040.0
    },
    {
     "key": "C",
     "label": "801-1,000 sq ft (2 bed / 1 bath)",
-    "minutes": 2400.0
+    "minutes": 1300.0
    },
    {
     "key": "D",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
-    "minutes": 3000.0
+    "minutes": 1625.0
    },
    {
     "key": "E",
     "label": "1,251 sq ft and up (3 bed / 2 bath)",
-    "minutes": 3000.0
+    "minutes": 1625.0
    }
   ],
   "source": "twin of 222-90",
   "twinOf": "222-90",
-  "notes": "Catalog block 222-90 · 222-91 (Removal column); lofts/ceilings over 9 ft: add 30% || Minutes = 2.4 min per sq ft at the band top (A 600, B 800, C 1,000, D 1,250; E = 1,250, above it E x sq ft / 1,250). Industry: 20 h for 500 sq ft (HomeGuide popcorn ceiling removal cost; ContractorPlus Des Moines remove popcorn ceiling, 20.0 h minimum job 500 sq ft). CFO 16/11: times follow the final prices; old catalog minutes were 675/940/1,205/1,500/1,855"
+  "notes": "Catalog block 222-90 · 222-91 (Removal column); lofts/ceilings over 9 ft: add 30% || Minutes = 1.3 min per sq ft at the band top (A 600, B 800, C 1,000, D 1,250; E = 1,250, above it E x sq ft / 1,250). Industry: 20 h for 500 sq ft (HomeGuide popcorn ceiling removal cost; ContractorPlus Des Moines remove popcorn ceiling, 20.0 h minimum job 500 sq ft). CFO 16/11: times follow the final prices; old catalog minutes were 675/940/1,205/1,500/1,855 || CFO 16/11/2026 23:26: production rate (was 2.4, worked back from a price): removal ~45 sq ft per person-hour incl. cover, scrape, skim, sand; spray application mostly masking"
  },
  {
   "sku": "210-91",
@@ -6377,32 +6378,32 @@
    {
     "key": "A",
     "label": "Up to 600 sq ft (studio)",
-    "minutes": 720.0
+    "minutes": 360.0
    },
    {
     "key": "B",
     "label": "601-800 sq ft (1 bed / 1 bath)",
-    "minutes": 960.0
+    "minutes": 480.0
    },
    {
     "key": "C",
     "label": "801-1,000 sq ft (2 bed / 1 bath)",
-    "minutes": 1200.0
+    "minutes": 600.0
    },
    {
     "key": "D",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath)",
-    "minutes": 1500.0
+    "minutes": 750.0
    },
    {
     "key": "E",
     "label": "1,251 sq ft and up (3 bed / 2 bath)",
-    "minutes": 1500.0
+    "minutes": 750.0
    }
   ],
   "source": "twin of 222-91",
   "twinOf": "222-91",
-  "notes": "Catalog block 222-90 · 222-91 (Application column); lofts/ceilings over 9 ft: add 30% || Minutes = 1.2 min per sq ft at the band top (A 600, B 800, C 1,000, D 1,250; E = 1,250, above it E x sq ft / 1,250). Industry: 10 h for 500 sq ft (ContractorPlus Des Moines texture ceiling, 10.0 h minimum job 500 sq ft; Dallas same 10.0 h). CFO 16/11: times follow the final prices; old catalog minutes were 210/270/330/420/480"
+  "notes": "Catalog block 222-90 · 222-91 (Application column); lofts/ceilings over 9 ft: add 30% || Minutes = 0.6 min per sq ft at the band top (A 600, B 800, C 1,000, D 1,250; E = 1,250, above it E x sq ft / 1,250). Industry: 10 h for 500 sq ft (ContractorPlus Des Moines texture ceiling, 10.0 h minimum job 500 sq ft; Dallas same 10.0 h). CFO 16/11: times follow the final prices; old catalog minutes were 210/270/330/420/480 || CFO 16/11/2026 23:26: production rate (was 1.2, worked back from a price): spray application, time is mostly masking"
  },
  {
   "sku": "210-92",
@@ -6553,117 +6554,117 @@
    {
     "key": "A · L1",
     "label": "Up to 600 sq ft (studio) · Level 1",
-    "minutes": 5.2,
+    "minutes": 13.0,
     "level": 1
    },
    {
     "key": "A · L2",
     "label": "Up to 600 sq ft (studio) · Level 2",
-    "minutes": 8.4,
+    "minutes": 21.0,
     "level": 2
    },
    {
     "key": "A · L3",
     "label": "Up to 600 sq ft (studio) · Level 3",
-    "minutes": 13.1,
+    "minutes": 32.8,
     "level": 3
    },
    {
     "key": "B · L1",
     "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
-    "minutes": 7.0,
+    "minutes": 17.5,
     "level": 1
    },
    {
     "key": "B · L2",
     "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
-    "minutes": 11.2,
+    "minutes": 28.0,
     "level": 2
    },
    {
     "key": "B · L3",
     "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
-    "minutes": 17.5,
+    "minutes": 43.8,
     "level": 3
    },
    {
     "key": "C · L1",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
-    "minutes": 10.5,
+    "minutes": 26.2,
     "level": 1
    },
    {
     "key": "C · L2",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
-    "minutes": 16.8,
+    "minutes": 42.0,
     "level": 2
    },
    {
     "key": "C · L3",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
-    "minutes": 26.2,
+    "minutes": 65.5,
     "level": 3
    },
    {
     "key": "D · L1",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
-    "minutes": 12.2,
+    "minutes": 30.5,
     "level": 1
    },
    {
     "key": "D · L2",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
-    "minutes": 19.6,
+    "minutes": 49.0,
     "level": 2
    },
    {
     "key": "D · L3",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
-    "minutes": 30.6,
+    "minutes": 76.5,
     "level": 3
    },
    {
     "key": "E · L1",
     "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
-    "minutes": 15.8,
+    "minutes": 39.5,
     "level": 1
    },
    {
     "key": "E · L2",
     "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
-    "minutes": 25.2,
+    "minutes": 63.0,
     "level": 2
    },
    {
     "key": "E · L3",
     "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
-    "minutes": 39.4,
+    "minutes": 98.5,
     "level": 3
    },
    {
     "key": "F · L1",
     "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
-    "minutes": 1.3,
+    "minutes": 3.2,
     "level": 1,
     "per": "per 100 sq ft"
    },
    {
     "key": "F · L2",
     "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
-    "minutes": 2.0,
+    "minutes": 5.0,
     "level": 2,
     "per": "per 100 sq ft"
    },
    {
     "key": "F · L3",
     "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
-    "minutes": 3.2,
+    "minutes": 8.0,
     "level": 3,
     "per": "per 100 sq ft"
    }
   ],
   "source": "CFO 15/11/2026 14:15: unit add-on, minutes from the item times of the unit-cleaning review",
-  "notes": "Add-on to Move-In / Move-Out: blinds dusted, per unit by size and level. Washing blinds slat by slat is a separate extra.",
+  "notes": "Add-on to Move-In / Move-Out: blinds dusted, per unit by size and level. Washing blinds slat by slat is a separate extra. || CFO 16/11/2026 23:26: about 4 min per window or track (industry 3-5); was ~1.5: x2.5, same size and level structure",
   "addOn": true
  },
  {
@@ -6677,117 +6678,117 @@
    {
     "key": "A · L1",
     "label": "Up to 600 sq ft (studio) · Level 1",
-    "minutes": 5.2,
+    "minutes": 13.0,
     "level": 1
    },
    {
     "key": "A · L2",
     "label": "Up to 600 sq ft (studio) · Level 2",
-    "minutes": 8.4,
+    "minutes": 21.0,
     "level": 2
    },
    {
     "key": "A · L3",
     "label": "Up to 600 sq ft (studio) · Level 3",
-    "minutes": 13.1,
+    "minutes": 32.8,
     "level": 3
    },
    {
     "key": "B · L1",
     "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
-    "minutes": 7.0,
+    "minutes": 17.5,
     "level": 1
    },
    {
     "key": "B · L2",
     "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
-    "minutes": 11.2,
+    "minutes": 28.0,
     "level": 2
    },
    {
     "key": "B · L3",
     "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
-    "minutes": 17.5,
+    "minutes": 43.8,
     "level": 3
    },
    {
     "key": "C · L1",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
-    "minutes": 10.5,
+    "minutes": 26.2,
     "level": 1
    },
    {
     "key": "C · L2",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
-    "minutes": 16.8,
+    "minutes": 42.0,
     "level": 2
    },
    {
     "key": "C · L3",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
-    "minutes": 26.2,
+    "minutes": 65.5,
     "level": 3
    },
    {
     "key": "D · L1",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
-    "minutes": 12.2,
+    "minutes": 30.5,
     "level": 1
    },
    {
     "key": "D · L2",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
-    "minutes": 19.6,
+    "minutes": 49.0,
     "level": 2
    },
    {
     "key": "D · L3",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
-    "minutes": 30.6,
+    "minutes": 76.5,
     "level": 3
    },
    {
     "key": "E · L1",
     "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
-    "minutes": 15.8,
+    "minutes": 39.5,
     "level": 1
    },
    {
     "key": "E · L2",
     "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
-    "minutes": 25.2,
+    "minutes": 63.0,
     "level": 2
    },
    {
     "key": "E · L3",
     "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
-    "minutes": 39.4,
+    "minutes": 98.5,
     "level": 3
    },
    {
     "key": "F · L1",
     "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
-    "minutes": 1.3,
+    "minutes": 3.2,
     "level": 1,
     "per": "per 100 sq ft"
    },
    {
     "key": "F · L2",
     "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
-    "minutes": 2.0,
+    "minutes": 5.0,
     "level": 2,
     "per": "per 100 sq ft"
    },
    {
     "key": "F · L3",
     "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
-    "minutes": 3.2,
+    "minutes": 8.0,
     "level": 3,
     "per": "per 100 sq ft"
    }
   ],
   "source": "CFO 15/11/2026 14:15: unit add-on, minutes from the item times of the unit-cleaning review",
-  "notes": "Add-on to Move-In / Move-Out: blinds dusted, per unit by size and level. Washing blinds slat by slat is a separate extra.",
+  "notes": "Add-on to Move-In / Move-Out: blinds dusted, per unit by size and level. Washing blinds slat by slat is a separate extra. || CFO 16/11/2026 23:26: about 4 min per window or track (industry 3-5); was ~1.5: x2.5, same size and level structure",
   "addOn": true,
   "twinOf": "111-76"
  },
@@ -6802,117 +6803,117 @@
    {
     "key": "A · L1",
     "label": "Up to 600 sq ft (studio) · Level 1",
-    "minutes": 5.2,
+    "minutes": 13.0,
     "level": 1
    },
    {
     "key": "A · L2",
     "label": "Up to 600 sq ft (studio) · Level 2",
-    "minutes": 8.4,
+    "minutes": 21.0,
     "level": 2
    },
    {
     "key": "A · L3",
     "label": "Up to 600 sq ft (studio) · Level 3",
-    "minutes": 13.1,
+    "minutes": 32.8,
     "level": 3
    },
    {
     "key": "B · L1",
     "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
-    "minutes": 7.0,
+    "minutes": 17.5,
     "level": 1
    },
    {
     "key": "B · L2",
     "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
-    "minutes": 11.2,
+    "minutes": 28.0,
     "level": 2
    },
    {
     "key": "B · L3",
     "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
-    "minutes": 17.5,
+    "minutes": 43.8,
     "level": 3
    },
    {
     "key": "C · L1",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
-    "minutes": 10.5,
+    "minutes": 26.2,
     "level": 1
    },
    {
     "key": "C · L2",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
-    "minutes": 16.8,
+    "minutes": 42.0,
     "level": 2
    },
    {
     "key": "C · L3",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
-    "minutes": 26.2,
+    "minutes": 65.5,
     "level": 3
    },
    {
     "key": "D · L1",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
-    "minutes": 12.2,
+    "minutes": 30.5,
     "level": 1
    },
    {
     "key": "D · L2",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
-    "minutes": 19.6,
+    "minutes": 49.0,
     "level": 2
    },
    {
     "key": "D · L3",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
-    "minutes": 30.6,
+    "minutes": 76.5,
     "level": 3
    },
    {
     "key": "E · L1",
     "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
-    "minutes": 15.8,
+    "minutes": 39.5,
     "level": 1
    },
    {
     "key": "E · L2",
     "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
-    "minutes": 25.2,
+    "minutes": 63.0,
     "level": 2
    },
    {
     "key": "E · L3",
     "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
-    "minutes": 39.4,
+    "minutes": 98.5,
     "level": 3
    },
    {
     "key": "F · L1",
     "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
-    "minutes": 1.3,
+    "minutes": 3.2,
     "level": 1,
     "per": "per 100 sq ft"
    },
    {
     "key": "F · L2",
     "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
-    "minutes": 2.0,
+    "minutes": 5.0,
     "level": 2,
     "per": "per 100 sq ft"
    },
    {
     "key": "F · L3",
     "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
-    "minutes": 3.2,
+    "minutes": 8.0,
     "level": 3,
     "per": "per 100 sq ft"
    }
   ],
   "source": "CFO 15/11/2026 14:15: unit add-on, minutes from the item times of the unit-cleaning review",
-  "notes": "Add-on to Move-In / Move-Out: window tracks vacuumed and wiped, per unit by size and level. Scrubbing tracks in detail is a separate extra.",
+  "notes": "Add-on to Move-In / Move-Out: window tracks vacuumed and wiped, per unit by size and level. Scrubbing tracks in detail is a separate extra. || CFO 16/11/2026 23:26: about 4 min per window or track (industry 3-5); was ~1.5: x2.5, same size and level structure",
   "addOn": true
  },
  {
@@ -6926,117 +6927,117 @@
    {
     "key": "A · L1",
     "label": "Up to 600 sq ft (studio) · Level 1",
-    "minutes": 5.2,
+    "minutes": 13.0,
     "level": 1
    },
    {
     "key": "A · L2",
     "label": "Up to 600 sq ft (studio) · Level 2",
-    "minutes": 8.4,
+    "minutes": 21.0,
     "level": 2
    },
    {
     "key": "A · L3",
     "label": "Up to 600 sq ft (studio) · Level 3",
-    "minutes": 13.1,
+    "minutes": 32.8,
     "level": 3
    },
    {
     "key": "B · L1",
     "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
-    "minutes": 7.0,
+    "minutes": 17.5,
     "level": 1
    },
    {
     "key": "B · L2",
     "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
-    "minutes": 11.2,
+    "minutes": 28.0,
     "level": 2
    },
    {
     "key": "B · L3",
     "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
-    "minutes": 17.5,
+    "minutes": 43.8,
     "level": 3
    },
    {
     "key": "C · L1",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
-    "minutes": 10.5,
+    "minutes": 26.2,
     "level": 1
    },
    {
     "key": "C · L2",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
-    "minutes": 16.8,
+    "minutes": 42.0,
     "level": 2
    },
    {
     "key": "C · L3",
     "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
-    "minutes": 26.2,
+    "minutes": 65.5,
     "level": 3
    },
    {
     "key": "D · L1",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
-    "minutes": 12.2,
+    "minutes": 30.5,
     "level": 1
    },
    {
     "key": "D · L2",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
-    "minutes": 19.6,
+    "minutes": 49.0,
     "level": 2
    },
    {
     "key": "D · L3",
     "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
-    "minutes": 30.6,
+    "minutes": 76.5,
     "level": 3
    },
    {
     "key": "E · L1",
     "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
-    "minutes": 15.8,
+    "minutes": 39.5,
     "level": 1
    },
    {
     "key": "E · L2",
     "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
-    "minutes": 25.2,
+    "minutes": 63.0,
     "level": 2
    },
    {
     "key": "E · L3",
     "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
-    "minutes": 39.4,
+    "minutes": 98.5,
     "level": 3
    },
    {
     "key": "F · L1",
     "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
-    "minutes": 1.3,
+    "minutes": 3.2,
     "level": 1,
     "per": "per 100 sq ft"
    },
    {
     "key": "F · L2",
     "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
-    "minutes": 2.0,
+    "minutes": 5.0,
     "level": 2,
     "per": "per 100 sq ft"
    },
    {
     "key": "F · L3",
     "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
-    "minutes": 3.2,
+    "minutes": 8.0,
     "level": 3,
     "per": "per 100 sq ft"
    }
   ],
   "source": "CFO 15/11/2026 14:15: unit add-on, minutes from the item times of the unit-cleaning review",
-  "notes": "Add-on to Move-In / Move-Out: window tracks vacuumed and wiped, per unit by size and level. Scrubbing tracks in detail is a separate extra.",
+  "notes": "Add-on to Move-In / Move-Out: window tracks vacuumed and wiped, per unit by size and level. Scrubbing tracks in detail is a separate extra. || CFO 16/11/2026 23:26: about 4 min per window or track (industry 3-5); was ~1.5: x2.5, same size and level structure",
   "addOn": true,
   "twinOf": "111-79"
  },
