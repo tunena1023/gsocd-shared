@@ -2062,7 +2062,7 @@
    }
   ],
   "source": "222 catalog p.29",
-  "notes": "No standard time: built from the other catalog services after a walk-through",
+  "notes": "CFO 17/11/2026: the package is the sum of its parts at the standard times and prices, by unit size (move-out cleaning, full touch-up paint, minor drywall, caulking kitchen + bath, carpet rooms + hallway, front walk pressure wash, front door paint): Marketing lib/quote-standard PRESALE",
   "noStandardTime": true
  },
  {
@@ -2188,14 +2188,13 @@
   "options": [
    {
     "key": "A",
-    "label": "Mowing, mulch, weeds, trimming, fall cleanup - per hour or per visit",
-    "minutes": 70.0,
+    "label": "Mowing, trimming and blowing (per acre)",
+    "minutes": 60.0,
     "per": "per acre"
    }
   ],
-  "source": "222 catalog p.31",
-  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
-  "noStandardTime": true
+  "source": "CFO 17/11/2026 (times approved 09:57-10:02)",
+  "notes": "60-in mower about 30-37 min an acre + trimming and blowing; Des Moines 1 acre $83-$98 a cut (was 70 min, catalog block without a standard time)"
  },
  {
   "sku": "333-11",
@@ -2207,14 +2206,13 @@
   "options": [
    {
     "key": "A",
-    "label": "Mowing, mulch, weeds, trimming, fall cleanup - per hour or per visit",
-    "minutes": 42.0,
+    "label": "Mulch spread by hand, light bed prep (per cubic yard; mulch billed separately)",
+    "minutes": 30.0,
     "per": "per cubic yard"
    }
   ],
-  "source": "222 catalog p.31",
-  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
-  "noStandardTime": true
+  "source": "CFO 17/11/2026 (times approved 09:57-10:02)",
+  "notes": "Hand spread about 2.5 cu yd an hour within 100 ft (24 min) + light bed prep; mulch is a material at cost + 25% (was 42 min)"
  },
  {
   "sku": "333-12",
@@ -2226,14 +2224,13 @@
   "options": [
    {
     "key": "A",
-    "label": "Mowing, mulch, weeds, trimming, fall cleanup - per hour or per visit",
-    "minutes": 16.0,
+    "label": "Bed weeding by hand (per 1,000 sq ft of beds)",
+    "minutes": 15.0,
     "per": "per 1,000 sq ft"
    }
   ],
-  "source": "222 catalog p.31",
-  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
-  "noStandardTime": true
+  "source": "CFO 17/11/2026 (times approved 09:57-10:02)",
+  "notes": "Bed weeding about 6,000 sq ft an hour light, 3,000 heavy; 15 min typical. Minimum charge per visit: Marketing Settings > Exteriors standard (was 16 min)"
  },
  {
   "sku": "333-13",
@@ -2241,18 +2238,29 @@
   "catalogTitle": "Bush trimming & shaping",
   "division": "Exteriors",
   "market": "Commercial",
-  "unit": "per shrub",
+  "unit": "per shrub, by size",
   "options": [
    {
     "key": "A",
-    "label": "Mowing, mulch, weeds, trimming, fall cleanup - per hour or per visit",
-    "minutes": 8.0,
+    "label": "Small shrub, up to 3 ft",
+    "minutes": 4.0,
+    "per": "per shrub"
+   },
+   {
+    "key": "B",
+    "label": "Medium shrub, 3-6 ft",
+    "minutes": 6.0,
+    "per": "per shrub"
+   },
+   {
+    "key": "C",
+    "label": "Large shrub, over 6 ft",
+    "minutes": 10.0,
     "per": "per shrub"
    }
   ],
-  "source": "222 catalog p.31",
-  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
-  "noStandardTime": true
+  "source": "CFO 17/11/2026 (times approved 09:57-10:02)",
+  "notes": "Industry 15 / 10 / 6 shrubs an hour. Minimum charge per visit: Marketing Settings > Exteriors standard (was 8 min, one size)"
  },
  {
   "sku": "333-14",
@@ -2264,14 +2272,13 @@
   "options": [
    {
     "key": "A",
-    "label": "Mowing, mulch, weeds, trimming, fall cleanup - per hour or per visit",
-    "minutes": 20.0,
+    "label": "Leaves blown and mulched or bagged, beds cleared (per 1,000 sq ft; haul-away billed separately)",
+    "minutes": 10.0,
     "per": "per 1,000 sq ft"
    }
   ],
-  "source": "222 catalog p.31",
-  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
-  "noStandardTime": true
+  "source": "CFO 17/11/2026 (times approved 09:57-10:02)",
+  "notes": "Blow + mulch-mow or bag + load: a 1/4 acre about 2 person-hours; haul-away and dump fee extra (was 20 min)"
  },
  {
   "sku": "333-16",
@@ -2279,17 +2286,17 @@
   "catalogTitle": "Landscaping",
   "division": "Exteriors",
   "market": "Commercial",
-  "unit": "quoted per project",
+  "unit": "per hour (2-hour minimum per visit); materials at cost + 25%",
   "options": [
    {
-    "key": "B",
-    "label": "Tree removal, landscaping projects, roof cleaning - quoted per project",
-    "minutes": null
+    "key": "A",
+    "label": "Landscaping labor (per worker-hour, 2-hour minimum per visit)",
+    "minutes": 60.0,
+    "per": "per hour"
    }
   ],
-  "source": "222 catalog p.31",
-  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
-  "noStandardTime": true
+  "source": "CFO 17/11/2026 (times approved 09:57-10:02)",
+  "notes": "Per worker-hour; materials (plants, mulch, rock, soil) and delivery or dump fees at cost + 25%; outside the metro the trip charge applies"
  },
  {
   "sku": "333-27",
@@ -2297,17 +2304,30 @@
   "catalogTitle": "Tree Removal",
   "division": "Exteriors",
   "market": "Commercial",
-  "unit": "quoted per project",
+  "unit": "per tree, by size",
   "options": [
    {
+    "key": "A",
+    "label": "Small tree, up to 30 ft",
+    "minutes": 120.0,
+    "per": "per tree"
+   },
+   {
     "key": "B",
-    "label": "Tree removal, landscaping projects, roof cleaning - quoted per project",
-    "minutes": null
+    "label": "Medium tree, 30-60 ft",
+    "minutes": 264.0,
+    "per": "per tree"
+   },
+   {
+    "key": "C",
+    "label": "Large tree, over 60 ft: priced after the visit",
+    "minutes": null,
+    "per": "per tree",
+    "afterVisit": true
    }
   ],
-  "source": "222 catalog p.31",
-  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
-  "noStandardTime": true
+  "source": "CFO 17/11/2026 (times approved 09:57-10:02)",
+  "notes": "Medium tree about 2.2 crew-hours (2 people); large trees priced after the visit (equipment, insurance, city permits for right-of-way trees)"
  },
  {
   "sku": "333-19",
@@ -2315,17 +2335,23 @@
   "catalogTitle": "Roof cleaning",
   "division": "Exteriors",
   "market": "Commercial",
-  "unit": "quoted per project",
+  "unit": "per 100 sq ft of roof",
   "options": [
    {
+    "key": "A",
+    "label": "Soft wash, walkable pitch, one story (per 100 sq ft of roof)",
+    "minutes": 12.0,
+    "per": "per 100 sq ft"
+   },
+   {
     "key": "B",
-    "label": "Tree removal, landscaping projects, roof cleaning - quoted per project",
-    "minutes": null
+    "label": "Steep pitch or two stories and up: priced after the visit",
+    "minutes": null,
+    "afterVisit": true
    }
   ],
-  "source": "222 catalog p.31",
-  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
-  "noStandardTime": true
+  "source": "CFO 17/11/2026 (times approved 09:57-10:02)",
+  "notes": "Soft wash, 1 worker; steep or 2+ stories need more equipment: priced after the visit"
  },
  {
   "sku": "333-15",
@@ -2333,17 +2359,230 @@
   "catalogTitle": "Snow Removal",
   "division": "Exteriors",
   "market": "Commercial",
+  "unit": "per hour (1-hour minimum per visit)",
+  "options": [
+   {
+    "key": "A",
+    "label": "Walks and entrances, blower and shovel (per worker-hour, 1-hour minimum per visit)",
+    "minutes": 60.0,
+    "per": "per hour"
+   },
+   {
+    "key": "B",
+    "label": "Parking lots (plow truck, per visit): priced after the visit",
+    "minutes": null,
+    "afterVisit": true,
+    "per": "per visit"
+   }
+  ],
+  "source": "CFO 17/11/2026 (times approved 09:57-10:02)",
+  "notes": "Sidewalks and entrances by blower and shovel; parking lots need a plow truck: priced after the visit"
+ },
+ {
+  "sku": "300-10",
+  "name": "Tree Removal",
+  "catalogTitle": "Tree Removal",
+  "division": "Exteriors",
+  "market": "Residential",
+  "unit": "per tree, by size",
+  "options": [
+   {
+    "key": "A",
+    "label": "Small tree, up to 30 ft",
+    "minutes": 120.0,
+    "per": "per tree"
+   },
+   {
+    "key": "B",
+    "label": "Medium tree, 30-60 ft",
+    "minutes": 264.0,
+    "per": "per tree"
+   },
+   {
+    "key": "C",
+    "label": "Large tree, over 60 ft: priced after the visit",
+    "minutes": null,
+    "per": "per tree",
+    "afterVisit": true
+   }
+  ],
+  "source": "twin of 333-27",
+  "twinOf": "333-27",
+  "notes": "Medium tree about 2.2 crew-hours (2 people); large trees priced after the visit (equipment, insurance, city permits for right-of-way trees)"
+ },
+ {
+  "sku": "300-12",
+  "name": "Landscaping",
+  "catalogTitle": "Landscaping",
+  "division": "Exteriors",
+  "market": "Residential",
+  "unit": "per hour (2-hour minimum per visit); materials at cost + 25%",
+  "options": [
+   {
+    "key": "A",
+    "label": "Landscaping labor (per worker-hour, 2-hour minimum per visit)",
+    "minutes": 60.0,
+    "per": "per hour"
+   }
+  ],
+  "source": "twin of 333-16",
+  "twinOf": "333-16",
+  "notes": "Per worker-hour; materials (plants, mulch, rock, soil) and delivery or dump fees at cost + 25%; outside the metro the trip charge applies"
+ },
+ {
+  "sku": "300-15",
+  "name": "Roof cleaning",
+  "catalogTitle": "Roof cleaning",
+  "division": "Exteriors",
+  "market": "Residential",
+  "unit": "per 100 sq ft of roof",
+  "options": [
+   {
+    "key": "A",
+    "label": "Soft wash, walkable pitch, one story (per 100 sq ft of roof)",
+    "minutes": 12.0,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "B",
+    "label": "Steep pitch or two stories and up: priced after the visit",
+    "minutes": null,
+    "afterVisit": true
+   }
+  ],
+  "source": "twin of 333-19",
+  "twinOf": "333-19",
+  "notes": "Soft wash, 1 worker; steep or 2+ stories need more equipment: priced after the visit"
+ },
+ {
+  "sku": "300-19",
+  "name": "Mulch installation",
+  "catalogTitle": "Mulch installation",
+  "division": "Exteriors",
+  "market": "Residential",
+  "unit": "per cubic yard",
+  "options": [
+   {
+    "key": "A",
+    "label": "Mulch spread by hand, light bed prep (per cubic yard; mulch billed separately)",
+    "minutes": 30.0,
+    "per": "per cubic yard"
+   }
+  ],
+  "source": "twin of 333-11",
+  "twinOf": "333-11",
+  "notes": "Hand spread about 2.5 cu yd an hour within 100 ft (24 min) + light bed prep; mulch is a material at cost + 25% (was 42 min)"
+ },
+ {
+  "sku": "300-20",
+  "name": "Weed control",
+  "catalogTitle": "Weed control",
+  "division": "Exteriors",
+  "market": "Residential",
+  "unit": "per 1,000 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Bed weeding by hand (per 1,000 sq ft of beds)",
+    "minutes": 15.0,
+    "per": "per 1,000 sq ft"
+   }
+  ],
+  "source": "twin of 333-12",
+  "twinOf": "333-12",
+  "notes": "Bed weeding about 6,000 sq ft an hour light, 3,000 heavy; 15 min typical. Minimum charge per visit: Marketing Settings > Exteriors standard (was 16 min)"
+ },
+ {
+  "sku": "300-21",
+  "name": "Bush trimming & shaping",
+  "catalogTitle": "Bush trimming & shaping",
+  "division": "Exteriors",
+  "market": "Residential",
+  "unit": "per shrub, by size",
+  "options": [
+   {
+    "key": "A",
+    "label": "Small shrub, up to 3 ft",
+    "minutes": 4.0,
+    "per": "per shrub"
+   },
+   {
+    "key": "B",
+    "label": "Medium shrub, 3-6 ft",
+    "minutes": 6.0,
+    "per": "per shrub"
+   },
+   {
+    "key": "C",
+    "label": "Large shrub, over 6 ft",
+    "minutes": 10.0,
+    "per": "per shrub"
+   }
+  ],
+  "source": "twin of 333-13",
+  "twinOf": "333-13",
+  "notes": "Industry 15 / 10 / 6 shrubs an hour. Minimum charge per visit: Marketing Settings > Exteriors standard (was 8 min, one size)"
+ },
+ {
+  "sku": "300-22",
+  "name": "Fall cleanup",
+  "catalogTitle": "Fall cleanup",
+  "division": "Exteriors",
+  "market": "Residential",
+  "unit": "per 1,000 sq ft",
+  "options": [
+   {
+    "key": "A",
+    "label": "Leaves blown and mulched or bagged, beds cleared (per 1,000 sq ft; haul-away billed separately)",
+    "minutes": 10.0,
+    "per": "per 1,000 sq ft"
+   }
+  ],
+  "source": "twin of 333-14",
+  "twinOf": "333-14",
+  "notes": "Blow + mulch-mow or bag + load: a 1/4 acre about 2 person-hours; haul-away and dump fee extra (was 20 min)"
+ },
+ {
+  "sku": "300-13",
+  "name": "Grass Mowing",
+  "catalogTitle": "Grass Mowing",
+  "division": "Exteriors",
+  "market": "Residential",
+  "unit": "per visit (house lot up to 1/4 acre) / per acre",
+  "options": [
+   {
+    "key": "A",
+    "label": "House lot up to 1/4 acre: mowing, trimming and blowing (per visit)",
+    "minutes": 45.0,
+    "per": "per visit"
+   },
+   {
+    "key": "B",
+    "label": "Larger lot: mowing, trimming and blowing (per acre)",
+    "minutes": 60.0,
+    "per": "per acre"
+   }
+  ],
+  "source": "CFO 17/11/2026 (times approved 09:57-10:02)",
+  "notes": "House lot: about 30 min mowing with a mid-size mower + 15 min trim, edge and blow; Des Moines 1/4 acre $39-$54 a cut. Larger lots per acre, like 333-17"
+ },
+ {
+  "sku": "300-11",
+  "name": "Snow Removal",
+  "catalogTitle": "Snow Removal",
+  "division": "Exteriors",
+  "market": "Residential",
   "unit": "per visit",
   "options": [
    {
-    "key": "C",
-    "label": "Snow removal - per visit",
-    "minutes": null
+    "key": "A",
+    "label": "Driveway (2 cars) and front walk, up to 6 in of snow (per visit)",
+    "minutes": 30.0,
+    "per": "per visit"
    }
   ],
-  "source": "222 catalog p.31",
-  "notes": "Catalog block 333-16 · 333-17 · 333-11 · 333-12 · 333-13 · 333-14 · 333-27 · 333-15 · 333-19 (Grounds & Seasonal): no standard time",
-  "noStandardTime": true
+  "source": "CFO 17/11/2026 (times approved 09:57-10:02)",
+  "notes": "Snow blower 20-30 min a typical driveway and walk; Des Moines $30-$45 a storm, longer $50-$65"
  },
  {
   "sku": "111-48",
@@ -4366,6 +4605,129 @@
   "source": "twin of 111-43",
   "twinOf": "111-43",
   "notes": "Levels: 1 normal, 2 additional (grease, soap scum, heavy dust), 3 heavy. Option F (over 1,600 sq ft) is per 100 sq ft of floor area, confirmed at walk-through; hours per visit"
+ },
+ {
+  "sku": "110-27",
+  "name": "Bi-Weekly Cleaning",
+  "catalogTitle": "Bi-Weekly Cleaning",
+  "division": "Janitorial",
+  "market": "Residential",
+  "unit": "per visit, by unit size option A-F and level 1-3",
+  "options": [
+   {
+    "key": "A · L1",
+    "label": "Up to 600 sq ft (studio) · Level 1",
+    "minutes": 108.0,
+    "level": 1
+   },
+   {
+    "key": "A · L2",
+    "label": "Up to 600 sq ft (studio) · Level 2",
+    "minutes": 144.0,
+    "level": 2
+   },
+   {
+    "key": "A · L3",
+    "label": "Up to 600 sq ft (studio) · Level 3",
+    "minutes": 223.2,
+    "level": 3
+   },
+   {
+    "key": "B · L1",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 1",
+    "minutes": 144.0,
+    "level": 1
+   },
+   {
+    "key": "B · L2",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 2",
+    "minutes": 237.6,
+    "level": 2
+   },
+   {
+    "key": "B · L3",
+    "label": "601-800 sq ft (1 bed / 1 bath) · Level 3",
+    "minutes": 316.8,
+    "level": 3
+   },
+   {
+    "key": "C · L1",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 1",
+    "minutes": 180.0,
+    "level": 1
+   },
+   {
+    "key": "C · L2",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 2",
+    "minutes": 302.4,
+    "level": 2
+   },
+   {
+    "key": "C · L3",
+    "label": "801-1,000 sq ft (2 bed / 1 bath) · Level 3",
+    "minutes": 403.2,
+    "level": 3
+   },
+   {
+    "key": "D · L1",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 1",
+    "minutes": 252.0,
+    "level": 1
+   },
+   {
+    "key": "D · L2",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 2",
+    "minutes": 381.6,
+    "level": 2
+   },
+   {
+    "key": "D · L3",
+    "label": "1,001-1,250 sq ft (2 bed / 2 bath) · Level 3",
+    "minutes": 504.0,
+    "level": 3
+   },
+   {
+    "key": "E · L1",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 1",
+    "minutes": 316.8,
+    "level": 1
+   },
+   {
+    "key": "E · L2",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 2",
+    "minutes": 475.2,
+    "level": 2
+   },
+   {
+    "key": "E · L3",
+    "label": "1,251-1,600 sq ft (3 bed / 2 bath) · Level 3",
+    "minutes": 633.6,
+    "level": 3
+   },
+   {
+    "key": "F · L1",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 1",
+    "minutes": 22.8,
+    "level": 1,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L2",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 2",
+    "minutes": 33.6,
+    "level": 2,
+    "per": "per 100 sq ft"
+   },
+   {
+    "key": "F · L3",
+    "label": "1,601 sq ft and up (house or large unit) - per 100 sq ft · Level 3",
+    "minutes": 45.6,
+    "level": 3,
+    "per": "per 100 sq ft"
+   }
+  ],
+  "source": "CFO 17/11/2026 (times approved 09:57-10:02): Regular Cleaning (110-39) time + 20%",
+  "notes": "Every other week: more dust and soap scum between visits (sources: 11-33% longer than weekly; 20% taken). Option F (over 1,600 sq ft) per 100 sq ft, like 110-39"
  },
  {
   "sku": "110-40",
